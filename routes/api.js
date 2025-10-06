@@ -258,3 +258,6 @@ router.post('/orders', async (req, res) => {
     client.release();
   }
 });
+
+// Export the router - THIS IS REQUIRED!
+module.exports = router;
