@@ -1,11 +1,3 @@
-// ============================================
-// BACKEND API STRUCTURE FOR TCG SINGLES PLATFORM
-// ============================================
-
-// Database Schema (PostgreSQL recommended)
-// ============================================
-
-
 CREATE TABLE games (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL UNIQUE,
@@ -103,7 +95,6 @@ CREATE TABLE order_items (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Indexes for performance
 CREATE INDEX idx_cards_game_set ON cards(game_id, set_id);
 CREATE INDEX idx_cards_name ON cards(name);
 CREATE INDEX idx_inventory_card ON card_inventory(card_id);
