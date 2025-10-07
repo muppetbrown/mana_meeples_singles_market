@@ -16,27 +16,78 @@ app.set('trust proxy', 1);
 // ============================================
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 20,
+  ssl: {
+    rejectUnauthorized: false
+  },
+  max: 5,                       // Reduced for free tier stability
+  min: 1,                       // Keep 1 connection alive
   idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionTimeoutMillis: 10000,
+  acquireTimeoutMillis: 10000,
+  allowExitOnIdle: false
 });
 
-// Make database globally available
+// Handle pool errors gracefully
+pool.on('error', (err) => {
+  console.error('⚠️  Unexpected database error:', err.message);
+  // Don't exit the process on pool errors
+});
+
+// Periodic health check (every 60 seconds)
+setInterval(async () => {
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    client.release();
+    console.log('🔄 Database connection pool healthy');
+  } catch (err) {
+    console.error('❌ Database pool health check failed:', err.message);
+  }
+}, 60000);
+
+// Make database globally available with proper connection management
 global.db = {
-  query: (text, params) => pool.query(text, params),
+  query: async (text, params) => {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(text, params);
+      return result;
+    } catch (error) {
+      console.error('Database query error:', error.message);
+      throw error;
+    } finally {
+      client.release();
+    }
+  },
   getClient: () => pool.connect()
 };
 
-// Test database connection
-pool.connect((err, client, release) => {
-  if (err) {
-    console.error('❌ Error connecting to database:', err.stack);
-  } else {
-    console.log('✅ Database connected successfully');
-    release();
+// Test database connection with retry logic
+async function testDatabaseConnection(retries = 3) {
+  for (let i = 0; i < retries; i++) {
+    try {
+      const client = await pool.connect();
+      console.log('✅ Database connected successfully');
+      const result = await client.query('SELECT NOW() as server_time, version() as pg_version');
+      console.log('📊 Database time:', result.rows[0].server_time);
+      console.log('📦 PostgreSQL:', result.rows[0].pg_version.split(',')[0]);
+      client.release();
+      return true;
+    } catch (err) {
+      console.error(`❌ Connection attempt ${i + 1}/${retries} failed:`, err.message);
+      if (i < retries - 1) {
+        console.log('⏳ Retrying in 2 seconds...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
   }
-});
+  console.error('❌ Could not establish database connection after', retries, 'attempts');
+  console.error('⚠️  Server will continue, but database operations will fail');
+  return false;
+}
+
+// Initialize database connection
+testDatabaseConnection();
 
 // ============================================
 // SECURITY MIDDLEWARE
@@ -55,17 +106,19 @@ app.use(helmet({
 
 // CORS configuration
 const allowedOrigins = process.env.ALLOWED_ORIGINS 
-  ? process.env.ALLOWED_ORIGINS.split(',')
+  ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
   : ['http://localhost:3000'];
 
 app.use(cors({
   origin: (origin, callback) => {
+    // Allow requests with no origin (mobile apps, Postman, curl, etc.)
     if (!origin) return callback(null, true);
     
     if (allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
       console.warn('⚠️  Blocked CORS request from:', origin);
+      console.warn('⚠️  Allowed origins:', allowedOrigins.join(', '));
       callback(new Error('Not allowed by CORS'));
     }
   },
@@ -94,11 +147,24 @@ app.use('/api/', apiLimiter);
 
 const adminLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  max: 30,
-  message: 'Too many admin requests, please try again later.'
+  max: 50, // Increased slightly for admin operations
+  message: 'Too many admin requests, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
 });
 
 app.use('/api/admin/', adminLimiter);
+
+// Login-specific rate limiting (prevent brute force)
+const loginLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, // Only 5 login attempts per 15 minutes
+  message: 'Too many login attempts, please try again later.',
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+app.use('/api/auth/admin/login', loginLimiter);
 
 // ============================================
 // ROUTES
@@ -109,14 +175,40 @@ const apiRoutes = require('./routes/api');
 app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
 
-// Health check endpoint
-app.get('/health', (req, res) => {
+// Health check endpoint with database status
+app.get('/health', async (req, res) => {
+  let dbStatus = 'unknown';
+  
+  try {
+    const client = await pool.connect();
+    await client.query('SELECT 1');
+    client.release();
+    dbStatus = 'connected';
+  } catch (err) {
+    dbStatus = 'disconnected';
+  }
+
   res.json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV
+    environment: process.env.NODE_ENV || 'development',
+    database: dbStatus
   });
+});
+
+// Database stats endpoint (useful for debugging)
+app.get('/api/db-stats', async (req, res) => {
+  try {
+    const stats = {
+      totalConnections: pool.totalCount,
+      idleConnections: pool.idleCount,
+      waitingClients: pool.waitingCount,
+    };
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to get database stats' });
+  }
 });
 
 // ============================================
@@ -125,10 +217,23 @@ app.get('/health', (req, res) => {
 app.use((err, req, res, next) => {
   console.error('❌ Server error:', err);
   
+  // Handle specific error types
+  if (err.message === 'Not allowed by CORS') {
+    return res.status(403).json({ 
+      error: 'CORS policy violation',
+      message: 'Origin not allowed'
+    });
+  }
+
+  if (err.code === 'EBADCSRFTOKEN') {
+    return res.status(403).json({ error: 'Invalid CSRF token' });
+  }
+
+  // Generic error response
   if (process.env.NODE_ENV === 'production') {
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(err.status || 500).json({ error: 'Internal server error' });
   } else {
-    res.status(500).json({ 
+    res.status(err.status || 500).json({ 
       error: err.message,
       stack: err.stack 
     });
@@ -137,29 +242,61 @@ app.use((err, req, res, next) => {
 
 // 404 handler
 app.use((req, res) => {
-  res.status(404).json({ error: 'Endpoint not found' });
+  res.status(404).json({ 
+    error: 'Endpoint not found',
+    path: req.path,
+    method: req.method
+  });
 });
 
 // ============================================
 // GRACEFUL SHUTDOWN
 // ============================================
-process.on('SIGTERM', () => {
-  console.log('🛑 SIGTERM received, shutting down gracefully...');
+const gracefulShutdown = async (signal) => {
+  console.log(`\n🛑 ${signal} received, shutting down gracefully...`);
   
-  pool.end(() => {
-    console.log('📊 Database pool closed');
-    process.exit(0);
+  // Stop accepting new connections
+  server.close(() => {
+    console.log('📡 HTTP server closed');
   });
+
+  // Close database pool
+  try {
+    await pool.end();
+    console.log('📊 Database pool closed');
+  } catch (err) {
+    console.error('Error closing database pool:', err);
+  }
+
+  process.exit(0);
+};
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('💥 Uncaught Exception:', err);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
+});
+
+// Handle unhandled promise rejections
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('💥 Unhandled Rejection at:', promise, 'reason:', reason);
 });
 
 // ============================================
 // START SERVER
 // ============================================
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const PORT = process.env.PORT || 10000;
+const server = app.listen(PORT, () => {
+  console.log('═'.repeat(60));
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔐 Admin auth enabled`);
+  console.log(`🌐 CORS allowed origins: ${allowedOrigins.join(', ')}`);
+  console.log(`💾 Database pool: max ${pool.options.max}, min ${pool.options.min}`);
+  console.log('═'.repeat(60));
 });
 
 module.exports = app;
