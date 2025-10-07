@@ -51,14 +51,20 @@ CREATE TABLE card_inventory (
   card_id INTEGER REFERENCES cards(id) ON DELETE CASCADE,
   variation_id INTEGER REFERENCES card_variations(id) ON DELETE SET NULL,
   quality VARCHAR(50) NOT NULL, -- Near Mint, Lightly Played, etc.
+  foil_type VARCHAR(50) DEFAULT 'Regular', -- Regular, Foil, Etched, Cold Foil
+  language VARCHAR(50) DEFAULT 'English',
   stock_quantity INTEGER NOT NULL DEFAULT 0,
   price DECIMAL(10, 2) NOT NULL,
+  cost DECIMAL(10, 2), -- Cost basis for profit tracking
   price_source VARCHAR(50), -- manual, api_tcgplayer, api_cardmarket
+  markup_percentage DECIMAL(5, 2) DEFAULT 0, -- Markup over cost
+  auto_price_enabled BOOLEAN DEFAULT false,
+  low_stock_threshold INTEGER DEFAULT 3,
   last_price_update TIMESTAMP,
   sku VARCHAR(100) UNIQUE,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE(card_id, variation_id, quality)
+  UNIQUE(card_id, variation_id, quality, foil_type, language)
 );
 
 CREATE TABLE price_history (
