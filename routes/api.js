@@ -180,7 +180,8 @@ router.get('/admin/inventory', async (req, res) => {
         ci.stock_quantity,
         ci.price,
         ci.price_source,
-        ci.id as inventory_id
+        ci.id as inventory_id,
+        ci.updated_at
       FROM cards c
       JOIN games g ON c.game_id = g.id
       JOIN card_sets cs ON c.set_id = cs.id
