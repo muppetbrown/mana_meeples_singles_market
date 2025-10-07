@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown, ChevronUp } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown } from 'lucide-react';
 
 // Use environment variable for API URL, fallback for development
 const API_URL = process.env.REACT_APP_API_URL || 'https://mana-meeples-singles-market.onrender.com/api';
@@ -27,7 +27,6 @@ const TCGShop = () => {
     sortBy: 'name',
     sortOrder: 'asc'
   });
-  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
     rarities: [],
@@ -38,7 +37,6 @@ const TCGShop = () => {
 
   // Currency and localization with toggle
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
-  const [currencyToggle, setCurrencyToggle] = useState(false);
 
   // Search autocomplete
   const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -578,7 +576,7 @@ const TCGShop = () => {
 
                     <div className="mb-3">
                       <label className="block text-xs font-medium text-slate-600 mb-1">
-                        Variation:
+                        Condition & Finish:
                       </label>
                       <select
                         value={selectedQuality}
@@ -590,26 +588,55 @@ const TCGShop = () => {
                       >
                         {card.variations.map(variation => (
                           <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
-                            {variation.quality}{variation.foil_type !== 'Regular' ? ` (${variation.foil_type})` : ''} - {variation.stock} in stock
+                            {variation.quality}{variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
+                            {variation.language !== 'English' ? ` • ${variation.language}` : ''}
+                            {variation.variation_name ? ` • ${variation.variation_name}` : ''}
+                            {' '}({variation.stock} available)
                           </option>
                         ))}
                       </select>
+
+                      {/* Show available foil types and variations for this card */}
+                      <div className="mt-1 text-xs text-slate-500">
+                        {(() => {
+                          const foilTypes = [...new Set(card.variations.map(v => v.foil_type))];
+                          const hasSpecialVariations = card.variations.some(v => v.variation_name);
+                          return (
+                            <>
+                              Available: {foilTypes.join(', ')}
+                              {hasSpecialVariations && (
+                                <div className="text-blue-600">
+                                  ✨ Special versions available
+                                </div>
+                              )}
+                              {card.variations.length === 1 && card.variations[0].foil_type === 'Regular' && (
+                                <div className="text-amber-600">
+                                  💡 Need foil/special versions? <button className="underline hover:text-amber-700" onClick={() => alert(`Please contact us about foil versions of "${card.name}" from ${card.set_name}`)}>Request here</button>
+                                </div>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
                     </div>
 
-                    {/* Variation details */}
+                    {/* Selected variation highlights */}
                     {selectedVariation && (
-                      <div className="mb-3 text-xs text-slate-600 space-y-1">
+                      <div className="mb-3 flex flex-wrap gap-1">
                         {selectedVariation.foil_type !== 'Regular' && (
-                          <div className="flex items-center gap-1">
-                            <span className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"></span>
-                            {selectedVariation.foil_type}
-                          </div>
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 rounded-full text-xs font-medium">
+                            ✨ {selectedVariation.foil_type}
+                          </span>
                         )}
                         {selectedVariation.language !== 'English' && (
-                          <div>Language: {selectedVariation.language}</div>
+                          <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                            🌍 {selectedVariation.language}
+                          </span>
                         )}
                         {selectedVariation.variation_name && (
-                          <div>Variant: {selectedVariation.variation_name}</div>
+                          <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                            ⭐ {selectedVariation.variation_name}
+                          </span>
                         )}
                       </div>
                     )}
