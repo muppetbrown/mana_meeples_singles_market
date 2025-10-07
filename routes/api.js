@@ -106,10 +106,24 @@ router.get('/cards', async (req, res) => {
     }
 
     if (search) {
-      // Enhanced search: name, card number, description, and card type
-      conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR c.description ILIKE $${paramCount} OR c.card_type ILIKE $${paramCount} OR cs.name ILIKE $${paramCount})`);
-      params.push(`%${search}%`);
-      paramCount++;
+      // Enhanced multi-term search: supports "FIN 437", "set name card name", "card name number" etc.
+      const searchTerms = search.trim().split(/\s+/);
+
+      if (searchTerms.length === 1) {
+        // Single term search
+        conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR c.description ILIKE $${paramCount} OR c.card_type ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount})`);
+        params.push(`%${search}%`);
+        paramCount++;
+      } else {
+        // Multi-term search - all terms must match somewhere
+        const searchConditions = [];
+        for (const term of searchTerms) {
+          searchConditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount} OR c.description ILIKE $${paramCount})`);
+          params.push(`%${term}%`);
+          paramCount++;
+        }
+        conditions.push(`(${searchConditions.join(' AND ')})`);
+      }
     }
 
     if (collector_number) {
@@ -257,9 +271,22 @@ router.get('/admin/inventory', async (req, res) => {
     const conditions = [];
 
     if (search) {
-      conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount})`);
-      params.push(`%${search}%`);
-      paramCount++;
+      // Enhanced multi-term search for admin
+      const searchTerms = search.trim().split(/\s+/);
+
+      if (searchTerms.length === 1) {
+        conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount})`);
+        params.push(`%${search}%`);
+        paramCount++;
+      } else {
+        const searchConditions = [];
+        for (const term of searchTerms) {
+          searchConditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount})`);
+          params.push(`%${term}%`);
+          paramCount++;
+        }
+        conditions.push(`(${searchConditions.join(' AND ')})`);
+      }
     }
 
     if (game_id) {
