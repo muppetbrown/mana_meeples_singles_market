@@ -30,6 +30,8 @@ const AdminDashboard = () => {
   const [editingItems, setEditingItems] = useState(new Map());
   const [bulkEditMode, setBulkEditMode] = useState(false);
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
+  const [showFoilModal, setShowFoilModal] = useState(false);
+  const [foilModalCard, setFoilModalCard] = useState(null);
 
   // Fetch inventory from API
   useEffect(() => {
@@ -638,13 +640,26 @@ const AdminDashboard = () => {
                               )}
                             </td>
                             <td className="px-4 py-2">
-                              <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                                item.price_source === 'manual'
-                                  ? 'bg-blue-100 text-blue-800'
-                                  : 'bg-gray-100 text-gray-800'
-                              }`}>
-                                {item.price_source === 'manual' ? 'Manual' : 'API'}
-                              </span>
+                              <div className="flex flex-col gap-1">
+                                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                                  item.price_source === 'manual'
+                                    ? 'bg-blue-100 text-blue-800'
+                                    : 'bg-gray-100 text-gray-800'
+                                }`}>
+                                  {item.price_source === 'manual' ? 'Manual' : 'API'}
+                                </span>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setFoilModalCard(item);
+                                    setShowFoilModal(true);
+                                  }}
+                                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                                  title="Create foil version of this card"
+                                >
+                                  + Add Foil
+                                </button>
+                              </div>
                             </td>
                             <td className="px-4 py-2">
                               {isEditing ? (
@@ -718,6 +733,118 @@ const AdminDashboard = () => {
               <EyeOff className="w-4 h-4" />
               Collapse All
             </button>
+          </div>
+        )}
+
+        {/* Foil Creation Modal */}
+        {showFoilModal && foilModalCard && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-bold text-slate-900">Create Foil Version</h3>
+                <button
+                  onClick={() => {
+                    setShowFoilModal(false);
+                    setFoilModalCard(null);
+                  }}
+                  className="p-2 hover:bg-slate-100 rounded-lg"
+                >
+                  <X className="w-5 h-5 text-slate-500" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-lg">
+                  <img
+                    src={foilModalCard.image_url}
+                    alt={foilModalCard.card_name}
+                    className="w-12 h-16 object-contain rounded"
+                    onError={(e) => {
+                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="64"%3E%3Crect fill="%23cbd5e1" width="48" height="64"/%3E%3C/svg%3E';
+                    }}
+                  />
+                  <div>
+                    <div className="font-medium text-slate-900">{foilModalCard.card_name}</div>
+                    <div className="text-sm text-slate-500">{foilModalCard.game} • {foilModalCard.set}</div>
+                    <div className="text-xs text-slate-400">Current: {foilModalCard.quality}</div>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Foil Type
+                  </label>
+                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="Foil">Regular Foil</option>
+                    <option value="Etched">Etched Foil</option>
+                    <option value="Showcase">Showcase Foil</option>
+                    <option value="Extended Art">Extended Art Foil</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Quality
+                  </label>
+                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                    <option value="Near Mint">Near Mint</option>
+                    <option value="Lightly Played">Lightly Played</option>
+                    <option value="Moderately Played">Moderately Played</option>
+                    <option value="Heavily Played">Heavily Played</option>
+                    <option value="Damaged">Damaged</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Price ({currency.symbol})
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    placeholder={(foilModalCard.price * 2.5).toFixed(2)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                  <div className="text-xs text-slate-500 mt-1">
+                    Suggested: {currency.symbol}{(foilModalCard.price * 2.5).toFixed(2)} (2.5x regular price)
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    Initial Stock
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    defaultValue="0"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                <div className="flex gap-3 mt-6">
+                  <button
+                    onClick={() => {
+                      alert('Foil creation API endpoint will be implemented');
+                      setShowFoilModal(false);
+                      setFoilModalCard(null);
+                    }}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                  >
+                    Create Foil Version
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowFoilModal(false);
+                      setFoilModalCard(null);
+                    }}
+                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         )}
       </main>
