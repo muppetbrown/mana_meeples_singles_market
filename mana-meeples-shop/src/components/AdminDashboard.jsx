@@ -29,9 +29,17 @@ const AdminDashboard = () => {
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingItems, setEditingItems] = useState(new Map());
   const [bulkEditMode, setBulkEditMode] = useState(false);
+  const [selectedItems, setSelectedItems] = useState(new Set());
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
   const [showFoilModal, setShowFoilModal] = useState(false);
   const [foilModalCard, setFoilModalCard] = useState(null);
+  const [foilFormData, setFoilFormData] = useState({
+    foilType: 'Foil',
+    quality: 'Near Mint',
+    price: '',
+    initialStock: 0
+  });
+  const [foilModalLoading, setFoilModalLoading] = useState(false);
 
   // Fetch inventory from API
   useEffect(() => {
@@ -156,6 +164,55 @@ const AdminDashboard = () => {
     }
   };
 
+  const createFoil = async () => {
+    if (!foilModalCard || !foilFormData.price || foilFormData.price <= 0) return;
+
+    setFoilModalLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/admin/create-foil`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          card_id: foilModalCard.card_id,
+          quality: foilFormData.quality,
+          foil_type: foilFormData.foilType,
+          price: parseFloat(foilFormData.price),
+          stock_quantity: parseInt(foilFormData.initialStock),
+          language: 'English'
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.text();
+        throw new Error(error || 'Failed to create foil');
+      }
+
+      const result = await response.json();
+
+      // Show success message
+      alert(`Success! Created ${foilFormData.foilType} version of ${foilModalCard.card_name}`);
+
+      // Close modal and reset form
+      setShowFoilModal(false);
+      setFoilModalCard(null);
+      setFoilFormData({
+        foilType: 'Foil',
+        quality: 'Near Mint',
+        price: '',
+        initialStock: 0
+      });
+
+      // Refresh inventory
+      window.location.reload();
+
+    } catch (error) {
+      console.error('Error creating foil:', error);
+      alert(`Error: ${error.message}`);
+    } finally {
+      setFoilModalLoading(false);
+    }
+  };
+
   const toggleCardExpansion = (key) => {
     const newExpanded = new Set(expandedCards);
     if (newExpanded.has(key)) {
@@ -164,6 +221,25 @@ const AdminDashboard = () => {
       newExpanded.add(key);
     }
     setExpandedCards(newExpanded);
+  };
+
+  const toggleItemSelection = (itemId) => {
+    const newSelected = new Set(selectedItems);
+    if (newSelected.has(itemId)) {
+      newSelected.delete(itemId);
+    } else {
+      newSelected.add(itemId);
+    }
+    setSelectedItems(newSelected);
+  };
+
+  const selectAllItems = () => {
+    const allVisibleIds = filteredInventory.map(item => item.id);
+    setSelectedItems(new Set(allVisibleIds));
+  };
+
+  const deselectAllItems = () => {
+    setSelectedItems(new Set());
   };
 
   const startEditing = (item) => {
@@ -583,8 +659,8 @@ const AdminDashboard = () => {
                                   quality.stock === 0
                                     ? 'bg-slate-100 text-slate-500'
                                     : quality.stock <= quality.low_stock_threshold
-                                      ? 'bg-amber-100 text-amber-800'
-                                      : 'bg-green-100 text-green-800'
+                                      ? 'bg-amber-50 text-amber-900'
+                                      : 'bg-green-50 text-green-900'
                                 }`}
                               >
                                 {quality.quality.substring(0, 2).toUpperCase()} ({quality.stock})
@@ -652,8 +728,8 @@ const AdminDashboard = () => {
                               <div className="flex flex-col gap-1">
                                 <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
                                   item.price_source === 'manual'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : 'bg-gray-100 text-gray-800'
+                                    ? 'bg-blue-50 text-blue-900'
+                                    : 'bg-gray-50 text-gray-900'
                                 }`}>
                                   {item.price_source === 'manual' ? 'Manual' : 'API'}
                                 </span>
@@ -661,6 +737,12 @@ const AdminDashboard = () => {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setFoilModalCard(item);
+                                    setFoilFormData({
+                                      foilType: 'Foil',
+                                      quality: 'Near Mint',
+                                      price: (item.price * 2.5).toFixed(2),
+                                      initialStock: 0
+                                    });
                                     setShowFoilModal(true);
                                   }}
                                   className="text-xs text-blue-600 hover:text-blue-800 underline"
@@ -750,7 +832,7 @@ const AdminDashboard = () => {
           <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
             <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-slate-900">Create Foil Version</h3>
+                <h2 className="text-lg font-bold text-slate-900">Create Foil Version</h2>
                 <button
                   onClick={() => {
                     setShowFoilModal(false);
@@ -783,25 +865,41 @@ const AdminDashboard = () => {
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Foil Type
                   </label>
-                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <select
+                    value={foilFormData.foilType}
+                    onChange={(e) => setFoilFormData({ ...foilFormData, foilType: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    aria-describedby="foil-type-help"
+                  >
                     <option value="Foil">Regular Foil</option>
                     <option value="Etched">Etched Foil</option>
                     <option value="Showcase">Showcase Foil</option>
                     <option value="Extended Art">Extended Art Foil</option>
                   </select>
+                  <div id="foil-type-help" className="text-xs text-slate-500 mt-1">
+                    Select the type of foil treatment for this card
+                  </div>
                 </div>
 
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     Quality
                   </label>
-                  <select className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                  <select
+                    value={foilFormData.quality}
+                    onChange={(e) => setFoilFormData({ ...foilFormData, quality: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    aria-describedby="quality-help"
+                  >
                     <option value="Near Mint">Near Mint</option>
                     <option value="Lightly Played">Lightly Played</option>
                     <option value="Moderately Played">Moderately Played</option>
                     <option value="Heavily Played">Heavily Played</option>
                     <option value="Damaged">Damaged</option>
                   </select>
+                  <div id="quality-help" className="text-xs text-slate-500 mt-1">
+                    Select the condition of the foil card
+                  </div>
                 </div>
 
                 <div>
@@ -811,10 +909,14 @@ const AdminDashboard = () => {
                   <input
                     type="number"
                     step="0.01"
+                    value={foilFormData.price}
+                    onChange={(e) => setFoilFormData({ ...foilFormData, price: e.target.value })}
                     placeholder={(foilModalCard.price * 2.5).toFixed(2)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    aria-describedby="price-help"
+                    required
                   />
-                  <div className="text-xs text-slate-500 mt-1">
+                  <div id="price-help" className="text-xs text-slate-500 mt-1">
                     Suggested: {currency.symbol}{(foilModalCard.price * 2.5).toFixed(2)} (2.5x regular price)
                   </div>
                 </div>
@@ -826,21 +928,24 @@ const AdminDashboard = () => {
                   <input
                     type="number"
                     min="0"
-                    defaultValue="0"
+                    value={foilFormData.initialStock}
+                    onChange={(e) => setFoilFormData({ ...foilFormData, initialStock: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    aria-describedby="stock-help"
                   />
+                  <div id="stock-help" className="text-xs text-slate-500 mt-1">
+                    Number of foil cards to add to inventory
+                  </div>
                 </div>
 
                 <div className="flex gap-3 mt-6">
                   <button
-                    onClick={() => {
-                      alert('Foil creation API endpoint will be implemented');
-                      setShowFoilModal(false);
-                      setFoilModalCard(null);
-                    }}
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                    onClick={createFoil}
+                    disabled={foilModalLoading || !foilFormData.price || foilFormData.price <= 0}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                    aria-label={`Create ${foilFormData.foilType} version of ${foilModalCard?.card_name} for $${foilFormData.price}`}
                   >
-                    Create Foil Version
+                    {foilModalLoading ? 'Creating...' : 'Create Foil Version'}
                   </button>
                   <button
                     onClick={() => {
