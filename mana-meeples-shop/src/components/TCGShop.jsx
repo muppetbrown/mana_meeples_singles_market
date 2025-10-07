@@ -424,9 +424,19 @@ const TCGShop = () => {
                         className="w-4 h-4 text-blue-600 border-slate-300"
                       />
                       <div className="flex items-center gap-2">
-                        {/* Game Icon */}
-                        <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded-md flex items-center justify-center text-white text-xs font-bold">
-                          {game.name.substring(0, 2).toUpperCase()}
+                        {/* Game Icon with specific colors and styling */}
+                        <div className={`w-8 h-8 rounded-md flex items-center justify-center text-white text-xs font-bold ${
+                          game.name.toLowerCase().includes('magic') ? 'bg-gradient-to-br from-orange-500 to-red-600' :
+                          game.name.toLowerCase().includes('pokemon') ? 'bg-gradient-to-br from-yellow-400 to-blue-500' :
+                          game.name.toLowerCase().includes('yu-gi-oh') ? 'bg-gradient-to-br from-purple-600 to-indigo-700' :
+                          game.name.toLowerCase().includes('one piece') ? 'bg-gradient-to-br from-red-500 to-pink-600' :
+                          'bg-gradient-to-br from-slate-500 to-slate-600'
+                        }`}>
+                          {game.name.toLowerCase().includes('magic') ? '⚡' :
+                           game.name.toLowerCase().includes('pokemon') ? '⚡' :
+                           game.name.toLowerCase().includes('yu-gi-oh') ? '🃏' :
+                           game.name.toLowerCase().includes('one piece') ? '🏴‍☠️' :
+                           game.name.substring(0, 2).toUpperCase()}
                         </div>
                         <span className="text-sm">{game.name}</span>
                       </div>
@@ -529,276 +539,242 @@ const TCGShop = () => {
 
           {/* Main Content */}
           <div className="flex-1">
-            {/* Mobile Search (only visible on mobile) */}
-            <div className="lg:hidden bg-white rounded-xl shadow-sm p-4 mb-6 border border-slate-200">
-              <div className="relative">
-                  value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  onFocus={() => setShowSuggestions(searchSuggestions.length > 0)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  aria-label="Search cards"
-                />
-              </div>
+            {/* Results Header */}
+            <div className="flex justify-between items-center mb-4">
+              <p className="text-slate-600">
+                <span className="font-medium">{cards.length}</span> cards found
+              </p>
 
-              {/* Autocomplete suggestions */}
-              {showSuggestions && searchSuggestions.length > 0 && (
-                <div className="absolute top-full left-0 right-0 bg-white border border-slate-300 rounded-lg mt-1 shadow-lg z-50 max-h-64 overflow-y-auto">
-                  {searchSuggestions.map((suggestion, idx) => (
-                    <button
-                      key={idx}
-                      className="w-full px-4 py-3 text-left hover:bg-slate-50 flex items-center gap-3 border-b last:border-b-0"
-                      onClick={() => {
-                        setSearchTerm(suggestion.name);
-                        setShowSuggestions(false);
-                      }}
-                    >
-                      <img
-                        src={suggestion.image_url}
-                        alt={suggestion.name}
-                        className="w-8 h-10 object-contain rounded"
-                        onError={(e) => {
-                          e.target.style.display = 'none';
-                        }}
-                      />
-                      <div>
-                        <div className="font-medium text-sm">{suggestion.name}</div>
-                        <div className="text-xs text-slate-500">{suggestion.set_name}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
+              {/* Currency indicator */}
+              <div className="text-sm text-slate-500">
+                Prices in {currency.symbol === 'NZ$' ? 'New Zealand Dollars (NZD)' : 'US Dollars (USD)'}
+              </div>
             </div>
 
-            <select
-              value={selectedGame}
-              onChange={(e) => setSelectedGame(e.target.value)}
-              className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white min-w-40"
-              aria-label="Filter by game"
-            >
-              <option value="all">All Games</option>
-              {games.map(game => (
-                <option key={game.id} value={game.name}>{game.name}</option>
-              ))}
-            </select>
+            {/* Cards Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">{cards.map(card => {
+              const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+              const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
-            <button
-              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
-              className="flex items-center gap-2 px-4 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
-            >
-              <Filter className="w-4 h-4" />
-              Filters
-              {showAdvancedFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-            </button>
-          </div>
+              return (
+                <div key={card.id} className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all overflow-hidden border border-slate-200">
+                  <div className="aspect-[5/7] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
+                    <img
+                      src={card.image_url}
+                      alt={card.name}
+                      className="w-full h-full object-contain hover:scale-105 transition-transform"
+                      loading="lazy"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="250" height="350"%3E%3Crect fill="%231e293b" width="250" height="350"/%3E%3Ctext fill="white" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif"%3ENo Image%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="font-bold text-lg text-slate-900 mb-1">{card.name}</h3>
+                    <p className="text-xs text-slate-500 mb-3">
+                      {card.set_name} • #{card.card_number}
+                    </p>
 
-          {/* Advanced filters */}
-          {showAdvancedFilters && (
-            <div className="border-t pt-4 mt-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                <select
-                  value={filters.rarity}
-                  onChange={(e) => handleFilterChange('rarity', e.target.value)}
-                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                >
-                  <option value="all">All Rarities</option>
-                  {filterOptions.rarities.map(rarity => (
-                    <option key={rarity} value={rarity}>{rarity}</option>
-                  ))}
-                </select>
+                    <div className="mb-3">
+                      <label className="block text-xs font-medium text-slate-600 mb-1">
+                        Variation:
+                      </label>
+                      <select
+                        value={selectedQuality}
+                        onChange={(e) => setSelectedQualities({
+                          ...selectedQualities,
+                          [card.id]: e.target.value
+                        })}
+                        className="w-full text-sm px-2 py-1.5 border border-slate-300 rounded bg-white focus:ring-2 focus:ring-blue-500"
+                      >
+                        {card.variations.map(variation => (
+                          <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
+                            {variation.quality}{variation.foil_type !== 'Regular' ? ` (${variation.foil_type})` : ''} - {variation.stock} in stock
+                          </option>
+                        ))}
+                      </select>
+                    </div>
 
-                <select
-                  value={filters.quality}
-                  onChange={(e) => handleFilterChange('quality', e.target.value)}
-                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                >
-                  <option value="all">All Conditions</option>
-                  {filterOptions.qualities.map(quality => (
-                    <option key={quality} value={quality}>{quality}</option>
-                  ))}
-                </select>
+                    {/* Variation details */}
+                    {selectedVariation && (
+                      <div className="mb-3 text-xs text-slate-600 space-y-1">
+                        {selectedVariation.foil_type !== 'Regular' && (
+                          <div className="flex items-center gap-1">
+                            <span className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"></span>
+                            {selectedVariation.foil_type}
+                          </div>
+                        )}
+                        {selectedVariation.language !== 'English' && (
+                          <div>Language: {selectedVariation.language}</div>
+                        )}
+                        {selectedVariation.variation_name && (
+                          <div>Variant: {selectedVariation.variation_name}</div>
+                        )}
+                      </div>
+                    )}
 
-                <select
-                  value={filters.foilType}
-                  onChange={(e) => handleFilterChange('foilType', e.target.value)}
-                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                >
-                  <option value="all">All Foil Types</option>
-                  {filterOptions.foilTypes.map(foilType => (
-                    <option key={foilType} value={foilType}>{foilType}</option>
-                  ))}
-                </select>
-
-                <select
-                  value={filters.language}
-                  onChange={(e) => handleFilterChange('language', e.target.value)}
-                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                >
-                  {filterOptions.languages.map(language => (
-                    <option key={language} value={language}>{language}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm text-slate-600 mb-1">Min Price ({currency.symbol})</label>
-                  <input
-                    type="number"
-                    value={filters.minPrice}
-                    onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                    placeholder="0.00"
-                    step="0.01"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-slate-600 mb-1">Max Price ({currency.symbol})</label>
-                  <input
-                    type="number"
-                    value={filters.maxPrice}
-                    onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                    placeholder="999.99"
-                    step="0.01"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-slate-600 mb-1">Sort By</label>
-                  <div className="flex gap-2">
-                    <select
-                      value={filters.sortBy}
-                      onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm"
-                    >
-                      <option value="name">Name</option>
-                      <option value="price">Price</option>
-                      <option value="rarity">Rarity</option>
-                      <option value="set">Set</option>
-                      <option value="updated">Recently Updated</option>
-                    </select>
-                    <button
-                      onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className="px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50"
-                    >
-                      {filters.sortOrder === 'asc' ? '↑' : '↓'}
-                    </button>
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <div className="text-2xl font-bold text-blue-600">
+                          {currency.symbol}{selectedVariation?.price.toFixed(2)}
+                        </div>
+                        {selectedVariation?.stock < 5 && selectedVariation?.stock > 0 && (
+                          <div className="text-xs text-red-600 font-medium mt-1">
+                            Only {selectedVariation.stock} left
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => addToCart({
+                          ...card,
+                          ...selectedVariation,
+                          quality: selectedQuality
+                        })}
+                        disabled={!selectedVariation || selectedVariation.stock === 0}
+                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-sm"
+                      >
+                        {selectedVariation?.stock === 0 ? 'Sold Out' : 'Add to Cart'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
+              );
+            })}
             </div>
-          )}
-        </div>
 
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-slate-600">
-            <span className="font-medium">{cards.length}</span> cards found
-          </p>
-
-          {/* Currency indicator */}
-          <div className="text-sm text-slate-500">
-            Prices in {currency.symbol === 'NZ$' ? 'New Zealand Dollars (NZD)' : 'US Dollars (USD)'}
+            {cards.length === 0 && !loading && (
+              <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+                <p className="text-slate-500 text-lg">No cards found matching your search</p>
+              </div>
+            )}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {cards.map(card => {
-            const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-            const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
-            
-            return (
-              <div key={card.id} className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all overflow-hidden border border-slate-200">
-                <div className="aspect-[5/7] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-                  <img
-                    src={card.image_url}
-                    alt={card.name}
-                    className="w-full h-full object-contain hover:scale-105 transition-transform"
-                    loading="lazy"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="250" height="350"%3E%3Crect fill="%231e293b" width="250" height="350"/%3E%3Ctext fill="white" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif"%3ENo Image%3C/text%3E%3C/svg%3E';
-                    }}
-                  />
+        {/* Mobile Filter Modal */}
+        {showMobileFilters && (
+          <div className="fixed inset-0 bg-black/50 z-50 lg:hidden" onClick={() => setShowMobileFilters(false)}>
+            <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+              <div className="px-6 py-4 border-b flex items-center justify-between">
+                <h2 className="text-xl font-bold">Filters</h2>
+                <button onClick={() => setShowMobileFilters(false)} className="p-2 hover:bg-slate-100 rounded-lg">
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+              <div className="p-6">
+                {/* Mobile search */}
+                <div className="mb-6">
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Search</label>
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <input
+                      type="search"
+                      placeholder="Card name, set, number..."
+                      value={searchTerm}
+                      onChange={(e) => handleSearchChange(e.target.value)}
+                      className="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    />
+                  </div>
                 </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-lg text-slate-900 mb-1">{card.name}</h3>
-                  <p className="text-xs text-slate-500 mb-3">
-                    {card.set_name} • #{card.card_number}
-                  </p>
-                  
-                  <div className="mb-3">
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
-                      Variation:
-                    </label>
+
+                {/* Mobile filters - same as desktop sidebar */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Game</label>
                     <select
-                      value={selectedQuality}
-                      onChange={(e) => setSelectedQualities({
-                        ...selectedQualities,
-                        [card.id]: e.target.value
-                      })}
-                      className="w-full text-sm px-2 py-1.5 border border-slate-300 rounded bg-white focus:ring-2 focus:ring-blue-500"
+                      value={selectedGame}
+                      onChange={(e) => setSelectedGame(e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                     >
-                      {card.variations.map(variation => (
-                        <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
-                          {variation.quality}{variation.foil_type !== 'Regular' ? ` (${variation.foil_type})` : ''} - {variation.stock} in stock
-                        </option>
+                      <option value="all">All Games</option>
+                      {games.map(game => (
+                        <option key={game.id} value={game.name}>{game.name}</option>
                       ))}
                     </select>
                   </div>
 
-                  {/* Variation details */}
-                  {selectedVariation && (
-                    <div className="mb-3 text-xs text-slate-600 space-y-1">
-                      {selectedVariation.foil_type !== 'Regular' && (
-                        <div className="flex items-center gap-1">
-                          <span className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"></span>
-                          {selectedVariation.foil_type}
-                        </div>
-                      )}
-                      {selectedVariation.language !== 'English' && (
-                        <div>Language: {selectedVariation.language}</div>
-                      )}
-                      {selectedVariation.variation_name && (
-                        <div>Variant: {selectedVariation.variation_name}</div>
-                      )}
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between gap-3">
-                    <div>
-                      <div className="text-2xl font-bold text-blue-600">
-                        {currency.symbol}{selectedVariation?.price.toFixed(2)}
-                      </div>
-                      {selectedVariation?.stock < 5 && selectedVariation?.stock > 0 && (
-                        <div className="text-xs text-red-600 font-medium mt-1">
-                          Only {selectedVariation.stock} left
-                        </div>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => addToCart({
-                        ...card,
-                        ...selectedVariation,
-                        quality: selectedQuality
-                      })}
-                      disabled={!selectedVariation || selectedVariation.stock === 0}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-sm"
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Rarity</label>
+                    <select
+                      value={filters.rarity}
+                      onChange={(e) => handleFilterChange('rarity', e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                     >
-                      {selectedVariation?.stock === 0 ? 'Sold Out' : 'Add to Cart'}
-                    </button>
+                      <option value="all">All Rarities</option>
+                      {filterOptions.rarities.map(rarity => (
+                        <option key={rarity} value={rarity}>{rarity}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Condition</label>
+                    <select
+                      value={filters.quality}
+                      onChange={(e) => handleFilterChange('quality', e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="all">All Conditions</option>
+                      {filterOptions.qualities.map(quality => (
+                        <option key={quality} value={quality}>{quality}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Price Range ({currency.symbol})</label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="number"
+                        placeholder="Min"
+                        value={filters.minPrice}
+                        onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                        step="0.01"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Max"
+                        value={filters.maxPrice}
+                        onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                        step="0.01"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Sort By</label>
+                    <div className="flex gap-2">
+                      <select
+                        value={filters.sortBy}
+                        onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="name">Name</option>
+                        <option value="price">Price</option>
+                        <option value="rarity">Rarity</option>
+                        <option value="set">Set</option>
+                        <option value="updated">Recently Updated</option>
+                      </select>
+                      <button
+                        onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
+                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50"
+                      >
+                        {filters.sortOrder === 'asc' ? '↑' : '↓'}
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
 
-        {cards.length === 0 && !loading && (
-          <div className="text-center py-12 bg-white rounded-xl shadow-sm">
-            <p className="text-slate-500 text-lg">No cards found matching your search</p>
+                <button
+                  onClick={() => setShowMobileFilters(false)}
+                  className="w-full mt-6 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+                >
+                  Apply Filters
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </main>

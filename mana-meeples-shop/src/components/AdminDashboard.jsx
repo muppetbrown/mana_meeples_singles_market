@@ -214,7 +214,26 @@ const AdminDashboard = () => {
   };
 
   const refreshPrices = async () => {
-    alert('Price refresh feature coming soon!');
+    setLoading(true);
+    try {
+      // In production, this would call the price update API
+      const response = await fetch(`${API_URL}/admin/refresh-prices`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        // Reload inventory data
+        window.location.reload();
+      } else {
+        throw new Error('Failed to refresh prices');
+      }
+    } catch (error) {
+      console.error('Price refresh error:', error);
+      alert('Price refresh is not available yet. This feature will be added in a future update.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const exportCSV = () => {
