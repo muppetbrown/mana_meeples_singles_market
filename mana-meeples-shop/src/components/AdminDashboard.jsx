@@ -22,6 +22,18 @@ import {
 // Use environment variable for API URL, fallback for development
 const API_URL = process.env.REACT_APP_API_URL || 'https://mana-meeples-singles-market.onrender.com/api';
 
+// Helper function to get admin authentication headers
+const getAdminHeaders = () => {
+  const username = process.env.REACT_APP_ADMIN_USERNAME || 'admin';
+  const password = process.env.REACT_APP_ADMIN_PASSWORD || 'admin123';
+  const credentials = btoa(`${username}:${password}`);
+
+  return {
+    'Authorization': `Basic ${credentials}`,
+    'Content-Type': 'application/json'
+  };
+};
+
 const AdminDashboard = () => {
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,10 +68,17 @@ const AdminDashboard = () => {
   const [csvStep, setCsvStep] = useState(1); // 1: Upload, 2: Preview/Map, 3: Results
   const [dragActive, setDragActive] = useState(false);
 
-  // Fetch inventory from API
+  // Fetch inventory from API with authentication
   useEffect(() => {
-    fetch(`${API_URL}/admin/inventory?limit=5000`)
-      .then(res => res.json())
+    fetch(`${API_URL}/admin/inventory?limit=5000`, {
+      headers: getAdminHeaders()
+    })
+      .then(res => {
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+        }
+        return res.json();
+      })
       .then(data => {
         const formatted = data.inventory.map(card => ({
           id: card.inventory_id,
@@ -155,7 +174,7 @@ const AdminDashboard = () => {
     try {
       await fetch(`${API_URL}/admin/inventory/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify(updates)
       });
 
@@ -186,7 +205,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(`${API_URL}/admin/create-foil`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAdminHeaders(),
         body: JSON.stringify({
           card_id: foilModalCard.card_id,
           quality: foilFormData.quality,
@@ -308,7 +327,7 @@ const AdminDashboard = () => {
       // In production, this would call the price update API
       const response = await fetch(`${API_URL}/admin/refresh-prices`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: getAdminHeaders()
       });
 
       if (response.ok) {
@@ -460,6 +479,10 @@ const AdminDashboard = () => {
 
       const response = await fetch(`${API_URL}/admin/csv-import`, {
         method: 'POST',
+        headers: {
+          'Authorization': getAdminHeaders()['Authorization']
+          // Note: Don't set Content-Type for FormData, let browser set it with boundary
+        },
         body: formData
       });
 
