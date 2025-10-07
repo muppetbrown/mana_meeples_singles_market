@@ -288,7 +288,7 @@ const AdminDashboard = () => {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <div className="inline-block animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
           <p className="mt-4 text-slate-600">Loading inventory...</p>
         </div>
       </div>
@@ -297,13 +297,20 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      {/* Skip to main content link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+      >
+        Skip to main content
+      </a>
       {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-              <span className="text-sm text-slate-500">
+              <span className="text-sm text-slate-700">
                 {filteredInventory.length} cards ({inventory.length} total items)
               </span>
             </div>
@@ -311,36 +318,38 @@ const AdminDashboard = () => {
               {/* Currency Toggle */}
               <button
                 onClick={toggleCurrency}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-sm font-medium"
-                title="Toggle currency display"
+                className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none text-sm font-medium"
+                aria-label={`Switch currency from ${currency.code} to ${currency.code === 'USD' ? 'NZD' : 'USD'}`}
               >
                 <span className="text-slate-700">{currency.code}</span>
-                <span className="text-slate-500">|</span>
-                <span className="text-slate-500">{currency.code === 'USD' ? 'NZD' : 'USD'}</span>
+                <span className="text-slate-700">|</span>
+                <span className="text-slate-700">{currency.code === 'USD' ? 'NZD' : 'USD'}</span>
               </button>
 
               <button
                 onClick={() => setBulkEditMode(!bulkEditMode)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-offset-2 focus:outline-none ${
                   bulkEditMode
-                    ? 'bg-red-600 hover:bg-red-700 text-white'
-                    : 'bg-yellow-600 hover:bg-yellow-700 text-white'
+                    ? 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500'
+                    : 'bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-500'
                 }`}
+                aria-label={bulkEditMode ? 'Exit bulk edit mode' : 'Enter bulk edit mode'}
               >
                 {bulkEditMode ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
                 <span className="hidden sm:inline">{bulkEditMode ? 'Exit Bulk' : 'Bulk Edit'}</span>
               </button>
               <button
                 onClick={refreshPrices}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-                title="Refresh prices from API"
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                aria-label="Refresh prices from API"
               >
                 <RefreshCw className="w-4 h-4" />
                 <span className="hidden sm:inline">Refresh Prices</span>
               </button>
               <button
                 onClick={exportCSV}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-slate-500 focus:ring-offset-2 focus:outline-none"
+                aria-label="Export inventory data to CSV"
               >
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline">Export</span>
@@ -350,7 +359,7 @@ const AdminDashboard = () => {
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
@@ -361,7 +370,7 @@ const AdminDashboard = () => {
             <p className="text-3xl font-bold text-slate-900">
               {currency.symbol}{(totalValue * currency.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-600 mt-1">
               {inStockItems} items in stock
             </p>
           </div>
@@ -374,7 +383,7 @@ const AdminDashboard = () => {
             <p className="text-3xl font-bold text-slate-900">
               {lowStockCount}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-600 mt-1">
               Items need restocking
             </p>
           </div>
@@ -387,7 +396,7 @@ const AdminDashboard = () => {
             <p className="text-3xl font-bold text-slate-900">
               {groupedInventory.length}
             </p>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-xs text-slate-600 mt-1">
               {totalItems} total variations
             </p>
           </div>
