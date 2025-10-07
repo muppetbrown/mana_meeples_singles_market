@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown, Heart } from 'lucide-react';
+import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown } from 'lucide-react';
 
 // Use environment variable for API URL, fallback for development
 const API_URL = process.env.REACT_APP_API_URL || 'https://mana-meeples-singles-market.onrender.com/api';
@@ -156,8 +156,8 @@ const TCGShop = () => {
   const searchTerm = searchParams.get('search') || '';
   const selectedGame = searchParams.get('game') || 'all';
 
-  // Enhanced filter states from URL
-  const filters = {
+  // Enhanced filter states from URL - memoized to prevent hook dependency issues
+  const filters = useMemo(() => ({
     quality: searchParams.get('quality') || 'all',
     rarity: searchParams.get('rarity') || 'all',
     foilType: searchParams.get('foilType') || 'all',
@@ -166,7 +166,7 @@ const TCGShop = () => {
     maxPrice: searchParams.get('maxPrice') || '',
     sortBy: searchParams.get('sortBy') || 'name',
     sortOrder: searchParams.get('sortOrder') || 'asc'
-  };
+  }), [searchParams]);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
     rarities: [],
@@ -177,8 +177,6 @@ const TCGShop = () => {
 
   // Currency and localization with toggle
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
-  const [wishlist, setWishlist] = useState([]);
-  const [showWishlistTooltip, setShowWishlistTooltip] = useState('');
 
   // Search autocomplete with proper debouncing and request cancellation
   const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -406,6 +404,7 @@ const TCGShop = () => {
           case 'maxPrice': displayName = 'Max Price'; displayValue = `$${value}`; break;
           case 'sortBy': displayName = 'Sort'; break;
           case 'sortOrder': return; // Don't show sort order as separate filter
+          default: displayName = key.charAt(0).toUpperCase() + key.slice(1); break;
         }
 
         active.push({ key, displayName, displayValue });
@@ -514,7 +513,7 @@ const TCGShop = () => {
       ...selectedVariation,
       quality: selectedQuality
     });
-  }, []);
+  }, [addToCart]);
 
   if (loading) {
     return (
@@ -663,12 +662,16 @@ const TCGShop = () => {
                           setShowSuggestions(false);
                           setSelectedSuggestionIndex(-1);
                           break;
+                        default:
+                          // Allow other key events to proceed normally
+                          break;
                       }
                     }}
                     className="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     aria-label="Search for cards by name, set, or number"
                     aria-describedby={showSuggestions ? "search-suggestions" : undefined}
                     aria-expanded={showSuggestions}
+                    aria-controls={showSuggestions ? "search-suggestions" : undefined}
                     aria-activedescendant={selectedSuggestionIndex >= 0 ? `suggestion-${selectedSuggestionIndex}` : undefined}
                     role="combobox"
                   />
