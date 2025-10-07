@@ -101,12 +101,62 @@ CREATE TABLE order_items (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Add missing constraints and checks
+ALTER TABLE card_inventory
+  ADD CONSTRAINT chk_price_nonneg CHECK (price >= 0),
+  ADD CONSTRAINT chk_stock_nonneg CHECK (stock_quantity >= 0),
+  ADD CONSTRAINT chk_language_nonempty CHECK (length(language) > 0),
+  ADD CONSTRAINT chk_quality_nonempty CHECK (length(quality) > 0),
+  ADD CONSTRAINT chk_foil_type_nonempty CHECK (length(foil_type) > 0);
+
+ALTER TABLE orders
+  ADD CONSTRAINT chk_subtotal_nonneg CHECK (subtotal >= 0),
+  ADD CONSTRAINT chk_tax_nonneg CHECK (tax >= 0),
+  ADD CONSTRAINT chk_shipping_nonneg CHECK (shipping >= 0),
+  ADD CONSTRAINT chk_total_nonneg CHECK (total >= 0);
+
+ALTER TABLE order_items
+  ADD CONSTRAINT chk_quantity_positive CHECK (quantity > 0),
+  ADD CONSTRAINT chk_unit_price_nonneg CHECK (unit_price >= 0),
+  ADD CONSTRAINT chk_total_price_nonneg CHECK (total_price >= 0);
+
+-- Comprehensive indexing strategy
 CREATE INDEX idx_cards_game_set ON cards(game_id, set_id);
 CREATE INDEX idx_cards_name ON cards(name);
 CREATE INDEX idx_inventory_card ON card_inventory(card_id);
 CREATE INDEX idx_inventory_stock ON card_inventory(stock_quantity);
+CREATE INDEX idx_inventory_card_variation ON card_inventory(card_id, variation_id);
+CREATE INDEX idx_inventory_filters ON card_inventory(quality, foil_type, language);
+CREATE INDEX idx_inventory_updated ON card_inventory(updated_at DESC);
+CREATE INDEX idx_inventory_price ON card_inventory(price);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_created ON orders(created_at);
+CREATE INDEX idx_price_history_inventory ON price_history(inventory_id);
+CREATE INDEX idx_price_history_recorded ON price_history(recorded_at DESC);
+
+-- Add triggers for automatic updated_at maintenance
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+  NEW.updated_at = CURRENT_TIMESTAMP;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER update_games_updated_at BEFORE UPDATE ON games
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_card_sets_updated_at BEFORE UPDATE ON card_sets
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_cards_updated_at BEFORE UPDATE ON cards
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_card_inventory_updated_at BEFORE UPDATE ON card_inventory
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
+  FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 
 

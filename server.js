@@ -5,6 +5,43 @@ require('dotenv').config();
 
 const app = express();
 
+// Simple in-memory rate limiter
+const rateLimitStore = new Map();
+
+const rateLimit = (maxRequests = 100, windowMs = 15 * 60 * 1000) => {
+  return (req, res, next) => {
+    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
+    const now = Date.now();
+    const windowStart = now - windowMs;
+
+    // Clean up old entries
+    if (rateLimitStore.size > 10000) { // Prevent memory leak
+      for (const [key, data] of rateLimitStore.entries()) {
+        if (data.requests.every(timestamp => timestamp < windowStart)) {
+          rateLimitStore.delete(key);
+        }
+      }
+    }
+
+    if (!rateLimitStore.has(clientIp)) {
+      rateLimitStore.set(clientIp, { requests: [] });
+    }
+
+    const clientData = rateLimitStore.get(clientIp);
+    clientData.requests = clientData.requests.filter(timestamp => timestamp > windowStart);
+
+    if (clientData.requests.length >= maxRequests) {
+      return res.status(429).json({
+        error: 'Too many requests, please try again later.',
+        retryAfter: Math.ceil(windowMs / 1000)
+      });
+    }
+
+    clientData.requests.push(now);
+    next();
+  };
+};
+
 // Database connection pool
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -33,9 +70,9 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes
+// API routes with rate limiting
 const apiRouter = require('./routes/api');
-app.use('/api', apiRouter);
+app.use('/api', rateLimit(200, 15 * 60 * 1000), apiRouter); // 200 requests per 15 minutes
 
 // Error handling
 app.use((err, req, res, next) => {
