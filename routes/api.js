@@ -355,5 +355,52 @@ router.post('/orders', async (req, res) => {
   }
 });
 
+// PUT /api/admin/inventory/:id - Update inventory price and/or stock
+router.put('/admin/inventory/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { price, stock_quantity } = req.body;
+
+    let query = 'UPDATE card_inventory SET';
+    let updates = [];
+    let params = [];
+    let paramCount = 1;
+
+    if (price !== undefined) {
+      updates.push(`price = $${paramCount}, price_source = 'manual', last_price_update = CURRENT_TIMESTAMP`);
+      params.push(parseFloat(price));
+      paramCount++;
+    }
+
+    if (stock_quantity !== undefined) {
+      updates.push(`stock_quantity = $${paramCount}`);
+      params.push(parseInt(stock_quantity));
+      paramCount++;
+    }
+
+    if (updates.length === 0) {
+      return res.status(400).json({ error: 'No valid fields to update' });
+    }
+
+    updates.push('updated_at = CURRENT_TIMESTAMP');
+    query += ` ${updates.join(', ')} WHERE id = $${paramCount} RETURNING *`;
+    params.push(id);
+
+    const result = await db.query(query, params);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Inventory item not found' });
+    }
+
+    res.json({
+      success: true,
+      inventory: result.rows[0]
+    });
+  } catch (error) {
+    console.error('Error updating inventory:', error);
+    res.status(500).json({ error: 'Failed to update inventory' });
+  }
+});
+
 // Export the router - THIS IS REQUIRED!
 module.exports = router;
