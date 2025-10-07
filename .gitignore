@@ -4,3 +4,27 @@ node_modules/
 *.log
 .DS_Store
 npm-debug.log*
+
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/mana-meeples-shop/node_modules
+/mana-meeples-shop/.pnp
+/mana-meeples-shop/.pnp.js
+
+# testing
+/mana-meeples-shop/coverage
+
+# production
+/mana-meeples-shop/build
+
+# misc
+/mana-meeples-shop/.DS_Store
+/mana-meeples-shop/.env.local
+/mana-meeples-shop/.env.development.local
+/mana-meeples-shop/.env.test.local
+/mana-meeples-shop/.env.production.local
+
+/mana-meeples-shop/npm-debug.log*
+/mana-meeples-shop/yarn-debug.log*
+/mana-meeples-shop/yarn-error.log*
