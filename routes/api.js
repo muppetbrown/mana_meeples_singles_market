@@ -151,6 +151,101 @@ router.get('/cards', async (req, res) => {
   }
 });
 
+// GET /api/admin/inventory - Get ALL inventory including zero stock
+router.get('/admin/inventory', async (req, res) => {
+  try {
+    const {
+      search,
+      game_id,
+      set_id,
+      quality,
+      sort_by = 'name',
+      sort_order = 'asc',
+      page = 1,
+      limit = 1000
+    } = req.query;
+
+    let query = `
+      SELECT 
+        c.id,
+        c.name,
+        c.card_number,
+        c.rarity,
+        c.card_type,
+        c.description,
+        c.image_url,
+        g.name as game_name,
+        cs.name as set_name,
+        ci.quality,
+        ci.stock_quantity,
+        ci.price,
+        ci.price_source,
+        ci.id as inventory_id
+      FROM cards c
+      JOIN games g ON c.game_id = g.id
+      JOIN card_sets cs ON c.set_id = cs.id
+      JOIN card_inventory ci ON ci.card_id = c.id
+    `;
+
+    const params = [];
+    let paramCount = 1;
+    const conditions = [];
+
+    if (search) {
+      conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount})`);
+      params.push(`%${search}%`);
+      paramCount++;
+    }
+
+    if (game_id) {
+      conditions.push(`c.game_id = $${paramCount}`);
+      params.push(game_id);
+      paramCount++;
+    }
+
+    if (set_id) {
+      conditions.push(`c.set_id = $${paramCount}`);
+      params.push(set_id);
+      paramCount++;
+    }
+
+    if (quality) {
+      conditions.push(`ci.quality = $${paramCount}`);
+      params.push(quality);
+      paramCount++;
+    }
+
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    // Sorting
+    const validSortFields = {
+      name: 'c.name',
+      price: 'ci.price',
+      stock: 'ci.stock_quantity'
+    };
+    const sortField = validSortFields[sort_by] || 'c.name';
+    const order = sort_order === 'desc' ? 'DESC' : 'ASC';
+    query += ` ORDER BY ${sortField} ${order}`;
+
+    // Pagination
+    const offset = (page - 1) * limit;
+    query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
+    params.push(limit, offset);
+
+    const result = await db.query(query, params);
+
+    res.json({
+      inventory: result.rows,
+      total: result.rows.length
+    });
+  } catch (error) {
+    console.error('Error fetching admin inventory:', error);
+    res.status(500).json({ error: 'Failed to fetch inventory' });
+  }
+});
+
 // GET /api/cards/:id - Get single card with all details
 router.get('/cards/:id', async (req, res) => {
   try {
