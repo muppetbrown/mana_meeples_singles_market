@@ -35,7 +35,7 @@ router.get('/sets', async (req, res) => {
   }
 });
 
-// GET /api/cards - Get cards with filtering and pagination
+// GET /api/cards - Get cards with advanced filtering and pagination
 router.get('/cards', async (req, res) => {
   try {
     const {
@@ -45,14 +45,20 @@ router.get('/cards', async (req, res) => {
       quality,
       min_price,
       max_price,
+      rarity,
+      card_type,
+      collector_number,
+      foil_type,
+      language = 'English',
       sort_by = 'name',
       sort_order = 'asc',
       page = 1,
-      limit = 20
+      limit = 20,
+      include_zero_stock = false
     } = req.query;
 
     let query = `
-      SELECT 
+      SELECT
         c.id,
         c.name,
         c.card_number,
@@ -62,63 +68,111 @@ router.get('/cards', async (req, res) => {
         c.image_url,
         g.name as game_name,
         cs.name as set_name,
+        cs.code as set_code,
         cv.variation_name,
         ci.quality,
         ci.stock_quantity,
         ci.price,
-        ci.id as inventory_id
+        ci.id as inventory_id,
+        ci.language,
+        ci.foil_type,
+        ci.updated_at
       FROM cards c
       JOIN games g ON c.game_id = g.id
       JOIN card_sets cs ON c.set_id = cs.id
       LEFT JOIN card_variations cv ON cv.card_id = c.id
       JOIN card_inventory ci ON ci.card_id = c.id
-      WHERE ci.stock_quantity > 0
     `;
 
     const params = [];
     let paramCount = 1;
+    const conditions = [];
+
+    // Stock filter
+    if (!include_zero_stock || include_zero_stock === 'false') {
+      conditions.push('ci.stock_quantity > 0');
+    }
 
     if (game_id) {
-      query += ` AND c.game_id = $${paramCount}`;
+      conditions.push(`c.game_id = $${paramCount}`);
       params.push(game_id);
       paramCount++;
     }
 
     if (set_id) {
-      query += ` AND c.set_id = $${paramCount}`;
+      conditions.push(`c.set_id = $${paramCount}`);
       params.push(set_id);
       paramCount++;
     }
 
     if (search) {
-      query += ` AND (c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount})`;
+      // Enhanced search: name, card number, description, and card type
+      conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR c.description ILIKE $${paramCount} OR c.card_type ILIKE $${paramCount} OR cs.name ILIKE $${paramCount})`);
       params.push(`%${search}%`);
       paramCount++;
     }
 
+    if (collector_number) {
+      conditions.push(`c.card_number ILIKE $${paramCount}`);
+      params.push(`%${collector_number}%`);
+      paramCount++;
+    }
+
     if (quality) {
-      query += ` AND ci.quality = $${paramCount}`;
+      conditions.push(`ci.quality = $${paramCount}`);
       params.push(quality);
       paramCount++;
     }
 
+    if (rarity) {
+      conditions.push(`c.rarity = $${paramCount}`);
+      params.push(rarity);
+      paramCount++;
+    }
+
+    if (card_type) {
+      conditions.push(`c.card_type ILIKE $${paramCount}`);
+      params.push(`%${card_type}%`);
+      paramCount++;
+    }
+
+    if (foil_type) {
+      conditions.push(`ci.foil_type = $${paramCount}`);
+      params.push(foil_type);
+      paramCount++;
+    }
+
+    if (language) {
+      conditions.push(`ci.language = $${paramCount}`);
+      params.push(language);
+      paramCount++;
+    }
+
     if (min_price) {
-      query += ` AND ci.price >= $${paramCount}`;
+      conditions.push(`ci.price >= $${paramCount}`);
       params.push(min_price);
       paramCount++;
     }
 
     if (max_price) {
-      query += ` AND ci.price <= $${paramCount}`;
+      conditions.push(`ci.price <= $${paramCount}`);
       params.push(max_price);
       paramCount++;
     }
 
-    // Sorting
+    if (conditions.length > 0) {
+      query += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    // Enhanced sorting options
     const validSortFields = {
       name: 'c.name',
       price: 'ci.price',
-      stock: 'ci.stock_quantity'
+      stock: 'ci.stock_quantity',
+      rarity: 'c.rarity',
+      set: 'cs.name',
+      number: 'c.card_number::integer',
+      updated: 'ci.updated_at'
     };
     const sortField = validSortFields[sort_by] || 'c.name';
     const order = sort_order === 'desc' ? 'DESC' : 'ASC';
@@ -131,9 +185,19 @@ router.get('/cards', async (req, res) => {
 
     const result = await db.query(query, params);
 
-    // Get total count for pagination
-    let countQuery = 'SELECT COUNT(*) FROM cards c JOIN card_inventory ci ON ci.card_id = c.id WHERE ci.stock_quantity > 0';
-    const countResult = await db.query(countQuery);
+    // Get total count for pagination with same conditions
+    let countQuery = `
+      SELECT COUNT(*)
+      FROM cards c
+      JOIN card_inventory ci ON ci.card_id = c.id
+      JOIN card_sets cs ON c.set_id = cs.id
+    `;
+
+    if (conditions.length > 0) {
+      countQuery += ' WHERE ' + conditions.join(' AND ');
+    }
+
+    const countResult = await db.query(countQuery, params.slice(0, -2)); // Remove limit and offset params
     const totalCount = parseInt(countResult.rows[0].count);
 
     res.json({
@@ -288,25 +352,57 @@ router.get('/cards/:id', async (req, res) => {
   }
 });
 
-// POST /api/orders - Create a new order
+// POST /api/orders - Create a new order with overselling prevention
 router.post('/orders', async (req, res) => {
   const client = await db.getClient();
-  
+
   try {
     await client.query('BEGIN');
 
     const { customer_email, customer_name, items, shipping_info } = req.body;
 
-    // Validate stock availability
+    // Enhanced stock validation with overselling prevention
+    const stockIssues = [];
+    const stockUpdates = [];
+
     for (const item of items) {
       const stockCheck = await client.query(
-        'SELECT stock_quantity FROM card_inventory WHERE id = $1 FOR UPDATE',
+        `SELECT ci.stock_quantity, c.name as card_name, ci.quality
+         FROM card_inventory ci
+         JOIN cards c ON c.id = ci.card_id
+         WHERE ci.id = $1 FOR UPDATE`,
         [item.inventory_id]
       );
 
-      if (stockCheck.rows[0].stock_quantity < item.quantity) {
-        throw new Error(`Insufficient stock for item ${item.inventory_id}`);
+      if (stockCheck.rows.length === 0) {
+        stockIssues.push(`Item not found: ${item.inventory_id}`);
+        continue;
       }
+
+      const currentStock = stockCheck.rows[0].stock_quantity;
+      const cardName = stockCheck.rows[0].card_name;
+      const quality = stockCheck.rows[0].quality;
+
+      if (currentStock < item.quantity) {
+        stockIssues.push(`Insufficient stock for ${cardName} (${quality}): requested ${item.quantity}, available ${currentStock}`);
+      } else {
+        stockUpdates.push({
+          inventory_id: item.inventory_id,
+          quantity: item.quantity,
+          card_name: cardName,
+          quality: quality,
+          remaining_stock: currentStock - item.quantity
+        });
+      }
+    }
+
+    // If any stock issues, return detailed error
+    if (stockIssues.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        error: 'Stock validation failed',
+        details: stockIssues
+      });
     }
 
     // Calculate totals
@@ -399,6 +495,283 @@ router.put('/admin/inventory/:id', async (req, res) => {
   } catch (error) {
     console.error('Error updating inventory:', error);
     res.status(500).json({ error: 'Failed to update inventory' });
+  }
+});
+
+// GET /api/search/autocomplete - Autocomplete suggestions
+router.get('/search/autocomplete', async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || q.length < 2) {
+      return res.json({ suggestions: [] });
+    }
+
+    const suggestions = await db.query(`
+      SELECT DISTINCT c.name, c.image_url, cs.name as set_name
+      FROM cards c
+      JOIN card_sets cs ON c.set_id = cs.id
+      JOIN card_inventory ci ON ci.card_id = c.id
+      WHERE c.name ILIKE $1 AND ci.stock_quantity > 0
+      ORDER BY c.name
+      LIMIT 10
+    `, [`${q}%`]);
+
+    res.json({ suggestions: suggestions.rows });
+  } catch (error) {
+    console.error('Error fetching autocomplete:', error);
+    res.status(500).json({ error: 'Failed to fetch suggestions' });
+  }
+});
+
+// GET /api/filters - Get available filter options
+router.get('/filters', async (req, res) => {
+  try {
+    const { game_id } = req.query;
+
+    const baseQuery = game_id ?
+      'FROM cards c JOIN card_inventory ci ON ci.card_id = c.id WHERE c.game_id = $1' :
+      'FROM cards c JOIN card_inventory ci ON ci.card_id = c.id';
+
+    const params = game_id ? [game_id] : [];
+
+    const [rarities, qualities, foilTypes, cardTypes, languages] = await Promise.all([
+      db.query(`SELECT DISTINCT c.rarity ${baseQuery} ORDER BY c.rarity`, params),
+      db.query(`SELECT DISTINCT ci.quality ${baseQuery} ORDER BY ci.quality`, params),
+      db.query(`SELECT DISTINCT ci.foil_type ${baseQuery} ORDER BY ci.foil_type`, params),
+      db.query(`SELECT DISTINCT c.card_type ${baseQuery} ORDER BY c.card_type`, params),
+      db.query(`SELECT DISTINCT ci.language ${baseQuery} ORDER BY ci.language`, params)
+    ]);
+
+    res.json({
+      rarities: rarities.rows.map(r => r.rarity).filter(Boolean),
+      qualities: qualities.rows.map(q => q.quality).filter(Boolean),
+      foilTypes: foilTypes.rows.map(f => f.foil_type).filter(Boolean),
+      cardTypes: cardTypes.rows.map(t => t.card_type).filter(Boolean),
+      languages: languages.rows.map(l => l.language).filter(Boolean)
+    });
+  } catch (error) {
+    console.error('Error fetching filters:', error);
+    res.status(500).json({ error: 'Failed to fetch filter options' });
+  }
+});
+
+// GET /api/analytics/trending - Get trending cards (most viewed/bought)
+router.get('/analytics/trending', async (req, res) => {
+  try {
+    const { days = 7, limit = 10 } = req.query;
+
+    // For now, we'll simulate trending by recent sales and stock turnover
+    const trending = await db.query(`
+      SELECT
+        c.id,
+        c.name,
+        c.image_url,
+        cs.name as set_name,
+        AVG(ci.price) as avg_price,
+        SUM(CASE WHEN oi.created_at > NOW() - INTERVAL '${days} days' THEN oi.quantity ELSE 0 END) as recent_sales
+      FROM cards c
+      JOIN card_sets cs ON c.set_id = cs.id
+      JOIN card_inventory ci ON ci.card_id = c.id
+      LEFT JOIN order_items oi ON oi.inventory_id = ci.id
+      WHERE ci.stock_quantity > 0
+      GROUP BY c.id, c.name, c.image_url, cs.name
+      HAVING SUM(CASE WHEN oi.created_at > NOW() - INTERVAL '${days} days' THEN oi.quantity ELSE 0 END) > 0
+      ORDER BY recent_sales DESC, avg_price DESC
+      LIMIT $1
+    `, [limit]);
+
+    res.json({ trending: trending.rows });
+  } catch (error) {
+    console.error('Error fetching trending cards:', error);
+    res.status(500).json({ error: 'Failed to fetch trending cards' });
+  }
+});
+
+// POST /api/admin/bulk-update - Bulk update prices and stock
+router.post('/admin/bulk-update', async (req, res) => {
+  const client = await db.getClient();
+
+  try {
+    await client.query('BEGIN');
+
+    const { updates } = req.body; // Array of {inventory_id, price?, stock_quantity?, markup_percentage?}
+    const results = [];
+
+    for (const update of updates) {
+      const { inventory_id, price, stock_quantity, markup_percentage } = update;
+
+      let query = 'UPDATE card_inventory SET';
+      let setParts = [];
+      let params = [];
+      let paramCount = 1;
+
+      if (price !== undefined) {
+        setParts.push(`price = $${paramCount}, price_source = 'manual', last_price_update = CURRENT_TIMESTAMP`);
+        params.push(parseFloat(price));
+        paramCount++;
+      }
+
+      if (stock_quantity !== undefined) {
+        setParts.push(`stock_quantity = $${paramCount}`);
+        params.push(parseInt(stock_quantity));
+        paramCount++;
+      }
+
+      if (markup_percentage !== undefined) {
+        setParts.push(`markup_percentage = $${paramCount}`);
+        params.push(parseFloat(markup_percentage));
+        paramCount++;
+      }
+
+      if (setParts.length === 0) continue;
+
+      setParts.push('updated_at = CURRENT_TIMESTAMP');
+      query += ` ${setParts.join(', ')} WHERE id = $${paramCount} RETURNING *`;
+      params.push(inventory_id);
+
+      const result = await client.query(query, params);
+      if (result.rows.length > 0) {
+        results.push(result.rows[0]);
+      }
+    }
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      updated: results.length,
+      items: results
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error in bulk update:', error);
+    res.status(500).json({ error: 'Failed to perform bulk update' });
+  } finally {
+    client.release();
+  }
+});
+
+// POST /api/admin/csv-import - Bulk import/update from CSV with overselling prevention
+router.post('/admin/csv-import', async (req, res) => {
+  const client = await db.getClient();
+
+  try {
+    await client.query('BEGIN');
+
+    const { csvData } = req.body; // Array of {sku, stock_quantity, price}
+    const results = {
+      success: 0,
+      errors: [],
+      warnings: []
+    };
+
+    for (const row of csvData) {
+      const { sku, stock_quantity, price } = row;
+
+      try {
+        // Find inventory item by SKU
+        const inventoryCheck = await client.query(
+          `SELECT ci.id, ci.stock_quantity, c.name as card_name, ci.quality
+           FROM card_inventory ci
+           JOIN cards c ON c.id = ci.card_id
+           WHERE ci.sku = $1`,
+          [sku]
+        );
+
+        if (inventoryCheck.rows.length === 0) {
+          results.errors.push(`SKU not found: ${sku}`);
+          continue;
+        }
+
+        const item = inventoryCheck.rows[0];
+
+        // Prevent negative stock updates
+        if (stock_quantity !== undefined && stock_quantity < 0) {
+          results.errors.push(`Invalid stock quantity for ${sku}: ${stock_quantity} (must be >= 0)`);
+          continue;
+        }
+
+        // Update inventory
+        let query = 'UPDATE card_inventory SET';
+        let updates = [];
+        let params = [];
+        let paramCount = 1;
+
+        if (stock_quantity !== undefined) {
+          updates.push(`stock_quantity = $${paramCount}`);
+          params.push(parseInt(stock_quantity));
+          paramCount++;
+
+          // Log significant stock changes
+          const stockDiff = parseInt(stock_quantity) - item.stock_quantity;
+          if (Math.abs(stockDiff) > 10) {
+            results.warnings.push(`Large stock change for ${item.card_name}: ${stockDiff > 0 ? '+' : ''}${stockDiff}`);
+          }
+        }
+
+        if (price !== undefined) {
+          updates.push(`price = $${paramCount}, price_source = 'csv_import', last_price_update = CURRENT_TIMESTAMP`);
+          params.push(parseFloat(price));
+          paramCount++;
+        }
+
+        if (updates.length === 0) continue;
+
+        updates.push('updated_at = CURRENT_TIMESTAMP');
+        query += ` ${updates.join(', ')} WHERE id = $${paramCount}`;
+        params.push(item.id);
+
+        await client.query(query, params);
+        results.success++;
+
+      } catch (error) {
+        results.errors.push(`Error processing SKU ${sku}: ${error.message}`);
+      }
+    }
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      summary: results
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error in CSV import:', error);
+    res.status(500).json({ error: 'Failed to import CSV data' });
+  } finally {
+    client.release();
+  }
+});
+
+// GET /api/currency/detect - Detect user's currency based on location
+router.get('/currency/detect', async (req, res) => {
+  try {
+    // Simple IP-based detection (in production, use a proper geolocation service)
+    const clientIP = req.ip || req.connection.remoteAddress;
+
+    // For now, default to USD, but can be enhanced with IP geolocation
+    let currency = 'USD';
+    let symbol = '$';
+
+    // Check if request is from New Zealand (simplified example)
+    const userAgent = req.headers['user-agent'] || '';
+    const acceptLanguage = req.headers['accept-language'] || '';
+
+    if (acceptLanguage.includes('en-NZ') || userAgent.includes('NZ')) {
+      currency = 'NZD';
+      symbol = 'NZ$';
+    }
+
+    res.json({
+      currency,
+      symbol,
+      rate: currency === 'NZD' ? 1.6 : 1.0 // Simplified conversion rate
+    });
+  } catch (error) {
+    console.error('Error detecting currency:', error);
+    res.json({ currency: 'USD', symbol: '$', rate: 1.0 });
   }
 });
 

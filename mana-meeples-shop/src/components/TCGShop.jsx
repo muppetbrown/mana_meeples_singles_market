@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { ShoppingCart, X, Plus, Minus } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown, ChevronUp } from 'lucide-react';
 
 const API_URL = 'https://mana-meeples-singles-market.onrender.com/api';
 
@@ -12,75 +12,202 @@ const TCGShop = () => {
   const [selectedGame, setSelectedGame] = useState('all');
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const [showMiniCart, setShowMiniCart] = useState(false);
   const [selectedQualities, setSelectedQualities] = useState({});
 
+  // Enhanced filter states
+  const [filters, setFilters] = useState({
+    quality: 'all',
+    rarity: 'all',
+    foilType: 'all',
+    language: 'English',
+    minPrice: '',
+    maxPrice: '',
+    sortBy: 'name',
+    sortOrder: 'asc'
+  });
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+  const [filterOptions, setFilterOptions] = useState({
+    rarities: [],
+    qualities: [],
+    foilTypes: [],
+    languages: []
+  });
+
+  // Currency and localization
+  const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0 });
+
+  // Search autocomplete
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Load initial data and currency detection
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
         setLoading(true);
         setError(null);
-        
-        const [gamesRes, cardsRes] = await Promise.all([
+
+        const [gamesRes, currencyRes, filtersRes] = await Promise.all([
           fetch(`${API_URL}/games`),
-          fetch(`${API_URL}/cards?limit=200`)
+          fetch(`${API_URL}/currency/detect`),
+          fetch(`${API_URL}/filters`)
         ]);
-        
-        if (!gamesRes.ok || !cardsRes.ok) {
-          throw new Error('API request failed');
+
+        if (!gamesRes.ok) {
+          throw new Error('Failed to fetch games');
         }
-        
+
         const gamesData = await gamesRes.json();
-        const cardsData = await cardsRes.json();
-        
-        // Group cards by base card (same card, different quality/variation)
-        const groupedCards = {};
-        cardsData.cards.forEach(item => {
-          const key = `${item.game_name}-${item.set_name}-${item.card_number}`;
-          
-          if (!groupedCards[key]) {
-            groupedCards[key] = {
-              id: item.id,
-              name: item.name,
-              game_name: item.game_name,
-              set_name: item.set_name,
-              card_number: item.card_number,
-              rarity: item.rarity,
-              card_type: item.card_type,
-              description: item.description,
-              image_url: item.image_url,
-              variations: []
-            };
-          }
-          
-          groupedCards[key].variations.push({
-            inventory_id: item.inventory_id,
-            quality: item.quality,
-            variation_name: item.variation_name,
-            price: parseFloat(item.price),
-            stock: item.stock_quantity
-          });
-        });
-        
         setGames(gamesData);
-        setCards(Object.values(groupedCards));
-        setLoading(false);
+
+        // Set currency if available
+        if (currencyRes.ok) {
+          const currencyData = await currencyRes.json();
+          setCurrency(currencyData);
+        }
+
+        // Set filter options if available
+        if (filtersRes.ok) {
+          const filtersData = await filtersRes.json();
+          setFilterOptions(filtersData);
+        }
+
       } catch (err) {
         console.error('Error:', err);
         setError('Failed to load data. The API might be waking up. Please wait 30 seconds and try again.');
+      } finally {
         setLoading(false);
       }
     };
-    
-    fetchData();
+
+    fetchInitialData();
   }, []);
 
-  const filteredCards = useMemo(() => {
-    return cards.filter(card => {
-      const matchesSearch = card.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesGame = selectedGame === 'all' || card.game_name === selectedGame;
-      return matchesSearch && matchesGame;
-    });
-  }, [cards, searchTerm, selectedGame]);
+  // Fetch cards with current filters
+  const fetchCards = useCallback(async () => {
+    try {
+      const queryParams = new URLSearchParams({
+        limit: '200',
+        search: searchTerm,
+        sort_by: filters.sortBy,
+        sort_order: filters.sortOrder
+      });
+
+      if (selectedGame !== 'all') {
+        const selectedGameData = games.find(g => g.name === selectedGame);
+        if (selectedGameData) {
+          queryParams.append('game_id', selectedGameData.id);
+        }
+      }
+
+      if (filters.quality !== 'all') queryParams.append('quality', filters.quality);
+      if (filters.rarity !== 'all') queryParams.append('rarity', filters.rarity);
+      if (filters.foilType !== 'all') queryParams.append('foil_type', filters.foilType);
+      if (filters.language !== 'English') queryParams.append('language', filters.language);
+      if (filters.minPrice) queryParams.append('min_price', filters.minPrice);
+      if (filters.maxPrice) queryParams.append('max_price', filters.maxPrice);
+
+      const cardsRes = await fetch(`${API_URL}/cards?${queryParams}`);
+
+      if (!cardsRes.ok) {
+        throw new Error('API request failed');
+      }
+
+      const cardsData = await cardsRes.json();
+
+      // Group cards by base card (consolidated variants)
+      const groupedCards = {};
+      cardsData.cards.forEach(item => {
+        const key = `${item.game_name}-${item.set_name}-${item.card_number}`;
+
+        if (!groupedCards[key]) {
+          groupedCards[key] = {
+            id: item.id,
+            name: item.name,
+            game_name: item.game_name,
+            set_name: item.set_name,
+            set_code: item.set_code,
+            card_number: item.card_number,
+            rarity: item.rarity,
+            card_type: item.card_type,
+            description: item.description,
+            image_url: item.image_url,
+            variations: []
+          };
+        }
+
+        groupedCards[key].variations.push({
+          inventory_id: item.inventory_id,
+          quality: item.quality,
+          variation_name: item.variation_name,
+          foil_type: item.foil_type || 'Regular',
+          language: item.language || 'English',
+          price: parseFloat(item.price) * currency.rate,
+          stock: item.stock_quantity
+        });
+      });
+
+      setCards(Object.values(groupedCards));
+    } catch (err) {
+      console.error('Error fetching cards:', err);
+      setError('Failed to load cards. Please try again.');
+    }
+  }, [searchTerm, selectedGame, filters, games, currency.rate]);
+
+  useEffect(() => {
+    if (games.length > 0) {
+      fetchCards();
+    }
+  }, [fetchCards, games]);
+
+  // Autocomplete search
+  const handleSearchChange = useCallback(async (value) => {
+    setSearchTerm(value);
+
+    if (value.length >= 2) {
+      try {
+        const res = await fetch(`${API_URL}/search/autocomplete?q=${encodeURIComponent(value)}`);
+        if (res.ok) {
+          const data = await res.json();
+          setSearchSuggestions(data.suggestions || []);
+          setShowSuggestions(true);
+        }
+      } catch (err) {
+        console.error('Autocomplete error:', err);
+      }
+    } else {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+    }
+  }, []);
+
+  // Handle filter changes
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  // Load cart from localStorage
+  useEffect(() => {
+    const savedCart = localStorage.getItem('tcg-shop-cart');
+    if (savedCart) {
+      try {
+        setCart(JSON.parse(savedCart));
+      } catch (err) {
+        console.error('Failed to load cart:', err);
+      }
+    }
+  }, []);
+
+  // Save cart to localStorage
+  useEffect(() => {
+    localStorage.setItem('tcg-shop-cart', JSON.stringify(cart));
+
+    // Show mini cart when items added
+    if (cart.length > 0 && !showCart) {
+      setShowMiniCart(true);
+    }
+  }, [cart, showCart]);
 
   const addToCart = (item) => {
     const existingItem = cart.find(c => 
@@ -181,22 +308,59 @@ const TCGShop = () => {
       </header>
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        {/* Enhanced Search and Filters */}
         <div className="bg-white rounded-xl shadow-sm p-4 mb-6 border border-slate-200">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <input
-                type="search"
-                placeholder="Search by card name..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                aria-label="Search cards"
-              />
+          {/* Main search bar */}
+          <div className="flex flex-col lg:flex-row gap-4 mb-4">
+            <div className="flex-1 relative">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-5 h-5" />
+                <input
+                  type="search"
+                  placeholder="Search cards, sets, or collectors numbers..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  onFocus={() => setShowSuggestions(searchSuggestions.length > 0)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  aria-label="Search cards"
+                />
+              </div>
+
+              {/* Autocomplete suggestions */}
+              {showSuggestions && searchSuggestions.length > 0 && (
+                <div className="absolute top-full left-0 right-0 bg-white border border-slate-300 rounded-lg mt-1 shadow-lg z-50 max-h-64 overflow-y-auto">
+                  {searchSuggestions.map((suggestion, idx) => (
+                    <button
+                      key={idx}
+                      className="w-full px-4 py-3 text-left hover:bg-slate-50 flex items-center gap-3 border-b last:border-b-0"
+                      onClick={() => {
+                        setSearchTerm(suggestion.name);
+                        setShowSuggestions(false);
+                      }}
+                    >
+                      <img
+                        src={suggestion.image_url}
+                        alt={suggestion.name}
+                        className="w-8 h-10 object-contain rounded"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                      <div>
+                        <div className="font-medium text-sm">{suggestion.name}</div>
+                        <div className="text-xs text-slate-500">{suggestion.set_name}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
+
             <select
               value={selectedGame}
               onChange={(e) => setSelectedGame(e.target.value)}
-              className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white"
+              className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 bg-white min-w-40"
               aria-label="Filter by game"
             >
               <option value="all">All Games</option>
@@ -204,15 +368,130 @@ const TCGShop = () => {
                 <option key={game.id} value={game.name}>{game.name}</option>
               ))}
             </select>
+
+            <button
+              onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+              className="flex items-center gap-2 px-4 py-3 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              <Filter className="w-4 h-4" />
+              Filters
+              {showAdvancedFilters ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+            </button>
+          </div>
+
+          {/* Advanced filters */}
+          {showAdvancedFilters && (
+            <div className="border-t pt-4 mt-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                <select
+                  value={filters.rarity}
+                  onChange={(e) => handleFilterChange('rarity', e.target.value)}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                >
+                  <option value="all">All Rarities</option>
+                  {filterOptions.rarities.map(rarity => (
+                    <option key={rarity} value={rarity}>{rarity}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filters.quality}
+                  onChange={(e) => handleFilterChange('quality', e.target.value)}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                >
+                  <option value="all">All Conditions</option>
+                  {filterOptions.qualities.map(quality => (
+                    <option key={quality} value={quality}>{quality}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filters.foilType}
+                  onChange={(e) => handleFilterChange('foilType', e.target.value)}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                >
+                  <option value="all">All Foil Types</option>
+                  {filterOptions.foilTypes.map(foilType => (
+                    <option key={foilType} value={foilType}>{foilType}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={filters.language}
+                  onChange={(e) => handleFilterChange('language', e.target.value)}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                >
+                  {filterOptions.languages.map(language => (
+                    <option key={language} value={language}>{language}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm text-slate-600 mb-1">Min Price ({currency.symbol})</label>
+                  <input
+                    type="number"
+                    value={filters.minPrice}
+                    onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                    placeholder="0.00"
+                    step="0.01"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-600 mb-1">Max Price ({currency.symbol})</label>
+                  <input
+                    type="number"
+                    value={filters.maxPrice}
+                    onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                    placeholder="999.99"
+                    step="0.01"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm text-slate-600 mb-1">Sort By</label>
+                  <div className="flex gap-2">
+                    <select
+                      value={filters.sortBy}
+                      onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm"
+                    >
+                      <option value="name">Name</option>
+                      <option value="price">Price</option>
+                      <option value="rarity">Rarity</option>
+                      <option value="set">Set</option>
+                      <option value="updated">Recently Updated</option>
+                    </select>
+                    <button
+                      onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
+                      className="px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50"
+                    >
+                      {filters.sortOrder === 'asc' ? '↑' : '↓'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-between items-center mb-4">
+          <p className="text-slate-600">
+            <span className="font-medium">{cards.length}</span> cards found
+          </p>
+
+          {/* Currency indicator */}
+          <div className="text-sm text-slate-500">
+            Prices in {currency.symbol === 'NZ$' ? 'New Zealand Dollars (NZD)' : 'US Dollars (USD)'}
           </div>
         </div>
 
-        <p className="mb-4 text-slate-600">
-          <span className="font-medium">{filteredCards.length}</span> cards found
-        </p>
-
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-          {filteredCards.map(card => {
+          {cards.map(card => {
             const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
             const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
             
@@ -238,7 +517,7 @@ const TCGShop = () => {
                   
                   <div className="mb-3">
                     <label className="block text-xs font-medium text-slate-600 mb-1">
-                      Condition:
+                      Variation:
                     </label>
                     <select
                       value={selectedQuality}
@@ -250,16 +529,34 @@ const TCGShop = () => {
                     >
                       {card.variations.map(variation => (
                         <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
-                          {variation.quality} ({variation.stock} in stock)
+                          {variation.quality}{variation.foil_type !== 'Regular' ? ` (${variation.foil_type})` : ''} - {variation.stock} in stock
                         </option>
                       ))}
                     </select>
                   </div>
-                  
+
+                  {/* Variation details */}
+                  {selectedVariation && (
+                    <div className="mb-3 text-xs text-slate-600 space-y-1">
+                      {selectedVariation.foil_type !== 'Regular' && (
+                        <div className="flex items-center gap-1">
+                          <span className="w-2 h-2 bg-gradient-to-r from-yellow-400 to-yellow-600 rounded-full"></span>
+                          {selectedVariation.foil_type}
+                        </div>
+                      )}
+                      {selectedVariation.language !== 'English' && (
+                        <div>Language: {selectedVariation.language}</div>
+                      )}
+                      {selectedVariation.variation_name && (
+                        <div>Variant: {selectedVariation.variation_name}</div>
+                      )}
+                    </div>
+                  )}
+
                   <div className="flex items-center justify-between gap-3">
                     <div>
                       <div className="text-2xl font-bold text-blue-600">
-                        ${selectedVariation?.price.toFixed(2)}
+                        {currency.symbol}{selectedVariation?.price.toFixed(2)}
                       </div>
                       {selectedVariation?.stock < 5 && selectedVariation?.stock > 0 && (
                         <div className="text-xs text-red-600 font-medium mt-1">
@@ -274,7 +571,7 @@ const TCGShop = () => {
                         quality: selectedQuality
                       })}
                       disabled={!selectedVariation || selectedVariation.stock === 0}
-                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors"
+                      className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors text-sm"
                     >
                       {selectedVariation?.stock === 0 ? 'Sold Out' : 'Add to Cart'}
                     </button>
@@ -285,12 +582,77 @@ const TCGShop = () => {
           })}
         </div>
 
-        {filteredCards.length === 0 && (
+        {cards.length === 0 && !loading && (
           <div className="text-center py-12 bg-white rounded-xl shadow-sm">
-            <p className="text-slate-500 text-lg">No cards found</p>
+            <p className="text-slate-500 text-lg">No cards found matching your search</p>
           </div>
         )}
       </main>
+
+      {/* Persistent Mini Cart */}
+      {showMiniCart && cart.length > 0 && !showCart && (
+        <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 z-40 max-w-sm">
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="font-semibold text-slate-900">Cart ({cartCount})</h3>
+            <button
+              onClick={() => setShowMiniCart(false)}
+              className="text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="space-y-2 max-h-48 overflow-y-auto">
+            {cart.slice(0, 3).map((item, idx) => (
+              <div key={`${item.id}-${item.quality}`} className="flex items-center gap-2 text-sm">
+                <img
+                  src={item.image_url}
+                  alt={item.name}
+                  className="w-8 h-10 object-contain rounded"
+                  onError={(e) => {
+                    e.target.style.display = 'none';
+                  }}
+                />
+                <div className="flex-1 min-w-0">
+                  <div className="truncate font-medium">{item.name}</div>
+                  <div className="text-xs text-slate-500">{item.quality} × {item.quantity}</div>
+                </div>
+                <div className="font-semibold text-blue-600">
+                  {currency.symbol}{(item.price * item.quantity).toFixed(2)}
+                </div>
+              </div>
+            ))}
+            {cart.length > 3 && (
+              <div className="text-xs text-slate-500 text-center">
+                ...and {cart.length - 3} more items
+              </div>
+            )}
+          </div>
+
+          <div className="border-t mt-3 pt-3">
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-medium">Total:</span>
+              <span className="font-bold text-lg text-blue-600">
+                {currency.symbol}{cartTotal.toFixed(2)}
+              </span>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={() => setShowCart(true)}
+                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-colors"
+              >
+                View Cart
+              </button>
+              <button
+                onClick={() => setShowMiniCart(false)}
+                className="px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 text-sm"
+              >
+                Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showCart && (
         <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowCart(false)}>
@@ -324,7 +686,7 @@ const TCGShop = () => {
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-sm mb-1 line-clamp-2">{item.name}</h3>
                         <p className="text-xs text-slate-500 mb-2">{item.quality}</p>
-                        <p className="text-sm font-bold text-blue-600 mb-3">${item.price.toFixed(2)}</p>
+                        <p className="text-sm font-bold text-blue-600 mb-3">{currency.symbol}{item.price.toFixed(2)}</p>
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
                             <button 
@@ -362,7 +724,7 @@ const TCGShop = () => {
               <div className="border-t px-6 py-4 bg-slate-50">
                 <div className="flex justify-between mb-4">
                   <span className="text-lg font-medium">Total:</span>
-                  <span className="text-3xl font-bold text-blue-600">${cartTotal.toFixed(2)}</span>
+                  <span className="text-3xl font-bold text-blue-600">{currency.symbol}{cartTotal.toFixed(2)}</span>
                 </div>
                 <button className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors">
                   Proceed to Checkout
