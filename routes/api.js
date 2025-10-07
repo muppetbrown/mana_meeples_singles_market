@@ -195,11 +195,16 @@ router.get('/cards', async (req, res) => {
 
     if (search) {
       // When searching, prioritize by relevance first, then by selected sort field
-      const escapedSearch = search.replace(/'/g, "''"); // Escape single quotes for SQL
+      // Use parameterized queries to prevent SQL injection
+      const searchParam1 = paramCount++;
+      const searchParam2 = paramCount++;
+      const searchParam3 = paramCount++;
+      params.push(search, search, search);
+
       query += ` ORDER BY GREATEST(
-        ts_rank(to_tsvector('english', c.name || ' ' || COALESCE(c.card_type, '') || ' ' || COALESCE(c.description, '')), plainto_tsquery('english', '${escapedSearch}')),
-        similarity(c.name, '${escapedSearch}') * 0.8,
-        similarity(c.card_number, '${escapedSearch}') * 0.6
+        ts_rank(to_tsvector('english', c.name || ' ' || COALESCE(c.card_type, '') || ' ' || COALESCE(c.description, '')), plainto_tsquery('english', $${searchParam1})),
+        similarity(c.name, $${searchParam2}) * 0.8,
+        similarity(c.card_number, $${searchParam3}) * 0.6
       ) DESC, ${sortField} ${order}`;
     } else if (sort_by === 'number') {
       // Safe numeric sorting for card numbers that may contain non-numeric characters
@@ -258,6 +263,10 @@ router.get('/admin/inventory', async (req, res) => {
       page = 1,
       limit = 1000
     } = req.query;
+
+    // Sanitize input parameters to prevent injection
+    const sanitizedGameId = game_id ? parseInt(game_id) || null : null;
+    const sanitizedSetId = set_id ? parseInt(set_id) || null : null;
 
     let query = `
       SELECT 

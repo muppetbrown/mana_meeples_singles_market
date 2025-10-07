@@ -90,17 +90,17 @@ const CardItem = React.memo(({
         {selectedVariation && (
           <div className="mb-3 flex flex-wrap gap-1">
             {selectedVariation.foil_type !== 'Regular' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 rounded-full text-xs font-medium">
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-900 rounded-full text-xs font-medium">
                 ✨ {selectedVariation.foil_type}
               </span>
             )}
             {selectedVariation.language !== 'English' && (
-              <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+              <span className="inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-900 rounded-full text-xs font-medium">
                 🌍 {selectedVariation.language}
               </span>
             )}
             {selectedVariation.variation_name && (
-              <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+              <span className="inline-flex items-center px-2 py-0.5 bg-purple-50 text-purple-900 rounded-full text-xs font-medium">
                 ⭐ {selectedVariation.variation_name}
               </span>
             )}
@@ -601,7 +601,7 @@ const TCGShop = () => {
             onClick={() => setShowMobileFilters(true)}
             className="flex items-center gap-2 w-full px-4 py-3 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
             aria-label="Open filters and search panel"
-            aria-expanded="false"
+            aria-expanded={showMobileFilters}
           >
             <Filter className="w-5 h-5 text-slate-600" />
             <span className="font-medium text-slate-700">Filters & Search</span>
@@ -880,7 +880,7 @@ const TCGShop = () => {
                 {activeFilters.map((filter) => (
                   <span
                     key={filter.key}
-                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-900 rounded-full text-sm"
                   >
                     <span>{filter.displayName}: {filter.displayValue}</span>
                     <button
