@@ -82,12 +82,15 @@ const AdminDashboard = () => {
       .then(data => {
         const formatted = data.inventory.map(card => ({
           id: card.inventory_id,
-          sku: `${card.game_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.set_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.card_number}-${card.quality?.substring(0,2).toUpperCase() || 'NM'}`,
+          sku: `${card.game_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.set_code || card.set_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.card_number}-${card.quality?.substring(0,2).toUpperCase() || 'NM'}-${card.foil_type === 'Regular' || card.foil_type === 'Non-foil' ? 'NF' : 'F'}`,
           card_name: card.name,
           game: card.game_name,
           set: card.set_name,
+          set_code: card.set_code,
           number: card.card_number,
           quality: card.quality,
+          foil_type: card.foil_type || 'Regular',
+          language: card.language || 'English',
           price: parseFloat(card.price),
           stock: card.stock_quantity,
           image_url: card.image_url,
@@ -324,21 +327,24 @@ const AdminDashboard = () => {
   const refreshPrices = async () => {
     setLoading(true);
     try {
-      // In production, this would call the price update API
       const response = await fetch(`${API_URL}/admin/refresh-prices`, {
         method: 'POST',
         headers: getAdminHeaders()
       });
 
       if (response.ok) {
+        const result = await response.json();
+        alert(`Price refresh completed!\n\nUpdated: ${result.updated} items\nTotal processed: ${result.total} MTG cards\n\n${result.errors?.length > 0 ? 'Errors: ' + result.errors.length : 'No errors'}`);
+
         // Reload inventory data
         window.location.reload();
       } else {
-        throw new Error('Failed to refresh prices');
+        const error = await response.json();
+        throw new Error(error.details || 'Failed to refresh prices');
       }
     } catch (error) {
       console.error('Price refresh error:', error);
-      alert('Price refresh is not available yet. This feature will be added in a future update.');
+      alert(`Price refresh failed: ${error.message}\n\nPlease check that you have MTG cards with Scryfall IDs in your inventory.`);
     } finally {
       setLoading(false);
     }
@@ -346,15 +352,20 @@ const AdminDashboard = () => {
 
   const exportCSV = () => {
     const csv = [
-      ['SKU', 'Name', 'Game', 'Set', 'Quality', 'Price', 'Stock', 'Last Updated'].join(','),
+      ['SKU', 'Name', 'Game', 'Set', 'Set Code', 'Number', 'Quality', 'Foil Type', 'Language', 'Price', 'Stock', 'Price Source', 'Last Updated'].join(','),
       ...inventory.map(item => [
         item.sku,
         `"${item.card_name}"`,
         item.game,
         item.set,
+        item.set_code || '',
+        item.number || '',
         item.quality,
+        item.foil_type || 'Regular',
+        item.language || 'English',
         item.price,
         item.stock,
+        item.price_source || '',
         item.last_updated || ''
       ].join(','))
     ].join('\n');
@@ -924,30 +935,49 @@ const AdminDashboard = () => {
                             </td>
                             <td className="px-4 py-2">
                               <div className="flex flex-col gap-1">
-                                <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                                  item.price_source === 'manual'
-                                    ? 'bg-blue-50 text-blue-900'
-                                    : 'bg-gray-50 text-gray-900'
-                                }`}>
-                                  {item.price_source === 'manual' ? 'Manual' : 'API'}
-                                </span>
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setFoilModalCard(item);
-                                    setFoilFormData({
-                                      foilType: 'Foil',
-                                      quality: 'Near Mint',
-                                      price: (item.price * 2.5).toFixed(2),
-                                      initialStock: 0
-                                    });
-                                    setShowFoilModal(true);
-                                  }}
-                                  className="text-xs text-blue-600 hover:text-blue-800 underline"
-                                  title="Create foil version of this card"
-                                >
-                                  + Add Foil
-                                </button>
+                                <div className="flex flex-wrap gap-1">
+                                  <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                                    item.foil_type === 'Regular' || item.foil_type === 'Non-foil'
+                                      ? 'bg-slate-50 text-slate-900'
+                                      : 'bg-yellow-50 text-yellow-900'
+                                  }`}>
+                                    {item.foil_type || 'Regular'}
+                                  </span>
+                                  <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                                    item.price_source === 'manual'
+                                      ? 'bg-blue-50 text-blue-900'
+                                      : item.price_source?.includes('scryfall')
+                                        ? 'bg-purple-50 text-purple-900'
+                                        : 'bg-gray-50 text-gray-900'
+                                  }`}>
+                                    {item.price_source === 'manual' ? 'Manual' :
+                                     item.price_source?.includes('scryfall') ? 'Scryfall' : 'API'}
+                                  </span>
+                                </div>
+                                {(item.foil_type === 'Regular' || item.foil_type === 'Non-foil') && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setFoilModalCard(item);
+                                      setFoilFormData({
+                                        foilType: 'Foil',
+                                        quality: 'Near Mint',
+                                        price: (item.price * 2.5).toFixed(2),
+                                        initialStock: 0
+                                      });
+                                      setShowFoilModal(true);
+                                    }}
+                                    className="text-xs text-blue-600 hover:text-blue-800 underline text-left"
+                                    title="Create foil version of this card"
+                                  >
+                                    + Add Foil
+                                  </button>
+                                )}
+                                {item.language && item.language !== 'English' && (
+                                  <span className="text-xs text-slate-500">
+                                    {item.language}
+                                  </span>
+                                )}
                               </div>
                             </td>
                             <td className="px-4 py-2">

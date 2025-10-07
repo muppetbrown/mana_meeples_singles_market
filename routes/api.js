@@ -328,7 +328,7 @@ router.get('/admin/inventory', adminAuth, async (req, res) => {
     const sanitizedSetId = set_id ? parseInt(set_id) || null : null;
 
     let query = `
-      SELECT 
+      SELECT
         c.id,
         c.name,
         c.card_number,
@@ -338,11 +338,14 @@ router.get('/admin/inventory', adminAuth, async (req, res) => {
         c.image_url,
         g.name as game_name,
         cs.name as set_name,
+        cs.code as set_code,
         ci.quality,
         ci.stock_quantity,
         ci.price,
         ci.price_source,
         ci.id as inventory_id,
+        ci.foil_type,
+        ci.language,
         ci.updated_at,
         ci.last_price_update
       FROM cards c
@@ -1381,6 +1384,133 @@ router.post('/admin/bulk-create-foils', adminAuth, async (req, res) => {
     await client.query('ROLLBACK');
     console.error('Error in bulk foil creation:', error);
     res.status(500).json({ error: 'Failed to bulk create foil versions' });
+  } finally {
+    client.release();
+  }
+});
+
+// POST /api/admin/refresh-prices - Refresh MTG prices from Scryfall CardKingdom
+router.post('/admin/refresh-prices', adminAuth, async (req, res) => {
+  const client = await db.getClient();
+
+  try {
+    await client.query('BEGIN');
+
+    // Get all MTG cards with Scryfall IDs that need price updates
+    const mtgCards = await client.query(`
+      SELECT DISTINCT c.scryfall_id, c.name, ci.id as inventory_id, ci.foil_type, ci.quality
+      FROM cards c
+      JOIN games g ON c.game_id = g.id
+      JOIN card_inventory ci ON ci.card_id = c.id
+      WHERE g.code = 'mtg'
+        AND c.scryfall_id IS NOT NULL
+        AND ci.stock_quantity >= 0
+        AND (ci.last_price_update IS NULL OR ci.last_price_update < NOW() - INTERVAL '1 hour')
+      ORDER BY c.scryfall_id
+    `);
+
+    const results = {
+      updated: 0,
+      errors: [],
+      total: mtgCards.rows.length
+    };
+
+    // Process cards in batches to respect rate limits
+    const batchSize = 75; // Scryfall allows 10 requests per second, we'll be conservative
+
+    for (let i = 0; i < mtgCards.rows.length; i += batchSize) {
+      const batch = mtgCards.rows.slice(i, i + batchSize);
+      const scryfallIds = batch.map(card => card.scryfall_id);
+
+      try {
+        // Fetch price data from Scryfall
+        const response = await fetch('https://api.scryfall.com/cards/collection', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            identifiers: scryfallIds.map(id => ({ id }))
+          })
+        });
+
+        if (!response.ok) {
+          results.errors.push(`Scryfall API error: ${response.statusText}`);
+          continue;
+        }
+
+        const scryfallData = await response.json();
+
+        // Update prices for each card
+        for (const scryfallCard of scryfallData.data) {
+          const matchingInventoryItems = batch.filter(item => item.scryfall_id === scryfallCard.id);
+
+          for (const item of matchingInventoryItems) {
+            let price = null;
+
+            // Get appropriate price based on foil type from CardKingdom prices
+            if (scryfallCard.prices) {
+              if (item.foil_type === 'Regular' || item.foil_type === 'Non-foil') {
+                price = scryfallCard.prices.usd;
+              } else {
+                // For foil cards, try foil price first, fall back to regular with multiplier
+                price = scryfallCard.prices.usd_foil || (scryfallCard.prices.usd ? parseFloat(scryfallCard.prices.usd) * 2.5 : null);
+              }
+            }
+
+            if (price && price > 0) {
+              // Apply condition modifier
+              let conditionMultiplier = 1.0;
+              switch (item.quality) {
+                case 'Lightly Played': conditionMultiplier = 0.9; break;
+                case 'Moderately Played': conditionMultiplier = 0.8; break;
+                case 'Heavily Played': conditionMultiplier = 0.7; break;
+                case 'Damaged': conditionMultiplier = 0.5; break;
+                default: conditionMultiplier = 1.0; // Near Mint
+              }
+
+              const adjustedPrice = parseFloat(price) * conditionMultiplier;
+
+              await client.query(`
+                UPDATE card_inventory
+                SET price = $1,
+                    price_source = 'api_scryfall_cardkingdom',
+                    last_price_update = NOW(),
+                    updated_at = NOW()
+                WHERE id = $2
+              `, [adjustedPrice.toFixed(2), item.inventory_id]);
+
+              results.updated++;
+            }
+          }
+        }
+
+        // Rate limit: wait 100ms between batches
+        if (i + batchSize < mtgCards.rows.length) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+
+      } catch (error) {
+        results.errors.push(`Batch error: ${error.message}`);
+      }
+    }
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      ...results,
+      message: `Updated ${results.updated} prices from ${results.total} MTG cards`
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Price refresh error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Failed to refresh prices',
+      details: error.message
+    });
   } finally {
     client.release();
   }
