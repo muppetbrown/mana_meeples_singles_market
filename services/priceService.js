@@ -1,7 +1,22 @@
 // ============================================
 // PRICE API INTEGRATION SERVICE
 // ============================================
-module.exports = PriceService;
+
+const { Pool } = require('pg');
+
+// Initialize database pool if not already available globally
+let db = global.db;
+if (!db) {
+  const pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+  });
+
+  db = {
+    query: (text, params) => pool.query(text, params),
+    getClient: () => pool.connect()
+  };
+}
 
 class PriceService {
   // TCGPlayer API integration
@@ -25,11 +40,13 @@ class PriceService {
           [card.marketPrice, card.productId]
         );
 
-        // Log price history
+        // Log price history only if price changed
         await db.query(
           `INSERT INTO price_history (inventory_id, price, source, recorded_at)
            SELECT id, $1, 'api_tcgplayer', NOW()
-           FROM card_inventory WHERE tcgplayer_id = $2`,
+           FROM card_inventory
+           WHERE tcgplayer_id = $2
+             AND (price IS DISTINCT FROM $1)`,
           [card.marketPrice, card.productId]
         );
       }
@@ -111,20 +128,24 @@ class PriceService {
   // Manual price update
   static async updateManualPrice(inventoryId, newPrice) {
     try {
-      await db.query(
-        `UPDATE card_inventory 
+      const updateResult = await db.query(
+        `UPDATE card_inventory
          SET price = $1, price_source = 'manual', last_price_update = NOW()
-         WHERE id = $2`,
+         WHERE id = $2 AND (price IS DISTINCT FROM $1)
+         RETURNING price`,
         [newPrice, inventoryId]
       );
 
-      await db.query(
-        `INSERT INTO price_history (inventory_id, price, source, recorded_at)
-         VALUES ($1, $2, 'manual', NOW())`,
-        [inventoryId, newPrice]
-      );
+      // Only log price history if the price was actually updated
+      if (updateResult.rows.length > 0) {
+        await db.query(
+          `INSERT INTO price_history (inventory_id, price, source, recorded_at)
+           VALUES ($1, $2, 'manual', NOW())`,
+          [inventoryId, newPrice]
+        );
+      }
 
-      return { success: true };
+      return { success: true, updated: updateResult.rows.length > 0 };
     } catch (error) {
       console.error('Manual price update failed:', error);
       return { success: false, error: error.message };
@@ -141,18 +162,55 @@ const cron = require('node-cron');
 // Update prices daily at 2 AM
 cron.schedule('0 2 * * *', async () => {
   console.log('Running daily price update...');
-  
-  // Get all inventory items with API-based pricing
-  const items = await db.query(
-    `SELECT DISTINCT tcgplayer_id 
-     FROM card_inventory 
-     WHERE price_source LIKE 'api_%' AND tcgplayer_id IS NOT NULL`
-  );
 
-  const tcgplayerIds = items.rows.map(row => row.tcgplayer_id);
-  await PriceService.updatePricesFromTCGPlayer(tcgplayerIds);
-  
-  console.log('Daily price update completed');
+  try {
+    // Get all inventory items with API-based pricing
+    const items = await db.query(
+      `SELECT DISTINCT tcgplayer_id
+       FROM card_inventory
+       WHERE price_source LIKE 'api_%' AND tcgplayer_id IS NOT NULL`
+    );
+
+    const tcgplayerIds = items.rows.map(row => row.tcgplayer_id);
+
+    // Handle empty arrays
+    if (tcgplayerIds.length === 0) {
+      console.log('No TCGPlayer IDs found for price update');
+      return;
+    }
+
+    // Process in batches of 100 to respect rate limits
+    const batchSize = 100;
+    let successCount = 0;
+    let errorCount = 0;
+
+    for (let i = 0; i < tcgplayerIds.length; i += batchSize) {
+      const batch = tcgplayerIds.slice(i, i + batchSize);
+
+      try {
+        const result = await PriceService.updatePricesFromTCGPlayer(batch);
+        if (result.success) {
+          successCount += result.updated;
+          console.log(`Batch ${Math.floor(i/batchSize) + 1}: Updated ${result.updated} prices`);
+        } else {
+          errorCount += batch.length;
+          console.error(`Batch ${Math.floor(i/batchSize) + 1} failed:`, result.error);
+        }
+      } catch (error) {
+        errorCount += batch.length;
+        console.error(`Batch ${Math.floor(i/batchSize) + 1} error:`, error.message);
+      }
+
+      // Add delay between batches to respect rate limits
+      if (i + batchSize < tcgplayerIds.length) {
+        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+      }
+    }
+
+    console.log(`Daily price update completed: ${successCount} updated, ${errorCount} errors`);
+  } catch (error) {
+    console.error('Daily price update failed:', error);
+  }
 });
 
 // Export modules

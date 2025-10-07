@@ -6,6 +6,9 @@ const express = require('express');
 const router = express.Router();
 const { normalizeSearchTerms, buildSearchConditions, CARD_SEARCH_FIELDS, CARD_SEARCH_FIELDS_BASIC } = require('../services/searchUtils');
 
+// Database connection (expects global.db to be set by server.js)
+const db = global.db;
+
 // GET /api/games - Get all active games
 router.get('/games', async (req, res) => {
   try {
@@ -58,6 +61,14 @@ router.get('/cards', async (req, res) => {
       include_zero_stock = false
     } = req.query;
 
+    // Input validation and sanitization
+    const sanitizedPage = Math.max(1, parseInt(page) || 1);
+    const sanitizedLimit = Math.min(200, Math.max(1, parseInt(limit) || 20)); // Cap at 200
+    const sanitizedMinPrice = min_price ? Math.max(0, parseFloat(min_price) || 0) : null;
+    const sanitizedMaxPrice = max_price ? Math.max(0, parseFloat(max_price) || 0) : null;
+    const sanitizedGameId = game_id ? parseInt(game_id) || null : null;
+    const sanitizedSetId = set_id ? parseInt(set_id) || null : null;
+
     let query = `
       SELECT
         c.id,
@@ -81,8 +92,8 @@ router.get('/cards', async (req, res) => {
       FROM cards c
       JOIN games g ON c.game_id = g.id
       JOIN card_sets cs ON c.set_id = cs.id
-      LEFT JOIN card_variations cv ON cv.card_id = c.id
       JOIN card_inventory ci ON ci.card_id = c.id
+      LEFT JOIN card_variations cv ON cv.id = ci.variation_id
     `;
 
     const params = [];
@@ -94,15 +105,15 @@ router.get('/cards', async (req, res) => {
       conditions.push('ci.stock_quantity > 0');
     }
 
-    if (game_id) {
+    if (sanitizedGameId) {
       conditions.push(`c.game_id = $${paramCount}`);
-      params.push(game_id);
+      params.push(sanitizedGameId);
       paramCount++;
     }
 
-    if (set_id) {
+    if (sanitizedSetId) {
       conditions.push(`c.set_id = $${paramCount}`);
-      params.push(set_id);
+      params.push(sanitizedSetId);
       paramCount++;
     }
 
@@ -153,15 +164,15 @@ router.get('/cards', async (req, res) => {
       paramCount++;
     }
 
-    if (min_price) {
+    if (sanitizedMinPrice !== null) {
       conditions.push(`ci.price >= $${paramCount}`);
-      params.push(min_price);
+      params.push(sanitizedMinPrice);
       paramCount++;
     }
 
-    if (max_price) {
+    if (sanitizedMaxPrice !== null) {
       conditions.push(`ci.price <= $${paramCount}`);
-      params.push(max_price);
+      params.push(sanitizedMaxPrice);
       paramCount++;
     }
 
@@ -176,17 +187,23 @@ router.get('/cards', async (req, res) => {
       stock: 'ci.stock_quantity',
       rarity: 'c.rarity',
       set: 'cs.name',
-      number: 'c.card_number::integer',
+      number: 'c.card_number',
       updated: 'ci.updated_at'
     };
     const sortField = validSortFields[sort_by] || 'c.name';
     const order = sort_order === 'desc' ? 'DESC' : 'ASC';
-    query += ` ORDER BY ${sortField} ${order}`;
+
+    if (sort_by === 'number') {
+      // Safe numeric sorting for card numbers that may contain non-numeric characters
+      query += ` ORDER BY NULLIF(regexp_replace(c.card_number, '\\D','','g'),'')::int ${order} NULLS LAST, c.card_number ${order}`;
+    } else {
+      query += ` ORDER BY ${sortField} ${order}`;
+    }
 
     // Pagination
-    const offset = (page - 1) * limit;
+    const offset = (sanitizedPage - 1) * sanitizedLimit;
     query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
-    params.push(limit, offset);
+    params.push(sanitizedLimit, offset);
 
     const result = await db.query(query, params);
 
@@ -208,10 +225,10 @@ router.get('/cards', async (req, res) => {
     res.json({
       cards: result.rows,
       pagination: {
-        page: parseInt(page),
-        limit: parseInt(limit),
+        page: sanitizedPage,
+        limit: sanitizedLimit,
         total: totalCount,
-        totalPages: Math.ceil(totalCount / limit)
+        totalPages: Math.ceil(totalCount / sanitizedLimit)
       }
     });
   } catch (error) {
@@ -273,15 +290,15 @@ router.get('/admin/inventory', async (req, res) => {
       }
     }
 
-    if (game_id) {
+    if (sanitizedGameId) {
       conditions.push(`c.game_id = $${paramCount}`);
-      params.push(game_id);
+      params.push(sanitizedGameId);
       paramCount++;
     }
 
-    if (set_id) {
+    if (sanitizedSetId) {
       conditions.push(`c.set_id = $${paramCount}`);
-      params.push(set_id);
+      params.push(sanitizedSetId);
       paramCount++;
     }
 
@@ -344,8 +361,8 @@ router.get('/cards/:id', async (req, res) => {
       FROM cards c
       JOIN games g ON c.game_id = g.id
       JOIN card_sets cs ON c.set_id = cs.id
-      LEFT JOIN card_variations cv ON cv.card_id = c.id
       JOIN card_inventory ci ON ci.card_id = c.id
+      LEFT JOIN card_variations cv ON cv.id = ci.variation_id
       WHERE c.id = $1
       GROUP BY c.id, g.name, cs.name
     `;
@@ -378,7 +395,7 @@ router.post('/orders', async (req, res) => {
 
     for (const item of items) {
       const stockCheck = await client.query(
-        `SELECT ci.stock_quantity, c.name as card_name, ci.quality
+        `SELECT ci.stock_quantity, ci.price, c.name as card_name, ci.quality
          FROM card_inventory ci
          JOIN cards c ON c.id = ci.card_id
          WHERE ci.id = $1 FOR UPDATE`,
@@ -391,6 +408,7 @@ router.post('/orders', async (req, res) => {
       }
 
       const currentStock = stockCheck.rows[0].stock_quantity;
+      const currentPrice = parseFloat(stockCheck.rows[0].price);
       const cardName = stockCheck.rows[0].card_name;
       const quality = stockCheck.rows[0].quality;
 
@@ -402,6 +420,7 @@ router.post('/orders', async (req, res) => {
           quantity: item.quantity,
           card_name: cardName,
           quality: quality,
+          current_price: currentPrice, // Use server-side price instead of client price
           remaining_stock: currentStock - item.quantity
         });
       }
@@ -416,8 +435,8 @@ router.post('/orders', async (req, res) => {
       });
     }
 
-    // Calculate totals
-    const subtotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    // Calculate totals using server-side prices
+    const subtotal = stockUpdates.reduce((sum, item) => sum + (item.current_price * item.quantity), 0);
     const tax = subtotal * 0.1; // Example: 10% tax
     const shipping = 5.99; // Flat shipping
     const total = subtotal + tax + shipping;
@@ -432,12 +451,12 @@ router.post('/orders', async (req, res) => {
 
     const orderId = orderResult.rows[0].id;
 
-    // Create order items and update inventory
-    for (const item of items) {
+    // Create order items and update inventory using server-side pricing
+    for (const item of stockUpdates) {
       await client.query(
         `INSERT INTO order_items (order_id, inventory_id, card_name, quality, quantity, unit_price, total_price)
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
-        [orderId, item.inventory_id, item.card_name, item.quality, item.quantity, item.price, item.price * item.quantity]
+        [orderId, item.inventory_id, item.card_name, item.quality, item.quantity, item.current_price, item.current_price * item.quantity]
       );
 
       await client.query(
