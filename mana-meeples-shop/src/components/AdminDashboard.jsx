@@ -69,8 +69,57 @@ const AdminDashboard = () => {
   const [csvStep, setCsvStep] = useState(1); // 1: Upload, 2: Preview/Map, 3: Results
   const [dragActive, setDragActive] = useState(false);
   
-  // Check authentication on mount
-  useEffect(() => {
+  // Fetch inventory function (defined before useEffect)
+const fetchInventory = async () => {
+  try {
+    setLoading(true);
+    
+    const response = await fetch(`${API_URL}/admin/inventory?limit=5000`, {
+      credentials: 'include',
+      headers: getAdminHeaders()
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    
+    // The API returns an array directly
+    const inventoryArray = Array.isArray(data) ? data : (data.inventory || []);
+    
+    const formatted = inventoryArray.map(card => ({
+      id: card.inventory_id || card.id,
+      sku: `${card.game_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.set_code || card.set_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.card_number || '000'}-${card.quality?.substring(0,2).toUpperCase() || 'NM'}-${card.foil_type === 'Regular' || card.foil_type === 'Non-foil' ? 'NF' : 'F'}`,
+      card_name: card.name || card.card_name,
+      game: card.game_name,
+      set: card.set_name,
+      set_code: card.set_code,
+      number: card.card_number,
+      quality: card.quality,
+      foil_type: card.foil_type || 'Regular',
+      language: card.language || 'English',
+      price: parseFloat(card.price || 0),
+      stock: card.stock_quantity || 0,
+      image_url: card.image_url,
+      low_stock_threshold: 3,
+      price_source: card.price_source || 'api_scryfall',
+      last_updated: card.updated_at || card.last_updated,
+      card_id: card.card_id || card.id
+    }));
+    
+    setInventory(formatted);
+    console.log('✅ Loaded inventory:', formatted.length, 'items');
+    
+  } catch (err) {
+    console.error('❌ Error loading inventory:', err);
+  } finally {
+    setLoading(false);
+  }
+};
+
+// Check authentication on mount
+useEffect(() => {
   const checkAuth = async () => {
     try {
       const response = await fetch(`${API_URL}/auth/admin/auth/check`, {
@@ -80,9 +129,12 @@ const AdminDashboard = () => {
 
       if (response.ok) {
         const data = await response.json();
-        setIsAuthenticated(data.authenticated);
         
-        if (!data.authenticated) {
+        if (data.authenticated) {
+          setIsAuthenticated(true);
+          // ✅ Fetch inventory AFTER auth is confirmed
+          await fetchInventory();
+        } else {
           navigate('/admin/login');
         }
       } else {
@@ -97,66 +149,7 @@ const AdminDashboard = () => {
   };
 
   checkAuth();
-  }, [navigate]);
-
-  // Fetch inventory ONLY after authentication is confirmed
-  useEffect(() => {
-  // Don't fetch if not authenticated yet
-  if (!isAuthenticated) return;
-
-  const fetchInventory = async () => {
-    try {
-      setLoading(true);
-      
-      const response = await fetch(`${API_URL}/admin/inventory?limit=5000`, {
-        credentials: 'include',
-        headers: getAdminHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      
-      // The API returns an array directly, not { inventory: [...] }
-      // If it's wrapped, use data.inventory; if not, use data
-      const inventoryArray = Array.isArray(data) ? data : (data.inventory || []);
-      
-      const formatted = inventoryArray.map(card => ({
-        id: card.inventory_id || card.id,
-        sku: `${card.game_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.set_code || card.set_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.card_number || '000'}-${card.quality?.substring(0,2).toUpperCase() || 'NM'}-${card.foil_type === 'Regular' || card.foil_type === 'Non-foil' ? 'NF' : 'F'}`,
-        card_name: card.name || card.card_name,
-        game: card.game_name,
-        set: card.set_name,
-        set_code: card.set_code,
-        number: card.card_number,
-        quality: card.quality,
-        foil_type: card.foil_type || 'Regular',
-        language: card.language || 'English',
-        price: parseFloat(card.price || 0),
-        stock: card.stock_quantity || 0,
-        image_url: card.image_url,
-        low_stock_threshold: 3,
-        price_source: card.price_source || 'api_scryfall',
-        last_updated: card.updated_at || card.last_updated,
-        card_id: card.card_id || card.id
-      }));
-      
-      setInventory(formatted);
-      console.log('✅ Loaded inventory:', formatted.length, 'items');
-      
-    } catch (err) {
-      console.error('❌ Error loading inventory:', err);
-      // Optionally show error to user
-      // setError('Failed to load inventory');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchInventory();
-}, [isAuthenticated]); // ← Only runs when isAuthenticated changes
+}, [navigate]);
 
   // Group inventory by card (name, game, set, number)
   const groupedInventory = useMemo(() => {
