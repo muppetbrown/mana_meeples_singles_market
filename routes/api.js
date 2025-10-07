@@ -9,6 +9,65 @@ const { normalizeSearchTerms, buildSearchConditions, CARD_SEARCH_FIELDS, CARD_SE
 // Database connection (expects global.db to be set by server.js)
 const db = global.db;
 
+// Basic authentication middleware for admin routes
+const adminAuth = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+
+  const [type, credentials] = authHeader.split(' ');
+
+  if (type !== 'Basic') {
+    return res.status(401).json({ error: 'Basic authentication required' });
+  }
+
+  try {
+    const decoded = Buffer.from(credentials, 'base64').toString('utf-8');
+    const [username, password] = decoded.split(':');
+
+    // Basic hardcoded admin credentials (in production, use proper user management)
+    const validUsername = process.env.ADMIN_USERNAME || 'admin';
+    const validPassword = process.env.ADMIN_PASSWORD || 'admin123';
+
+    if (username === validUsername && password === validPassword) {
+      req.user = { username, role: 'admin' };
+      next();
+    } else {
+      res.status(401).json({ error: 'Invalid credentials' });
+    }
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid authentication format' });
+  }
+};
+
+// Rate limiting middleware (simple in-memory implementation)
+const rateLimitStore = new Map();
+const rateLimit = (windowMs = 60000, maxRequests = 100) => (req, res, next) => {
+  const clientId = req.ip || req.connection.remoteAddress;
+  const now = Date.now();
+  const windowStart = now - windowMs;
+
+  // Clean old entries
+  for (const [key, timestamps] of rateLimitStore.entries()) {
+    rateLimitStore.set(key, timestamps.filter(time => time > windowStart));
+    if (rateLimitStore.get(key).length === 0) {
+      rateLimitStore.delete(key);
+    }
+  }
+
+  const clientRequests = rateLimitStore.get(clientId) || [];
+
+  if (clientRequests.length >= maxRequests) {
+    return res.status(429).json({ error: 'Too many requests' });
+  }
+
+  clientRequests.push(now);
+  rateLimitStore.set(clientId, clientRequests);
+  next();
+};
+
 // GET /api/games - Get all active games
 router.get('/games', async (req, res) => {
   try {
@@ -40,7 +99,7 @@ router.get('/sets', async (req, res) => {
 });
 
 // GET /api/cards - Get cards with advanced filtering and pagination
-router.get('/cards', async (req, res) => {
+router.get('/cards', rateLimit(60000, 200), async (req, res) => {
   try {
     const {
       game_id,
@@ -251,7 +310,7 @@ router.get('/cards', async (req, res) => {
 });
 
 // GET /api/admin/inventory - Get ALL inventory including zero stock
-router.get('/admin/inventory', async (req, res) => {
+router.get('/admin/inventory', adminAuth, async (req, res) => {
   try {
     const {
       search,
@@ -499,7 +558,7 @@ router.post('/orders', async (req, res) => {
 });
 
 // PUT /api/admin/inventory/:id - Update inventory price and/or stock
-router.put('/admin/inventory/:id', async (req, res) => {
+router.put('/admin/inventory/:id', adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
     const { price, stock_quantity } = req.body;
@@ -546,7 +605,7 @@ router.put('/admin/inventory/:id', async (req, res) => {
 });
 
 // GET /api/search/autocomplete - Autocomplete suggestions with enhanced fuzzy matching
-router.get('/search/autocomplete', async (req, res) => {
+router.get('/search/autocomplete', rateLimit(60000, 50), async (req, res) => {
   try {
     const { q } = req.query;
 
@@ -639,6 +698,199 @@ router.get('/filters', async (req, res) => {
   }
 });
 
+// GET /api/filters/counts - Get filter counts for dynamic UI
+router.get('/filters/counts', async (req, res) => {
+  try {
+    const { game_id, quality, rarity, foil_type, language = 'English' } = req.query;
+
+    let baseQuery = `
+      FROM cards c
+      JOIN card_inventory ci ON ci.card_id = c.id
+      WHERE ci.stock_quantity > 0
+    `;
+
+    const params = [];
+    let paramCount = 1;
+
+    // Apply existing filters to get context-aware counts
+    if (game_id) {
+      baseQuery += ` AND c.game_id = $${paramCount}`;
+      params.push(game_id);
+      paramCount++;
+    }
+
+    if (quality) {
+      baseQuery += ` AND ci.quality = $${paramCount}`;
+      params.push(quality);
+      paramCount++;
+    }
+
+    if (rarity) {
+      baseQuery += ` AND c.rarity = $${paramCount}`;
+      params.push(rarity);
+      paramCount++;
+    }
+
+    if (foil_type) {
+      baseQuery += ` AND ci.foil_type = $${paramCount}`;
+      params.push(foil_type);
+      paramCount++;
+    }
+
+    if (language) {
+      baseQuery += ` AND ci.language = $${paramCount}`;
+      params.push(language);
+      paramCount++;
+    }
+
+    // Get counts for each filter category
+    const [rarityCounts, qualityCounts, foilCounts] = await Promise.all([
+      db.query(`
+        SELECT c.rarity, COUNT(DISTINCT c.id) as count
+        ${baseQuery.replace('AND c.rarity = $' + (rarity ? params.findIndex(p => p === rarity) + 1 : 0), '')}
+        GROUP BY c.rarity
+        ORDER BY c.rarity
+      `, params.filter(p => p !== rarity)),
+
+      db.query(`
+        SELECT ci.quality, COUNT(DISTINCT c.id) as count
+        ${baseQuery.replace('AND ci.quality = $' + (quality ? params.findIndex(p => p === quality) + 1 : 0), '')}
+        GROUP BY ci.quality
+        ORDER BY ci.quality
+      `, params.filter(p => p !== quality)),
+
+      db.query(`
+        SELECT ci.foil_type, COUNT(DISTINCT c.id) as count
+        ${baseQuery.replace('AND ci.foil_type = $' + (foil_type ? params.findIndex(p => p === foil_type) + 1 : 0), '')}
+        GROUP BY ci.foil_type
+        ORDER BY ci.foil_type
+      `, params.filter(p => p !== foil_type))
+    ]);
+
+    const formatCounts = (rows) => rows.reduce((acc, row) => {
+      if (row.rarity || row.quality || row.foil_type) {
+        const key = row.rarity || row.quality || row.foil_type;
+        acc[key] = parseInt(row.count);
+      }
+      return acc;
+    }, {});
+
+    res.json({
+      rarities: formatCounts(rarityCounts.rows),
+      qualities: formatCounts(qualityCounts.rows),
+      foilTypes: formatCounts(foilCounts.rows)
+    });
+  } catch (error) {
+    console.error('Error fetching filter counts:', error);
+    res.status(500).json({ error: 'Failed to fetch filter counts' });
+  }
+});
+
+// GET /api/cards/:id/stock - Get current stock for a card
+router.get('/cards/:id/stock', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const result = await db.query(`
+      SELECT
+        ci.id as inventory_id,
+        ci.quality,
+        ci.stock_quantity as stock,
+        ci.foil_type,
+        ci.language
+      FROM card_inventory ci
+      WHERE ci.card_id = $1
+      ORDER BY ci.quality, ci.foil_type
+    `, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+
+    const totalStock = result.rows.reduce((sum, item) => sum + item.stock, 0);
+
+    res.json({
+      card_id: id,
+      total_stock: totalStock,
+      variations: result.rows,
+      in_stock: totalStock > 0
+    });
+  } catch (error) {
+    console.error('Error fetching card stock:', error);
+    res.status(500).json({ error: 'Failed to fetch stock information' });
+  }
+});
+
+// GET /api/cards/:id/current-price - Get current price for a card inventory item
+router.get('/cards/:id/current-price', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { quality, foil_type = 'Regular', language = 'English' } = req.query;
+
+    let query = `
+      SELECT
+        ci.price,
+        ci.price_source,
+        ci.last_price_update,
+        ci.stock_quantity,
+        ci.quality,
+        ci.foil_type,
+        ci.language,
+        c.name as card_name
+      FROM card_inventory ci
+      JOIN cards c ON c.id = ci.card_id
+      WHERE ci.card_id = $1
+    `;
+
+    const params = [id];
+    let paramCount = 2;
+
+    if (quality) {
+      query += ` AND ci.quality = $${paramCount}`;
+      params.push(quality);
+      paramCount++;
+    }
+
+    if (foil_type) {
+      query += ` AND ci.foil_type = $${paramCount}`;
+      params.push(foil_type);
+      paramCount++;
+    }
+
+    if (language) {
+      query += ` AND ci.language = $${paramCount}`;
+      params.push(language);
+      paramCount++;
+    }
+
+    query += ' ORDER BY ci.quality, ci.foil_type LIMIT 1';
+
+    const result = await db.query(query, params);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Card variation not found' });
+    }
+
+    const item = result.rows[0];
+
+    res.json({
+      card_id: id,
+      price: parseFloat(item.price),
+      price_source: item.price_source,
+      last_updated: item.last_price_update,
+      stock_quantity: item.stock_quantity,
+      quality: item.quality,
+      foil_type: item.foil_type,
+      language: item.language,
+      card_name: item.card_name,
+      is_stale: item.last_price_update && (Date.now() - new Date(item.last_price_update).getTime()) > 7 * 24 * 60 * 60 * 1000 // 7 days
+    });
+  } catch (error) {
+    console.error('Error fetching current price:', error);
+    res.status(500).json({ error: 'Failed to fetch current price' });
+  }
+});
+
 // GET /api/analytics/trending - Get trending cards (most viewed/bought)
 router.get('/analytics/trending', async (req, res) => {
   try {
@@ -672,7 +924,7 @@ router.get('/analytics/trending', async (req, res) => {
 });
 
 // POST /api/admin/bulk-update - Bulk update prices and stock
-router.post('/admin/bulk-update', async (req, res) => {
+router.post('/admin/bulk-update', adminAuth, async (req, res) => {
   const client = await db.getClient();
 
   try {
@@ -736,7 +988,7 @@ router.post('/admin/bulk-update', async (req, res) => {
 });
 
 // POST /api/admin/csv-import - Bulk import/update from CSV with overselling prevention
-router.post('/admin/csv-import', async (req, res) => {
+router.post('/admin/csv-import', adminAuth, async (req, res) => {
   const client = await db.getClient();
 
   try {
@@ -991,7 +1243,7 @@ router.get('/cards/sectioned', async (req, res) => {
 });
 
 // POST /api/admin/create-foil - Create foil version of existing card
-router.post('/admin/create-foil', async (req, res) => {
+router.post('/admin/create-foil', adminAuth, async (req, res) => {
   try {
     const { card_id, quality, foil_type, price, stock_quantity = 0, language = 'English' } = req.body;
 
@@ -1046,7 +1298,7 @@ router.post('/admin/create-foil', async (req, res) => {
 });
 
 // POST /api/admin/bulk-create-foils - Bulk create foil versions for multiple cards
-router.post('/admin/bulk-create-foils', async (req, res) => {
+router.post('/admin/bulk-create-foils', adminAuth, async (req, res) => {
   const client = await db.getClient();
 
   try {
