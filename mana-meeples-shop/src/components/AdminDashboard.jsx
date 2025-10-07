@@ -74,7 +74,8 @@ const AdminDashboard = () => {
     const checkAuth = async () => {
       try {
         const response = await fetch(`${API_URL}/auth/admin/auth/check`, {
-          credentials: 'include'
+          credentials: 'include',
+          headers: getAdminHeaders()
         });
 
         if (response.ok) {
@@ -138,6 +139,21 @@ const AdminDashboard = () => {
         setLoading(false);
       });
   }, []);
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-slate-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect to login
+  }
 
   // Group inventory by card (name, game, set, number)
   const groupedInventory = useMemo(() => {
@@ -525,10 +541,7 @@ const AdminDashboard = () => {
       const response = await fetch(`${API_URL}/admin/csv-import`, {
         method: 'POST',
         credentials: 'include',
-        headers: {
-          'Authorization': getAdminHeaders()['Authorization']
-          // Note: Don't set Content-Type for FormData, let browser set it with boundary
-        },
+        headers: getAdminHeaders(),
         body: formData
       });
 
@@ -595,21 +608,6 @@ const AdminDashboard = () => {
     if (diffDays < 7) return `${diffDays}d ago`;
     return date.toLocaleDateString();
   };
-
-  if (authChecking) {
-    return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-slate-600">Checking authentication...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isAuthenticated) {
-    return null; // Will redirect to login
-  }
 
   if (loading) {
     return (
