@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Package,
   DollarSign,
@@ -22,19 +23,18 @@ import {
 // Use environment variable for API URL, fallback for development
 const API_URL = process.env.REACT_APP_API_URL || 'https://mana-meeples-singles-market.onrender.com/api';
 
-// Helper function to get admin authentication headers
+// Helper function for authenticated requests
 const getAdminHeaders = () => {
-  const username = process.env.REACT_APP_ADMIN_USERNAME || 'admin';
-  const password = process.env.REACT_APP_ADMIN_PASSWORD || 'admin123';
-  const credentials = btoa(`${username}:${password}`);
-
   return {
-    'Authorization': `Basic ${credentials}`,
     'Content-Type': 'application/json'
+    // Cookies are sent automatically with credentials: 'include'
   };
 };
 
 const AdminDashboard = () => {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authChecking, setAuthChecking] = useState(true);
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -57,6 +57,7 @@ const AdminDashboard = () => {
     initialStock: 0
   });
   const [foilModalLoading, setFoilModalLoading] = useState(false);
+  
 
   // CSV Import Modal State
   const [showCSVModal, setShowCSVModal] = useState(false);
@@ -68,9 +69,39 @@ const AdminDashboard = () => {
   const [csvStep, setCsvStep] = useState(1); // 1: Upload, 2: Preview/Map, 3: Results
   const [dragActive, setDragActive] = useState(false);
 
+  // Check authentication on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${API_URL}/auth/admin/auth/check`, {
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          setIsAuthenticated(data.authenticated);
+          
+          if (!data.authenticated) {
+            navigate('/admin/login');
+          }
+        } else {
+          navigate('/admin/login');
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        navigate('/admin/login');
+      } finally {
+        setAuthChecking(false);
+      }
+    };
+
+    checkAuth();
+  }, [navigate]);
+
   // Fetch inventory from API with authentication
   useEffect(() => {
     fetch(`${API_URL}/admin/inventory?limit=5000`, {
+      credentials: 'include',
       headers: getAdminHeaders()
     })
       .then(res => {
@@ -177,6 +208,7 @@ const AdminDashboard = () => {
     try {
       await fetch(`${API_URL}/admin/inventory/${id}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: getAdminHeaders(),
         body: JSON.stringify(updates)
       });
@@ -208,6 +240,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(`${API_URL}/admin/create-foil`, {
         method: 'POST',
+        credentials: 'include',
         headers: getAdminHeaders(),
         body: JSON.stringify({
           card_id: foilModalCard.card_id,
@@ -329,6 +362,7 @@ const AdminDashboard = () => {
     try {
       const response = await fetch(`${API_URL}/admin/refresh-prices`, {
         method: 'POST',
+        credentials: 'include',
         headers: getAdminHeaders()
       });
 
@@ -490,6 +524,7 @@ const AdminDashboard = () => {
 
       const response = await fetch(`${API_URL}/admin/csv-import`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Authorization': getAdminHeaders()['Authorization']
           // Note: Don't set Content-Type for FormData, let browser set it with boundary
@@ -560,6 +595,21 @@ const AdminDashboard = () => {
     if (diffDays < 7) return `${diffDays}d ago`;
     return date.toLocaleDateString();
   };
+
+  if (authChecking) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="inline-block animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <p className="mt-4 text-slate-600">Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return null; // Will redirect to login
+  }
 
   if (loading) {
     return (

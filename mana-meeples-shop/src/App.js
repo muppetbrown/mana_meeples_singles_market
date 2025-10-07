@@ -1,11 +1,12 @@
 import React, { Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
-// Lazy load components for code splitting
+// Lazy load components
 const TCGShop = React.lazy(() => import('./components/TCGShop'));
+const AdminLogin = React.lazy(() => import('./components/AdminLogin'));
 const AdminDashboard = React.lazy(() => import('./components/AdminDashboard'));
 
-// Loading fallback component
+// Loading fallback
 const LoadingSpinner = () => (
   <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
     <div className="text-center">
@@ -21,6 +22,7 @@ function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<TCGShop />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
           <Route path="/admin" element={<AdminDashboard />} />
         </Routes>
       </Suspense>

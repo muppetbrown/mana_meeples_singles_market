@@ -9,38 +9,13 @@ const { normalizeSearchTerms, buildSearchConditions, CARD_SEARCH_FIELDS, CARD_SE
 // Database connection (expects global.db to be set by server.js)
 const db = global.db;
 
-// Basic authentication middleware for admin routes
-const adminAuth = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+// ============================================
+// AUTHENTICATION MIDDLEWARE
+// ============================================
+const { adminAuthBasic } = require('../middleware/auth');
 
-  if (!authHeader) {
-    return res.status(401).json({ error: 'Authentication required' });
-  }
-
-  const [type, credentials] = authHeader.split(' ');
-
-  if (type !== 'Basic') {
-    return res.status(401).json({ error: 'Basic authentication required' });
-  }
-
-  try {
-    const decoded = Buffer.from(credentials, 'base64').toString('utf-8');
-    const [username, password] = decoded.split(':');
-
-    // Basic hardcoded admin credentials (in production, use proper user management)
-    const validUsername = process.env.ADMIN_USERNAME || 'admin';
-    const validPassword = process.env.ADMIN_PASSWORD || 'admin123';
-
-    if (username === validUsername && password === validPassword) {
-      req.user = { username, role: 'admin' };
-      next();
-    } else {
-      res.status(401).json({ error: 'Invalid credentials' });
-    }
-  } catch (error) {
-    res.status(401).json({ error: 'Invalid authentication format' });
-  }
-};
+// Use secure Basic Auth with bcrypt
+const adminAuth = adminAuthBasic;
 
 // Rate limiting middleware (simple in-memory implementation)
 const rateLimitStore = new Map();
