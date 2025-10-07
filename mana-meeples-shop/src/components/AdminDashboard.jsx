@@ -5,13 +5,18 @@ import {
   AlertCircle,
   Edit,
   Download,
+  Upload,
   RefreshCw,
   Search,
   ChevronDown,
   ChevronRight,
   Save,
   X,
-  EyeOff
+  EyeOff,
+  FileText,
+  CheckCircle,
+  XCircle,
+  AlertTriangle
 } from 'lucide-react';
 
 // Use environment variable for API URL, fallback for development
@@ -40,6 +45,16 @@ const AdminDashboard = () => {
     initialStock: 0
   });
   const [foilModalLoading, setFoilModalLoading] = useState(false);
+
+  // CSV Import Modal State
+  const [showCSVModal, setShowCSVModal] = useState(false);
+  const [csvFile, setCsvFile] = useState(null);
+  const [csvPreview, setCsvPreview] = useState([]);
+  const [csvMapping, setCsvMapping] = useState({});
+  const [csvImporting, setCsvImporting] = useState(false);
+  const [csvResults, setCsvResults] = useState(null);
+  const [csvStep, setCsvStep] = useState(1); // 1: Upload, 2: Preview/Map, 3: Results
+  const [dragActive, setDragActive] = useState(false);
 
   // Fetch inventory from API
   useEffect(() => {
@@ -333,6 +348,158 @@ const AdminDashboard = () => {
     a.click();
   };
 
+  // CSV Import Functions
+  const resetCSVModal = () => {
+    setCsvFile(null);
+    setCsvPreview([]);
+    setCsvMapping({});
+    setCsvResults(null);
+    setCsvStep(1);
+    setCsvImporting(false);
+    setDragActive(false);
+  };
+
+  const handleCSVUpload = (file) => {
+    if (!file || file.type !== 'text/csv') {
+      alert('Please select a valid CSV file.');
+      return;
+    }
+
+    setCsvFile(file);
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const csv = e.target.result;
+      const lines = csv.split('\n').filter(line => line.trim());
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      const preview = lines.slice(1, 6).map(line => {
+        const values = line.split(',').map(v => v.trim().replace(/"/g, ''));
+        return headers.reduce((obj, header, index) => {
+          obj[header] = values[index] || '';
+          return obj;
+        }, {});
+      });
+
+      setCsvPreview(preview);
+
+      // Auto-map common columns
+      const defaultMapping = {};
+      headers.forEach(header => {
+        const lowerHeader = header.toLowerCase();
+        if (lowerHeader.includes('sku')) defaultMapping.sku = header;
+        else if (lowerHeader.includes('name')) defaultMapping.card_name = header;
+        else if (lowerHeader.includes('price')) defaultMapping.price = header;
+        else if (lowerHeader.includes('stock') || lowerHeader.includes('quantity')) defaultMapping.stock_quantity = header;
+        else if (lowerHeader.includes('quality') || lowerHeader.includes('condition')) defaultMapping.quality = header;
+        else if (lowerHeader.includes('foil')) defaultMapping.foil_type = header;
+        else if (lowerHeader.includes('game')) defaultMapping.game = header;
+        else if (lowerHeader.includes('set')) defaultMapping.set_name = header;
+      });
+      setCsvMapping(defaultMapping);
+      setCsvStep(2);
+    };
+    reader.readAsText(file);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragActive(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragActive(false);
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      handleCSVUpload(files[0]);
+    }
+  };
+
+  const validateCSVData = () => {
+    const errors = [];
+    const warnings = [];
+
+    // Check required mappings
+    if (!csvMapping.sku) errors.push('SKU column mapping is required');
+    if (!csvMapping.card_name) errors.push('Card Name column mapping is required');
+    if (!csvMapping.price) errors.push('Price column mapping is required');
+    if (!csvMapping.stock_quantity) errors.push('Stock Quantity column mapping is required');
+
+    // Validate data
+    csvPreview.forEach((row, index) => {
+      if (!row[csvMapping.sku]) errors.push(`Row ${index + 2}: SKU is missing`);
+      if (!row[csvMapping.card_name]) errors.push(`Row ${index + 2}: Card name is missing`);
+
+      const price = parseFloat(row[csvMapping.price]);
+      if (isNaN(price) || price < 0) errors.push(`Row ${index + 2}: Invalid price`);
+
+      const stock = parseInt(row[csvMapping.stock_quantity]);
+      if (isNaN(stock) || stock < 0) warnings.push(`Row ${index + 2}: Invalid stock quantity`);
+    });
+
+    return { errors, warnings };
+  };
+
+  const importCSV = async () => {
+    const validation = validateCSVData();
+    if (validation.errors.length > 0) {
+      alert('Please fix the following errors:\n' + validation.errors.join('\n'));
+      return;
+    }
+
+    setCsvImporting(true);
+
+    try {
+      const formData = new FormData();
+      formData.append('csv', csvFile);
+      formData.append('mapping', JSON.stringify(csvMapping));
+
+      const response = await fetch(`${API_URL}/admin/csv-import`, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error(`Import failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      setCsvResults(result);
+      setCsvStep(3);
+
+      // Refresh inventory after successful import
+      if (result.success_count > 0) {
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('CSV import error:', error);
+      alert(`CSV import failed: ${error.message}`);
+    } finally {
+      setCsvImporting(false);
+    }
+  };
+
+  const downloadCSVTemplate = () => {
+    const template = [
+      ['SKU', 'Card Name', 'Game', 'Set Name', 'Quality', 'Price', 'Stock Quantity', 'Foil Type', 'Language'].join(','),
+      ['MTG-LTR-001-NM', 'Lightning Bolt', 'Magic: The Gathering', 'The Lord of the Rings', 'Near Mint', '2.50', '10', 'Non-foil', 'English'].join(','),
+      ['PKM-SVP-025-LP', 'Pikachu', 'Pokemon', 'Scarlet & Violet Promos', 'Lightly Played', '5.00', '3', 'Holo', 'English'].join(',')
+    ].join('\n');
+
+    const blob = new Blob([template], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'csv-import-template.csv';
+    a.click();
+  };
+
   // Currency toggle function
   const toggleCurrency = () => {
     const isUSD = currency.code === 'USD';
@@ -421,6 +588,14 @@ const AdminDashboard = () => {
               >
                 <RefreshCw className="w-4 h-4" />
                 <span className="hidden sm:inline">Refresh Prices</span>
+              </button>
+              <button
+                onClick={() => setShowCSVModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
+                aria-label="Import inventory data from CSV"
+              >
+                <Upload className="w-4 h-4" />
+                <span className="hidden sm:inline">Import</span>
               </button>
               <button
                 onClick={exportCSV}
@@ -957,6 +1132,285 @@ const AdminDashboard = () => {
                     Cancel
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* CSV Import Modal */}
+        {showCSVModal && (
+          <div className="fixed inset-0 bg-slate-500/75 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="px-6 py-4 border-b border-slate-200">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-slate-900">
+                    CSV Import - Step {csvStep} of 3
+                  </h2>
+                  <button
+                    onClick={() => {
+                      setShowCSVModal(false);
+                      resetCSVModal();
+                    }}
+                    className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                    aria-label="Close CSV import modal"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6">
+                {/* Step 1: File Upload */}
+                {csvStep === 1 && (
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-medium text-slate-900 mb-4">Upload CSV File</h3>
+                      <p className="text-slate-600 mb-4">
+                        Upload a CSV file containing your inventory data. Make sure your file includes columns for SKU, Card Name, Price, and Stock Quantity.
+                      </p>
+                    </div>
+
+                    {/* Drag and Drop Area */}
+                    <div
+                      className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
+                        dragActive
+                          ? 'border-blue-400 bg-blue-50'
+                          : 'border-slate-300 hover:border-slate-400'
+                      }`}
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                    >
+                      <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                      <div className="space-y-2">
+                        <p className="text-lg font-medium text-slate-700">
+                          Drop your CSV file here, or{' '}
+                          <label className="text-blue-600 hover:text-blue-500 cursor-pointer underline">
+                            browse
+                            <input
+                              type="file"
+                              accept=".csv"
+                              onChange={(e) => handleCSVUpload(e.target.files[0])}
+                              className="hidden"
+                            />
+                          </label>
+                        </p>
+                        <p className="text-sm text-slate-500">
+                          Maximum file size: 10MB. Supported format: CSV only.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                      <button
+                        onClick={downloadCSVTemplate}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download Template
+                      </button>
+                      <p className="text-sm text-slate-600">
+                        Need help formatting your CSV? Download our template with example data.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 2: Preview and Column Mapping */}
+                {csvStep === 2 && (
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-medium text-slate-900 mb-2">Map CSV Columns</h3>
+                      <p className="text-slate-600 mb-4">
+                        Map your CSV columns to our database fields. Preview shows first 5 rows.
+                      </p>
+                    </div>
+
+                    {/* Column Mapping */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                      {Object.keys(csvPreview[0] || {}).map(csvColumn => (
+                        <div key={csvColumn} className="space-y-2">
+                          <label className="block text-sm font-medium text-slate-700">
+                            CSV Column: <span className="font-semibold">{csvColumn}</span>
+                          </label>
+                          <select
+                            value={Object.keys(csvMapping).find(key => csvMapping[key] === csvColumn) || ''}
+                            onChange={(e) => {
+                              const newMapping = { ...csvMapping };
+                              // Remove old mapping if exists
+                              Object.keys(newMapping).forEach(key => {
+                                if (newMapping[key] === csvColumn) delete newMapping[key];
+                              });
+                              // Add new mapping if selected
+                              if (e.target.value) newMapping[e.target.value] = csvColumn;
+                              setCsvMapping(newMapping);
+                            }}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          >
+                            <option value="">Don't import</option>
+                            <option value="sku">SKU (Required)</option>
+                            <option value="card_name">Card Name (Required)</option>
+                            <option value="game">Game</option>
+                            <option value="set_name">Set Name</option>
+                            <option value="quality">Quality/Condition</option>
+                            <option value="price">Price (Required)</option>
+                            <option value="stock_quantity">Stock Quantity (Required)</option>
+                            <option value="foil_type">Foil Type</option>
+                            <option value="language">Language</option>
+                          </select>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Data Preview */}
+                    <div>
+                      <h4 className="text-md font-medium text-slate-900 mb-3">Data Preview</h4>
+                      <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-slate-200">
+                          <thead className="bg-slate-50">
+                            <tr>
+                              {Object.keys(csvPreview[0] || {}).map(column => (
+                                <th key={column} className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">
+                                  {column}
+                                </th>
+                              ))}
+                            </tr>
+                          </thead>
+                          <tbody className="bg-white divide-y divide-slate-200">
+                            {csvPreview.map((row, index) => (
+                              <tr key={index}>
+                                {Object.values(row).map((value, colIndex) => (
+                                  <td key={colIndex} className="px-4 py-3 text-sm text-slate-900 whitespace-nowrap">
+                                    {value || <span className="text-slate-400 italic">empty</span>}
+                                  </td>
+                                ))}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setCsvStep(1)}
+                        className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                      >
+                        Back
+                      </button>
+                      <button
+                        onClick={importCSV}
+                        disabled={csvImporting || !csvMapping.sku || !csvMapping.card_name || !csvMapping.price || !csvMapping.stock_quantity}
+                        className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:ring-4 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
+                      >
+                        {csvImporting ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin inline mr-2" />
+                            Importing...
+                          </>
+                        ) : (
+                          'Import Data'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Step 3: Results */}
+                {csvStep === 3 && csvResults && (
+                  <div className="space-y-6">
+                    <div>
+                      <h3 className="text-lg font-medium text-slate-900 mb-4">Import Results</h3>
+                    </div>
+
+                    {/* Success/Error Summary */}
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                          <span className="text-sm font-medium text-green-800">Successfully Imported</span>
+                        </div>
+                        <div className="text-2xl font-bold text-green-900 mt-1">
+                          {csvResults.success_count || 0}
+                        </div>
+                      </div>
+
+                      <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                        <div className="flex items-center">
+                          <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2" />
+                          <span className="text-sm font-medium text-yellow-800">Warnings</span>
+                        </div>
+                        <div className="text-2xl font-bold text-yellow-900 mt-1">
+                          {csvResults.warning_count || 0}
+                        </div>
+                      </div>
+
+                      <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                        <div className="flex items-center">
+                          <XCircle className="w-5 h-5 text-red-600 mr-2" />
+                          <span className="text-sm font-medium text-red-800">Errors</span>
+                        </div>
+                        <div className="text-2xl font-bold text-red-900 mt-1">
+                          {csvResults.error_count || 0}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Error/Warning Details */}
+                    {(csvResults.errors?.length > 0 || csvResults.warnings?.length > 0) && (
+                      <div className="space-y-4">
+                        {csvResults.errors?.length > 0 && (
+                          <div>
+                            <h4 className="text-md font-medium text-red-900 mb-2">Errors</h4>
+                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 max-h-40 overflow-y-auto">
+                              {csvResults.errors.map((error, index) => (
+                                <div key={index} className="text-sm text-red-700">
+                                  {error}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+
+                        {csvResults.warnings?.length > 0 && (
+                          <div>
+                            <h4 className="text-md font-medium text-yellow-900 mb-2">Warnings</h4>
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 max-h-40 overflow-y-auto">
+                              {csvResults.warnings.map((warning, index) => (
+                                <div key={index} className="text-sm text-yellow-700">
+                                  {warning}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {csvResults.success_count > 0 && (
+                      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div className="flex items-center">
+                          <CheckCircle className="w-5 h-5 text-blue-600 mr-2" />
+                          <span className="text-sm text-blue-800">
+                            Import completed successfully! The inventory will refresh automatically in a few seconds.
+                          </span>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setShowCSVModal(false);
+                          resetCSVModal();
+                        }}
+                        className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

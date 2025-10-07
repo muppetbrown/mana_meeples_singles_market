@@ -1,6 +1,11 @@
-import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown } from 'lucide-react';
+import OptimizedImage from './OptimizedImage';
+import { useFilterCounts } from '../hooks/useFilterCounts';
+
+// Lazy load VirtualCardGrid for code splitting
+const VirtualCardGrid = React.lazy(() => import('./VirtualCardGrid'));
 
 // Use environment variable for API URL, fallback for development
 const API_URL = process.env.REACT_APP_API_URL || 'https://mana-meeples-singles-market.onrender.com/api';
@@ -30,18 +35,15 @@ const CardItem = React.memo(({
 }) => {
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200">
-      <div className="aspect-[5/7] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-        <img
-          src={card.image_url}
-          alt={`${card.name} from ${card.set_name}`}
-          className="w-full h-full object-contain hover:scale-105 transition-transform motion-reduce:hover:scale-100 motion-reduce:transition-none"
-          loading="lazy"
-          onError={(e) => {
-            e.target.onerror = null;
-            e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="250" height="350"%3E%3Crect fill="%231e293b" width="250" height="350"/%3E%3Ctext fill="white" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif"%3ENo Image%3C/text%3E%3C/svg%3E';
-          }}
-        />
-      </div>
+      <OptimizedImage
+        src={card.image_url}
+        alt={`${card.name} from ${card.set_name}`}
+        width={250}
+        height={350}
+        className="bg-gradient-to-br from-slate-100 to-slate-200"
+        placeholder="blur"
+        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+      />
       <div className="p-4">
         <h3 className="font-bold text-lg text-slate-900 mb-1">{card.name}</h3>
         <p className="text-xs text-slate-600 mb-3">
@@ -167,6 +169,10 @@ const TCGShop = () => {
     sortBy: searchParams.get('sortBy') || 'name',
     sortOrder: searchParams.get('sortOrder') || 'asc'
   }), [searchParams]);
+
+  // Filter counts hook for dynamic counts in dropdowns
+  const { getCount } = useFilterCounts(API_URL, { ...filters, game: selectedGame });
+
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
     rarities: [],
@@ -778,7 +784,9 @@ const TCGShop = () => {
                   >
                     <option value="all">All Rarities</option>
                     {filterOptions.rarities.map(rarity => (
-                      <option key={rarity} value={rarity}>{rarity}</option>
+                      <option key={rarity} value={rarity}>
+                        {rarity} {getCount('rarities', rarity)}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -792,7 +800,9 @@ const TCGShop = () => {
                   >
                     <option value="all">All Conditions</option>
                     {filterOptions.qualities.map(quality => (
-                      <option key={quality} value={quality}>{quality}</option>
+                      <option key={quality} value={quality}>
+                        {quality} {getCount('qualities', quality)}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -806,7 +816,9 @@ const TCGShop = () => {
                   >
                     <option value="all">All Foil Types</option>
                     {filterOptions.foilTypes.map(foilType => (
-                      <option key={foilType} value={foilType}>{foilType}</option>
+                      <option key={foilType} value={foilType}>
+                        {foilType} {getCount('foilTypes', foilType === 'Foil' ? 'foil' : 'non-foil')}
+                      </option>
                     ))}
                   </select>
                 </div>
@@ -867,9 +879,29 @@ const TCGShop = () => {
                 <span className="font-medium">{cards.length}</span> cards found
               </p>
 
-              {/* Currency indicator */}
-              <div className="text-sm text-slate-700">
-                Prices in {currency.symbol === 'NZ$' ? 'New Zealand Dollars (NZD)' : 'US Dollars (USD)'}
+              {/* Enhanced Currency indicator with exchange rate */}
+              <div className="text-sm text-slate-600 space-y-1">
+                <div>
+                  Prices shown in <span className="font-medium text-slate-700">{currency.code}</span>
+                  {currency.code !== 'USD' && (
+                    <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
+                      <span>Approximately, based on current exchange rates</span>
+                      <div
+                        className="group relative cursor-help"
+                        title={`Exchange rate: 1 USD = ${currency.rate} ${currency.code}\nRates updated daily and may vary at checkout`}
+                      >
+                        <div className="w-3 h-3 rounded-full bg-slate-300 flex items-center justify-center text-[10px] text-slate-600">
+                          ?
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {currency.code !== 'USD' && (
+                  <div className="text-xs text-slate-400">
+                    Rate: 1 USD = {currency.rate} {currency.code}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -911,25 +943,60 @@ const TCGShop = () => {
               </div>
             )}
 
-            {/* Cards Grid - Optimized with memoized components */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-              {cards.map(card => {
-                const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-                const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+            {/* Cards Grid - With Virtual Scrolling for Performance */}
+            {cards.length > 100 ? (
+              /* Virtual Scrolling for large datasets (100+ cards) */
+              <Suspense
+                fallback={
+                  <div className="text-center py-8">
+                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                    <p className="text-slate-600 text-sm">Loading virtual scrolling...</p>
+                  </div>
+                }
+              >
+                <VirtualCardGrid
+                  cards={cards}
+                  CardComponent={({ card }) => {
+                    const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+                    const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
-                return (
-                  <CardItem
-                    key={card.id}
-                    card={card}
-                    selectedQuality={selectedQuality}
-                    selectedVariation={selectedVariation}
-                    currency={currency}
-                    onQualityChange={handleQualityChange(card.id)}
-                    onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
-                  />
-                );
-              })}
-            </div>
+                    return (
+                      <CardItem
+                        card={card}
+                        selectedQuality={selectedQuality}
+                        selectedVariation={selectedVariation}
+                        currency={currency}
+                        onQualityChange={handleQualityChange(card.id)}
+                        onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                      />
+                    );
+                  }}
+                  cardHeight={450}
+                  containerHeight={800}
+                  enableProgressiveLoading={cards.length > 500}
+                />
+              </Suspense>
+            ) : (
+              /* Standard Grid for smaller datasets (< 100 cards) */
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                {cards.map(card => {
+                  const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+                  const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+
+                  return (
+                    <CardItem
+                      key={card.id}
+                      card={card}
+                      selectedQuality={selectedQuality}
+                      selectedVariation={selectedVariation}
+                      currency={currency}
+                      onQualityChange={handleQualityChange(card.id)}
+                      onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                    />
+                  );
+                })}
+              </div>
+            )}
 
             {cards.length === 0 && !loading && (
               <div className="text-center py-12 bg-white rounded-xl shadow-sm">
@@ -995,7 +1062,9 @@ const TCGShop = () => {
                     >
                       <option value="all">All Rarities</option>
                       {filterOptions.rarities.map(rarity => (
-                        <option key={rarity} value={rarity}>{rarity}</option>
+                        <option key={rarity} value={rarity}>
+                          {rarity} {getCount('rarities', rarity)}
+                        </option>
                       ))}
                     </select>
                   </div>
@@ -1009,7 +1078,9 @@ const TCGShop = () => {
                     >
                       <option value="all">All Conditions</option>
                       {filterOptions.qualities.map(quality => (
-                        <option key={quality} value={quality}>{quality}</option>
+                        <option key={quality} value={quality}>
+                          {quality} {getCount('qualities', quality)}
+                        </option>
                       ))}
                     </select>
                   </div>
