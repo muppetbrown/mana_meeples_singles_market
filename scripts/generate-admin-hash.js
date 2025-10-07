@@ -7,8 +7,8 @@ const rl = readline.createInterface({
 });
 
 async function generateHash() {
-  rl.question('Enter admin password (min 10 characters): ', async (password) => {
-    if (password.length < 10) {
+  rl.question('Enter admin password (min 12 characters): ', async (password) => {
+    if (password.length < 12) {
       console.error('❌ Password must be at least 12 characters long');
       process.exit(1);
     }
