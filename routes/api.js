@@ -4,6 +4,7 @@
 
 const express = require('express');
 const router = express.Router();
+const { normalizeSearchTerms, buildSearchConditions, CARD_SEARCH_FIELDS, CARD_SEARCH_FIELDS_BASIC } = require('../services/searchUtils');
 
 // GET /api/games - Get all active games
 router.get('/games', async (req, res) => {
@@ -106,23 +107,13 @@ router.get('/cards', async (req, res) => {
     }
 
     if (search) {
-      // Enhanced multi-term search: supports "FIN 437", "set name card name", "card name number" etc.
-      const searchTerms = search.trim().split(/\s+/);
+      const searchTerms = normalizeSearchTerms(search);
+      const searchResult = buildSearchConditions(searchTerms, CARD_SEARCH_FIELDS, paramCount);
 
-      if (searchTerms.length === 1) {
-        // Single term search
-        conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR c.description ILIKE $${paramCount} OR c.card_type ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount})`);
-        params.push(`%${search}%`);
-        paramCount++;
-      } else {
-        // Multi-term search - all terms must match somewhere
-        const searchConditions = [];
-        for (const term of searchTerms) {
-          searchConditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount} OR c.description ILIKE $${paramCount})`);
-          params.push(`%${term}%`);
-          paramCount++;
-        }
-        conditions.push(`(${searchConditions.join(' AND ')})`);
+      if (searchResult.condition) {
+        conditions.push(searchResult.condition);
+        params.push(...searchResult.params);
+        paramCount = searchResult.paramCount;
       }
     }
 
@@ -271,21 +262,13 @@ router.get('/admin/inventory', async (req, res) => {
     const conditions = [];
 
     if (search) {
-      // Enhanced multi-term search for admin
-      const searchTerms = search.trim().split(/\s+/);
+      const searchTerms = normalizeSearchTerms(search);
+      const searchResult = buildSearchConditions(searchTerms, CARD_SEARCH_FIELDS_BASIC, paramCount);
 
-      if (searchTerms.length === 1) {
-        conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount})`);
-        params.push(`%${search}%`);
-        paramCount++;
-      } else {
-        const searchConditions = [];
-        for (const term of searchTerms) {
-          searchConditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount})`);
-          params.push(`%${term}%`);
-          paramCount++;
-        }
-        conditions.push(`(${searchConditions.join(' AND ')})`);
+      if (searchResult.condition) {
+        conditions.push(searchResult.condition);
+        params.push(...searchResult.params);
+        paramCount = searchResult.paramCount;
       }
     }
 
@@ -836,9 +819,15 @@ router.get('/cards/sectioned', async (req, res) => {
     }
 
     if (search) {
-      query += ` AND (c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount})`;
-      params.push(`%${search}%`);
-      paramCount++;
+      const searchTerms = normalizeSearchTerms(search);
+      const searchFields = ['c.name', 'c.card_number'];
+      const searchResult = buildSearchConditions(searchTerms, searchFields, paramCount);
+
+      if (searchResult.condition) {
+        query += ` AND ${searchResult.condition}`;
+        params.push(...searchResult.params);
+        paramCount = searchResult.paramCount;
+      }
     }
 
     if (quality) {

@@ -11,9 +11,6 @@ import {
   ChevronRight,
   Save,
   X,
-  Plus,
-  Minus,
-  Eye,
   EyeOff
 } from 'lucide-react';
 
@@ -32,7 +29,6 @@ const AdminDashboard = () => {
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingItems, setEditingItems] = useState(new Map());
   const [bulkEditMode, setBulkEditMode] = useState(false);
-  const [selectedItems, setSelectedItems] = useState(new Set());
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
 
   // Fetch inventory from API
