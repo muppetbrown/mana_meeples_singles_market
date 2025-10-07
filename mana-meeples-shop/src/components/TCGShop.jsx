@@ -1,32 +1,172 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown, Heart } from 'lucide-react';
 
 // Use environment variable for API URL, fallback for development
 const API_URL = process.env.REACT_APP_API_URL || 'https://mana-meeples-singles-market.onrender.com/api';
 
+// Helper function to highlight matching text in suggestions
+const highlightMatch = (text, query) => {
+  if (!query || !text) return text;
+
+  const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+  const parts = text.split(regex);
+
+  return parts.map((part, idx) =>
+    regex.test(part) ?
+      <mark key={idx} className="bg-yellow-200 font-medium">{part}</mark> :
+      part
+  );
+};
+
+// Memoized Card Component for performance
+const CardItem = React.memo(({
+  card,
+  selectedQuality,
+  selectedVariation,
+  currency,
+  onQualityChange,
+  onAddToCart
+}) => {
+  return (
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200">
+      <div className="aspect-[5/7] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
+        <img
+          src={card.image_url}
+          alt={`${card.name} from ${card.set_name}`}
+          className="w-full h-full object-contain hover:scale-105 transition-transform motion-reduce:hover:scale-100 motion-reduce:transition-none"
+          loading="lazy"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="250" height="350"%3E%3Crect fill="%231e293b" width="250" height="350"/%3E%3Ctext fill="white" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif"%3ENo Image%3C/text%3E%3C/svg%3E';
+          }}
+        />
+      </div>
+      <div className="p-4">
+        <h3 className="font-bold text-lg text-slate-900 mb-1">{card.name}</h3>
+        <p className="text-xs text-slate-600 mb-3">
+          {card.set_name} • #{card.card_number}
+        </p>
+
+        <div className="mb-3">
+          <label className="block text-xs font-medium text-slate-600 mb-1">
+            Condition & Finish:
+          </label>
+          <select
+            value={selectedQuality}
+            onChange={onQualityChange}
+            className="w-full text-sm px-2 py-1.5 border border-slate-300 rounded bg-white focus:ring-2 focus:ring-blue-500"
+          >
+            {card.variations.map(variation => (
+              <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
+                {variation.quality}{variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
+                {variation.language !== 'English' ? ` • ${variation.language}` : ''}
+                {variation.variation_name ? ` • ${variation.variation_name}` : ''}
+                {' '}({variation.stock} available)
+              </option>
+            ))}
+          </select>
+
+          {/* Show available foil types and variations for this card */}
+          <div className="mt-1 text-xs text-slate-600">
+            {(() => {
+              const foilTypes = [...new Set(card.variations.map(v => v.foil_type))];
+              const hasSpecialVariations = card.variations.some(v => v.variation_name);
+              return (
+                <>
+                  Available: {foilTypes.join(', ')}
+                  {hasSpecialVariations && (
+                    <div className="text-blue-600">
+                      ✨ Special versions available
+                    </div>
+                  )}
+                </>
+              );
+            })()}
+          </div>
+        </div>
+
+        {/* Selected variation highlights */}
+        {selectedVariation && (
+          <div className="mb-3 flex flex-wrap gap-1">
+            {selectedVariation.foil_type !== 'Regular' && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 rounded-full text-xs font-medium">
+                ✨ {selectedVariation.foil_type}
+              </span>
+            )}
+            {selectedVariation.language !== 'English' && (
+              <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
+                🌍 {selectedVariation.language}
+              </span>
+            )}
+            {selectedVariation.variation_name && (
+              <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
+                ⭐ {selectedVariation.variation_name}
+              </span>
+            )}
+          </div>
+        )}
+
+        <div className="flex items-center justify-between gap-3">
+          <div>
+            <div className="text-2xl font-bold text-blue-600">
+              {currency.symbol}{selectedVariation?.price.toFixed(2)}
+            </div>
+            {selectedVariation?.stock < 5 && selectedVariation?.stock > 0 && (
+              <div className="text-xs text-red-600 font-medium mt-1">
+                Only {selectedVariation.stock} left
+              </div>
+            )}
+          </div>
+          <button
+            onClick={onAddToCart}
+            disabled={!selectedVariation || selectedVariation.stock === 0}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none text-sm"
+            aria-label={`Add ${card.name} ${selectedQuality} condition to cart for ${currency.symbol}${selectedVariation?.price.toFixed(2)}`}
+          >
+            {selectedVariation?.stock === 0 ? 'Sold Out' : 'Add to Cart'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison function to prevent unnecessary re-renders
+  return (
+    prevProps.card.id === nextProps.card.id &&
+    prevProps.selectedQuality === nextProps.selectedQuality &&
+    prevProps.currency.symbol === nextProps.currency.symbol &&
+    prevProps.currency.rate === nextProps.currency.rate &&
+    JSON.stringify(prevProps.selectedVariation) === JSON.stringify(nextProps.selectedVariation)
+  );
+});
+
 const TCGShop = () => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [cards, setCards] = useState([]);
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedGame, setSelectedGame] = useState('all');
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [selectedQualities, setSelectedQualities] = useState({});
 
-  // Enhanced filter states
-  const [filters, setFilters] = useState({
-    quality: 'all',
-    rarity: 'all',
-    foilType: 'all',
-    language: 'English',
-    minPrice: '',
-    maxPrice: '',
-    sortBy: 'name',
-    sortOrder: 'asc'
-  });
+  // Initialize state from URL parameters
+  const searchTerm = searchParams.get('search') || '';
+  const selectedGame = searchParams.get('game') || 'all';
+
+  // Enhanced filter states from URL
+  const filters = {
+    quality: searchParams.get('quality') || 'all',
+    rarity: searchParams.get('rarity') || 'all',
+    foilType: searchParams.get('foilType') || 'all',
+    language: searchParams.get('language') || 'English',
+    minPrice: searchParams.get('minPrice') || '',
+    maxPrice: searchParams.get('maxPrice') || '',
+    sortBy: searchParams.get('sortBy') || 'name',
+    sortOrder: searchParams.get('sortOrder') || 'asc'
+  };
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
     rarities: [],
@@ -40,9 +180,12 @@ const TCGShop = () => {
   const [wishlist, setWishlist] = useState([]);
   const [showWishlistTooltip, setShowWishlistTooltip] = useState('');
 
-  // Search autocomplete
+  // Search autocomplete with proper debouncing and request cancellation
   const [searchSuggestions, setSearchSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+  const abortController = useRef(null);
+  const searchTimeoutRef = useRef(null);
 
   // Load initial data and currency detection
   useEffect(() => {
@@ -164,31 +307,121 @@ const TCGShop = () => {
     }
   }, [fetchCards, games]);
 
-  // Autocomplete search
+  // Improved autocomplete search with debouncing and request cancellation
   const handleSearchChange = useCallback(async (value) => {
-    setSearchTerm(value);
+    // Update URL immediately for responsiveness
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (value) {
+        newParams.set('search', value);
+      } else {
+        newParams.delete('search');
+      }
+      return newParams;
+    });
+
+    // Cancel previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Cancel previous request
+    if (abortController.current) {
+      abortController.current.abort();
+    }
 
     if (value.length >= 2) {
-      try {
-        const res = await fetch(`${API_URL}/search/autocomplete?q=${encodeURIComponent(value)}`);
-        if (res.ok) {
-          const data = await res.json();
-          setSearchSuggestions(data.suggestions || []);
-          setShowSuggestions(true);
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          // Create new AbortController for this request
+          abortController.current = new AbortController();
+
+          const res = await fetch(
+            `${API_URL}/search/autocomplete?q=${encodeURIComponent(value)}`,
+            { signal: abortController.current.signal }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            setSearchSuggestions(data.suggestions || []);
+            setShowSuggestions(true);
+            setSelectedSuggestionIndex(-1);
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Autocomplete error:', err);
+          }
         }
-      } catch (err) {
-        console.error('Autocomplete error:', err);
-      }
+      }, 300); // 300ms debounce
     } else {
       setSearchSuggestions([]);
       setShowSuggestions(false);
+      setSelectedSuggestionIndex(-1);
     }
-  }, []);
+  }, [setSearchParams]);
 
-  // Handle filter changes
-  const handleFilterChange = (key, value) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-  };
+  // Handle filter changes with URL state management
+  const handleFilterChange = useCallback((key, value) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (value && value !== 'all' && value !== '') {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+      return newParams;
+    });
+  }, [setSearchParams]);
+
+  // Handle game selection
+  const handleGameChange = useCallback((game) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (game && game !== 'all') {
+        newParams.set('game', game);
+      } else {
+        newParams.delete('game');
+      }
+      return newParams;
+    });
+  }, [setSearchParams]);
+
+  // Clear all filters function
+  const clearAllFilters = useCallback(() => {
+    setSearchParams({});
+  }, [setSearchParams]);
+
+  // Get active filters for display
+  const activeFilters = useMemo(() => {
+    const active = [];
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value && value !== 'all' && value !== '' && value !== 'English') {
+        let displayName = key;
+        let displayValue = value;
+
+        // Format display names
+        switch (key) {
+          case 'foilType': displayName = 'Foil'; break;
+          case 'minPrice': displayName = 'Min Price'; displayValue = `$${value}`; break;
+          case 'maxPrice': displayName = 'Max Price'; displayValue = `$${value}`; break;
+          case 'sortBy': displayName = 'Sort'; break;
+          case 'sortOrder': return; // Don't show sort order as separate filter
+        }
+
+        active.push({ key, displayName, displayValue });
+      }
+    });
+
+    if (searchTerm) {
+      active.push({ key: 'search', displayName: 'Search', displayValue: searchTerm });
+    }
+
+    if (selectedGame && selectedGame !== 'all') {
+      active.push({ key: 'game', displayName: 'Game', displayValue: selectedGame });
+    }
+
+    return active;
+  }, [filters, searchTerm, selectedGame]);
 
   // Currency toggle function
   const toggleCurrency = () => {
@@ -263,8 +496,25 @@ const TCGShop = () => {
     setCart(cart.filter(item => !(item.id === id && item.quality === quality)));
   };
 
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  // Memoized expensive calculations
+  const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), [cart]);
+  const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
+
+  // Memoized card handlers
+  const handleQualityChange = useCallback((cardId) => (e) => {
+    setSelectedQualities(prev => ({
+      ...prev,
+      [cardId]: e.target.value
+    }));
+  }, []);
+
+  const handleAddToCart = useCallback((card, selectedQuality, selectedVariation) => () => {
+    addToCart({
+      ...card,
+      ...selectedVariation,
+      quality: selectedQuality
+    });
+  }, []);
 
   if (loading) {
     return (
@@ -378,11 +628,48 @@ const TCGShop = () => {
                     value={searchTerm}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     onFocus={() => setShowSuggestions(searchSuggestions.length > 0)}
-                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    onBlur={(e) => {
+                      // Don't hide suggestions if clicking on them
+                      if (!e.relatedTarget?.closest('#search-suggestions')) {
+                        setTimeout(() => setShowSuggestions(false), 200);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (!showSuggestions) return;
+
+                      switch (e.key) {
+                        case 'ArrowDown':
+                          e.preventDefault();
+                          setSelectedSuggestionIndex(prev =>
+                            prev < searchSuggestions.length - 1 ? prev + 1 : 0
+                          );
+                          break;
+                        case 'ArrowUp':
+                          e.preventDefault();
+                          setSelectedSuggestionIndex(prev =>
+                            prev > 0 ? prev - 1 : searchSuggestions.length - 1
+                          );
+                          break;
+                        case 'Enter':
+                          if (selectedSuggestionIndex >= 0 && searchSuggestions[selectedSuggestionIndex]) {
+                            e.preventDefault();
+                            const suggestion = searchSuggestions[selectedSuggestionIndex];
+                            handleSearchChange(suggestion.name);
+                            setShowSuggestions(false);
+                            setSelectedSuggestionIndex(-1);
+                          }
+                          break;
+                        case 'Escape':
+                          setShowSuggestions(false);
+                          setSelectedSuggestionIndex(-1);
+                          break;
+                      }
+                    }}
                     className="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
                     aria-label="Search for cards by name, set, or number"
                     aria-describedby={showSuggestions ? "search-suggestions" : undefined}
                     aria-expanded={showSuggestions}
+                    aria-activedescendant={selectedSuggestionIndex >= 0 ? `suggestion-${selectedSuggestionIndex}` : undefined}
                     role="combobox"
                   />
                 </div>
@@ -397,22 +684,31 @@ const TCGShop = () => {
                     {searchSuggestions.map((suggestion, idx) => (
                       <button
                         key={idx}
-                        className="w-full px-3 py-2 text-left hover:bg-slate-50 focus:bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none flex items-center gap-2 border-b last:border-b-0"
-                        onClick={() => {
-                          setSearchTerm(suggestion.name);
+                        id={`suggestion-${idx}`}
+                        className={`w-full px-3 py-2 text-left hover:bg-slate-50 focus:bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none flex items-center gap-2 border-b last:border-b-0 ${
+                          selectedSuggestionIndex === idx ? 'bg-blue-50' : ''
+                        }`}
+                        onMouseDown={() => {
+                          // Use onMouseDown instead of onClick to prevent blur issues
+                          handleSearchChange(suggestion.name);
                           setShowSuggestions(false);
+                          setSelectedSuggestionIndex(-1);
                         }}
+                        onMouseEnter={() => setSelectedSuggestionIndex(idx)}
                         role="option"
+                        aria-selected={selectedSuggestionIndex === idx}
                         aria-label={`Select ${suggestion.name} from ${suggestion.set_name}`}
                       >
                         <img
                           src={suggestion.image_url}
-                          alt={suggestion.name}
+                          alt=""
                           className="w-6 h-8 object-contain rounded"
                           onError={(e) => { e.target.style.display = 'none'; }}
                         />
                         <div>
-                          <div className="text-xs font-medium">{suggestion.name}</div>
+                          <div className="text-xs font-medium">
+                            {highlightMatch(suggestion.name, searchTerm)}
+                          </div>
                           <div className="text-xs text-slate-600">{suggestion.set_name}</div>
                         </div>
                       </button>
@@ -431,7 +727,7 @@ const TCGShop = () => {
                       name="gameFilter"
                       value="all"
                       checked={selectedGame === 'all'}
-                      onChange={(e) => setSelectedGame(e.target.value)}
+                      onChange={(e) => handleGameChange(e.target.value)}
                       className="w-4 h-4 text-blue-600 border-slate-300"
                     />
                     <span className="text-sm">All Games</span>
@@ -443,7 +739,7 @@ const TCGShop = () => {
                         name="gameFilter"
                         value={game.name}
                         checked={selectedGame === game.name}
-                        onChange={(e) => setSelectedGame(e.target.value)}
+                        onChange={(e) => handleGameChange(e.target.value)}
                         className="w-4 h-4 text-blue-600 border-slate-300"
                       />
                       <div className="flex items-center gap-2">
@@ -574,121 +870,62 @@ const TCGShop = () => {
               </div>
             </div>
 
-            {/* Cards Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">{cards.map(card => {
-              const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-              const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
-
-              return (
-                <div key={card.id} className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200">
-                  <div className="aspect-[5/7] bg-gradient-to-br from-slate-100 to-slate-200 overflow-hidden">
-                    <img
-                      src={card.image_url}
-                      alt={`${card.name} from ${card.set_name}`}
-                      className="w-full h-full object-contain hover:scale-105 transition-transform motion-reduce:hover:scale-100 motion-reduce:transition-none"
-                      loading="lazy"
-                      onError={(e) => {
-                        e.target.onerror = null;
-                        e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="250" height="350"%3E%3Crect fill="%231e293b" width="250" height="350"/%3E%3Ctext fill="white" x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif"%3ENo Image%3C/text%3E%3C/svg%3E';
+            {/* Active Filter Badges */}
+            {activeFilters.length > 0 && (
+              <div className="mb-4 flex flex-wrap items-center gap-2">
+                <span className="text-sm text-slate-600 font-medium">Active filters:</span>
+                {activeFilters.map((filter) => (
+                  <span
+                    key={filter.key}
+                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                  >
+                    <span>{filter.displayName}: {filter.displayValue}</span>
+                    <button
+                      onClick={() => {
+                        if (filter.key === 'search') {
+                          handleSearchChange('');
+                        } else if (filter.key === 'game') {
+                          handleGameChange('all');
+                        } else {
+                          handleFilterChange(filter.key, '');
+                        }
                       }}
-                    />
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-lg text-slate-900 mb-1">{card.name}</h3>
-                    <p className="text-xs text-slate-600 mb-3">
-                      {card.set_name} • #{card.card_number}
-                    </p>
+                      className="ml-1 hover:bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      aria-label={`Clear ${filter.displayName} filter`}
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+                {activeFilters.length > 1 && (
+                  <button
+                    onClick={clearAllFilters}
+                    className="px-3 py-1 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-full border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  >
+                    Clear All
+                  </button>
+                )}
+              </div>
+            )}
 
-                    <div className="mb-3">
-                      <label className="block text-xs font-medium text-slate-600 mb-1">
-                        Condition & Finish:
-                      </label>
-                      <select
-                        value={selectedQuality}
-                        onChange={(e) => setSelectedQualities({
-                          ...selectedQualities,
-                          [card.id]: e.target.value
-                        })}
-                        className="w-full text-sm px-2 py-1.5 border border-slate-300 rounded bg-white focus:ring-2 focus:ring-blue-500"
-                      >
-                        {card.variations.map(variation => (
-                          <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
-                            {variation.quality}{variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
-                            {variation.language !== 'English' ? ` • ${variation.language}` : ''}
-                            {variation.variation_name ? ` • ${variation.variation_name}` : ''}
-                            {' '}({variation.stock} available)
-                          </option>
-                        ))}
-                      </select>
+            {/* Cards Grid - Optimized with memoized components */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {cards.map(card => {
+                const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+                const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
-                      {/* Show available foil types and variations for this card */}
-                      <div className="mt-1 text-xs text-slate-600">
-                        {(() => {
-                          const foilTypes = [...new Set(card.variations.map(v => v.foil_type))];
-                          const hasSpecialVariations = card.variations.some(v => v.variation_name);
-                          return (
-                            <>
-                              Available: {foilTypes.join(', ')}
-                              {hasSpecialVariations && (
-                                <div className="text-blue-600">
-                                  ✨ Special versions available
-                                </div>
-                              )}
-                            </>
-                          );
-                        })()}
-                      </div>
-                    </div>
-
-                    {/* Selected variation highlights */}
-                    {selectedVariation && (
-                      <div className="mb-3 flex flex-wrap gap-1">
-                        {selectedVariation.foil_type !== 'Regular' && (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-100 to-yellow-200 text-yellow-800 rounded-full text-xs font-medium">
-                            ✨ {selectedVariation.foil_type}
-                          </span>
-                        )}
-                        {selectedVariation.language !== 'English' && (
-                          <span className="inline-flex items-center px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                            🌍 {selectedVariation.language}
-                          </span>
-                        )}
-                        {selectedVariation.variation_name && (
-                          <span className="inline-flex items-center px-2 py-0.5 bg-purple-100 text-purple-800 rounded-full text-xs font-medium">
-                            ⭐ {selectedVariation.variation_name}
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    <div className="flex items-center justify-between gap-3">
-                      <div>
-                        <div className="text-2xl font-bold text-blue-600">
-                          {currency.symbol}{selectedVariation?.price.toFixed(2)}
-                        </div>
-                        {selectedVariation?.stock < 5 && selectedVariation?.stock > 0 && (
-                          <div className="text-xs text-red-600 font-medium mt-1">
-                            Only {selectedVariation.stock} left
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => addToCart({
-                          ...card,
-                          ...selectedVariation,
-                          quality: selectedQuality
-                        })}
-                        disabled={!selectedVariation || selectedVariation.stock === 0}
-                        className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none text-sm"
-                        aria-label={`Add ${card.name} ${selectedQuality} condition to cart for ${currency.symbol}${selectedVariation?.price.toFixed(2)}`}
-                      >
-                        {selectedVariation?.stock === 0 ? 'Sold Out' : 'Add to Cart'}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+                return (
+                  <CardItem
+                    key={card.id}
+                    card={card}
+                    selectedQuality={selectedQuality}
+                    selectedVariation={selectedVariation}
+                    currency={currency}
+                    onQualityChange={handleQualityChange(card.id)}
+                    onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                  />
+                );
+              })}
             </div>
 
             {cards.length === 0 && !loading && (
@@ -736,7 +973,7 @@ const TCGShop = () => {
                     <label className="block text-sm font-medium text-slate-700 mb-2">Game</label>
                     <select
                       value={selectedGame}
-                      onChange={(e) => setSelectedGame(e.target.value)}
+                      onChange={(e) => handleGameChange(e.target.value)}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="all">All Games</option>

@@ -118,14 +118,14 @@ router.get('/cards', async (req, res) => {
     }
 
     if (search) {
-      const searchTerms = normalizeSearchTerms(search);
-      const searchResult = buildSearchConditions(searchTerms, CARD_SEARCH_FIELDS, paramCount);
-
-      if (searchResult.condition) {
-        conditions.push(searchResult.condition);
-        params.push(...searchResult.params);
-        paramCount = searchResult.paramCount;
-      }
+      // Use full-text search with ranking for better results
+      conditions.push(`(
+        to_tsvector('english', c.name || ' ' || COALESCE(c.card_type, '') || ' ' || COALESCE(c.description, '')) @@ plainto_tsquery('english', $${paramCount})
+        OR similarity(c.name, $${paramCount + 1}) > 0.3
+        OR similarity(c.card_number, $${paramCount + 2}) > 0.4
+      )`);
+      params.push(search, search, search);
+      paramCount += 3;
     }
 
     if (collector_number) {
@@ -193,7 +193,15 @@ router.get('/cards', async (req, res) => {
     const sortField = validSortFields[sort_by] || 'c.name';
     const order = sort_order === 'desc' ? 'DESC' : 'ASC';
 
-    if (sort_by === 'number') {
+    if (search) {
+      // When searching, prioritize by relevance first, then by selected sort field
+      const escapedSearch = search.replace(/'/g, "''"); // Escape single quotes for SQL
+      query += ` ORDER BY GREATEST(
+        ts_rank(to_tsvector('english', c.name || ' ' || COALESCE(c.card_type, '') || ' ' || COALESCE(c.description, '')), plainto_tsquery('english', '${escapedSearch}')),
+        similarity(c.name, '${escapedSearch}') * 0.8,
+        similarity(c.card_number, '${escapedSearch}') * 0.6
+      ) DESC, ${sortField} ${order}`;
+    } else if (sort_by === 'number') {
       // Safe numeric sorting for card numbers that may contain non-numeric characters
       query += ` ORDER BY NULLIF(regexp_replace(c.card_number, '\\D','','g'),'')::int ${order} NULLS LAST, c.card_number ${order}`;
     } else {
@@ -528,7 +536,7 @@ router.put('/admin/inventory/:id', async (req, res) => {
   }
 });
 
-// GET /api/search/autocomplete - Autocomplete suggestions
+// GET /api/search/autocomplete - Autocomplete suggestions with enhanced fuzzy matching
 router.get('/search/autocomplete', async (req, res) => {
   try {
     const { q } = req.query;
@@ -537,17 +545,53 @@ router.get('/search/autocomplete', async (req, res) => {
       return res.json({ suggestions: [] });
     }
 
-    const suggestions = await db.query(`
-      SELECT DISTINCT c.name, c.image_url, cs.name as set_name
-      FROM cards c
-      JOIN card_sets cs ON c.set_id = cs.id
-      JOIN card_inventory ci ON ci.card_id = c.id
-      WHERE c.name ILIKE $1 AND ci.stock_quantity > 0
-      ORDER BY c.name
-      LIMIT 10
-    `, [`${q}%`]);
+    // Use the new search suggestions function for better results
+    try {
+      const suggestions = await db.query('SELECT * FROM get_search_suggestions($1, $2)', [q, 10]);
 
-    res.json({ suggestions: suggestions.rows });
+      // Format for frontend compatibility and filter for cards with stock
+      const formattedSuggestions = await Promise.all(
+        suggestions.rows.map(async (row) => {
+          if (row.match_type === 'card') {
+            // Check if card has stock
+            const stockCheck = await db.query(
+              'SELECT ci.stock_quantity > 0 as has_stock FROM card_inventory ci JOIN cards c ON ci.card_id = c.id WHERE c.name = $1 LIMIT 1',
+              [row.name]
+            );
+            if (stockCheck.rows.length > 0 && stockCheck.rows[0].has_stock) {
+              return {
+                name: row.name,
+                set_name: row.set_name,
+                image_url: row.image_url,
+                match_type: row.match_type
+              };
+            }
+          }
+          return row.match_type === 'set' ? {
+            name: row.name,
+            set_name: '',
+            image_url: '',
+            match_type: row.match_type
+          } : null;
+        })
+      );
+
+      res.json({ suggestions: formattedSuggestions.filter(Boolean) });
+    } catch (functionError) {
+      // Fallback to enhanced basic search if full-text functions aren't available
+      const fallbackSuggestions = await db.query(`
+        SELECT DISTINCT c.name, c.image_url, cs.name as set_name, 'card' as match_type
+        FROM cards c
+        JOIN card_sets cs ON c.set_id = cs.id
+        JOIN card_inventory ci ON ci.card_id = c.id
+        WHERE (c.name ILIKE $1 OR c.card_number ILIKE $1 OR similarity(c.name, $2) > 0.3)
+          AND ci.stock_quantity > 0
+        ORDER BY c.name
+        LIMIT 10
+      `, [`%${q}%`, q]);
+
+      res.json({ suggestions: fallbackSuggestions.rows });
+    }
   } catch (error) {
     console.error('Error fetching autocomplete:', error);
     res.status(500).json({ error: 'Failed to fetch suggestions' });
