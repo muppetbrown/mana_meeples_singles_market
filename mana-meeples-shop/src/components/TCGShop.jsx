@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown } from 'lucide-react';
+import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown, Heart } from 'lucide-react';
 
 // Use environment variable for API URL, fallback for development
 const API_URL = process.env.REACT_APP_API_URL || 'https://mana-meeples-singles-market.onrender.com/api';
@@ -37,6 +37,8 @@ const TCGShop = () => {
 
   // Currency and localization with toggle
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
+  const [wishlist, setWishlist] = useState([]);
+  const [showWishlistTooltip, setShowWishlistTooltip] = useState('');
 
   // Search autocomplete
   const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -607,11 +609,6 @@ const TCGShop = () => {
                               {hasSpecialVariations && (
                                 <div className="text-blue-600">
                                   ✨ Special versions available
-                                </div>
-                              )}
-                              {card.variations.length === 1 && card.variations[0].foil_type === 'Regular' && (
-                                <div className="text-amber-600">
-                                  💡 Need foil/special versions? <button className="underline hover:text-amber-700" onClick={() => alert(`Please contact us about foil versions of "${card.name}" from ${card.set_name}`)}>Request here</button>
                                 </div>
                               )}
                             </>

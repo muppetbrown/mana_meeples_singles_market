@@ -250,7 +250,8 @@ router.get('/admin/inventory', async (req, res) => {
         ci.price,
         ci.price_source,
         ci.id as inventory_id,
-        ci.updated_at
+        ci.updated_at,
+        ci.last_price_update
       FROM cards c
       JOIN games g ON c.game_id = g.id
       JOIN card_sets cs ON c.set_id = cs.id
@@ -914,6 +915,150 @@ router.get('/cards/sectioned', async (req, res) => {
   } catch (error) {
     console.error('Error fetching sectioned cards:', error);
     res.status(500).json({ error: 'Failed to fetch sectioned cards' });
+  }
+});
+
+// POST /api/admin/create-foil - Create foil version of existing card
+router.post('/admin/create-foil', async (req, res) => {
+  try {
+    const { card_id, quality, foil_type, price, stock_quantity = 0, language = 'English' } = req.body;
+
+    // Validation
+    if (!card_id || !quality || !foil_type || !price) {
+      return res.status(400).json({
+        error: 'Missing required fields: card_id, quality, foil_type, price'
+      });
+    }
+
+    // Check if this foil variation already exists
+    const existingFoil = await db.query(
+      `SELECT id FROM card_inventory
+       WHERE card_id = $1 AND quality = $2 AND foil_type = $3 AND language = $4`,
+      [card_id, quality, foil_type, language]
+    );
+
+    if (existingFoil.rows.length > 0) {
+      return res.status(400).json({
+        error: 'This foil variation already exists for this card'
+      });
+    }
+
+    // Create the foil inventory item
+    const result = await db.query(
+      `INSERT INTO card_inventory (card_id, quality, foil_type, language, stock_quantity, price, price_source, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, 'manual', NOW(), NOW())
+       RETURNING *`,
+      [card_id, quality, foil_type, language, stock_quantity, parseFloat(price)]
+    );
+
+    // Get card details for response
+    const cardDetails = await db.query(
+      `SELECT c.name, c.card_number, g.name as game_name, cs.name as set_name
+       FROM cards c
+       JOIN games g ON c.game_id = g.id
+       JOIN card_sets cs ON c.set_id = cs.id
+       WHERE c.id = $1`,
+      [card_id]
+    );
+
+    res.json({
+      success: true,
+      foil_item: result.rows[0],
+      card: cardDetails.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error creating foil version:', error);
+    res.status(500).json({ error: 'Failed to create foil version' });
+  }
+});
+
+// POST /api/admin/bulk-create-foils - Bulk create foil versions for multiple cards
+router.post('/admin/bulk-create-foils', async (req, res) => {
+  const client = await db.getClient();
+
+  try {
+    await client.query('BEGIN');
+
+    const { card_ids, foil_type = 'Foil', price_multiplier = 2.5 } = req.body;
+
+    if (!card_ids || !Array.isArray(card_ids) || card_ids.length === 0) {
+      return res.status(400).json({ error: 'card_ids must be a non-empty array' });
+    }
+
+    const results = {
+      success: 0,
+      errors: [],
+      created: []
+    };
+
+    const qualities = ['Near Mint', 'Lightly Played', 'Moderately Played', 'Heavily Played', 'Damaged'];
+
+    for (const cardId of card_ids) {
+      try {
+        // Get existing regular versions to base foil prices on
+        const regularVersions = await client.query(
+          `SELECT ci.*, c.name as card_name
+           FROM card_inventory ci
+           JOIN cards c ON c.id = ci.card_id
+           WHERE ci.card_id = $1 AND ci.foil_type = 'Regular'`,
+          [cardId]
+        );
+
+        if (regularVersions.rows.length === 0) {
+          results.errors.push(`No regular versions found for card ID ${cardId}`);
+          continue;
+        }
+
+        for (const regular of regularVersions.rows) {
+          const foilPrice = regular.price * price_multiplier;
+
+          // Check if foil version already exists
+          const existingFoil = await client.query(
+            `SELECT id FROM card_inventory
+             WHERE card_id = $1 AND quality = $2 AND foil_type = $3`,
+            [cardId, regular.quality, foil_type]
+          );
+
+          if (existingFoil.rows.length > 0) {
+            continue; // Skip if already exists
+          }
+
+          // Create foil version
+          const foilResult = await client.query(
+            `INSERT INTO card_inventory (card_id, quality, foil_type, language, stock_quantity, price, price_source)
+             VALUES ($1, $2, $3, $4, 0, $5, 'bulk_foil_creation')
+             RETURNING *`,
+            [cardId, regular.quality, foil_type, regular.language || 'English', foilPrice]
+          );
+
+          results.created.push({
+            card_name: regular.card_name,
+            quality: regular.quality,
+            foil_type: foil_type,
+            price: foilPrice
+          });
+          results.success++;
+        }
+
+      } catch (error) {
+        results.errors.push(`Error processing card ID ${cardId}: ${error.message}`);
+      }
+    }
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      summary: results
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error in bulk foil creation:', error);
+    res.status(500).json({ error: 'Failed to bulk create foil versions' });
+  } finally {
+    client.release();
   }
 });
 

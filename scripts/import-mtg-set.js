@@ -156,7 +156,7 @@ async function importMTGSet(setCode) {
         imported++;
       }
 
-      // Add/update inventory for each quality level
+      // Add/update inventory for each quality level and foil type
       const qualities = [
         { name: 'Near Mint', discount: 0 },
         { name: 'Lightly Played', discount: 0.1 },
@@ -164,24 +164,49 @@ async function importMTGSet(setCode) {
         { name: 'Heavily Played', discount: 0.3 },
         { name: 'Damaged', discount: 0.5 }
       ];
-      
+
+      const foilTypes = [
+        { type: 'Regular', multiplier: 1.0 },
+        { type: 'Foil', multiplier: 2.5 } // Foil cards typically cost 2.5x more
+      ];
+
       const basePrice = parseFloat(card.prices?.usd || 0);
+      const foilPrice = parseFloat(card.prices?.usd_foil || basePrice * 2.5);
 
       for (const quality of qualities) {
-        const adjustedPrice = Math.max(0.25, basePrice * (1 - quality.discount));
-        
+        // Regular version
+        const regularPrice = Math.max(0.25, basePrice * (1 - quality.discount));
+
         await pool.query(
-          `INSERT INTO card_inventory (card_id, quality, stock_quantity, price, price_source)
-           VALUES ($1, $2, 0, $3, 'api_scryfall')
-           ON CONFLICT (card_id, variation_id, quality) 
-           DO UPDATE SET 
-             price = CASE 
+          `INSERT INTO card_inventory (card_id, quality, foil_type, stock_quantity, price, price_source)
+           VALUES ($1, $2, 'Regular', 0, $3, 'api_scryfall')
+           ON CONFLICT (card_id, variation_id, quality, foil_type, language)
+           DO UPDATE SET
+             price = CASE
                WHEN card_inventory.price_source = 'manual' THEN card_inventory.price
                ELSE EXCLUDED.price
              END,
              updated_at = NOW()`,
-          [cardId, quality.name, adjustedPrice]
+          [cardId, quality.name, regularPrice]
         );
+
+        // Foil version (only create if foil price exists or is significantly different)
+        if (foilPrice > 0 && foilPrice !== basePrice) {
+          const adjustedFoilPrice = Math.max(0.50, foilPrice * (1 - quality.discount));
+
+          await pool.query(
+            `INSERT INTO card_inventory (card_id, quality, foil_type, stock_quantity, price, price_source)
+             VALUES ($1, $2, 'Foil', 0, $3, 'api_scryfall')
+             ON CONFLICT (card_id, variation_id, quality, foil_type, language)
+             DO UPDATE SET
+               price = CASE
+                 WHEN card_inventory.price_source = 'manual' THEN card_inventory.price
+                 ELSE EXCLUDED.price
+               END,
+               updated_at = NOW()`,
+            [cardId, quality.name, adjustedFoilPrice]
+          );
+        }
       }
 
       // Progress indicator
