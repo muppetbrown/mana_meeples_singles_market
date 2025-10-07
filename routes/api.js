@@ -106,10 +106,24 @@ router.get('/cards', async (req, res) => {
     }
 
     if (search) {
-      // Enhanced search: name, card number, description, and card type
-      conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR c.description ILIKE $${paramCount} OR c.card_type ILIKE $${paramCount} OR cs.name ILIKE $${paramCount})`);
-      params.push(`%${search}%`);
-      paramCount++;
+      // Enhanced multi-term search: supports "FIN 437", "set name card name", "card name number" etc.
+      const searchTerms = search.trim().split(/\s+/);
+
+      if (searchTerms.length === 1) {
+        // Single term search
+        conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR c.description ILIKE $${paramCount} OR c.card_type ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount})`);
+        params.push(`%${search}%`);
+        paramCount++;
+      } else {
+        // Multi-term search - all terms must match somewhere
+        const searchConditions = [];
+        for (const term of searchTerms) {
+          searchConditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount} OR c.description ILIKE $${paramCount})`);
+          params.push(`%${term}%`);
+          paramCount++;
+        }
+        conditions.push(`(${searchConditions.join(' AND ')})`);
+      }
     }
 
     if (collector_number) {
@@ -257,9 +271,22 @@ router.get('/admin/inventory', async (req, res) => {
     const conditions = [];
 
     if (search) {
-      conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount})`);
-      params.push(`%${search}%`);
-      paramCount++;
+      // Enhanced multi-term search for admin
+      const searchTerms = search.trim().split(/\s+/);
+
+      if (searchTerms.length === 1) {
+        conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount})`);
+        params.push(`%${search}%`);
+        paramCount++;
+      } else {
+        const searchConditions = [];
+        for (const term of searchTerms) {
+          searchConditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount} OR cs.name ILIKE $${paramCount} OR cs.code ILIKE $${paramCount})`);
+          params.push(`%${term}%`);
+          paramCount++;
+        }
+        conditions.push(`(${searchConditions.join(' AND ')})`);
+      }
     }
 
     if (game_id) {
@@ -772,6 +799,132 @@ router.get('/currency/detect', async (req, res) => {
   } catch (error) {
     console.error('Error detecting currency:', error);
     res.json({ currency: 'USD', symbol: '$', rate: 1.0 });
+  }
+});
+
+// GET /api/cards/sectioned - Get cards with section breaks for sorting
+router.get('/cards/sectioned', async (req, res) => {
+  try {
+    const {
+      game_id,
+      search,
+      quality,
+      sort_by = 'name',
+      sort_order = 'asc',
+      limit = 100
+    } = req.query;
+
+    let query = `
+      SELECT
+        c.id, c.name, c.card_number, c.rarity, c.card_type, c.image_url,
+        g.name as game_name, cs.name as set_name, cs.code as set_code,
+        ci.quality, ci.stock_quantity, ci.price, ci.id as inventory_id
+      FROM cards c
+      JOIN games g ON c.game_id = g.id
+      JOIN card_sets cs ON c.set_id = cs.id
+      JOIN card_inventory ci ON ci.card_id = c.id
+      WHERE ci.stock_quantity > 0
+    `;
+
+    const params = [];
+    let paramCount = 1;
+
+    if (game_id) {
+      query += ` AND c.game_id = $${paramCount}`;
+      params.push(game_id);
+      paramCount++;
+    }
+
+    if (search) {
+      query += ` AND (c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount})`;
+      params.push(`%${search}%`);
+      paramCount++;
+    }
+
+    if (quality) {
+      query += ` AND ci.quality = $${paramCount}`;
+      params.push(quality);
+      paramCount++;
+    }
+
+    // Sorting with different section break logic
+    const validSortFields = {
+      name: 'c.name',
+      price: 'ci.price',
+      rarity: 'c.rarity',
+      set: 'cs.name'
+    };
+    const sortField = validSortFields[sort_by] || 'c.name';
+    const order = sort_order === 'desc' ? 'DESC' : 'ASC';
+    query += ` ORDER BY ${sortField} ${order} LIMIT $${paramCount}`;
+    params.push(limit);
+
+    const result = await db.query(query, params);
+    const cards = result.rows;
+
+    // Group cards into sections based on sort field
+    const sections = [];
+    let currentSection = null;
+    let currentSectionKey = null;
+
+    for (const card of cards) {
+      let sectionKey;
+      let sectionTitle;
+
+      switch (sort_by) {
+        case 'name':
+          sectionKey = card.name.charAt(0).toUpperCase();
+          sectionTitle = sectionKey;
+          break;
+        case 'price':
+          const price = parseFloat(card.price);
+          if (price < 1) {
+            sectionKey = 'under-1';
+            sectionTitle = 'Under $1';
+          } else if (price < 5) {
+            sectionKey = '1-5';
+            sectionTitle = '$1 - $5';
+          } else if (price < 10) {
+            sectionKey = '5-10';
+            sectionTitle = '$5 - $10';
+          } else if (price < 25) {
+            sectionKey = '10-25';
+            sectionTitle = '$10 - $25';
+          } else {
+            sectionKey = 'over-25';
+            sectionTitle = '$25+';
+          }
+          break;
+        case 'rarity':
+          sectionKey = card.rarity || 'Unknown';
+          sectionTitle = sectionKey;
+          break;
+        case 'set':
+          sectionKey = card.set_name;
+          sectionTitle = card.set_name;
+          break;
+        default:
+          sectionKey = 'all';
+          sectionTitle = 'All Cards';
+      }
+
+      if (sectionKey !== currentSectionKey) {
+        currentSection = {
+          key: sectionKey,
+          title: sectionTitle,
+          cards: []
+        };
+        sections.push(currentSection);
+        currentSectionKey = sectionKey;
+      }
+
+      currentSection.cards.push(card);
+    }
+
+    res.json({ sections, total: cards.length });
+  } catch (error) {
+    console.error('Error fetching sectioned cards:', error);
+    res.status(500).json({ error: 'Failed to fetch sectioned cards' });
   }
 });
 

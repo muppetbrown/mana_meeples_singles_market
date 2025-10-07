@@ -17,7 +17,8 @@ import {
   EyeOff
 } from 'lucide-react';
 
-const API_URL = 'https://mana-meeples-singles-market.onrender.com/api';
+// Use environment variable for API URL, fallback for development
+const API_URL = process.env.REACT_APP_API_URL || 'https://mana-meeples-singles-market.onrender.com/api';
 
 const AdminDashboard = () => {
   const [inventory, setInventory] = useState([]);
@@ -32,6 +33,7 @@ const AdminDashboard = () => {
   const [editingItems, setEditingItems] = useState(new Map());
   const [bulkEditMode, setBulkEditMode] = useState(false);
   const [selectedItems, setSelectedItems] = useState(new Set());
+  const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
 
   // Fetch inventory from API
   useEffect(() => {
@@ -212,7 +214,26 @@ const AdminDashboard = () => {
   };
 
   const refreshPrices = async () => {
-    alert('Price refresh feature coming soon!');
+    setLoading(true);
+    try {
+      // In production, this would call the price update API
+      const response = await fetch(`${API_URL}/admin/refresh-prices`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        // Reload inventory data
+        window.location.reload();
+      } else {
+        throw new Error('Failed to refresh prices');
+      }
+    } catch (error) {
+      console.error('Price refresh error:', error);
+      alert('Price refresh is not available yet. This feature will be added in a future update.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const exportCSV = () => {
@@ -236,6 +257,16 @@ const AdminDashboard = () => {
     a.href = url;
     a.download = `inventory-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+  };
+
+  // Currency toggle function
+  const toggleCurrency = () => {
+    const isUSD = currency.code === 'USD';
+    setCurrency({
+      symbol: isUSD ? 'NZ$' : '$',
+      rate: isUSD ? 1.6 : 1.0,
+      code: isUSD ? 'NZD' : 'USD'
+    });
   };
 
   // Format date helper
@@ -279,6 +310,17 @@ const AdminDashboard = () => {
               </span>
             </div>
             <div className="flex items-center gap-3">
+              {/* Currency Toggle */}
+              <button
+                onClick={toggleCurrency}
+                className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-sm font-medium"
+                title="Toggle currency display"
+              >
+                <span className="text-slate-700">{currency.code}</span>
+                <span className="text-slate-500">|</span>
+                <span className="text-slate-500">{currency.code === 'USD' ? 'NZD' : 'USD'}</span>
+              </button>
+
               <button
                 onClick={() => setBulkEditMode(!bulkEditMode)}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
@@ -319,7 +361,7 @@ const AdminDashboard = () => {
               <DollarSign className="w-5 h-5 text-blue-600" />
             </div>
             <p className="text-3xl font-bold text-slate-900">
-              ${totalValue.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+              {currency.symbol}{(totalValue * currency.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
             <p className="text-xs text-slate-500 mt-1">
               {inStockItems} items in stock
@@ -515,7 +557,7 @@ const AdminDashboard = () => {
                         </td>
                         <td className="px-4 py-3 text-right">
                           <span className="text-sm font-semibold text-slate-900">
-                            ${group.totalValue.toFixed(2)}
+                            {currency.symbol}{(group.totalValue * currency.rate).toFixed(2)}
                           </span>
                         </td>
                         <td className="px-4 py-3 text-right">
@@ -580,7 +622,7 @@ const AdminDashboard = () => {
                                   className="w-24 px-2 py-1 text-sm border border-slate-300 rounded text-right"
                                 />
                               ) : (
-                                <span className="text-sm font-semibold text-slate-900">${item.price.toFixed(2)}</span>
+                                <span className="text-sm font-semibold text-slate-900">{currency.symbol}{(item.price * currency.rate).toFixed(2)}</span>
                               )}
                             </td>
                             <td className="px-4 py-2 text-right">
