@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Package,
@@ -14,20 +14,17 @@ import {
   Save,
   X,
   EyeOff,
-  FileText,
   CheckCircle,
   XCircle,
-  AlertTriangle
+  AlertTriangle,
+  Loader2
 } from 'lucide-react';
 
-// Use environment variable for API URL, fallback for development
 const API_URL = process.env.REACT_APP_API_URL || 'https://mana-meeples-singles-market.onrender.com/api';
 
-// Helper function for authenticated requests
 const getAdminHeaders = () => {
   return {
     'Content-Type': 'application/json'
-    // Cookies are sent automatically with credentials: 'include'
   };
 };
 
@@ -45,8 +42,6 @@ const AdminDashboard = () => {
   const [showZeroStock, setShowZeroStock] = useState(true);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingItems, setEditingItems] = useState(new Map());
-  const [bulkEditMode, setBulkEditMode] = useState(false);
-  const [selectedItems, setSelectedItems] = useState(new Set());
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
   const [showFoilModal, setShowFoilModal] = useState(false);
   const [foilModalCard, setFoilModalCard] = useState(null);
@@ -57,101 +52,90 @@ const AdminDashboard = () => {
     initialStock: 0
   });
   const [foilModalLoading, setFoilModalLoading] = useState(false);
-  
-
-  // CSV Import Modal State
   const [showCSVModal, setShowCSVModal] = useState(false);
   const [csvFile, setCsvFile] = useState(null);
   const [csvPreview, setCsvPreview] = useState([]);
   const [csvMapping, setCsvMapping] = useState({});
   const [csvImporting, setCsvImporting] = useState(false);
   const [csvResults, setCsvResults] = useState(null);
-  const [csvStep, setCsvStep] = useState(1); // 1: Upload, 2: Preview/Map, 3: Results
+  const [csvStep, setCsvStep] = useState(1);
   const [dragActive, setDragActive] = useState(false);
   
-  // Fetch inventory function (defined before useEffect)
-const fetchInventory = async () => {
-  try {
-    setLoading(true);
-    
-    const response = await fetch(`${API_URL}/admin/inventory?limit=5000`, {
-      credentials: 'include',
-      headers: getAdminHeaders()
-    });
+  // ✅ FIXED: Authentication and inventory fetch in single useEffect
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch(`${API_URL}/auth/admin/auth/check`, {
+          credentials: 'include',
+          headers: getAdminHeaders()
+        });
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-    }
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.authenticated) {
+            setIsAuthenticated(true);
+            
+            try {
+              setLoading(true);
+              
+              const inventoryResponse = await fetch(`${API_URL}/admin/inventory?limit=5000`, {
+                credentials: 'include',
+                headers: getAdminHeaders()
+              });
 
-    const data = await response.json();
-    
-    // The API returns an array directly
-    const inventoryArray = Array.isArray(data) ? data : (data.inventory || []);
-    
-    const formatted = inventoryArray.map(card => ({
-      id: card.inventory_id || card.id,
-      sku: `${card.game_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.set_code || card.set_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.card_number || '000'}-${card.quality?.substring(0,2).toUpperCase() || 'NM'}-${card.foil_type === 'Regular' || card.foil_type === 'Non-foil' ? 'NF' : 'F'}`,
-      card_name: card.name || card.card_name,
-      game: card.game_name,
-      set: card.set_name,
-      set_code: card.set_code,
-      number: card.card_number,
-      quality: card.quality,
-      foil_type: card.foil_type || 'Regular',
-      language: card.language || 'English',
-      price: parseFloat(card.price || 0),
-      stock: card.stock_quantity || 0,
-      image_url: card.image_url,
-      low_stock_threshold: 3,
-      price_source: card.price_source || 'api_scryfall',
-      last_updated: card.updated_at || card.last_updated,
-      card_id: card.card_id || card.id
-    }));
-    
-    setInventory(formatted);
-    console.log('✅ Loaded inventory:', formatted.length, 'items');
-    
-  } catch (err) {
-    console.error('❌ Error loading inventory:', err);
-  } finally {
-    setLoading(false);
-  }
-};
+              if (!inventoryResponse.ok) {
+                throw new Error(`HTTP ${inventoryResponse.status}: ${inventoryResponse.statusText}`);
+              }
 
-// Check authentication on mount
-useEffect(() => {
-  const checkAuth = async () => {
-    try {
-      const response = await fetch(`${API_URL}/auth/admin/auth/check`, {
-        credentials: 'include',
-        headers: getAdminHeaders()
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        
-        if (data.authenticated) {
-          setIsAuthenticated(true);
-          // ✅ Fetch inventory AFTER auth is confirmed
-          await fetchInventory();
+              const inventoryData = await inventoryResponse.json();
+              const inventoryArray = Array.isArray(inventoryData) ? inventoryData : (inventoryData.inventory || []);
+              
+              const formatted = inventoryArray.map(card => ({
+                id: card.inventory_id || card.id,
+                sku: `${card.game_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.set_code || card.set_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.card_number || '000'}-${card.quality?.substring(0,2).toUpperCase() || 'NM'}-${card.foil_type === 'Regular' || card.foil_type === 'Non-foil' ? 'NF' : 'F'}`,
+                card_name: card.name || card.card_name,
+                game: card.game_name,
+                set: card.set_name,
+                set_code: card.set_code,
+                number: card.card_number,
+                quality: card.quality,
+                foil_type: card.foil_type || 'Regular',
+                language: card.language || 'English',
+                price: parseFloat(card.price || 0),
+                stock: card.stock_quantity || 0,
+                image_url: card.image_url,
+                low_stock_threshold: 3,
+                price_source: card.price_source || 'api_scryfall',
+                last_updated: card.updated_at || card.last_updated,
+                card_id: card.card_id || card.id
+              }));
+              
+              setInventory(formatted);
+              console.log('✅ Loaded inventory:', formatted.length, 'items');
+              
+            } catch (err) {
+              console.error('❌ Error loading inventory:', err);
+            } finally {
+              setLoading(false);
+            }
+          } else {
+            navigate('/admin/login');
+          }
         } else {
           navigate('/admin/login');
         }
-      } else {
+      } catch (error) {
+        console.error('Auth check failed:', error);
         navigate('/admin/login');
+      } finally {
+        setAuthChecking(false);
       }
-    } catch (error) {
-      console.error('Auth check failed:', error);
-      navigate('/admin/login');
-    } finally {
-      setAuthChecking(false);
-    }
-  };
+    };
 
-  checkAuth();
-}, [navigate]);
+    checkAuth();
+  }, [navigate]);
 
-  // Group inventory by card (name, game, set, number)
   const groupedInventory = useMemo(() => {
     const groups = inventory.reduce((acc, item) => {
       const key = `${item.game}-${item.set}-${item.number}-${item.card_name}`;
@@ -175,7 +159,6 @@ useEffect(() => {
       acc[key].totalStock += item.stock;
       acc[key].hasLowStock = acc[key].hasLowStock || (item.stock > 0 && item.stock <= item.low_stock_threshold);
 
-      // Keep the most recent update time
       if (item.last_updated && (!acc[key].lastUpdated || new Date(item.last_updated) > new Date(acc[key].lastUpdated))) {
         acc[key].lastUpdated = item.last_updated;
       }
@@ -193,7 +176,6 @@ useEffect(() => {
     }));
   }, [inventory]);
 
-  // Filter grouped inventory
   const filteredInventory = useMemo(() => {
     return groupedInventory.filter(group => {
       const matchesSearch =
@@ -210,22 +192,36 @@ useEffect(() => {
     });
   }, [groupedInventory, searchTerm, filterGame, filterPriceSource, showLowStock, showInStock, showZeroStock]);
 
-  // Calculate metrics
-  const totalValue = inventory.reduce((sum, item) => sum + (item.price * item.stock), 0);
-  const lowStockCount = inventory.filter(item => item.stock <= item.low_stock_threshold && item.stock > 0).length;
+  const totalValue = useMemo(() => 
+    inventory.reduce((sum, item) => sum + (item.price * item.stock), 0),
+    [inventory]
+  );
+  
+  const lowStockCount = useMemo(() => 
+    inventory.filter(item => item.stock <= item.low_stock_threshold && item.stock > 0).length,
+    [inventory]
+  );
+  
   const totalItems = inventory.length;
-  const inStockItems = inventory.filter(item => item.stock > 0).length;
+  const inStockItems = useMemo(() => 
+    inventory.filter(item => item.stock > 0).length,
+    [inventory]
+  );
 
-  const updateItem = async (id, updates) => {
+  const updateItem = useCallback(async (id, updates) => {
     try {
-      await fetch(`${API_URL}/admin/inventory/${id}`, {
+      const response = await fetch(`${API_URL}/admin/inventory/${id}`, {
         method: 'PUT',
         credentials: 'include',
         headers: getAdminHeaders(),
         body: JSON.stringify(updates)
       });
 
-      setInventory(inventory.map(item =>
+      if (!response.ok) {
+        throw new Error('Failed to update item');
+      }
+
+      setInventory(prev => prev.map(item =>
         item.id === id
           ? {
               ...item,
@@ -243,7 +239,7 @@ useEffect(() => {
       console.error('Failed to update item:', err);
       return false;
     }
-  };
+  }, []);
 
   const createFoil = async () => {
     if (!foilModalCard || !foilFormData.price || foilFormData.price <= 0) return;
@@ -269,12 +265,8 @@ useEffect(() => {
         throw new Error(error || 'Failed to create foil');
       }
 
-      const result = await response.json();
-
-      // Show success message
       alert(`Success! Created ${foilFormData.foilType} version of ${foilModalCard.card_name}`);
 
-      // Close modal and reset form
       setShowFoilModal(false);
       setFoilModalCard(null);
       setFoilFormData({
@@ -284,7 +276,6 @@ useEffect(() => {
         initialStock: 0
       });
 
-      // Refresh inventory
       window.location.reload();
 
     } catch (error) {
@@ -295,55 +286,43 @@ useEffect(() => {
     }
   };
 
-  const toggleCardExpansion = (key) => {
-    const newExpanded = new Set(expandedCards);
-    if (newExpanded.has(key)) {
-      newExpanded.delete(key);
-    } else {
-      newExpanded.add(key);
-    }
-    setExpandedCards(newExpanded);
-  };
+  const toggleCardExpansion = useCallback((key) => {
+    setExpandedCards(prev => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(key)) {
+        newExpanded.delete(key);
+      } else {
+        newExpanded.add(key);
+      }
+      return newExpanded;
+    });
+  }, []);
 
-  const toggleItemSelection = (itemId) => {
-    const newSelected = new Set(selectedItems);
-    if (newSelected.has(itemId)) {
-      newSelected.delete(itemId);
-    } else {
-      newSelected.add(itemId);
-    }
-    setSelectedItems(newSelected);
-  };
+  const startEditing = useCallback((item) => {
+    setEditingItems(prev => {
+      const newEditing = new Map(prev);
+      newEditing.set(item.id, { ...item });
+      return newEditing;
+    });
+  }, []);
 
-  const selectAllItems = () => {
-    const allVisibleIds = filteredInventory.map(item => item.id);
-    setSelectedItems(new Set(allVisibleIds));
-  };
+  const cancelEditing = useCallback((id) => {
+    setEditingItems(prev => {
+      const newEditing = new Map(prev);
+      newEditing.delete(id);
+      return newEditing;
+    });
+  }, []);
 
-  const deselectAllItems = () => {
-    setSelectedItems(new Set());
-  };
-
-  const startEditing = (item) => {
-    const newEditing = new Map(editingItems);
-    newEditing.set(item.id, { ...item });
-    setEditingItems(newEditing);
-  };
-
-  const cancelEditing = (id) => {
-    const newEditing = new Map(editingItems);
-    newEditing.delete(id);
-    setEditingItems(newEditing);
-  };
-
-  const saveEditing = async (id) => {
+  const saveEditing = useCallback(async (id) => {
     const editedItem = editingItems.get(id);
+    const originalItem = inventory.find(i => i.id === id);
     const updates = {};
 
-    if (editedItem.price !== inventory.find(i => i.id === id).price) {
+    if (editedItem.price !== originalItem.price) {
       updates.price = editedItem.price;
     }
-    if (editedItem.stock !== inventory.find(i => i.id === id).stock) {
+    if (editedItem.stock !== originalItem.stock) {
       updates.stock_quantity = editedItem.stock;
     }
 
@@ -357,17 +336,19 @@ useEffect(() => {
     } else {
       cancelEditing(id);
     }
-  };
+  }, [editingItems, inventory, updateItem, cancelEditing]);
 
-  const updateEditingItem = (id, field, value) => {
-    const newEditing = new Map(editingItems);
-    const item = newEditing.get(id);
-    if (item) {
-      item[field] = value;
-      newEditing.set(id, item);
-      setEditingItems(newEditing);
-    }
-  };
+  const updateEditingItem = useCallback((id, field, value) => {
+    setEditingItems(prev => {
+      const newEditing = new Map(prev);
+      const item = newEditing.get(id);
+      if (item) {
+        item[field] = value;
+        newEditing.set(id, item);
+      }
+      return newEditing;
+    });
+  }, []);
 
   const refreshPrices = async () => {
     setLoading(true);
@@ -381,8 +362,6 @@ useEffect(() => {
       if (response.ok) {
         const result = await response.json();
         alert(`Price refresh completed!\n\nUpdated: ${result.updated} items\nTotal processed: ${result.total} MTG cards\n\n${result.errors?.length > 0 ? 'Errors: ' + result.errors.length : 'No errors'}`);
-
-        // Reload inventory data
         window.location.reload();
       } else {
         const error = await response.json();
@@ -390,7 +369,7 @@ useEffect(() => {
       }
     } catch (error) {
       console.error('Price refresh error:', error);
-      alert(`Price refresh failed: ${error.message}\n\nPlease check that you have MTG cards with Scryfall IDs in your inventory.`);
+      alert(`Price refresh failed: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -422,9 +401,9 @@ useEffect(() => {
     a.href = url;
     a.download = `inventory-${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
+    window.URL.revokeObjectURL(url);
   };
 
-  // CSV Import Functions
   const resetCSVModal = () => {
     setCsvFile(null);
     setCsvPreview([]);
@@ -457,7 +436,6 @@ useEffect(() => {
 
       setCsvPreview(preview);
 
-      // Auto-map common columns
       const defaultMapping = {};
       headers.forEach(header => {
         const lowerHeader = header.toLowerCase();
@@ -495,35 +473,9 @@ useEffect(() => {
     }
   };
 
-  const validateCSVData = () => {
-    const errors = [];
-    const warnings = [];
-
-    // Check required mappings
-    if (!csvMapping.sku) errors.push('SKU column mapping is required');
-    if (!csvMapping.card_name) errors.push('Card Name column mapping is required');
-    if (!csvMapping.price) errors.push('Price column mapping is required');
-    if (!csvMapping.stock_quantity) errors.push('Stock Quantity column mapping is required');
-
-    // Validate data
-    csvPreview.forEach((row, index) => {
-      if (!row[csvMapping.sku]) errors.push(`Row ${index + 2}: SKU is missing`);
-      if (!row[csvMapping.card_name]) errors.push(`Row ${index + 2}: Card name is missing`);
-
-      const price = parseFloat(row[csvMapping.price]);
-      if (isNaN(price) || price < 0) errors.push(`Row ${index + 2}: Invalid price`);
-
-      const stock = parseInt(row[csvMapping.stock_quantity]);
-      if (isNaN(stock) || stock < 0) warnings.push(`Row ${index + 2}: Invalid stock quantity`);
-    });
-
-    return { errors, warnings };
-  };
-
   const importCSV = async () => {
-    const validation = validateCSVData();
-    if (validation.errors.length > 0) {
-      alert('Please fix the following errors:\n' + validation.errors.join('\n'));
+    if (!csvMapping.sku || !csvMapping.card_name || !csvMapping.price || !csvMapping.stock_quantity) {
+      alert('Please map all required fields');
       return;
     }
 
@@ -537,7 +489,6 @@ useEffect(() => {
       const response = await fetch(`${API_URL}/admin/csv-import`, {
         method: 'POST',
         credentials: 'include',
-        headers: getAdminHeaders(),
         body: formData
       });
 
@@ -549,7 +500,6 @@ useEffect(() => {
       setCsvResults(result);
       setCsvStep(3);
 
-      // Refresh inventory after successful import
       if (result.success_count > 0) {
         setTimeout(() => {
           window.location.reload();
@@ -566,8 +516,7 @@ useEffect(() => {
   const downloadCSVTemplate = () => {
     const template = [
       ['SKU', 'Card Name', 'Game', 'Set Name', 'Quality', 'Price', 'Stock Quantity', 'Foil Type', 'Language'].join(','),
-      ['MTG-LTR-001-NM', 'Lightning Bolt', 'Magic: The Gathering', 'The Lord of the Rings', 'Near Mint', '2.50', '10', 'Non-foil', 'English'].join(','),
-      ['PKM-SVP-025-LP', 'Pikachu', 'Pokemon', 'Scarlet & Violet Promos', 'Lightly Played', '5.00', '3', 'Holo', 'English'].join(',')
+      ['MTG-LTR-001-NM', 'Lightning Bolt', 'Magic: The Gathering', 'The Lord of the Rings', 'Near Mint', '2.50', '10', 'Non-foil', 'English'].join(',')
     ].join('\n');
 
     const blob = new Blob([template], { type: 'text/csv' });
@@ -576,19 +525,17 @@ useEffect(() => {
     a.href = url;
     a.download = 'csv-import-template.csv';
     a.click();
+    window.URL.revokeObjectURL(url);
   };
 
-  // Currency toggle function
   const toggleCurrency = () => {
-    const isUSD = currency.code === 'USD';
-    setCurrency({
-      symbol: isUSD ? 'NZ$' : '$',
-      rate: isUSD ? 1.6 : 1.0,
-      code: isUSD ? 'NZD' : 'USD'
-    });
+    setCurrency(prev => ({
+      symbol: prev.code === 'USD' ? 'NZ$' : '$',
+      rate: prev.code === 'USD' ? 1.6 : 1.0,
+      code: prev.code === 'USD' ? 'NZD' : 'USD'
+    }));
   };
 
-  // Format date helper
   const formatDate = (dateString) => {
     if (!dateString) return 'Never';
     const date = new Date(dateString);
@@ -609,7 +556,7 @@ useEffect(() => {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <Loader2 className="inline-block animate-spin h-12 w-12 text-blue-600" />
           <p className="mt-4 text-slate-600">Checking authentication...</p>
         </div>
       </div>
@@ -617,14 +564,14 @@ useEffect(() => {
   }
 
   if (!isAuthenticated) {
-    return null; // Will redirect to login
+    return null;
   }
 
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="inline-block animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+          <Loader2 className="inline-block animate-spin h-12 w-12 text-blue-600" />
           <p className="mt-4 text-slate-600">Loading inventory...</p>
         </div>
       </div>
@@ -633,67 +580,57 @@ useEffect(() => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Skip to main content link for accessibility */}
+      {/* Skip to main content link */}
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
       >
         Skip to main content
       </a>
+
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-30">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div className="flex items-center gap-4">
               <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-              <span className="text-sm text-slate-700">
-                {filteredInventory.length} cards ({inventory.length} total items)
+              <span className="text-sm text-slate-600 bg-slate-100 px-3 py-1 rounded-full">
+                {filteredInventory.length} cards ({inventory.length} total)
               </span>
             </div>
-            <div className="flex items-center gap-3">
-              {/* Currency Toggle */}
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={toggleCurrency}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none text-sm font-medium"
-                aria-label={`Switch currency from ${currency.code} to ${currency.code === 'USD' ? 'NZD' : 'USD'}`}
+                className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                aria-label={`Switch currency to ${currency.code === 'USD' ? 'NZD' : 'USD'}`}
               >
                 <span className="text-slate-700">{currency.code}</span>
-                <span className="text-slate-700">|</span>
-                <span className="text-slate-700">{currency.code === 'USD' ? 'NZD' : 'USD'}</span>
+                <span className="text-slate-400">→</span>
+                <span className="text-slate-500">{currency.code === 'USD' ? 'NZD' : 'USD'}</span>
               </button>
 
               <button
-                onClick={() => setBulkEditMode(!bulkEditMode)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-offset-2 focus:outline-none ${
-                  bulkEditMode
-                    ? 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500'
-                    : 'bg-yellow-600 hover:bg-yellow-700 text-white focus:ring-yellow-500'
-                }`}
-                aria-label={bulkEditMode ? 'Exit bulk edit mode' : 'Enter bulk edit mode'}
-              >
-                {bulkEditMode ? <X className="w-4 h-4" /> : <Edit className="w-4 h-4" />}
-                <span className="hidden sm:inline">{bulkEditMode ? 'Exit Bulk' : 'Bulk Edit'}</span>
-              </button>
-              <button
                 onClick={refreshPrices}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                 aria-label="Refresh prices from API"
               >
                 <RefreshCw className="w-4 h-4" />
-                <span className="hidden sm:inline">Refresh Prices</span>
+                <span className="hidden sm:inline">Refresh</span>
               </button>
+              
               <button
                 onClick={() => setShowCSVModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
-                aria-label="Import inventory data from CSV"
+                className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors text-sm font-medium focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
+                aria-label="Import CSV"
               >
                 <Upload className="w-4 h-4" />
                 <span className="hidden sm:inline">Import</span>
               </button>
+              
               <button
                 onClick={exportCSV}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-slate-500 focus:ring-offset-2 focus:outline-none"
-                aria-label="Export inventory data to CSV"
+                className="flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white rounded-lg transition-colors text-sm font-medium focus:ring-2 focus:ring-slate-500 focus:ring-offset-2 focus:outline-none"
+                aria-label="Export to CSV"
               >
                 <Download className="w-4 h-4" />
                 <span className="hidden sm:inline">Export</span>
@@ -706,49 +643,49 @@ useEffect(() => {
       <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <span className="text-slate-600 text-sm font-medium">Inventory Value</span>
-              <DollarSign className="w-5 h-5 text-blue-600" />
+              <DollarSign className="w-5 h-5 text-blue-600" aria-hidden="true" />
             </div>
             <p className="text-3xl font-bold text-slate-900">
               {currency.symbol}{(totalValue * currency.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
             </p>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               {inStockItems} items in stock
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <span className="text-slate-600 text-sm font-medium">Low Stock Alerts</span>
-              <AlertCircle className="w-5 h-5 text-red-600" />
+              <AlertCircle className="w-5 h-5 text-amber-600" aria-hidden="true" />
             </div>
             <p className="text-3xl font-bold text-slate-900">
               {lowStockCount}
             </p>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Items need restocking
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
               <span className="text-slate-600 text-sm font-medium">Unique Cards</span>
-              <Package className="w-5 h-5 text-purple-600" />
+              <Package className="w-5 h-5 text-purple-600" aria-hidden="true" />
             </div>
             <p className="text-3xl font-bold text-slate-900">
               {groupedInventory.length}
             </p>
-            <p className="text-xs text-slate-600 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               {totalItems} total variations
             </p>
           </div>
 
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm">
+          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-600 text-sm font-medium">Showing</span>
-              <Package className="w-5 h-5 text-green-600" />
+              <span className="text-slate-600 text-sm font-medium">Filtered View</span>
+              <Package className="w-5 h-5 text-green-600" aria-hidden="true" />
             </div>
             <p className="text-3xl font-bold text-slate-900">
               {filteredInventory.length}
@@ -763,23 +700,26 @@ useEffect(() => {
         <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 border border-slate-200 shadow-sm">
           <div className="flex flex-col sm:flex-row gap-4 mb-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden="true" />
+              <label htmlFor="search-inventory" className="sr-only">Search inventory</label>
               <input
+                id="search-inventory"
                 type="search"
                 placeholder="Search by card name or SKU..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="filter-game" className="block text-sm font-medium text-slate-700 mb-2">
                 Game
               </label>
               <select
+                id="filter-game"
                 value={filterGame}
                 onChange={(e) => setFilterGame(e.target.value)}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
@@ -792,10 +732,11 @@ useEffect(() => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
+              <label htmlFor="filter-price-source" className="block text-sm font-medium text-slate-700 mb-2">
                 Price Source
               </label>
               <select
+                id="filter-price-source"
                 value={filterPriceSource}
                 onChange={(e) => setFilterPriceSource(e.target.value)}
                 className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
@@ -808,12 +749,12 @@ useEffect(() => {
             </div>
 
             <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={showInStock}
                   onChange={(e) => setShowInStock(e.target.checked)}
-                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
                 />
                 <span className="text-sm font-medium text-slate-700">
                   In Stock Only
@@ -822,12 +763,12 @@ useEffect(() => {
             </div>
 
             <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={showLowStock}
                   onChange={(e) => setShowLowStock(e.target.checked)}
-                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
                 />
                 <span className="text-sm font-medium text-slate-700">
                   Low Stock Only
@@ -836,12 +777,12 @@ useEffect(() => {
             </div>
 
             <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
                   checked={showZeroStock}
                   onChange={(e) => setShowZeroStock(e.target.checked)}
-                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
                 />
                 <span className="text-sm font-medium text-slate-700">
                   Show Zero Stock
@@ -857,15 +798,15 @@ useEffect(() => {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase w-10">
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase w-10">
                     <span className="sr-only">Expand</span>
                   </th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Image</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Card</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Total Value</th>
-                  <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Total Stock</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Qualities</th>
-                  <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Last Update</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Image</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Card</th>
+                  <th scope="col" className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Total Value</th>
+                  <th scope="col" className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Total Stock</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Qualities</th>
+                  <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Last Update</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -878,23 +819,30 @@ useEffect(() => {
                     <React.Fragment key={group.key}>
                       {/* Main card row */}
                       <tr
-                        className={`hover:bg-slate-50 cursor-pointer ${
+                        className={`hover:bg-slate-50 cursor-pointer transition-colors ${
                           hasLowStock ? 'bg-amber-50' : isZeroStock ? 'bg-slate-50' : ''
                         }`}
                         onClick={() => toggleCardExpansion(group.key)}
                       >
                         <td className="px-4 py-3 text-center">
-                          {isExpanded ? (
-                            <ChevronDown className="w-4 h-4 text-slate-500" />
-                          ) : (
-                            <ChevronRight className="w-4 h-4 text-slate-500" />
-                          )}
+                          <button
+                            className="p-1 hover:bg-slate-200 rounded transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                            aria-label={isExpanded ? `Collapse ${group.card_name}` : `Expand ${group.card_name}`}
+                            aria-expanded={isExpanded}
+                          >
+                            {isExpanded ? (
+                              <ChevronDown className="w-4 h-4 text-slate-500" aria-hidden="true" />
+                            ) : (
+                              <ChevronRight className="w-4 h-4 text-slate-500" aria-hidden="true" />
+                            )}
+                          </button>
                         </td>
                         <td className="px-4 py-2">
                           <img
                             src={group.image_url}
                             alt={group.card_name}
                             className="w-12 h-16 object-contain rounded border border-slate-200"
+                            loading="lazy"
                             onError={(e) => {
                               e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="48" height="64"%3E%3Crect fill="%23cbd5e1" width="48" height="64"/%3E%3C/svg%3E';
                             }}
@@ -927,8 +875,8 @@ useEffect(() => {
                                   quality.stock === 0
                                     ? 'bg-slate-100 text-slate-500'
                                     : quality.stock <= quality.low_stock_threshold
-                                      ? 'bg-amber-50 text-amber-900'
-                                      : 'bg-green-50 text-green-900'
+                                      ? 'bg-amber-100 text-amber-900'
+                                      : 'bg-green-100 text-green-900'
                                 }`}
                               >
                                 {quality.quality.substring(0, 2).toUpperCase()} ({quality.stock})
@@ -948,18 +896,18 @@ useEffect(() => {
                         const editedItem = editingItems.get(item.id);
 
                         return (
-                          <tr key={item.id} className="bg-slate-50 border-l-4 border-l-blue-200">
+                          <tr key={item.id} className="bg-slate-50 border-l-4 border-l-blue-300">
                             <td className="px-4 py-2"></td>
                             <td className="px-4 py-2">
                               <div className="w-8 h-10 bg-slate-200 rounded border border-slate-300 flex items-center justify-center">
-                                <span className="text-xs text-slate-500 font-mono">
+                                <span className="text-xs text-slate-600 font-mono font-medium">
                                   {item.quality.substring(0,2).toUpperCase()}
                                 </span>
                               </div>
                             </td>
                             <td className="px-4 py-2">
                               <div className="flex flex-col">
-                                <span className="text-sm text-slate-700">{item.quality}</span>
+                                <span className="text-sm text-slate-700 font-medium">{item.quality}</span>
                                 <span className="text-xs text-slate-400 font-mono">{item.sku}</span>
                               </div>
                             </td>
@@ -968,21 +916,27 @@ useEffect(() => {
                                 <input
                                   type="number"
                                   step="0.01"
+                                  min="0"
                                   value={editedItem.price}
                                   onChange={(e) => updateEditingItem(item.id, 'price', parseFloat(e.target.value))}
-                                  className="w-24 px-2 py-1 text-sm border border-slate-300 rounded text-right"
+                                  className="w-24 px-2 py-1 text-sm border border-slate-300 rounded text-right focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  aria-label="Edit price"
                                 />
                               ) : (
-                                <span className="text-sm font-semibold text-slate-900">{currency.symbol}{(item.price * currency.rate).toFixed(2)}</span>
+                                <span className="text-sm font-semibold text-slate-900">
+                                  {currency.symbol}{(item.price * currency.rate).toFixed(2)}
+                                </span>
                               )}
                             </td>
                             <td className="px-4 py-2 text-right">
                               {isEditing ? (
                                 <input
                                   type="number"
+                                  min="0"
                                   value={editedItem.stock}
                                   onChange={(e) => updateEditingItem(item.id, 'stock', parseInt(e.target.value))}
-                                  className="w-20 px-2 py-1 text-sm border border-slate-300 rounded text-right"
+                                  className="w-20 px-2 py-1 text-sm border border-slate-300 rounded text-right focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                  aria-label="Edit stock quantity"
                                 />
                               ) : (
                                 <span className={`text-sm font-semibold ${
@@ -997,17 +951,17 @@ useEffect(() => {
                                 <div className="flex flex-wrap gap-1">
                                   <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
                                     item.foil_type === 'Regular' || item.foil_type === 'Non-foil'
-                                      ? 'bg-slate-50 text-slate-900'
-                                      : 'bg-yellow-50 text-yellow-900'
+                                      ? 'bg-slate-100 text-slate-700'
+                                      : 'bg-yellow-100 text-yellow-900'
                                   }`}>
                                     {item.foil_type || 'Regular'}
                                   </span>
                                   <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
                                     item.price_source === 'manual'
-                                      ? 'bg-blue-50 text-blue-900'
+                                      ? 'bg-blue-100 text-blue-900'
                                       : item.price_source?.includes('scryfall')
-                                        ? 'bg-purple-50 text-purple-900'
-                                        : 'bg-gray-50 text-gray-900'
+                                        ? 'bg-purple-100 text-purple-900'
+                                        : 'bg-gray-100 text-gray-700'
                                   }`}>
                                     {item.price_source === 'manual' ? 'Manual' :
                                      item.price_source?.includes('scryfall') ? 'Scryfall' : 'API'}
@@ -1026,16 +980,11 @@ useEffect(() => {
                                       });
                                       setShowFoilModal(true);
                                     }}
-                                    className="text-xs text-blue-600 hover:text-blue-800 underline text-left"
-                                    title="Create foil version of this card"
+                                    className="text-xs text-blue-600 hover:text-blue-800 hover:underline text-left focus:ring-2 focus:ring-blue-500 focus:outline-none rounded px-1"
+                                    aria-label={`Add foil version of ${item.card_name}`}
                                   >
                                     + Add Foil
                                   </button>
-                                )}
-                                {item.language && item.language !== 'English' && (
-                                  <span className="text-xs text-slate-500">
-                                    {item.language}
-                                  </span>
                                 )}
                               </div>
                             </td>
@@ -1047,20 +996,20 @@ useEffect(() => {
                                       e.stopPropagation();
                                       saveEditing(item.id);
                                     }}
-                                    className="p-1 bg-blue-600 text-white rounded hover:bg-blue-700"
-                                    title="Save changes"
+                                    className="p-1.5 bg-blue-600 text-white rounded hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
+                                    aria-label="Save changes"
                                   >
-                                    <Save className="w-3 h-3" />
+                                    <Save className="w-3.5 h-3.5" aria-hidden="true" />
                                   </button>
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
                                       cancelEditing(item.id);
                                     }}
-                                    className="p-1 bg-slate-200 text-slate-700 rounded hover:bg-slate-300"
-                                    title="Cancel"
+                                    className="p-1.5 bg-slate-200 text-slate-700 rounded hover:bg-slate-300 focus:ring-2 focus:ring-slate-500 focus:outline-none transition-colors"
+                                    aria-label="Cancel editing"
                                   >
-                                    <X className="w-3 h-3" />
+                                    <X className="w-3.5 h-3.5" aria-hidden="true" />
                                   </button>
                                 </div>
                               ) : (
@@ -1069,10 +1018,10 @@ useEffect(() => {
                                     e.stopPropagation();
                                     startEditing(item);
                                   }}
-                                  className="p-1 hover:bg-slate-200 rounded"
-                                  title="Edit item"
+                                  className="p-1.5 hover:bg-slate-200 rounded focus:ring-2 focus:ring-blue-500 focus:outline-none transition-colors"
+                                  aria-label={`Edit ${item.card_name} ${item.quality}`}
                                 >
-                                  <Edit className="w-4 h-4 text-slate-500" />
+                                  <Edit className="w-4 h-4 text-slate-500" aria-hidden="true" />
                                 </button>
                               )}
                             </td>
@@ -1088,27 +1037,27 @@ useEffect(() => {
 
           {filteredInventory.length === 0 && (
             <div className="text-center py-12">
-              <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
-              <p className="text-slate-500 text-lg">No cards found</p>
+              <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" aria-hidden="true" />
+              <p className="text-slate-500 text-lg font-medium">No cards found</p>
               <p className="text-slate-400 text-sm mt-2">Try adjusting your filters</p>
             </div>
           )}
         </div>
 
-        {/* Action Panel for Expanded Cards */}
+        {/* Expanded Cards Panel */}
         {expandedCards.size > 0 && (
-          <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg border border-slate-200 p-4">
+          <div className="fixed bottom-4 right-4 bg-white rounded-lg shadow-lg border border-slate-200 p-4 z-20">
             <div className="flex items-center gap-2 mb-2">
-              <Package className="w-4 h-4 text-blue-600" />
+              <Package className="w-4 h-4 text-blue-600" aria-hidden="true" />
               <span className="text-sm font-medium">
                 {expandedCards.size} card{expandedCards.size !== 1 ? 's' : ''} expanded
               </span>
             </div>
             <button
               onClick={() => setExpandedCards(new Set())}
-              className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
+              className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 focus:ring-2 focus:ring-blue-500 focus:outline-none rounded px-1"
             >
-              <EyeOff className="w-4 h-4" />
+              <EyeOff className="w-4 h-4" aria-hidden="true" />
               Collapse All
             </button>
           </div>
@@ -1116,18 +1065,24 @@ useEffect(() => {
 
         {/* Foil Creation Modal */}
         {showFoilModal && foilModalCard && (
-          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div 
+            className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="foil-modal-title"
+          >
             <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-slate-900">Create Foil Version</h2>
+                <h2 id="foil-modal-title" className="text-lg font-bold text-slate-900">Create Foil Version</h2>
                 <button
                   onClick={() => {
                     setShowFoilModal(false);
                     setFoilModalCard(null);
                   }}
-                  className="p-2 hover:bg-slate-100 rounded-lg"
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  aria-label="Close modal"
                 >
-                  <X className="w-5 h-5 text-slate-500" />
+                  <X className="w-5 h-5 text-slate-500" aria-hidden="true" />
                 </button>
               </div>
 
@@ -1149,34 +1104,31 @@ useEffect(() => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label htmlFor="foil-type" className="block text-sm font-medium text-slate-700 mb-2">
                     Foil Type
                   </label>
                   <select
+                    id="foil-type"
                     value={foilFormData.foilType}
                     onChange={(e) => setFoilFormData({ ...foilFormData, foilType: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    aria-describedby="foil-type-help"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="Foil">Regular Foil</option>
                     <option value="Etched">Etched Foil</option>
                     <option value="Showcase">Showcase Foil</option>
                     <option value="Extended Art">Extended Art Foil</option>
                   </select>
-                  <div id="foil-type-help" className="text-xs text-slate-500 mt-1">
-                    Select the type of foil treatment for this card
-                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label htmlFor="foil-quality" className="block text-sm font-medium text-slate-700 mb-2">
                     Quality
                   </label>
                   <select
+                    id="foil-quality"
                     value={foilFormData.quality}
                     onChange={(e) => setFoilFormData({ ...foilFormData, quality: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    aria-describedby="quality-help"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="Near Mint">Near Mint</option>
                     <option value="Lightly Played">Lightly Played</option>
@@ -1184,62 +1136,63 @@ useEffect(() => {
                     <option value="Heavily Played">Heavily Played</option>
                     <option value="Damaged">Damaged</option>
                   </select>
-                  <div id="quality-help" className="text-xs text-slate-500 mt-1">
-                    Select the condition of the foil card
-                  </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label htmlFor="foil-price" className="block text-sm font-medium text-slate-700 mb-2">
                     Price ({currency.symbol})
                   </label>
                   <input
+                    id="foil-price"
                     type="number"
                     step="0.01"
+                    min="0"
                     value={foilFormData.price}
                     onChange={(e) => setFoilFormData({ ...foilFormData, price: e.target.value })}
                     placeholder={(foilModalCard.price * 2.5).toFixed(2)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    aria-describedby="price-help"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   />
-                  <div id="price-help" className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs text-slate-500 mt-1">
                     Suggested: {currency.symbol}{(foilModalCard.price * 2.5).toFixed(2)} (2.5x regular price)
-                  </div>
+                  </p>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                  <label htmlFor="foil-stock" className="block text-sm font-medium text-slate-700 mb-2">
                     Initial Stock
                   </label>
                   <input
+                    id="foil-stock"
                     type="number"
                     min="0"
                     value={foilFormData.initialStock}
                     onChange={(e) => setFoilFormData({ ...foilFormData, initialStock: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-                    aria-describedby="stock-help"
+                    className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  <div id="stock-help" className="text-xs text-slate-500 mt-1">
-                    Number of foil cards to add to inventory
-                  </div>
                 </div>
 
                 <div className="flex gap-3 mt-6">
                   <button
                     onClick={createFoil}
                     disabled={foilModalLoading || !foilFormData.price || foilFormData.price <= 0}
-                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-                    aria-label={`Create ${foilFormData.foilType} version of ${foilModalCard?.card_name} for $${foilFormData.price}`}
+                    className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                   >
-                    {foilModalLoading ? 'Creating...' : 'Create Foil Version'}
+                    {foilModalLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin inline mr-2" aria-hidden="true" />
+                        Creating...
+                      </>
+                    ) : (
+                      'Create Foil Version'
+                    )}
                   </button>
                   <button
                     onClick={() => {
                       setShowFoilModal(false);
                       setFoilModalCard(null);
                     }}
-                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                    className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors focus:ring-2 focus:ring-slate-500 focus:outline-none"
                   >
                     Cancel
                   </button>
@@ -1251,11 +1204,16 @@ useEffect(() => {
 
         {/* CSV Import Modal */}
         {showCSVModal && (
-          <div className="fixed inset-0 bg-slate-500/75 flex items-center justify-center p-4 z-50">
+          <div 
+            className="fixed inset-0 bg-slate-900/75 flex items-center justify-center p-4 z-50"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="csv-modal-title"
+          >
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-              <div className="px-6 py-4 border-b border-slate-200">
+              <div className="px-6 py-4 border-b border-slate-200 sticky top-0 bg-white z-10">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold text-slate-900">
+                  <h2 id="csv-modal-title" className="text-xl font-semibold text-slate-900">
                     CSV Import - Step {csvStep} of 3
                   </h2>
                   <button
@@ -1263,10 +1221,10 @@ useEffect(() => {
                       setShowCSVModal(false);
                       resetCSVModal();
                     }}
-                    className="p-1 hover:bg-slate-100 rounded-full transition-colors"
+                    className="p-1 hover:bg-slate-100 rounded-full transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     aria-label="Close CSV import modal"
                   >
-                    <X className="w-5 h-5" />
+                    <X className="w-5 h-5" aria-hidden="true" />
                   </button>
                 </div>
               </div>
@@ -1276,13 +1234,12 @@ useEffect(() => {
                 {csvStep === 1 && (
                   <div className="space-y-6">
                     <div>
-                      <h3 className="text-lg font-medium text-slate-900 mb-4">Upload CSV File</h3>
-                      <p className="text-slate-600 mb-4">
+                      <h3 className="text-lg font-medium text-slate-900 mb-2">Upload CSV File</h3>
+                      <p className="text-slate-600">
                         Upload a CSV file containing your inventory data. Make sure your file includes columns for SKU, Card Name, Price, and Stock Quantity.
                       </p>
                     </div>
 
-                    {/* Drag and Drop Area */}
                     <div
                       className={`border-2 border-dashed rounded-lg p-8 text-center transition-colors ${
                         dragActive
@@ -1293,17 +1250,17 @@ useEffect(() => {
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                     >
-                      <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                      <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" aria-hidden="true" />
                       <div className="space-y-2">
                         <p className="text-lg font-medium text-slate-700">
                           Drop your CSV file here, or{' '}
-                          <label className="text-blue-600 hover:text-blue-500 cursor-pointer underline">
+                          <label className="text-blue-600 hover:text-blue-700 cursor-pointer underline focus-within:ring-2 focus-within:ring-blue-500 focus-within:outline-none rounded">
                             browse
                             <input
                               type="file"
                               accept=".csv"
                               onChange={(e) => handleCSVUpload(e.target.files[0])}
-                              className="hidden"
+                              className="sr-only"
                             />
                           </label>
                         </p>
@@ -1316,9 +1273,9 @@ useEffect(() => {
                     <div className="flex items-center gap-4">
                       <button
                         onClick={downloadCSVTemplate}
-                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                       >
-                        <Download className="w-4 h-4" />
+                        <Download className="w-4 h-4" aria-hidden="true" />
                         Download Template
                       </button>
                       <p className="text-sm text-slate-600">
@@ -1338,26 +1295,24 @@ useEffect(() => {
                       </p>
                     </div>
 
-                    {/* Column Mapping */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                       {Object.keys(csvPreview[0] || {}).map(csvColumn => (
                         <div key={csvColumn} className="space-y-2">
-                          <label className="block text-sm font-medium text-slate-700">
+                          <label htmlFor={`mapping-${csvColumn}`} className="block text-sm font-medium text-slate-700">
                             CSV Column: <span className="font-semibold">{csvColumn}</span>
                           </label>
                           <select
+                            id={`mapping-${csvColumn}`}
                             value={Object.keys(csvMapping).find(key => csvMapping[key] === csvColumn) || ''}
                             onChange={(e) => {
                               const newMapping = { ...csvMapping };
-                              // Remove old mapping if exists
                               Object.keys(newMapping).forEach(key => {
                                 if (newMapping[key] === csvColumn) delete newMapping[key];
                               });
-                              // Add new mapping if selected
                               if (e.target.value) newMapping[e.target.value] = csvColumn;
                               setCsvMapping(newMapping);
                             }}
-                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                           >
                             <option value="">Don't import</option>
                             <option value="sku">SKU (Required)</option>
@@ -1374,15 +1329,14 @@ useEffect(() => {
                       ))}
                     </div>
 
-                    {/* Data Preview */}
                     <div>
                       <h4 className="text-md font-medium text-slate-900 mb-3">Data Preview</h4>
-                      <div className="overflow-x-auto">
+                      <div className="overflow-x-auto border border-slate-200 rounded-lg">
                         <table className="min-w-full divide-y divide-slate-200">
                           <thead className="bg-slate-50">
                             <tr>
                               {Object.keys(csvPreview[0] || {}).map(column => (
-                                <th key={column} className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">
+                                <th key={column} scope="col" className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase">
                                   {column}
                                 </th>
                               ))}
@@ -1406,18 +1360,18 @@ useEffect(() => {
                     <div className="flex gap-3">
                       <button
                         onClick={() => setCsvStep(1)}
-                        className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors"
+                        className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors focus:ring-2 focus:ring-slate-500 focus:outline-none"
                       >
                         Back
                       </button>
                       <button
                         onClick={importCSV}
                         disabled={csvImporting || !csvMapping.sku || !csvMapping.card_name || !csvMapping.price || !csvMapping.stock_quantity}
-                        className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:ring-4 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
+                        className="flex-1 px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-green-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-green-500 focus:ring-offset-2 focus:outline-none"
                       >
                         {csvImporting ? (
                           <>
-                            <RefreshCw className="w-4 h-4 animate-spin inline mr-2" />
+                            <Loader2 className="w-4 h-4 animate-spin inline mr-2" aria-hidden="true" />
                             Importing...
                           </>
                         ) : (
@@ -1435,11 +1389,10 @@ useEffect(() => {
                       <h3 className="text-lg font-medium text-slate-900 mb-4">Import Results</h3>
                     </div>
 
-                    {/* Success/Error Summary */}
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                         <div className="flex items-center">
-                          <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                          <CheckCircle className="w-5 h-5 text-green-600 mr-2" aria-hidden="true" />
                           <span className="text-sm font-medium text-green-800">Successfully Imported</span>
                         </div>
                         <div className="text-2xl font-bold text-green-900 mt-1">
@@ -1449,7 +1402,7 @@ useEffect(() => {
 
                       <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                         <div className="flex items-center">
-                          <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2" />
+                          <AlertTriangle className="w-5 h-5 text-yellow-600 mr-2" aria-hidden="true" />
                           <span className="text-sm font-medium text-yellow-800">Warnings</span>
                         </div>
                         <div className="text-2xl font-bold text-yellow-900 mt-1">
@@ -1459,7 +1412,7 @@ useEffect(() => {
 
                       <div className="bg-red-50 border border-red-200 rounded-lg p-4">
                         <div className="flex items-center">
-                          <XCircle className="w-5 h-5 text-red-600 mr-2" />
+                          <XCircle className="w-5 h-5 text-red-600 mr-2" aria-hidden="true" />
                           <span className="text-sm font-medium text-red-800">Errors</span>
                         </div>
                         <div className="text-2xl font-bold text-red-900 mt-1">
@@ -1468,18 +1421,19 @@ useEffect(() => {
                       </div>
                     </div>
 
-                    {/* Error/Warning Details */}
                     {(csvResults.errors?.length > 0 || csvResults.warnings?.length > 0) && (
                       <div className="space-y-4">
                         {csvResults.errors?.length > 0 && (
                           <div>
                             <h4 className="text-md font-medium text-red-900 mb-2">Errors</h4>
                             <div className="bg-red-50 border border-red-200 rounded-lg p-3 max-h-40 overflow-y-auto">
-                              {csvResults.errors.map((error, index) => (
-                                <div key={index} className="text-sm text-red-700">
-                                  {error}
-                                </div>
-                              ))}
+                              <ul className="space-y-1">
+                                {csvResults.errors.map((error, index) => (
+                                  <li key={index} className="text-sm text-red-700">
+                                    {error}
+                                  </li>
+                                ))}
+                              </ul>
                             </div>
                           </div>
                         )}
@@ -1488,11 +1442,13 @@ useEffect(() => {
                           <div>
                             <h4 className="text-md font-medium text-yellow-900 mb-2">Warnings</h4>
                             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 max-h-40 overflow-y-auto">
-                              {csvResults.warnings.map((warning, index) => (
-                                <div key={index} className="text-sm text-yellow-700">
-                                  {warning}
-                                </div>
-                              ))}
+                              <ul className="space-y-1">
+                                {csvResults.warnings.map((warning, index) => (
+                                  <li key={index} className="text-sm text-yellow-700">
+                                    {warning}
+                                  </li>
+                                ))}
+                              </ul>
                             </div>
                           </div>
                         )}
@@ -1502,7 +1458,7 @@ useEffect(() => {
                     {csvResults.success_count > 0 && (
                       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
                         <div className="flex items-center">
-                          <CheckCircle className="w-5 h-5 text-blue-600 mr-2" />
+                          <CheckCircle className="w-5 h-5 text-blue-600 mr-2" aria-hidden="true" />
                           <span className="text-sm text-blue-800">
                             Import completed successfully! The inventory will refresh automatically in a few seconds.
                           </span>
@@ -1516,7 +1472,7 @@ useEffect(() => {
                           setShowCSVModal(false);
                           resetCSVModal();
                         }}
-                        className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                        className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                       >
                         Close
                       </button>
