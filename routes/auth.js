@@ -52,8 +52,9 @@ router.post('/admin/login', async (req, res) => {
     res.cookie('adminToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
-      maxAge: 24 * 60 * 60 * 1000 // 24 hours
+      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax', // ✅ CHANGED
+      maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      path: '/' // ✅ ADDED - ensure cookie is available for all paths
     });
 
     res.json({ 
