@@ -236,7 +236,7 @@ const TCGShop = () => {
   const fetchCards = useCallback(async () => {
     try {
       const queryParams = new URLSearchParams({
-        limit: '200',
+        limit: '100',
         search: searchTerm,
         sort_by: filters.sortBy,
         sort_order: filters.sortOrder
