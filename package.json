@@ -20,6 +20,7 @@
   "author": "Your Name",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.14",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
