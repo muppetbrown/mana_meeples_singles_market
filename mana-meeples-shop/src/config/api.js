@@ -8,36 +8,49 @@ const getApiUrl = () => {
   console.log('  NODE_ENV:', process.env.NODE_ENV);
   console.log('  window.location.hostname:', typeof window !== 'undefined' ? window.location.hostname : 'N/A');
 
-  // Priority order:
-  // 1. Explicit REACT_APP_API_URL from environment
-  if (process.env.REACT_APP_API_URL) {
-    console.log('✅ Using REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-    return process.env.REACT_APP_API_URL;
-  }
+  // Priority order (FIXED: hostname detection comes first to override incorrect build-time env vars):
+  // 1. Production domain override - force correct URL when on production domain
+  if (typeof window !== 'undefined') {
+    const { hostname } = window.location;
 
-  // 2. Production environment auto-detection
-  if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
-    const { protocol, hostname, port } = window.location;
-
-    // Special handling for known production domain
+    // Always use production API when on production domain, regardless of build-time env vars
     if (hostname === 'manaandmeeples.co.nz' || hostname === 'www.manaandmeeples.co.nz') {
-      console.log('✅ Using production domain fallback for known hostname');
+      console.log('✅ FORCING production API for production domain (overriding build-time env)');
       return 'https://manaandmeeples.co.nz/api';
     }
 
+    // Also check for any non-localhost hostname that might be production
+    if (!hostname.includes('localhost') && !hostname.includes('127.0.0.1')) {
+      // If we're not on localhost but have a localhost API URL, it's likely a build-time error
+      if (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.includes('localhost')) {
+        console.log('⚠️  OVERRIDING localhost API URL detected on non-localhost domain');
+        return 'https://manaandmeeples.co.nz/api';
+      }
+    }
+  }
+
+  // 2. Explicit REACT_APP_API_URL from environment (only if it makes sense for current hostname)
+  if (process.env.REACT_APP_API_URL) {
+    // If we're on localhost, use the environment variable as-is
+    if (typeof window !== 'undefined' && window.location.hostname.includes('localhost')) {
+      console.log('✅ Using REACT_APP_API_URL for localhost:', process.env.REACT_APP_API_URL);
+      return process.env.REACT_APP_API_URL;
+    }
+
+    // If we're not on localhost but the env var is reasonable (not localhost), use it
+    if (!process.env.REACT_APP_API_URL.includes('localhost')) {
+      console.log('✅ Using REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
+      return process.env.REACT_APP_API_URL;
+    }
+  }
+
+  // 3. Production environment auto-detection
+  if (process.env.NODE_ENV === 'production' && typeof window !== 'undefined') {
+    const { protocol, hostname, port } = window.location;
     const portSuffix = port && port !== '80' && port !== '443' ? `:${port}` : '';
     const detectedUrl = `${protocol}//${hostname}${portSuffix}/api`;
     console.log('✅ Using auto-detected URL:', detectedUrl);
     return detectedUrl;
-  }
-
-  // 3. If all else fails, and we're on a production-like hostname, force production API
-  if (typeof window !== 'undefined' &&
-      (window.location.hostname.includes('manaandmeeples') ||
-       window.location.hostname.includes('render') ||
-       !window.location.hostname.includes('localhost'))) {
-    console.log('⚠️  Forcing production API URL as fallback');
-    return 'https://manaandmeeples.co.nz/api';
   }
 
   // 4. Development fallback
