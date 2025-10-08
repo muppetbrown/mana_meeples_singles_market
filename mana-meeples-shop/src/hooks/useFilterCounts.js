@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 
 // Global cache to persist across component remounts
 const globalCache = {
@@ -25,17 +25,17 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
   const lastFetchRef = useRef(0);
 
   // Check if cached data is still valid
-  const isCacheValid = () => {
+  const isCacheValid = useCallback(() => {
     if (!globalCache.data || !globalCache.timestamp) return false;
-    
+
     const cacheAge = Date.now() - globalCache.timestamp;
     const filtersMatch = JSON.stringify(globalCache.filters) === JSON.stringify(currentFilters);
-    
+
     return cacheAge < CACHE_DURATION && filtersMatch;
-  };
+  }, [currentFilters]);
 
   // Fetch filter counts with retry logic
-  const fetchFilterCounts = async (filters = {}, retryCount = 0) => {
+  const fetchFilterCounts = useCallback(async (filters = {}, retryCount = 0) => {
     // Rate limiting: prevent requests within 1 second of last request
     const now = Date.now();
     if (now - lastFetchRef.current < 1000) {
@@ -121,7 +121,7 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [API_URL]);
 
   // Update counts when filters change with debouncing
   useEffect(() => {
