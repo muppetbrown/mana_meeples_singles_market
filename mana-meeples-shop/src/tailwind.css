@@ -1,7 +1,8 @@
 @import "tailwindcss";
 
-@source "../src/**/*.{js,jsx,ts,tsx}";
+/* Scan all JavaScript/TypeScript files in current directory and subdirectories */
+@source "./**/*.{js,jsx,ts,tsx}";
 
 @config {
-  /* Custom configuration for Tailwind CSS 4.x */
+  /* Configuration for Tailwind CSS 4.x */
 }
