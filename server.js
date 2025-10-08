@@ -137,7 +137,7 @@ app.use(helmet({
       styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
       scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
       imgSrc: ["'self'", "data:", "https:", "http:"],
-      connectSrc: ["'self'", process.env.API_URL || "*"],
+      connectSrc: ["'self'", process.env.CSP_CONNECT_SRC || "*"],
     },
   },
 }));
@@ -148,8 +148,20 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
   : ['http://localhost:3000'];
 
 // In production, also allow the current domain for frontend requests
-if (process.env.NODE_ENV === 'production' && process.env.RENDER_EXTERNAL_URL) {
-  allowedOrigins.push(process.env.RENDER_EXTERNAL_URL);
+if (process.env.NODE_ENV === 'production') {
+  // Add Render's external URL if available
+  if (process.env.RENDER_EXTERNAL_URL) {
+    allowedOrigins.push(process.env.RENDER_EXTERNAL_URL);
+  }
+
+  // Add any additional production origins from environment
+  if (process.env.ADDITIONAL_CORS_ORIGINS) {
+    const additionalOrigins = process.env.ADDITIONAL_CORS_ORIGINS
+      .split(',')
+      .map(origin => origin.trim())
+      .filter(Boolean);
+    allowedOrigins.push(...additionalOrigins);
+  }
 }
 
 app.use(cors({
