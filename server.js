@@ -152,10 +152,6 @@ if (process.env.NODE_ENV === 'production' && process.env.RENDER_EXTERNAL_URL) {
   allowedOrigins.push(process.env.RENDER_EXTERNAL_URL);
 }
 
-// Always allow the production frontend domain
-allowedOrigins.push('https://manaandmeeples.co.nz');
-allowedOrigins.push('https://www.manaandmeeples.co.nz');
-
 app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, Postman, curl, etc.)
