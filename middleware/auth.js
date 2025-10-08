@@ -1,68 +1,97 @@
-const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const bcrypt = require('bcrypt');
 
-// JWT-based admin authentication (for future use)
+// ============================================
+// JWT-BASED AUTHENTICATION MIDDLEWARE
+// ============================================
 const adminAuthJWT = async (req, res, next) => {
   try {
-    const token = req.cookies?.adminToken || req.headers.authorization?.replace('Bearer ', '');
+    // Get token from cookie
+    const token = req.cookies?.adminToken;
 
     if (!token) {
+      console.log('❌ No admin token found in cookies');
       return res.status(401).json({ 
         error: 'Authentication required',
-        redirectTo: '/admin/login'
+        authenticated: false 
       });
     }
 
+    // Verify JWT token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+
+    // Check if user has admin role
     if (decoded.role !== 'admin') {
-      return res.status(403).json({ error: 'Admin access required' });
+      console.log('❌ User does not have admin role');
+      return res.status(403).json({ 
+        error: 'Admin access required',
+        authenticated: false 
+      });
     }
 
-    req.user = decoded;
+    // Attach user info to request
+    req.user = {
+      username: decoded.username,
+      role: decoded.role,
+      iat: decoded.iat,
+      exp: decoded.exp
+    };
+
+    // Continue to next middleware/route
     next();
+
   } catch (error) {
-    console.error('Auth error:', error.message);
-    
     if (error.name === 'TokenExpiredError') {
+      console.log('❌ Token expired');
       return res.status(401).json({ 
-        error: 'Session expired. Please login again.',
-        redirectTo: '/admin/login'
+        error: 'Token expired. Please login again.',
+        authenticated: false 
       });
     }
     
-    return res.status(401).json({ 
-      error: 'Invalid authentication',
-      redirectTo: '/admin/login'
+    if (error.name === 'JsonWebTokenError') {
+      console.log('❌ Invalid token');
+      return res.status(401).json({ 
+        error: 'Invalid token',
+        authenticated: false 
+      });
+    }
+
+    console.error('❌ Auth middleware error:', error);
+    return res.status(500).json({ 
+      error: 'Authentication error',
+      authenticated: false 
     });
   }
 };
 
-// Basic Auth with bcrypt (current implementation - secure version)
+// ============================================
+// BASIC AUTH MIDDLEWARE (LEGACY - for backward compatibility)
+// ============================================
 const adminAuthBasic = async (req, res, next) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith('Basic ')) {
-    return res.status(401).json({ 
-      error: 'Authentication required',
-      message: 'Please provide admin credentials'
-    });
-  }
-
   try {
-    const credentials = Buffer.from(authHeader.slice(6), 'base64').toString('utf-8');
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader || !authHeader.startsWith('Basic ')) {
+      return res.status(401).json({ 
+        error: 'Authentication required',
+        hint: 'Use Basic Auth with username:password'
+      });
+    }
+
+    const base64Credentials = authHeader.split(' ')[1];
+    const credentials = Buffer.from(base64Credentials, 'base64').toString('utf-8');
     const [username, password] = credentials.split(':');
 
     const validUsername = process.env.ADMIN_USERNAME;
     const validPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
     if (!validUsername || !validPasswordHash) {
-      console.error('❌ ADMIN_USERNAME or ADMIN_PASSWORD_HASH not configured in .env');
+      console.error('❌ Admin credentials not configured');
       return res.status(500).json({ error: 'Server configuration error' });
     }
 
     if (username !== validUsername) {
-      // Add delay to prevent timing attacks
       await new Promise(resolve => setTimeout(resolve, 1000));
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -70,20 +99,22 @@ const adminAuthBasic = async (req, res, next) => {
     const isValidPassword = await bcrypt.compare(password, validPasswordHash);
 
     if (!isValidPassword) {
-      // Add delay to prevent brute force
       await new Promise(resolve => setTimeout(resolve, 1000));
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
     req.user = { username, role: 'admin' };
     next();
+
   } catch (error) {
-    console.error('Auth error:', error);
-    return res.status(401).json({ error: 'Authentication failed' });
+    console.error('Basic auth error:', error);
+    res.status(500).json({ error: 'Authentication failed' });
   }
 };
 
+// Export both middleware options
 module.exports = {
-  adminAuthJWT,
-  adminAuthBasic
+  adminAuthJWT,     // ✅ Use this for cookie-based JWT auth
+  adminAuthBasic,   // Legacy Basic Auth
+  adminAuth: adminAuthJWT  // Default export is JWT
 };

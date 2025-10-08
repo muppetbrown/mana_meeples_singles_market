@@ -12,10 +12,7 @@ const db = global.db;
 // ============================================
 // AUTHENTICATION MIDDLEWARE
 // ============================================
-const { adminAuthBasic } = require('../middleware/auth');
-
-// Use secure Basic Auth with bcrypt
-const adminAuth = adminAuthBasic;
+const { adminAuthJWT: adminAuth } = require('../middleware/auth');
 
 // Rate limiting middleware (simple in-memory implementation)
 const rateLimitStore = new Map();
