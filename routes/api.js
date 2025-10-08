@@ -697,7 +697,7 @@ router.get('/filters', async (req, res) => {
 });
 
 // GET /api/filters/counts - Get filter counts for dynamic UI
-router.get('/filters/counts', async (req, res) => {
+router.get('/filters/counts', lenientRateLimit, async (req, res) => {
   try {
     const { game_id, quality, rarity, foil_type, language = 'English' } = req.query;
 
