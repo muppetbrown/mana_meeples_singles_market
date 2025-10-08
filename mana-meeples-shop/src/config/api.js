@@ -16,7 +16,7 @@ const getApiUrl = () => {
     // Always use production API when on production domain, regardless of build-time env vars
     if (hostname === 'manaandmeeples.co.nz' || hostname === 'www.manaandmeeples.co.nz') {
       console.log('✅ FORCING production API for production domain (overriding build-time env)');
-      return 'https://manaandmeeples.co.nz/api';
+      return 'https://mana-meeples-singles-market.onrender.com/api';
     }
 
     // Also check for any non-localhost hostname that might be production
@@ -24,7 +24,7 @@ const getApiUrl = () => {
       // If we're not on localhost but have a localhost API URL, it's likely a build-time error
       if (process.env.REACT_APP_API_URL && process.env.REACT_APP_API_URL.includes('localhost')) {
         console.log('⚠️  OVERRIDING localhost API URL detected on non-localhost domain');
-        return 'https://manaandmeeples.co.nz/api';
+        return 'https://mana-meeples-singles-market.onrender.com/api';
       }
     }
   }
