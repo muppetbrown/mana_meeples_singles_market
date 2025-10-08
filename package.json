@@ -5,7 +5,12 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js"
+    "dev": "nodemon server.js",
+    "build": "cd mana-meeples-shop && npm install && npm run build",
+    "postinstall": "npm run build",
+    "dev:frontend": "cd mana-meeples-shop && npm start",
+    "clean": "rm -rf mana-meeples-shop/build mana-meeples-shop/node_modules node_modules",
+    "build:production": "NODE_ENV=production npm run build"
   },
   "keywords": [
     "tcg",
