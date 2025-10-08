@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 // Admin login endpoint
-router.post('/admin/login', async (req, res) => {
+router.post('/admin/login', strictRateLimit,  async (req, res) => {
   try {
     const { username, password } = req.body;
 
