@@ -40,6 +40,7 @@ const AdminDashboard = () => {
   const [showLowStock, setShowLowStock] = useState(false);
   const [showInStock, setShowInStock] = useState(false);
   const [showZeroStock, setShowZeroStock] = useState(false);
+  const [showZeroStockQualities, setShowZeroStockQualities] = useState(false);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingItems, setEditingItems] = useState(new Map());
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
@@ -166,15 +167,29 @@ const AdminDashboard = () => {
       return acc;
     }, {});
 
-    return Object.entries(groups).map(([key, group]) => ({
-      ...group,
-      key,
-      qualities: group.qualities.sort((a, b) => {
-        const qualityOrder = { 'Near Mint': 1, 'Lightly Played': 2, 'Moderately Played': 3, 'Heavily Played': 4, 'Damaged': 5 };
-        return (qualityOrder[a.quality] || 999) - (qualityOrder[b.quality] || 999);
-      })
-    }));
-  }, [inventory]);
+    return Object.entries(groups).map(([key, group]) => {
+      const filteredQualities = group.qualities
+        .filter(quality => showZeroStockQualities || quality.stock > 0)
+        .sort((a, b) => {
+          const qualityOrder = { 'Near Mint': 1, 'Lightly Played': 2, 'Moderately Played': 3, 'Heavily Played': 4, 'Damaged': 5 };
+          return (qualityOrder[a.quality] || 999) - (qualityOrder[b.quality] || 999);
+        });
+
+      // Recalculate totals based on filtered qualities
+      const filteredTotalValue = filteredQualities.reduce((sum, quality) => sum + (quality.price * quality.stock), 0);
+      const filteredTotalStock = filteredQualities.reduce((sum, quality) => sum + quality.stock, 0);
+      const filteredHasLowStock = filteredQualities.some(quality => quality.stock > 0 && quality.stock <= quality.low_stock_threshold);
+
+      return {
+        ...group,
+        key,
+        qualities: filteredQualities,
+        totalValue: filteredTotalValue,
+        totalStock: filteredTotalStock,
+        hasLowStock: filteredHasLowStock
+      };
+    }).filter(group => group.qualities.length > 0); // Remove cards with no visible qualities
+  }, [inventory, showZeroStockQualities]);
 
   const filteredInventory = useMemo(() => {
     return groupedInventory.filter(group => {
@@ -807,6 +822,19 @@ const AdminDashboard = () => {
                 />
                 <span className="text-sm font-medium text-slate-700">
                   Show Zero Stock
+                </span>
+              </label>
+            </div>
+            <div className="flex items-end">
+              <label className="flex items-center gap-2 cursor-pointer select-none">
+                <input
+                  type="checkbox"
+                  checked={showZeroStockQualities}
+                  onChange={(e) => setShowZeroStockQualities(e.target.checked)}
+                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                />
+                <span className="text-sm font-medium text-slate-700">
+                  Show Zero Stock Qualities
                 </span>
               </label>
             </div>
