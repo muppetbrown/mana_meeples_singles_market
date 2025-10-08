@@ -3,6 +3,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const cookieParser = require('cookie-parser');
+const path = require('path');
 const { Pool } = require('pg');
 require('dotenv').config();
 
@@ -90,6 +91,43 @@ async function testDatabaseConnection(retries = 3) {
 testDatabaseConnection();
 
 // ============================================
+// ENVIRONMENT VALIDATION
+// ============================================
+function validateEnvironment() {
+  const required = ['DATABASE_URL'];
+  const production = ['JWT_SECRET', 'ADMIN_USERNAME', 'ADMIN_PASSWORD_HASH'];
+
+  const missing = [];
+
+  required.forEach(env => {
+    if (!process.env[env]) {
+      missing.push(env);
+    }
+  });
+
+  if (process.env.NODE_ENV === 'production') {
+    production.forEach(env => {
+      if (!process.env[env]) {
+        missing.push(env);
+      }
+    });
+  }
+
+  if (missing.length > 0) {
+    console.error('❌ Missing required environment variables:', missing.join(', '));
+    console.error('⚠️  Server may not function correctly');
+    if (process.env.NODE_ENV === 'production') {
+      console.error('🛑 Exiting due to missing production environment variables');
+      process.exit(1);
+    }
+  } else {
+    console.log('✅ All required environment variables are set');
+  }
+}
+
+validateEnvironment();
+
+// ============================================
 // SECURITY MIDDLEWARE
 // ============================================
 app.use(helmet({
@@ -105,9 +143,14 @@ app.use(helmet({
 }));
 
 // CORS configuration
-const allowedOrigins = process.env.ALLOWED_ORIGINS 
+const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(origin => origin.trim())
   : ['http://localhost:3000'];
+
+// In production, also allow the current domain for frontend requests
+if (process.env.NODE_ENV === 'production' && process.env.RENDER_EXTERNAL_URL) {
+  allowedOrigins.push(process.env.RENDER_EXTERNAL_URL);
+}
 
 app.use(cors({
   origin: (origin, callback) => {
@@ -210,6 +253,39 @@ app.get('/api/db-stats', async (req, res) => {
     res.status(500).json({ error: 'Failed to get database stats' });
   }
 });
+
+// ============================================
+// STATIC FILE SERVING (React Frontend)
+// ============================================
+// Serve React app static files in production
+if (process.env.NODE_ENV === 'production') {
+  const buildPath = path.join(__dirname, 'mana-meeples-shop/build');
+
+  // Serve static files at /shop path
+  app.use('/shop', express.static(buildPath, {
+    maxAge: '1d', // Cache static assets for 1 day
+    etag: true,
+    lastModified: true
+  }));
+
+  // Catch all handler for React Router (must be after API routes)
+  app.get('/shop/*', (req, res) => {
+    res.sendFile(path.join(buildPath, 'index.html'));
+  });
+
+  // Optional: Redirect root to /shop
+  app.get('/', (req, res) => {
+    res.redirect('/shop');
+  });
+} else {
+  // Development mode - provide info about static serving
+  app.get('/shop', (req, res) => {
+    res.json({
+      message: 'Development mode: React app should be served by react-scripts on port 3000',
+      production: 'In production, this will serve the built React app'
+    });
+  });
+}
 
 // ============================================
 // ERROR HANDLING
