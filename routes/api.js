@@ -14,8 +14,11 @@ const db = global.db;
 // ============================================
 const { adminAuthJWT: adminAuth } = require('../middleware/auth');
 
-// Rate limiting middleware (simple in-memory implementation)
+// ============================================
+// RATE LIMITING MIDDLEWARE
+// ============================================
 const rateLimitStore = new Map();
+
 const rateLimit = (windowMs = 60000, maxRequests = 100) => (req, res, next) => {
   const clientId = req.ip || req.connection.remoteAddress;
   const now = Date.now();
@@ -32,7 +35,12 @@ const rateLimit = (windowMs = 60000, maxRequests = 100) => (req, res, next) => {
   const clientRequests = rateLimitStore.get(clientId) || [];
 
   if (clientRequests.length >= maxRequests) {
-    return res.status(429).json({ error: 'Too many requests' });
+    // Add Retry-After header to help clients
+    res.setHeader('Retry-After', Math.ceil(windowMs / 1000));
+    return res.status(429).json({ 
+      error: 'Too many requests',
+      retryAfter: Math.ceil(windowMs / 1000)
+    });
   }
 
   clientRequests.push(now);
@@ -40,8 +48,17 @@ const rateLimit = (windowMs = 60000, maxRequests = 100) => (req, res, next) => {
   next();
 };
 
+// Different limits for different endpoints
+const strictRateLimit = rateLimit(60000, 30);  // 30 req/min for expensive operations
+const normalRateLimit = rateLimit(60000, 100); // 100 req/min for normal operations
+const lenientRateLimit = rateLimit(60000, 200); // 200 req/min for light operations
+
+// ============================================
+// PUBLIC ROUTES
+// ============================================
+
 // GET /api/games - Get all active games
-router.get('/games', async (req, res) => {
+router.get('/games', normalRateLimit, async (req, res) => {
   try {
     const games = await db.query(
       'SELECT id, name, code FROM games WHERE active = true ORDER BY name'
@@ -53,7 +70,7 @@ router.get('/games', async (req, res) => {
 });
 
 // GET /api/sets?game_id=1 - Get sets for a game
-router.get('/sets', async (req, res) => {
+router.get('/sets', normalRateLimit, async (req, res) => {
   try {
     const { game_id } = req.query;
     const query = game_id 
@@ -71,7 +88,7 @@ router.get('/sets', async (req, res) => {
 });
 
 // GET /api/cards - Get cards with advanced filtering and pagination
-router.get('/cards', rateLimit(60000, 200), async (req, res) => {
+router.get('/cards', strictRateLimit, async (req, res) => {
   try {
     const {
       game_id,
@@ -94,11 +111,18 @@ router.get('/cards', rateLimit(60000, 200), async (req, res) => {
 
     // Input validation and sanitization
     const sanitizedPage = Math.max(1, parseInt(page) || 1);
-    const sanitizedLimit = Math.min(200, Math.max(1, parseInt(limit) || 20)); // Cap at 200
+    const sanitizedLimit = Math.min(1000, Math.max(1, parseInt(limit) || 20)); // Cap at 1000
     const sanitizedMinPrice = min_price ? Math.max(0, parseFloat(min_price) || 0) : null;
     const sanitizedMaxPrice = max_price ? Math.max(0, parseFloat(max_price) || 0) : null;
     const sanitizedGameId = game_id ? parseInt(game_id) || null : null;
     const sanitizedSetId = set_id ? parseInt(set_id) || null : null;
+
+    // Block unreasonably large requests for non-admin users
+    if (sanitizedLimit > 100 && !req.user?.isAdmin) {
+      return res.status(400).json({ 
+        error: 'Limit too high. Maximum allowed is 100 for public access.' 
+      });
+    }
 
     let query = `
       SELECT
@@ -226,7 +250,6 @@ router.get('/cards', rateLimit(60000, 200), async (req, res) => {
 
     if (search) {
       // When searching, prioritize by relevance first, then by selected sort field
-      // Use parameterized queries to prevent SQL injection
       const searchParam1 = paramCount++;
       const searchParam2 = paramCount++;
       const searchParam3 = paramCount++;
@@ -238,7 +261,7 @@ router.get('/cards', rateLimit(60000, 200), async (req, res) => {
         similarity(c.card_number, $${searchParam3}) * 0.6
       ) DESC, ${sortField} ${order}`;
     } else if (sort_by === 'number') {
-      // Safe numeric sorting for card numbers that may contain non-numeric characters
+      // Safe numeric sorting for card numbers
       query += ` ORDER BY NULLIF(regexp_replace(c.card_number, '\\D','','g'),'')::int ${order} NULLS LAST, c.card_number ${order}`;
     } else {
       query += ` ORDER BY ${sortField} ${order}`;
@@ -1488,5 +1511,5 @@ router.post('/admin/refresh-prices', adminAuth, async (req, res) => {
   }
 });
 
-// Export the router - THIS IS REQUIRED!
+// Export the router
 module.exports = router;

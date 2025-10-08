@@ -1,23 +1,62 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useRef } from 'react';
+
+// Global cache to persist across component remounts
+const globalCache = {
+  data: null,
+  timestamp: null,
+  filters: null
+};
+
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+const DEBOUNCE_DELAY = 500; // Increased from 300ms
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 2000; // 2 seconds between retries
 
 /**
- * Hook for managing filter counts
- * Provides real-time counts for filter options
+ * Hook for managing filter counts with aggressive caching and rate limit protection
  */
 export const useFilterCounts = (API_URL, currentFilters = {}) => {
-  const [filterCounts, setFilterCounts] = useState({});
+  const [filterCounts, setFilterCounts] = useState(globalCache.data || {});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  
+  const debounceTimerRef = useRef(null);
+  const abortControllerRef = useRef(null);
+  const lastFetchRef = useRef(0);
 
-  // Fetch filter counts from API
-  const fetchFilterCounts = async (filters = {}) => {
+  // Check if cached data is still valid
+  const isCacheValid = () => {
+    if (!globalCache.data || !globalCache.timestamp) return false;
+    
+    const cacheAge = Date.now() - globalCache.timestamp;
+    const filtersMatch = JSON.stringify(globalCache.filters) === JSON.stringify(currentFilters);
+    
+    return cacheAge < CACHE_DURATION && filtersMatch;
+  };
+
+  // Fetch filter counts with retry logic
+  const fetchFilterCounts = async (filters = {}, retryCount = 0) => {
+    // Rate limiting: prevent requests within 1 second of last request
+    const now = Date.now();
+    if (now - lastFetchRef.current < 1000) {
+      console.log('Rate limiting: skipping request');
+      return;
+    }
+    lastFetchRef.current = now;
+
+    // Abort previous request if still pending
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    abortControllerRef.current = new AbortController();
     setIsLoading(true);
     setError(null);
 
     try {
       const queryParams = new URLSearchParams();
 
-      // Add current filters (excluding the one being counted)
+      // Add current filters
       Object.entries(filters).forEach(([key, value]) => {
         if (value && value !== 'all') {
           queryParams.append(key, value);
@@ -28,132 +67,90 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        signal: abortControllerRef.current.signal
       });
 
+      if (response.status === 429) {
+        // Rate limited - don't retry immediately, use cached data
+        if (retryCount < MAX_RETRIES) {
+          console.warn(`Rate limited, retry ${retryCount + 1}/${MAX_RETRIES} in ${RETRY_DELAY}ms`);
+          await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, retryCount)));
+          return fetchFilterCounts(filters, retryCount + 1);
+        } else {
+          throw new Error('Rate limit exceeded. Using cached data.');
+        }
+      }
+
       if (!response.ok) {
-        // If API endpoint doesn't exist, calculate counts client-side
-        throw new Error(`Filter counts API not available: ${response.status}`);
+        throw new Error(`API error: ${response.status}`);
       }
 
       const data = await response.json();
+      
+      // Update global cache
+      globalCache.data = data;
+      globalCache.timestamp = Date.now();
+      globalCache.filters = filters;
+      
       setFilterCounts(data);
+      setError(null);
     } catch (error) {
-      console.warn('Filter counts API not available, using fallback:', error.message);
-      setError(error.message);
+      if (error.name === 'AbortError') {
+        console.log('Request aborted');
+        return;
+      }
 
-      // Fallback: fetch all cards and calculate counts client-side
-      await fetchAndCalculateCounts(filters);
+      console.error('Filter counts error:', error.message);
+      setError(error.message);
+      
+      // Use cached data if available, don't fall back to fetching all cards
+      if (globalCache.data) {
+        console.log('Using cached filter counts');
+        setFilterCounts(globalCache.data);
+      } else {
+        // Only show empty counts on first load failure
+        setFilterCounts({
+          rarities: {},
+          qualities: {},
+          games: {},
+          sets: {},
+          foilTypes: {}
+        });
+      }
     } finally {
       setIsLoading(false);
     }
   };
 
-  // Fallback: Calculate counts from all cards
-  const fetchAndCalculateCounts = async (filters) => {
-    try {
-      const queryParams = new URLSearchParams();
-      queryParams.append('limit', '10000'); // Get all cards for counting
-
-      const response = await fetch(`${API_URL}/cards?${queryParams}`);
-      if (!response.ok) throw new Error('Failed to fetch cards for counting');
-
-      const data = await response.json();
-      const counts = calculateFilterCounts(data.cards, filters);
-      setFilterCounts(counts);
-    } catch (error) {
-      console.error('Failed to calculate filter counts:', error);
-      setError(error.message);
-    }
-  };
-
-  // Calculate filter counts from card data
-  const calculateFilterCounts = (cards, currentFilters) => {
-    const counts = {
-      rarities: {},
-      qualities: {},
-      games: {},
-      sets: {},
-      foilTypes: {}
-    };
-
-    // Filter cards based on current filters (excluding the category being counted)
-    const getFilteredCards = (excludeKey) => {
-      return cards.filter(card => {
-        return Object.entries(currentFilters).every(([key, value]) => {
-          if (key === excludeKey || !value || value === 'all') return true;
-
-          switch (key) {
-            case 'game':
-              return card.game === value;
-            case 'rarity':
-              return card.rarity === value;
-            case 'quality':
-              return card.variations?.some(v => v.quality === value);
-            case 'set':
-              return card.set_name === value;
-            case 'foil':
-              return card.variations?.some(v =>
-                value === 'foil' ? v.foil_type !== 'Non-foil' : v.foil_type === 'Non-foil'
-              );
-            default:
-              return true;
-          }
-        });
-      });
-    };
-
-    // Count rarities
-    const cardsForRarity = getFilteredCards('rarity');
-    cardsForRarity.forEach(card => {
-      counts.rarities[card.rarity] = (counts.rarities[card.rarity] || 0) + 1;
-    });
-
-    // Count qualities
-    const cardsForQuality = getFilteredCards('quality');
-    cardsForQuality.forEach(card => {
-      card.variations?.forEach(variant => {
-        counts.qualities[variant.quality] = (counts.qualities[variant.quality] || 0) + 1;
-      });
-    });
-
-    // Count games
-    const cardsForGame = getFilteredCards('game');
-    cardsForGame.forEach(card => {
-      counts.games[card.game] = (counts.games[card.game] || 0) + 1;
-    });
-
-    // Count sets
-    const cardsForSet = getFilteredCards('set');
-    cardsForSet.forEach(card => {
-      counts.sets[card.set_name] = (counts.sets[card.set_name] || 0) + 1;
-    });
-
-    // Count foil types
-    const cardsForFoil = getFilteredCards('foil');
-    const foilCounts = { foil: 0, 'non-foil': 0 };
-    cardsForFoil.forEach(card => {
-      card.variations?.forEach(variant => {
-        if (variant.foil_type === 'Non-foil') {
-          foilCounts['non-foil']++;
-        } else {
-          foilCounts.foil++;
-        }
-      });
-    });
-    counts.foilTypes = foilCounts;
-
-    return counts;
-  };
-
-  // Update counts when filters change
+  // Update counts when filters change with debouncing
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      fetchFilterCounts(currentFilters);
-    }, 300); // Debounce API calls
+    // Check cache first
+    if (isCacheValid()) {
+      console.log('Using valid cached filter counts');
+      setFilterCounts(globalCache.data);
+      return;
+    }
 
-    return () => clearTimeout(timeoutId);
-  }, [currentFilters, API_URL]);
+    // Clear existing timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Debounce the API call
+    debounceTimerRef.current = setTimeout(() => {
+      fetchFilterCounts(currentFilters);
+    }, DEBOUNCE_DELAY);
+
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [JSON.stringify(currentFilters), API_URL]);
 
   // Format count for display
   const formatCount = (count) => {
@@ -187,6 +184,11 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
     error,
     getCount,
     getOptionsWithCounts,
-    refreshCounts: () => fetchFilterCounts(currentFilters)
+    refreshCounts: () => {
+      // Clear cache on manual refresh
+      globalCache.data = null;
+      globalCache.timestamp = null;
+      fetchFilterCounts(currentFilters);
+    }
   };
 };
