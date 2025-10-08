@@ -158,7 +158,7 @@ const OptimizedImage = ({
  * Useful for integration with CDN services
  */
 export const useResponsiveImage = (baseSrc, options = {}) => {
-  const { width, height, quality = 85, format = 'auto' } = options;
+  const { quality = 85, format = 'auto' } = options;
 
   return useMemo(() => {
     if (!baseSrc) return { src: '', srcSet: '' };
