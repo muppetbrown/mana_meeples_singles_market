@@ -171,7 +171,7 @@ export const useResponsiveImage = (baseSrc, options = {}) => {
       .join(', ');
 
     return { src, srcSet };
-  }, [baseSrc, width, height, quality, format]);
+  }, [baseSrc, quality, format]);
 };
 
 /**

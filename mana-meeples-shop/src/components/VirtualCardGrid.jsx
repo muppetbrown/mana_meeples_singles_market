@@ -42,7 +42,6 @@ const VirtualCardGrid = ({
     handleScroll,
     updateContainerSize,
     responsiveColumnCount,
-    scrollToItem,
     visibleRange
   } = useVirtualScrolling({
     items: displayCards,

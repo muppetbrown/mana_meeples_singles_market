@@ -458,11 +458,11 @@ const TCGShop = () => {
     }
   }, [cart, showCart]);
 
-  const addToCart = (item) => {
-    const existingItem = cart.find(c => 
+  const addToCart = useCallback((item) => {
+    const existingItem = cart.find(c =>
       c.id === item.id && c.quality === item.quality
     );
-    
+
     if (existingItem) {
       if (existingItem.quantity < item.stock) {
         setCart(cart.map(c =>
@@ -472,7 +472,7 @@ const TCGShop = () => {
         ));
       }
     } else {
-      setCart([...cart, { 
+      setCart([...cart, {
         id: item.id,
         inventory_id: item.inventory_id,
         name: item.name,
@@ -483,7 +483,7 @@ const TCGShop = () => {
         quantity: 1
       }]);
     }
-  };
+  }, [cart, setCart]);
 
   const updateCartQuantity = (id, quality, delta) => {
     setCart(cart.map(item => {
