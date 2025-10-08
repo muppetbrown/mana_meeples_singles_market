@@ -168,8 +168,12 @@ app.use(cors({
   origin: (origin, callback) => {
     // Allow requests with no origin (mobile apps, Postman, curl, etc.)
     if (!origin) return callback(null, true);
-    
+
+    console.log('🔍 CORS Debug - Origin:', origin);
+    console.log('🔍 CORS Debug - Allowed origins:', allowedOrigins);
+
     if (allowedOrigins.includes(origin)) {
+      console.log('✅ CORS allowed for origin:', origin);
       callback(null, true);
     } else {
       console.warn('⚠️  Blocked CORS request from:', origin);
@@ -177,7 +181,10 @@ app.use(cors({
       callback(new Error('Not allowed by CORS'));
     }
   },
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200 // Some legacy browsers (IE11, various SmartTVs) choke on 204
 }));
 
 // Cookie parser (for JWT tokens)
@@ -264,6 +271,20 @@ app.get('/api/db-stats', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Failed to get database stats' });
   }
+});
+
+// CORS debug endpoint (useful for debugging)
+app.get('/api/cors-debug', (req, res) => {
+  res.json({
+    allowedOrigins,
+    environmentVariables: {
+      ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
+      ADDITIONAL_CORS_ORIGINS: process.env.ADDITIONAL_CORS_ORIGINS,
+      NODE_ENV: process.env.NODE_ENV
+    },
+    requestOrigin: req.get('Origin'),
+    requestHost: req.get('Host')
+  });
 });
 
 // ============================================
