@@ -39,7 +39,7 @@ const AdminDashboard = () => {
   const [filterPriceSource, setFilterPriceSource] = useState('all');
   const [showLowStock, setShowLowStock] = useState(false);
   const [showInStock, setShowInStock] = useState(false);
-  const [showZeroStock, setShowZeroStock] = useState(true);
+  const [showZeroStock, setShowZeroStock] = useState(false);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingItems, setEditingItems] = useState(new Map());
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
@@ -353,23 +353,44 @@ const AdminDashboard = () => {
   const refreshPrices = async () => {
     setLoading(true);
     try {
+      console.log('🔄 Starting price refresh...');
       const response = await fetch(`${API_URL}/admin/refresh-prices`, {
         method: 'POST',
         credentials: 'include',
         headers: getAdminHeaders()
       });
 
+      console.log('📊 Price refresh response status:', response.status);
+
       if (response.ok) {
         const result = await response.json();
-        alert(`Price refresh completed!\n\nUpdated: ${result.updated} items\nTotal processed: ${result.total} MTG cards\n\n${result.errors?.length > 0 ? 'Errors: ' + result.errors.length : 'No errors'}`);
+        console.log('✅ Price refresh completed:', result);
+
+        const errorDetails = result.errors?.length > 0
+          ? `\n\nErrors (${result.errors.length}):\n${result.errors.slice(0, 3).join('\n')}${result.errors.length > 3 ? '\n...' : ''}`
+          : '\n\nNo errors occurred.';
+
+        alert(`Price refresh completed!\n\nUpdated: ${result.updated} items\nTotal processed: ${result.total} MTG cards${errorDetails}`);
         window.location.reload();
       } else {
-        const error = await response.json();
-        throw new Error(error.details || 'Failed to refresh prices');
+        const error = await response.json().catch(() => ({ details: `HTTP ${response.status}: ${response.statusText}` }));
+        console.error('❌ Price refresh API error:', error);
+        throw new Error(error.details || error.error || 'Failed to refresh prices');
       }
     } catch (error) {
-      console.error('Price refresh error:', error);
-      alert(`Price refresh failed: ${error.message}`);
+      console.error('❌ Price refresh error:', error);
+
+      // Provide more helpful error messages
+      let errorMessage = 'Price refresh failed: ';
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        errorMessage += 'Network connection failed. Please check your internet connection.';
+      } else if (error.message.includes('401') || error.message.includes('unauthorized')) {
+        errorMessage += 'Authentication failed. Please try logging in again.';
+      } else {
+        errorMessage += error.message || 'Unknown error occurred.';
+      }
+
+      alert(errorMessage);
     } finally {
       setLoading(false);
     }
