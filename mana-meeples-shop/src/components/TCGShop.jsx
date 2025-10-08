@@ -3,11 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
 import { useFilterCounts } from '../hooks/useFilterCounts';
+import { API_URL } from '../config/api';
 
 // Lazy load VirtualCardGrid for code splitting
 const VirtualCardGrid = React.lazy(() => import('./VirtualCardGrid'));
-
-import { API_URL } from '../config/api';
 
 // Helper function to highlight matching text in suggestions
 const highlightMatch = (text, query) => {
