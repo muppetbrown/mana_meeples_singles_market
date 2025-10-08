@@ -304,7 +304,7 @@ router.get('/cards', strictRateLimit, async (req, res) => {
   }
 });
 
-// GET /api/admin/inventory - Get ALL inventory including zero stock
+// GET /api/admin/inventory - Get ALL inventory with dynamic quality/foil combinations
 router.get('/admin/inventory', adminAuth, async (req, res) => {
   try {
     const {
@@ -322,9 +322,10 @@ router.get('/admin/inventory', adminAuth, async (req, res) => {
     const sanitizedGameId = game_id ? parseInt(game_id) || null : null;
     const sanitizedSetId = set_id ? parseInt(set_id) || null : null;
 
-    let query = `
+    // Step 1: Get all cards with their base pricing
+    let cardQuery = `
       SELECT
-        c.id,
+        c.id as card_id,
         c.name,
         c.card_number,
         c.rarity,
@@ -334,19 +335,14 @@ router.get('/admin/inventory', adminAuth, async (req, res) => {
         g.name as game_name,
         cs.name as set_name,
         cs.code as set_code,
-        ci.quality,
-        ci.stock_quantity,
-        ci.price,
-        ci.price_source,
-        ci.id as inventory_id,
-        ci.foil_type,
-        ci.language,
-        ci.updated_at,
-        ci.last_price_update
+        cp.base_price,
+        cp.foil_price,
+        cp.price_source as pricing_source,
+        cp.updated_at as pricing_updated_at
       FROM cards c
       JOIN games g ON c.game_id = g.id
       JOIN card_sets cs ON c.set_id = cs.id
-      JOIN card_inventory ci ON ci.card_id = c.id
+      LEFT JOIN card_pricing cp ON cp.card_id = c.id
     `;
 
     const params = [];
@@ -376,36 +372,125 @@ router.get('/admin/inventory', adminAuth, async (req, res) => {
       paramCount++;
     }
 
-    if (quality) {
-      conditions.push(`ci.quality = $${paramCount}`);
-      params.push(quality);
-      paramCount++;
-    }
-
     if (conditions.length > 0) {
-      query += ' WHERE ' + conditions.join(' AND ');
+      cardQuery += ' WHERE ' + conditions.join(' AND ');
     }
 
     // Sorting
     const validSortFields = {
       name: 'c.name',
-      price: 'ci.price',
-      stock: 'ci.stock_quantity'
+      rarity: 'c.rarity',
+      set: 'cs.name'
     };
     const sortField = validSortFields[sort_by] || 'c.name';
     const order = sort_order === 'desc' ? 'DESC' : 'ASC';
-    query += ` ORDER BY ${sortField} ${order}`;
+    cardQuery += ` ORDER BY ${sortField} ${order}`;
 
     // Pagination
     const offset = (page - 1) * limit;
-    query += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
+    cardQuery += ` LIMIT $${paramCount} OFFSET $${paramCount + 1}`;
     params.push(limit, offset);
 
-    const result = await db.query(query, params);
+    const cardResults = await db.query(cardQuery, params);
+
+    // Step 2: Get existing inventory for these cards
+    const cardIds = cardResults.rows.map(card => card.card_id);
+    let existingInventory = [];
+
+    if (cardIds.length > 0) {
+      const inventoryQuery = `
+        SELECT
+          ci.card_id,
+          ci.id as inventory_id,
+          ci.quality,
+          ci.foil_type,
+          ci.language,
+          ci.stock_quantity,
+          ci.price,
+          ci.price_source,
+          ci.updated_at,
+          ci.last_price_update
+        FROM card_inventory ci
+        WHERE ci.card_id = ANY($1)
+      `;
+
+      const inventoryResult = await db.query(inventoryQuery, [cardIds]);
+      existingInventory = inventoryResult.rows;
+    }
+
+    // Step 3: Generate dynamic inventory entries
+    const inventoryEntries = [];
+    const qualities = [
+      { name: 'Near Mint', discount: 0 },
+      { name: 'Lightly Played', discount: 0.1 },
+      { name: 'Moderately Played', discount: 0.2 },
+      { name: 'Heavily Played', discount: 0.3 },
+      { name: 'Damaged', discount: 0.5 }
+    ];
+    const foilTypes = ['Regular', 'Foil'];
+    const languages = ['English'];
+
+    for (const card of cardResults.rows) {
+      // Get existing inventory for this card
+      const cardInventory = existingInventory.filter(inv => inv.card_id === card.card_id);
+      const cardInventoryMap = new Map();
+
+      // Map existing inventory by quality-foil-language combination
+      cardInventory.forEach(inv => {
+        const key = `${inv.quality}-${inv.foil_type}-${inv.language}`;
+        cardInventoryMap.set(key, inv);
+      });
+
+      // Generate entries for all quality/foil/language combinations
+      for (const qualityObj of qualities) {
+        for (const foilType of foilTypes) {
+          for (const language of languages) {
+            const key = `${qualityObj.name}-${foilType}-${language}`;
+            const existing = cardInventoryMap.get(key);
+
+            // Skip if quality filter is specified and doesn't match
+            if (quality && qualityObj.name !== quality) {
+              continue;
+            }
+
+            // Calculate price based on base pricing
+            let calculatedPrice = 0;
+            if (card.base_price && card.foil_price) {
+              const basePrice = foilType === 'Foil' ? parseFloat(card.foil_price) : parseFloat(card.base_price);
+              calculatedPrice = Math.max(0.25, basePrice * (1 - qualityObj.discount));
+            }
+
+            inventoryEntries.push({
+              id: existing ? existing.inventory_id : `virtual-${card.card_id}-${key}`,
+              name: card.name,
+              card_number: card.card_number,
+              rarity: card.rarity,
+              card_type: card.card_type,
+              description: card.description,
+              image_url: card.image_url,
+              game_name: card.game_name,
+              set_name: card.set_name,
+              set_code: card.set_code,
+              quality: qualityObj.name,
+              foil_type: foilType,
+              language: language,
+              stock_quantity: existing ? existing.stock_quantity : 0,
+              price: existing ? parseFloat(existing.price) : calculatedPrice,
+              price_source: existing ? existing.price_source : (card.pricing_source || 'calculated'),
+              inventory_id: existing ? existing.inventory_id : null,
+              updated_at: existing ? existing.updated_at : card.pricing_updated_at,
+              last_price_update: existing ? existing.last_price_update : card.pricing_updated_at,
+              card_id: card.card_id,
+              is_virtual: !existing // Flag to indicate if this is a calculated entry
+            });
+          }
+        }
+      }
+    }
 
     res.json({
-      inventory: result.rows,
-      total: result.rows.length
+      inventory: inventoryEntries,
+      total: inventoryEntries.length
     });
   } catch (error) {
     console.error('Error fetching admin inventory:', error);
@@ -555,12 +640,43 @@ router.post('/orders', async (req, res) => {
   }
 });
 
-// PUT /api/admin/inventory/:id - Update inventory price and/or stock
+// PUT /api/admin/inventory/:id - Update inventory price and/or stock (handles virtual entries)
 router.put('/admin/inventory/:id', adminAuth, async (req, res) => {
   try {
     const { id } = req.params;
-    const { price, stock_quantity } = req.body;
+    const { price, stock_quantity, quality, foil_type, language, card_id } = req.body;
 
+    // Check if this is a virtual entry (starts with "virtual-")
+    if (id.startsWith('virtual-')) {
+      // Create new inventory entry for virtual entries
+      if (!card_id || !quality || !foil_type) {
+        return res.status(400).json({ error: 'Card ID, quality, and foil type are required for new inventory entries' });
+      }
+
+      const insertQuery = `
+        INSERT INTO card_inventory (card_id, quality, foil_type, language, stock_quantity, price, price_source, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6, 'manual', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+        RETURNING *
+      `;
+
+      const insertParams = [
+        card_id,
+        quality,
+        foil_type || 'Regular',
+        language || 'English',
+        stock_quantity !== undefined ? parseInt(stock_quantity) : 0,
+        price !== undefined ? parseFloat(price) : 0
+      ];
+
+      const result = await db.query(insertQuery, insertParams);
+
+      return res.json({
+        success: true,
+        inventory: result.rows[0]
+      });
+    }
+
+    // Handle existing inventory entries
     let query = 'UPDATE card_inventory SET';
     let updates = [];
     let params = [];
