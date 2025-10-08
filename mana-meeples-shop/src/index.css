@@ -1,11 +1,6 @@
-@import "tailwindcss";
-
-/* Scan all JavaScript/TypeScript files in current directory and subdirectories */
-@source "./**/*.{js,jsx,ts,tsx}";
-
-@config {
-  /* Configuration for Tailwind CSS 4.x */
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 * {
   margin: 0;
