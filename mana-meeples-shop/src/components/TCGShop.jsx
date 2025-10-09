@@ -43,7 +43,9 @@ const SectionHeader = ({ title, count }) => {
   );
 };
 
-// Memoized Card Component for performance - Horizontal layout for grid view
+// Memoized Card Component for Grid View
+// Desktop: Image above, details below (vertical card)
+// Mobile: Image left, details right (horizontal card for better mobile scrolling)
 const CardItem = React.memo(({
   card,
   selectedQuality,
@@ -53,89 +55,88 @@ const CardItem = React.memo(({
   onAddToCart
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200 flex flex-col sm:flex-row h-full">
-      {/* Card Image - Left side on desktop, top on mobile */}
-      <div className="relative flex-shrink-0 sm:w-48 md:w-52 lg:w-56">
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200 flex flex-row lg:flex-col h-full">
+      {/* Card Image - Left on mobile, top on desktop */}
+      <div className="relative flex-shrink-0 w-24 sm:w-32 lg:w-full">
         <OptimizedImage
           src={card.image_url}
           alt={`${card.name} from ${card.set_name}`}
           width={250}
           height={350}
-          className={`w-full h-48 sm:h-full object-cover bg-gradient-to-br from-slate-100 to-slate-200 ${
+          className={`w-full h-32 sm:h-44 lg:h-64 object-cover bg-gradient-to-br from-slate-100 to-slate-200 ${
             selectedVariation?.foil_type !== 'Regular'
               ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
               : ''
           }`}
           placeholder="blur"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 250px, 280px"
+          sizes="(max-width: 640px) 128px, (max-width: 1024px) 192px, 100%"
         />
         {/* Foil Badge */}
         {selectedVariation?.foil_type !== 'Regular' && (
-          <div className="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md border border-yellow-300">
+          <div className="absolute top-1 left-1 lg:top-2 lg:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-full shadow-md border border-yellow-300">
             ✨ {selectedVariation.foil_type}
           </div>
         )}
       </div>
 
-      {/* Card Content - Right side on desktop, bottom on mobile */}
-      <div className="p-4 sm:p-5 flex flex-col gap-3 sm:gap-4 flex-grow min-w-0">
+      {/* Card Content - Right on mobile, bottom on desktop */}
+      <div className="p-3 sm:p-4 lg:p-5 flex flex-col gap-2 lg:gap-3 flex-grow min-w-0">
         {/* Title & Set Info */}
         <div className="flex-shrink-0">
-          <h3 className="font-semibold text-lg leading-tight text-slate-900 mb-2 line-clamp-2">
+          <h3 className="font-semibold text-sm lg:text-lg leading-tight text-slate-900 mb-1 lg:mb-2 line-clamp-2">
             {card.name}
           </h3>
-          <p className="text-sm text-slate-600 pb-3 border-b border-slate-100">
+          <p className="text-xs lg:text-sm text-slate-600 pb-2 lg:pb-3 border-b border-slate-100">
             {card.set_name} • #{card.card_number}
           </p>
         </div>
 
         {/* Condition Selector */}
-        <div className="space-y-2 flex-shrink-0">
+        <div className="space-y-1 lg:space-y-2 flex-shrink-0">
           <label
             htmlFor={`condition-${card.id}`}
             className="block text-xs font-semibold text-slate-700 uppercase tracking-wide"
           >
-            Condition & Finish
+            Condition
           </label>
           <select
             id={`condition-${card.id}`}
             value={selectedQuality}
             onChange={onQualityChange}
-            className="w-full text-sm px-3 py-2.5 border-2 border-slate-300 rounded-lg bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-colors"
+            className="w-full text-xs lg:text-sm px-2 lg:px-3 py-1.5 lg:py-2.5 border-2 border-slate-300 rounded-lg bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-colors"
           >
             {card.variations.map(variation => (
               <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
                 {variation.quality}
-                {variation.foil_type !== 'Regular' ? ` ✨ ${variation.foil_type}` : ''}
+                {variation.foil_type !== 'Regular' ? ` ✨` : ''}
                 {variation.language !== 'English' ? ` • ${variation.language}` : ''}
-                {variation.variation_name ? ` • ${variation.variation_name}` : ''}
               </option>
             ))}
           </select>
         </div>
 
         {/* Availability Status */}
-        <div className="flex items-center gap-2 pb-3 border-b border-slate-100 flex-shrink-0">
+        <div className="flex items-center gap-2 pb-2 lg:pb-3 border-b border-slate-100 flex-shrink-0">
           {selectedVariation?.stock > 0 ? (
             <>
-              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-              <span className="text-sm font-medium text-emerald-700">
-                {selectedVariation.stock} available
+              <div className="w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full bg-emerald-500"></div>
+              <span className="text-xs lg:text-sm font-medium text-emerald-700">
+                {selectedVariation.stock} left
               </span>
             </>
           ) : (
             <>
-              <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-              <span className="text-sm font-medium text-slate-500">Out of stock</span>
+              <div className="w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full bg-slate-400"></div>
+              <span className="text-xs lg:text-sm font-medium text-slate-500">Out of stock</span>
             </>
           )}
         </div>
 
         {/* Price & CTA Section - Pushed to bottom */}
-        <div className="mt-auto pt-2">
+        <div className="mt-auto pt-1 lg:pt-2">
           {/* Price Display */}
-          <div className="mb-3">
-            <div className="text-2xl font-bold text-slate-900 leading-none mb-1">
+          <div className="mb-2 lg:mb-3">
+            <div className="text-lg lg:text-2xl font-bold text-slate-900 leading-none mb-1">
               {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
             </div>
             {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
@@ -149,7 +150,7 @@ const CardItem = React.memo(({
           <button
             onClick={onAddToCart}
             disabled={!selectedVariation || selectedVariation.stock === 0}
-            className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px]"
+            className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm lg:text-base font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px]"
             aria-label={`Add ${card.name} to cart`}
           >
             Add to Cart
@@ -169,8 +170,8 @@ const CardItem = React.memo(({
   );
 });
 
-
 // List Card Item Component for List View
+// Fixed to prevent horizontal scrolling by using fixed widths
 const ListCardItem = React.memo(({
   card,
   selectedQuality,
@@ -181,7 +182,7 @@ const ListCardItem = React.memo(({
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all motion-reduce:transition-none border border-slate-200 overflow-hidden">
-      <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4 min-w-0 w-full">
+      <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
         {/* Card Thumbnail - Fixed small size */}
         <div className="relative w-12 h-16 sm:w-16 sm:h-24 flex-shrink-0">
           <OptimizedImage
@@ -195,8 +196,8 @@ const ListCardItem = React.memo(({
           />
         </div>
 
-        {/* Card Info - Flexible with min width */}
-        <div className="flex-1 min-w-0 max-w-none">
+        {/* Card Info - Flexible with overflow handling */}
+        <div className="flex-1 min-w-0 overflow-hidden">
           <h3 className="font-semibold text-base text-slate-900 truncate mb-0.5">
             {card.name}
           </h3>
@@ -222,13 +223,13 @@ const ListCardItem = React.memo(({
 
         {/* Desktop-only responsive columns with flex layout */}
         <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
-          {/* Condition Selector - More flexible width */}
-          <div className="w-32 md:w-36 lg:w-40">
+          {/* Condition Selector - Fixed max width */}
+          <div className="w-36 max-w-[144px]">
             <select
               id={`condition-list-${card.id}`}
               value={selectedQuality}
               onChange={onQualityChange}
-              className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors"
+              className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors truncate"
             >
               {card.variations.map(variation => (
                 <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
@@ -239,8 +240,8 @@ const ListCardItem = React.memo(({
             </select>
           </div>
 
-          {/* Stock - Flexible width */}
-          <div className="flex items-center gap-2 w-14 md:w-16 lg:w-20">
+          {/* Stock - Fixed width */}
+          <div className="flex items-center gap-2 w-16">
             <div className={`w-2 h-2 rounded-full ${
               selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
             }`}></div>
@@ -249,18 +250,18 @@ const ListCardItem = React.memo(({
             }`}>
               {selectedVariation?.stock > 0
                 ? selectedVariation.stock
-                : 'Out'
+                : '0'
               }
             </span>
           </div>
 
-          {/* Price - Flexible width, right aligned */}
-          <div className="text-right w-20 md:w-24 lg:w-28">
+          {/* Price - Fixed width, right aligned */}
+          <div className="text-right w-24">
             <span className="text-lg font-bold text-slate-900 block leading-none">
               {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
             </span>
             {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
-              <span className="text-[10px] sm:text-xs font-semibold text-red-600 block mt-0.5">
+              <span className="text-xs font-semibold text-red-600 block mt-0.5">
                 {selectedVariation.stock} left
               </span>
             )}
@@ -270,7 +271,7 @@ const ListCardItem = React.memo(({
           <button
             onClick={onAddToCart}
             disabled={!selectedVariation || selectedVariation.stock === 0}
-            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap w-24 md:w-28"
+            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap w-28"
             aria-label={`Add ${card.name} to cart`}
           >
             Add to Cart
@@ -278,7 +279,7 @@ const ListCardItem = React.memo(({
         </div>
 
         {/* Mobile-only Add button */}
-        <div className="sm:hidden">
+        <div className="sm:hidden flex-shrink-0">
           <button
             onClick={onAddToCart}
             disabled={!selectedVariation || selectedVariation.stock === 0}
@@ -1355,7 +1356,7 @@ const TCGShop = () => {
                           />
                         );
                       }}
-                      cardHeight={300}    // ← CHANGED: 300 for horizontal layout instead of 550
+                      cardHeight={500}    // Increased for vertical card layout on desktop
                       containerHeight={800}
                       enableProgressiveLoading={cards.length > 500}
                     />
@@ -1366,7 +1367,7 @@ const TCGShop = () => {
                 <div>
                   {groupedCards.map((group, groupIndex) => (
                     <div key={groupIndex} className="mb-8">
-                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                         <SectionHeader title={group.section} count={group.cards.length} />
                         {group.cards.map(card => {
                           const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
