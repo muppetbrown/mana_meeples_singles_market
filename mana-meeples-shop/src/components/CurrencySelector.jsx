@@ -63,6 +63,9 @@ const CurrencySelector = ({ currency, onCurrencyChange, className = "" }) => {
           setIsOpen(true);
         }
         break;
+      default:
+        // No action for other keys
+        break;
     }
   };
 
@@ -105,7 +108,6 @@ const CurrencySelector = ({ currency, onCurrencyChange, className = "" }) => {
                 currency.code === curr.code ? 'bg-blue-50 hover:bg-blue-100' : ''
               }`}
               role="menuitem"
-              aria-checked={currency.code === curr.code}
             >
               {/* Flag Icon */}
               <div className="w-6 h-6 rounded-full flex items-center justify-center text-lg">
