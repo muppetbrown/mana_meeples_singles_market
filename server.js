@@ -19,7 +19,8 @@ const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === 'production'
     ? {
-        rejectUnauthorized: true
+        rejectUnauthorized: false,  // Allow self-signed certificates in production
+        require: true               // Still require SSL/TLS connection
       }
     : {
         rejectUnauthorized: false
