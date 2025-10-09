@@ -871,7 +871,11 @@ const TCGShop = () => {
       price: selectedVariation.price,
       stock: selectedVariation.stock,
       foil_type: selectedVariation.foil_type,
-      language: selectedVariation.language
+      language: selectedVariation.language,
+      game_name: card.game_name,
+      set_name: card.set_name,
+      card_number: card.card_number,
+      rarity: card.rarity
     });
   }, [addToCart]);
 
@@ -1743,7 +1747,16 @@ const TCGShop = () => {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="truncate font-medium">{item.name}</div>
-                  <div className="text-xs text-slate-600">{item.quality} × {item.quantity}</div>
+                  <div className="text-xs text-slate-600">
+                    <div className="truncate">{item.set_name} #{item.card_number}</div>
+                    <div>{item.quality} × {item.quantity}</div>
+                    {item.foil_type && item.foil_type !== 'Regular' && (
+                      <div className="text-yellow-600">✨ {item.foil_type}</div>
+                    )}
+                    {item.language && item.language !== 'English' && (
+                      <div>{item.language}</div>
+                    )}
+                  </div>
                 </div>
                 <div className="font-semibold text-blue-600">
                   {currency.symbol}{(item.price * item.quantity).toFixed(2)}
@@ -1817,7 +1830,20 @@ const TCGShop = () => {
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-sm mb-1 line-clamp-2">{item.name}</h3>
-                        <p className="text-xs text-slate-600 mb-2">{item.quality}</p>
+                        <div className="text-xs text-slate-600 mb-2 space-y-1">
+                          <div className="font-medium">{item.game_name}</div>
+                          <div>{item.set_name} #{item.card_number}</div>
+                          <div>{item.quality}</div>
+                          {item.foil_type && item.foil_type !== 'Regular' && (
+                            <div className="flex items-center gap-1">
+                              <span>✨</span>
+                              <span className="font-medium text-yellow-600">{item.foil_type}</span>
+                            </div>
+                          )}
+                          {item.language && item.language !== 'English' && (
+                            <div className="font-medium text-slate-700">{item.language}</div>
+                          )}
+                        </div>
                         <p className="text-sm font-bold text-blue-600 mb-3">{currency.symbol}{item.price.toFixed(2)}</p>
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">

@@ -421,7 +421,21 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
                     <h3 className="font-medium text-sm text-slate-900 line-clamp-2">
                       {item.name}
                     </h3>
-                    <p className="text-xs text-slate-600 mt-1">{item.quality}</p>
+                    <div className="text-xs text-slate-600 mt-1 space-y-1">
+                      <div className="font-medium text-slate-800">{item.game_name}</div>
+                      <div>{item.set_name} #{item.card_number}</div>
+                      {item.rarity && <div className="text-slate-500">{item.rarity}</div>}
+                      <div>{item.quality}</div>
+                      {item.foil_type && item.foil_type !== 'Regular' && (
+                        <div className="flex items-center gap-1">
+                          <span>✨</span>
+                          <span className="font-medium text-yellow-600">{item.foil_type}</span>
+                        </div>
+                      )}
+                      {item.language && item.language !== 'English' && (
+                        <div className="font-medium text-slate-700">{item.language}</div>
+                      )}
+                    </div>
                     <div className="flex justify-between items-center mt-2">
                       <span className="text-xs text-slate-600">Qty: {item.quantity}</span>
                       <span className="font-semibold text-slate-900">
