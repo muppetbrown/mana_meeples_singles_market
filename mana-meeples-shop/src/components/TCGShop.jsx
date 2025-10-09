@@ -169,116 +169,6 @@ const CardItem = React.memo(({
   );
 });
 
-// Grid Card Item Component for Grid View
-const GridCardItem = React.memo(({
-  card,
-  selectedQuality,
-  selectedVariation,
-  currency,
-  onQualityChange,
-  onAddToCart
-}) => {
-  return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200">
-      <div className="flex flex-col sm:flex-row">
-        {/* Card Image - Left Side */}
-        <div className="relative sm:w-48 sm:flex-shrink-0">
-          <OptimizedImage
-            src={card.image_url}
-            alt={`${card.name} from ${card.set_name}`}
-            width={250}
-            height={350}
-            className="bg-gradient-to-br from-slate-100 to-slate-200 w-full h-full object-cover"
-            placeholder="blur"
-            sizes="(max-width: 640px) 100vw, 192px"
-          />
-        </div>
-
-        {/* Card Details - Right Side */}
-        <div className="flex-1 p-4 sm:p-5 flex flex-col">
-          {/* Title & Set Info */}
-          <div className="mb-3">
-            <h3 className="font-semibold text-lg leading-tight text-slate-900 mb-1.5">
-              {card.name}
-            </h3>
-            <p className="text-sm text-slate-600">
-              {card.set_name} • #{card.card_number}
-            </p>
-          </div>
-
-          {/* Condition Selector */}
-          <div className="mb-3">
-            <label
-              htmlFor={`condition-grid-${card.id}`}
-              className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5"
-            >
-              Condition & Finish
-            </label>
-            <select
-              id={`condition-grid-${card.id}`}
-              value={selectedQuality}
-              onChange={onQualityChange}
-              className="w-full text-sm px-3 py-2 border-2 border-slate-300 rounded-lg bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-colors"
-            >
-              {card.variations.map(variation => (
-                <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
-                  {variation.quality}
-                  {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
-                  {variation.language !== 'English' ? ` • ${variation.language}` : ''}
-                  {variation.variation_name ? ` • ${variation.variation_name}` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Availability Status */}
-          <div className="flex items-center gap-2 mb-4">
-            {selectedVariation?.stock > 0 ? (
-              <>
-                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
-                <span className="text-sm font-medium text-emerald-700">
-                  {selectedVariation.stock} available
-                </span>
-              </>
-            ) : (
-              <>
-                <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-                <span className="text-sm font-medium text-slate-500">Out of stock</span>
-              </>
-            )}
-          </div>
-
-          {/* Price & CTA Section - Bottom */}
-          <div className="mt-auto pt-3 border-t border-slate-100">
-            <div className="flex items-center justify-between gap-3">
-              {/* Price Display */}
-              <div className="flex flex-col">
-                <span className="text-2xl font-bold text-slate-900 leading-none">
-                  {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
-                </span>
-                {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
-                  <span className="text-xs font-semibold text-red-600 mt-1">
-                    Only {selectedVariation.stock} left!
-                  </span>
-                )}
-              </div>
-
-              {/* Add to Cart Button */}
-              <button
-                onClick={onAddToCart}
-                disabled={!selectedVariation || selectedVariation.stock === 0}
-                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap"
-                aria-label={`Add ${card.name} to cart`}
-              >
-                Add to Cart
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-});
 
 // List Card Item Component for List View
 const ListCardItem = React.memo(({
@@ -431,10 +321,7 @@ const TCGShop = () => {
     addToCart,
     updateQuantity,
     removeFromCart,
-    clearCart,
-    validateCart,
-    checkStock,
-    getCartStats
+    clearCart
   } = useEnhancedCart(API_URL);
 
   // Initialize state from URL parameters
@@ -483,7 +370,7 @@ const TCGShop = () => {
         setLoading(true);
         setError(null);
 
-        const [gamesRes, currencyRes, filtersRes] = await Promise.all([
+        const [gamesRes, , filtersRes] = await Promise.all([
           fetch(`${API_URL}/games`),
           fetch(`${API_URL}/currency/detect`),
           fetch(`${API_URL}/filters`)

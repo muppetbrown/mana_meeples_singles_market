@@ -16,6 +16,23 @@ export const useEnhancedCart = (API_URL) => {
   const syncIntervalRef = useRef(null);
   const isUpdatingRef = useRef(false);
 
+  // Add notification
+  const addNotification = useCallback((message, type = 'info', duration = 5000) => {
+    const notification = {
+      id: Date.now() + Math.random(),
+      message,
+      type,
+      timestamp: Date.now()
+    };
+
+    setCartNotifications(prev => [...prev, notification]);
+
+    // Auto-remove after duration
+    setTimeout(() => {
+      setCartNotifications(prev => prev.filter(n => n.id !== notification.id));
+    }, duration);
+  }, []);
+
   // Load cart from localStorage with expiry check
   const loadCartFromStorage = useCallback(() => {
     try {
@@ -37,7 +54,7 @@ export const useEnhancedCart = (API_URL) => {
       console.error('Failed to load cart from storage:', error);
       return [];
     }
-  }, []);
+  }, [addNotification]);
 
   // Save cart to localStorage with timestamp
   const saveCartToStorage = useCallback((cartData) => {
@@ -54,24 +71,7 @@ export const useEnhancedCart = (API_URL) => {
       console.error('Failed to save cart to storage:', error);
       addNotification('Failed to save cart. Please try again.', 'error');
     }
-  }, []);
-
-  // Add notification
-  const addNotification = useCallback((message, type = 'info', duration = 5000) => {
-    const notification = {
-      id: Date.now() + Math.random(),
-      message,
-      type,
-      timestamp: Date.now()
-    };
-
-    setCartNotifications(prev => [...prev, notification]);
-
-    // Auto-remove after duration
-    setTimeout(() => {
-      setCartNotifications(prev => prev.filter(n => n.id !== notification.id));
-    }, duration);
-  }, []);
+  }, [addNotification]);
 
   // Cross-tab synchronization
   const syncWithStorage = useCallback(() => {
@@ -129,7 +129,7 @@ export const useEnhancedCart = (API_URL) => {
         isUpdatingRef.current = false;
       }, 100);
     }
-  }, [cart, saveCartToStorage]);
+  }, [cart, lastSync, saveCartToStorage]);
 
   // Validate item prices against current market data
   const validateItemPrice = useCallback(async (item) => {
@@ -239,22 +239,6 @@ export const useEnhancedCart = (API_URL) => {
     addNotification(`Added ${item.name} to cart`, 'success', 3000);
   }, [addNotification]);
 
-  // Update item quantity
-  const updateQuantity = useCallback((itemId, quality, newQuantity) => {
-    if (newQuantity <= 0) {
-      removeFromCart(itemId, quality);
-      return;
-    }
-
-    setCart(prevCart =>
-      prevCart.map(item =>
-        item.id === itemId && item.quality === quality
-          ? { ...item, quantity: newQuantity }
-          : item
-      )
-    );
-  }, []);
-
   // Remove item from cart
   const removeFromCart = useCallback((itemId, quality) => {
     setCart(prevCart => {
@@ -269,6 +253,22 @@ export const useEnhancedCart = (API_URL) => {
       return filtered;
     });
   }, [addNotification]);
+
+  // Update item quantity
+  const updateQuantity = useCallback((itemId, quality, newQuantity) => {
+    if (newQuantity <= 0) {
+      removeFromCart(itemId, quality);
+      return;
+    }
+
+    setCart(prevCart =>
+      prevCart.map(item =>
+        item.id === itemId && item.quality === quality
+          ? { ...item, quantity: newQuantity }
+          : item
+      )
+    );
+  }, [removeFromCart]);
 
   // Clear entire cart
   const clearCart = useCallback(() => {

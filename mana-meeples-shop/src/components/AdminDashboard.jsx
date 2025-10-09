@@ -19,8 +19,7 @@ import {
   AlertTriangle,
   Loader2,
   Plus,
-  ShoppingCart,
-  BarChart3
+  ShoppingCart
 } from 'lucide-react';
 
 import CurrencySelector from './CurrencySelector';
