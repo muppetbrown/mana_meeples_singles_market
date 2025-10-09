@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
 import CurrencySelector from './CurrencySelector';
+import Checkout from './Checkout';
 import { useFilterCounts } from '../hooks/useFilterCounts';
 import { API_URL } from '../config/api';
 
@@ -120,29 +121,27 @@ const CardItem = React.memo(({
 
         {/* Price & CTA Section - Pushed to bottom */}
         <div className="mt-auto pt-2">
-          <div className="flex items-center justify-between gap-3">
-            {/* Price Display */}
-            <div className="flex flex-col">
-              <span className="text-2xl font-bold text-slate-900 leading-none">
-                {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
-              </span>
-              {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
-                <span className="text-xs font-semibold text-red-600 mt-1">
-                  Only {selectedVariation.stock} left!
-                </span>
-              )}
+          {/* Price Display */}
+          <div className="mb-3">
+            <div className="text-2xl font-bold text-slate-900 leading-none mb-1">
+              {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
             </div>
-
-            {/* Add to Cart Button */}
-            <button
-              onClick={onAddToCart}
-              disabled={!selectedVariation || selectedVariation.stock === 0}
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] flex items-center justify-center whitespace-nowrap"
-              aria-label={`Add ${card.name} to cart`}
-            >
-              Add to Cart
-            </button>
+            {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
+              <div className="text-xs font-semibold text-red-600">
+                Only {selectedVariation.stock} left!
+              </div>
+            )}
           </div>
+
+          {/* Add to Cart Button - Full Width */}
+          <button
+            onClick={onAddToCart}
+            disabled={!selectedVariation || selectedVariation.stock === 0}
+            className="w-full px-4 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px]"
+            aria-label={`Add ${card.name} to cart`}
+          >
+            Add to Cart
+          </button>
         </div>
       </div>
     </div>
@@ -167,6 +166,7 @@ const TCGShop = () => {
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [showMiniCart, setShowMiniCart] = useState(false);
+  const [showCheckout, setShowCheckout] = useState(false);
   const [selectedQualities, setSelectedQualities] = useState({});
 
   // Initialize state from URL parameters
@@ -196,8 +196,8 @@ const TCGShop = () => {
     languages: []
   });
 
-  // Currency and localization with toggle
-  const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
+  // Currency and localization with toggle - Default to NZD for NZ-based shop
+  const [currency, setCurrency] = useState({ symbol: 'NZ$', rate: 1.6, code: 'NZD' });
 
   // Search autocomplete with proper debouncing and request cancellation
   const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -580,6 +580,42 @@ const TCGShop = () => {
     });
   }, [addToCart]);
 
+  // Checkout handlers
+  const handleCheckoutClick = useCallback(() => {
+    setShowCart(false);
+    setShowCheckout(true);
+  }, []);
+
+  const handleBackFromCheckout = useCallback(() => {
+    setShowCheckout(false);
+    setShowCart(false);
+  }, []);
+
+  const handleOrderSubmit = useCallback(async (orderData) => {
+    try {
+      // Here you would typically send the order to your backend
+      const response = await fetch(`${API_URL}/orders`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(orderData),
+      });
+
+      if (response.ok) {
+        // Clear the cart after successful order
+        setCart([]);
+        // Order submission was successful
+        return true;
+      } else {
+        throw new Error('Failed to submit order');
+      }
+    } catch (error) {
+      console.error('Order submission error:', error);
+      throw error;
+    }
+  }, []);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -607,6 +643,18 @@ const TCGShop = () => {
           </button>
         </div>
       </div>
+    );
+  }
+
+  // Show checkout if checkout is active
+  if (showCheckout) {
+    return (
+      <Checkout
+        cart={cart}
+        currency={currency}
+        onBack={handleBackFromCheckout}
+        onOrderSubmit={handleOrderSubmit}
+      />
     );
   }
 
@@ -1349,7 +1397,10 @@ const TCGShop = () => {
                   <span className="text-lg font-medium">Total:</span>
                   <span className="text-3xl font-bold text-blue-600">{currency.symbol}{cartTotal.toFixed(2)}</span>
                 </div>
-                <button className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none">
+                <button
+                  onClick={handleCheckoutClick}
+                  className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                >
                   Proceed to Checkout
                 </button>
               </div>
