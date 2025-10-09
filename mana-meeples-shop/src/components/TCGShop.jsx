@@ -1323,24 +1323,25 @@ const TCGShop = () => {
           {/* Main Content */}
           <div className="flex-1">
             {/* Results Header */}
-            <div className="flex items-center mb-4 gap-3">
-              <div className="flex-1">
+            <div className="flex items-center mb-4">
+              <div className="flex-1 pr-4">
                 <p className="text-slate-600" aria-live="polite">
                   <span className="font-medium">{cards.length}</span> cards found
                 </p>
               </div>
 
-              {/* View Toggle - Fixed Position */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <span className="text-sm text-slate-600 hidden sm:inline">View:</span>
-                <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5">
+              {/* View Toggle - Absolutely Fixed Position */}
+              <div className="flex items-center gap-2 flex-shrink-0" style={{ minWidth: '140px', width: '140px' }}>
+                <span className="text-sm text-slate-600 hidden sm:inline" style={{ width: '36px' }}>View:</span>
+                <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5" style={{ width: '96px' }}>
                   <button
                     onClick={() => setViewMode('grid')}
-                    className={`px-3 py-2 rounded-md transition-all ${
+                    className={`px-3 py-2 rounded-md transition-colors motion-reduce:transition-none ${
                       viewMode === 'grid'
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
+                    style={{ width: '44px', minWidth: '44px' }}
                     aria-pressed={viewMode === 'grid'}
                     aria-label="Switch to grid view"
                   >
@@ -1348,11 +1349,12 @@ const TCGShop = () => {
                   </button>
                   <button
                     onClick={() => setViewMode('list')}
-                    className={`px-3 py-2 rounded-md transition-all ${
+                    className={`px-3 py-2 rounded-md transition-colors motion-reduce:transition-none ${
                       viewMode === 'list'
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                     }`}
+                    style={{ width: '44px', minWidth: '44px' }}
                     aria-pressed={viewMode === 'list'}
                     aria-label="Switch to list view"
                   >
