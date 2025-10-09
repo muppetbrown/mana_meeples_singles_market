@@ -289,7 +289,7 @@ const ListCardItem = React.memo(({
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all motion-reduce:transition-none border border-slate-200 overflow-hidden">
-      <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
+      <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4 min-w-0">
         {/* Card Thumbnail - Small */}
         <div className="relative w-12 h-16 sm:w-16 sm:h-24 flex-shrink-0">
           <OptimizedImage
@@ -328,8 +328,8 @@ const ListCardItem = React.memo(({
           </div>
         </div>
 
-        {/* Condition Selector - Hidden on mobile */}
-        <div className="hidden sm:block w-44 flex-shrink-0">
+        {/* Condition Selector - Hidden on mobile, responsive width */}
+        <div className="hidden sm:block w-36 lg:w-44 flex-shrink-0">
           <select
             id={`condition-list-${card.id}`}
             value={selectedQuality}
@@ -345,8 +345,8 @@ const ListCardItem = React.memo(({
           </select>
         </div>
 
-        {/* Stock - Desktop only */}
-        <div className="hidden sm:flex items-center gap-2 w-24 flex-shrink-0">
+        {/* Stock - Desktop only, responsive width */}
+        <div className="hidden sm:flex items-center gap-2 w-16 lg:w-24 flex-shrink-0">
           <div className={`w-2 h-2 rounded-full ${
             selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
           }`}></div>
@@ -360,8 +360,8 @@ const ListCardItem = React.memo(({
           </span>
         </div>
 
-        {/* Price - Desktop gets large, Mobile gets medium */}
-        <div className="flex-shrink-0 w-20 sm:w-28 text-right">
+        {/* Price - Desktop gets large, Mobile gets medium, responsive width */}
+        <div className="flex-shrink-0 w-16 sm:w-20 lg:w-28 text-right">
           <span className="text-lg sm:text-xl font-bold text-slate-900 block leading-none">
             {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
           </span>
@@ -436,7 +436,8 @@ const TCGShop = () => {
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
     sortBy: searchParams.get('sortBy') || 'name',
-    sortOrder: searchParams.get('sortOrder') || 'asc'
+    sortOrder: searchParams.get('sortOrder') || 'asc',
+    set: searchParams.get('set') || 'all'
   }), [searchParams]);
 
   // Filter counts hook for dynamic counts in dropdowns
@@ -449,6 +450,7 @@ const TCGShop = () => {
     foilTypes: [],
     languages: []
   });
+  const [availableSets, setAvailableSets] = useState([]);
 
   // Currency and localization with toggle - Default to NZD for NZ-based shop
   const [currency, setCurrency] = useState({ symbol: 'NZ$', rate: 1.0, code: 'NZD' });
@@ -503,6 +505,38 @@ const TCGShop = () => {
     fetchInitialData();
   }, []);
 
+  // Fetch available sets when game changes (matching AdminDashboard logic)
+  useEffect(() => {
+    const fetchSets = async () => {
+      if (selectedGame === 'all') {
+        setAvailableSets([]);
+        return;
+      }
+
+      try {
+        const gameId = getGameIdFromName(selectedGame);
+        if (!gameId) return;
+
+        const response = await fetch(`${API_URL}/sets?game_id=${gameId}`);
+
+        if (response.ok) {
+          const sets = await response.json();
+          setAvailableSets(sets);
+        } else {
+          console.error('Failed to fetch sets');
+          setAvailableSets([]);
+        }
+      } catch (error) {
+        console.error('Error fetching sets:', error);
+        setAvailableSets([]);
+      }
+    };
+
+    fetchSets();
+    // Reset set filter when game changes
+    handleFilterChange('set', 'all');
+  }, [selectedGame]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // Fetch cards with current filters
   const fetchCards = useCallback(async () => {
     try {
@@ -524,6 +558,7 @@ const TCGShop = () => {
       if (filters.rarity !== 'all') queryParams.append('rarity', filters.rarity);
       if (filters.foilType !== 'all') queryParams.append('foil_type', filters.foilType);
       if (filters.language !== 'English') queryParams.append('language', filters.language);
+      if (filters.set !== 'all') queryParams.append('set_name', filters.set);
       if (filters.minPrice) queryParams.append('min_price', filters.minPrice);
       if (filters.maxPrice) queryParams.append('max_price', filters.maxPrice);
 
@@ -697,6 +732,16 @@ const TCGShop = () => {
     return active;
   }, [filters, searchTerm, selectedGame]);
 
+  // Helper function to get game ID from name (matching AdminDashboard)
+  const getGameIdFromName = (gameName) => {
+    const gameMap = {
+      'Magic: The Gathering': 1,
+      'Pokemon': 2,
+      'Yu-Gi-Oh!': 3
+    };
+    return gameMap[gameName] || null;
+  };
+
   // Currency change function
   const handleCurrencyChange = (newCurrency) => {
     setCurrency(newCurrency);
@@ -867,6 +912,11 @@ const TCGShop = () => {
         return aOrder - bOrder;
       }
       return 0;
+    });
+
+    // Apply secondary alphabetical sorting within each group
+    sortedGroups.forEach(group => {
+      group.cards.sort((a, b) => a.name.localeCompare(b.name));
     });
 
     return sortedGroups;
@@ -1137,51 +1187,40 @@ const TCGShop = () => {
                 )}
               </div>
 
-              {/* Game Filter with Visual Icons */}
+              {/* Game Filter - Dropdown Style */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-700 mb-3">Card Game</label>
-                <div className="space-y-2">
-                  <label className="flex items-center gap-3 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="gameFilter"
-                      value="all"
-                      checked={selectedGame === 'all'}
-                      onChange={(e) => handleGameChange(e.target.value)}
-                      className="w-4 h-4 text-blue-600 border-slate-300"
-                    />
-                    <span className="text-sm">All Games</span>
-                  </label>
+                <label htmlFor="game-filter" className="block text-sm font-medium text-slate-700 mb-2">Game</label>
+                <select
+                  id="game-filter"
+                  value={selectedGame}
+                  onChange={(e) => handleGameChange(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+                >
+                  <option value="all">All Games</option>
                   {games.map(game => (
-                    <label key={game.id} className="flex items-center gap-3 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="gameFilter"
-                        value={game.name}
-                        checked={selectedGame === game.name}
-                        onChange={(e) => handleGameChange(e.target.value)}
-                        className="w-4 h-4 text-blue-600 border-slate-300"
-                      />
-                      <div className="flex items-center gap-2">
-                        {/* Game Icon with specific colors and styling */}
-                        <div className={`w-8 h-8 rounded-md flex items-center justify-center text-white text-xs font-bold ${
-                          game.name.toLowerCase().includes('magic') ? 'bg-gradient-to-br from-orange-500 to-red-600' :
-                          game.name.toLowerCase().includes('pokemon') ? 'bg-gradient-to-br from-yellow-400 to-blue-500' :
-                          game.name.toLowerCase().includes('yu-gi-oh') ? 'bg-gradient-to-br from-purple-600 to-indigo-700' :
-                          game.name.toLowerCase().includes('one piece') ? 'bg-gradient-to-br from-red-500 to-pink-600' :
-                          'bg-gradient-to-br from-slate-500 to-slate-600'
-                        }`}>
-                          {game.name.toLowerCase().includes('magic') ? '⚡' :
-                           game.name.toLowerCase().includes('pokemon') ? '⚡' :
-                           game.name.toLowerCase().includes('yu-gi-oh') ? '🃏' :
-                           game.name.toLowerCase().includes('one piece') ? '🏴‍☠️' :
-                           game.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <span className="text-sm">{game.name}</span>
-                      </div>
-                    </label>
+                    <option key={game.id} value={game.name}>{game.name}</option>
                   ))}
-                </div>
+                </select>
+              </div>
+
+              {/* Set Filter - Dynamic based on selected game */}
+              <div className="mb-6">
+                <label htmlFor="set-filter" className="block text-sm font-medium text-slate-700 mb-2">Set</label>
+                <select
+                  id="set-filter"
+                  value={filters.set}
+                  onChange={(e) => handleFilterChange('set', e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white disabled:bg-slate-50 disabled:text-slate-500 text-sm"
+                  disabled={selectedGame === 'all'}
+                >
+                  <option value="all">All Sets</option>
+                  {availableSets.map(set => (
+                    <option key={set.id} value={set.name}>{set.name}</option>
+                  ))}
+                </select>
+                {selectedGame === 'all' && (
+                  <p className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
+                )}
               </div>
 
               {/* Other Filters */}
@@ -1456,7 +1495,7 @@ const TCGShop = () => {
                 <div>
                   {groupedCards.map((group, groupIndex) => (
                     <div key={groupIndex} className="mb-8">
-                      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5">
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
                         <SectionHeader title={group.section} count={group.cards.length} />
                         {group.cards.map(card => {
                           const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
@@ -1481,23 +1520,32 @@ const TCGShop = () => {
               )
             ) : (
               /* List View */
-              <div className="flex flex-col gap-2">
-                {cards.map(card => {
-                  const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-                  const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+              <div className="flex flex-col gap-2 overflow-hidden">
+                {groupedCards.map((group, groupIndex) => (
+                  <div key={groupIndex} className="mb-6">
+                    {group.section && (
+                      <SectionHeader title={group.section} count={group.cards.length} />
+                    )}
+                    <div className="flex flex-col gap-2">
+                      {group.cards.map(card => {
+                        const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+                        const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
-                  return (
-                    <ListCardItem
-                      key={card.id}
-                      card={card}
-                      selectedQuality={selectedQuality}
-                      selectedVariation={selectedVariation}
-                      currency={currency}
-                      onQualityChange={handleQualityChange(card.id)}
-                      onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
-                    />
-                  );
-                })}
+                        return (
+                          <ListCardItem
+                            key={card.id}
+                            card={card}
+                            selectedQuality={selectedQuality}
+                            selectedVariation={selectedVariation}
+                            currency={currency}
+                            onQualityChange={handleQualityChange(card.id)}
+                            onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
@@ -1554,6 +1602,24 @@ const TCGShop = () => {
                         <option key={game.id} value={game.name}>{game.name}</option>
                       ))}
                     </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Set</label>
+                    <select
+                      value={filters.set}
+                      onChange={(e) => handleFilterChange('set', e.target.value)}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-500"
+                      disabled={selectedGame === 'all'}
+                    >
+                      <option value="all">All Sets</option>
+                      {availableSets.map(set => (
+                        <option key={set.id} value={set.name}>{set.name}</option>
+                      ))}
+                    </select>
+                    {selectedGame === 'all' && (
+                      <p className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
+                    )}
                   </div>
 
                   <div>
