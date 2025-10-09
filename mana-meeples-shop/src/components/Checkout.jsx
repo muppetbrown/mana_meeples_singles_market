@@ -11,7 +11,9 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
 
     // Shipping Address
     address: '',
+    suburb: '',
     city: '',
+    region: '',
     postalCode: '',
     country: 'New Zealand', // Default for NZ shop
 
@@ -36,7 +38,7 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    // Phone number is now optional - no validation required
     if (!formData.address.trim()) newErrors.address = 'Address is required';
     if (!formData.city.trim()) newErrors.city = 'City is required';
     if (!formData.postalCode.trim()) newErrors.postalCode = 'Postal code is required';
@@ -212,7 +214,7 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
 
                   <div>
                     <label htmlFor="phone" className="block text-sm font-medium text-slate-700 mb-1">
-                      Phone Number *
+                      Phone Number (optional)
                     </label>
                     <div className="relative">
                       <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -265,6 +267,36 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
                         {errors.address}
                       </p>
                     )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label htmlFor="suburb" className="block text-sm font-medium text-slate-700 mb-1">
+                        Suburb (optional)
+                      </label>
+                      <input
+                        type="text"
+                        id="suburb"
+                        value={formData.suburb}
+                        onChange={(e) => handleInputChange('suburb', e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="Ponsonby"
+                      />
+                    </div>
+
+                    <div>
+                      <label htmlFor="region" className="block text-sm font-medium text-slate-700 mb-1">
+                        Region (optional)
+                      </label>
+                      <input
+                        type="text"
+                        id="region"
+                        value={formData.region}
+                        onChange={(e) => handleInputChange('region', e.target.value)}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        placeholder="Auckland Region"
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
