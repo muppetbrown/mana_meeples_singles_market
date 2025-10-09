@@ -172,7 +172,7 @@ const CardItem = React.memo(({
 });
 
 // List Card Item Component for List View
-// Responsive version to prevent overflow past shopping cart boundary
+// Fully responsive version with flexible widths - no hard-coded sizes
 const ListCardItem = React.memo(({
   card,
   selectedVariationKey,
@@ -222,14 +222,14 @@ const ListCardItem = React.memo(({
           </div>
         </div>
 
-        {/* Desktop-only responsive columns - Now truly flexible */}
-        <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
-          {/* Condition Selector - Responsive width */}
+        {/* Desktop-only responsive columns - Fully flexible, no fixed widths */}
+        <div className="hidden sm:flex items-center gap-2 lg:gap-3 flex-shrink-0 min-w-0">
+          {/* Condition Selector - Flexible, takes available space */}
           <select
             id={`condition-list-${card.id}`}
             value={selectedVariationKey}
             onChange={onVariationChange}
-            className="w-24 md:w-32 lg:w-36 text-xs lg:text-sm px-2 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors"
+            className="flex-shrink-0 min-w-[100px] max-w-[160px] text-xs lg:text-sm px-2 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors"
           >
             {card.variations.map(variation => (
               <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
@@ -239,35 +239,35 @@ const ListCardItem = React.memo(({
             ))}
           </select>
 
-          {/* Stock - Compact */}
-          <div className="flex items-center gap-1 w-10 md:w-12">
+          {/* Stock - Compact, flexible */}
+          <div className="flex items-center gap-1 flex-shrink-0 min-w-[32px]">
             <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
               selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
             }`}></div>
-            <span className={`text-xs font-medium ${
+            <span className={`text-xs font-medium whitespace-nowrap ${
               selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-slate-500'
             }`}>
               {selectedVariation?.stock > 0 ? selectedVariation.stock : '0'}
             </span>
           </div>
 
-          {/* Price - Responsive width */}
-          <div className="text-right w-16 md:w-20 lg:w-24 flex-shrink-0">
-            <span className="text-sm lg:text-lg font-bold text-slate-900 block leading-none">
+          {/* Price - Flexible but doesn't shrink below content */}
+          <div className="text-right flex-shrink-0 min-w-[60px]">
+            <span className="text-sm lg:text-base font-bold text-slate-900 block leading-none whitespace-nowrap">
               {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
             </span>
             {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
-              <span className="text-xs font-semibold text-red-600 block mt-0.5">
-                {selectedVariation.stock}
+              <span className="text-xs font-semibold text-red-600 block mt-0.5 whitespace-nowrap">
+                {selectedVariation.stock} left
               </span>
             )}
           </div>
 
-          {/* Add to Cart Button - Responsive */}
+          {/* Add to Cart Button - Flexible */}
           <button
             onClick={onAddToCart}
             disabled={!selectedVariation || selectedVariation.stock === 0}
-            className="px-2 md:px-3 lg:px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs lg:text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] w-20 md:w-24 lg:w-28 flex-shrink-0"
+            className="px-3 lg:px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] flex-shrink-0 whitespace-nowrap"
             aria-label={`Add ${card.name} to cart`}
           >
             <span className="hidden lg:inline">Add to Cart</span>
