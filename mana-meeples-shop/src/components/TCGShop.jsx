@@ -28,11 +28,11 @@ const highlightMatch = (text, query) => {
 };
 
 // Section Header Component
-const SectionHeader = ({ title, count }) => {
+const SectionHeader = ({ title, count, isGrid = false }) => {
   if (!title) return null;
 
   return (
-    <div className="col-span-full mb-4">
+    <div className={`${isGrid ? 'col-span-full' : ''} mb-4`}>
       <div className="flex items-center gap-4">
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg shadow-sm">
           <h3 className="text-lg font-bold">{title}</h3>
@@ -1445,7 +1445,7 @@ const TCGShop = () => {
                   {groupedCards.map((group, groupIndex) => (
                     <div key={groupIndex} className="mb-8">
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-                        <SectionHeader title={group.section} count={group.cards.length} />
+                        <SectionHeader title={group.section} count={group.cards.length} isGrid={true} />
                         {group.cards.map(card => {
                           const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
                           const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
@@ -1468,22 +1468,12 @@ const TCGShop = () => {
                 </div>
               )
             ) : (
-              /* List View */
+              /* List View - Structured to match Grid View */
               <div>
                 {groupedCards.map((group, groupIndex) => (
                   <div key={groupIndex} className="mb-8">
-                    {group.section && (
-                      <div className="mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg shadow-sm">
-                            <h3 className="text-lg font-bold">{group.section}</h3>
-                            <div className="text-xs opacity-90">{group.cards.length} cards</div>
-                          </div>
-                          <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-200 to-purple-200"></div>
-                        </div>
-                      </div>
-                    )}
                     <div className="space-y-2">
+                      <SectionHeader title={group.section} count={group.cards.length} isGrid={false} />
                       {group.cards.map(card => {
                         const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
                         const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
