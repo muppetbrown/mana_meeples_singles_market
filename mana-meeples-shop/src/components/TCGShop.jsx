@@ -5,6 +5,8 @@ import OptimizedImage from './OptimizedImage';
 import CurrencySelector from './CurrencySelector';
 import Checkout from './Checkout';
 import { useFilterCounts } from '../hooks/useFilterCounts';
+import { useEnhancedCart } from '../hooks/useEnhancedCart';
+import ErrorBoundary from './ErrorBoundary';
 import { API_URL } from '../config/api';
 
 // Lazy load VirtualCardGrid for code splitting
@@ -416,12 +418,24 @@ const TCGShop = () => {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedQualities, setSelectedQualities] = useState({});
   const [viewMode, setViewMode] = useState('grid');
+
+  // Enhanced cart hook with localStorage persistence
+  const {
+    cart,
+    cartNotifications,
+    addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
+    validateCart,
+    checkStock,
+    getCartStats
+  } = useEnhancedCart(API_URL);
 
   // Initialize state from URL parameters
   const searchTerm = searchParams.get('search') || '';
@@ -747,73 +761,21 @@ const TCGShop = () => {
     setCurrency(newCurrency);
   };
 
-  // Load cart from localStorage
+  // Show mini cart when items added
   useEffect(() => {
-    const savedCart = localStorage.getItem('tcg-shop-cart');
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (err) {
-        console.error('Failed to load cart:', err);
-      }
-    }
-  }, []);
-
-  // Save cart to localStorage
-  useEffect(() => {
-    localStorage.setItem('tcg-shop-cart', JSON.stringify(cart));
-
-    // Show mini cart when items added
     if (cart.length > 0 && !showCart) {
       setShowMiniCart(true);
     }
   }, [cart, showCart]);
 
-  const addToCart = useCallback((item) => {
-    setCart(prevCart => {
-      const existingItem = prevCart.find(c =>
-        c.id === item.id && c.quality === item.quality
-      );
-
-      if (existingItem) {
-        if (existingItem.quantity < item.stock) {
-          return prevCart.map(c =>
-            c.id === item.id && c.quality === item.quality
-              ? { ...c, quantity: c.quantity + 1 }
-              : c
-          );
-        }
-        return prevCart; // Don't update if already at max stock
-      } else {
-        return [...prevCart, {
-          id: item.id,
-          inventory_id: item.inventory_id,
-          name: item.name,
-          image_url: item.image_url,
-          quality: item.quality,
-          price: item.price,
-          stock: item.stock,
-          quantity: 1
-        }];
-      }
-    });
-  }, []);
-
+  // Update cart quantity function (wrapper for useEnhancedCart)
   const updateCartQuantity = useCallback((id, quality, delta) => {
-    setCart(prevCart =>
-      prevCart.map(item => {
-        if (item.id === id && item.quality === quality) {
-          const newQuantity = Math.max(0, Math.min(item.stock, item.quantity + delta));
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      }).filter(item => item.quantity > 0)
-    );
-  }, []);
-
-  const removeFromCart = useCallback((id, quality) => {
-    setCart(prevCart => prevCart.filter(item => !(item.id === id && item.quality === quality)));
-  }, []);
+    const existingItem = cart.find(item => item.id === id && item.quality === quality);
+    if (existingItem) {
+      const newQuantity = existingItem.quantity + delta;
+      updateQuantity(id, quality, newQuantity);
+    }
+  }, [cart, updateQuantity]);
 
   // Memoized expensive calculations
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), [cart]);
@@ -932,9 +894,15 @@ const TCGShop = () => {
 
   const handleAddToCart = useCallback((card, selectedQuality, selectedVariation) => () => {
     addToCart({
-      ...card,
-      ...selectedVariation,
-      quality: selectedQuality
+      id: card.id,
+      inventory_id: selectedVariation.inventory_id,
+      name: card.name,
+      image_url: card.image_url,
+      quality: selectedQuality,
+      price: selectedVariation.price,
+      stock: selectedVariation.stock,
+      foil_type: selectedVariation.foil_type,
+      language: selectedVariation.language
     });
   }, [addToCart]);
 
@@ -962,7 +930,7 @@ const TCGShop = () => {
 
       if (response.ok) {
         // Clear the cart after successful order
-        setCart([]);
+        clearCart();
         // Order submission was successful
         return true;
       } else {
@@ -972,7 +940,7 @@ const TCGShop = () => {
       console.error('Order submission error:', error);
       throw error;
     }
-  }, []);
+  }, [clearCart]);
 
   if (loading) {
     return (
@@ -1460,36 +1428,38 @@ const TCGShop = () => {
               /* Grid View */
               cards.length > 100 ? (
                 /* Virtual Scrolling for large datasets (100+ cards) */
-                <Suspense
-                  fallback={
-                    <div className="text-center py-8">
-                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                      <p className="text-slate-600 text-sm">Loading virtual scrolling...</p>
-                    </div>
-                  }
-                >
-                  <VirtualCardGrid
-                    cards={cards}
-                    CardComponent={({ card }) => {
-                      const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-                      const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+                <ErrorBoundary>
+                  <Suspense
+                    fallback={
+                      <div className="text-center py-8">
+                        <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                        <p className="text-slate-600 text-sm">Loading virtual scrolling...</p>
+                      </div>
+                    }
+                  >
+                    <VirtualCardGrid
+                      cards={cards}
+                      CardComponent={({ card }) => {
+                        const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+                        const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
-                      return (
-                        <GridCardItem
-                          card={card}
-                          selectedQuality={selectedQuality}
-                          selectedVariation={selectedVariation}
-                          currency={currency}
-                          onQualityChange={handleQualityChange(card.id)}
-                          onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
-                        />
-                      );
-                    }}
-                    cardHeight={450}
-                    containerHeight={800}
-                    enableProgressiveLoading={cards.length > 500}
-                  />
-                </Suspense>
+                        return (
+                          <GridCardItem
+                            card={card}
+                            selectedQuality={selectedQuality}
+                            selectedVariation={selectedVariation}
+                            currency={currency}
+                            onQualityChange={handleQualityChange(card.id)}
+                            onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                          />
+                        );
+                      }}
+                      cardHeight={450}
+                      containerHeight={800}
+                      enableProgressiveLoading={cards.length > 500}
+                    />
+                  </Suspense>
+                </ErrorBoundary>
               ) : (
                 /* Standard Grid for smaller datasets (< 100 cards) with sections */
                 <div>
@@ -1921,6 +1891,25 @@ const TCGShop = () => {
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Cart Notifications */}
+      {cartNotifications.length > 0 && (
+        <div className="fixed bottom-4 right-4 z-50 space-y-2">
+          {cartNotifications.map(notification => (
+            <div
+              key={notification.id}
+              className={`px-4 py-3 rounded-lg shadow-lg ${
+                notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
+                notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
+                notification.type === 'warning' ? 'bg-orange-50 border-orange-200 text-orange-800' :
+                'bg-blue-50 border-blue-200 text-blue-800'
+              } border`}
+            >
+              {notification.message}
+            </div>
+          ))}
         </div>
       )}
     </div>
