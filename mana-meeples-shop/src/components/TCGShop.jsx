@@ -1891,8 +1891,8 @@ const TCGShop = () => {
 
       {/* ARIA Live Regions for Screen Reader Announcements */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {filteredGroupedCards.length > 0 && (
-          `Showing ${filteredGroupedCards.reduce((total, group) => total + group.cards.length, 0)} cards`
+        {groupedCards.length > 0 && (
+          `Showing ${groupedCards.reduce((total, group) => total + group.cards.length, 0)} cards`
         )}
       </div>
       <div aria-live="assertive" aria-atomic="true" className="sr-only">
@@ -1906,11 +1906,11 @@ const TCGShop = () => {
         aria-live="polite"
         aria-atomic="true"
         className="sr-only"
-        key={`search-${searchTerm}-${filteredGroupedCards.length}`}
+        key={`search-${searchTerm}-${groupedCards.length}`}
       >
         {searchTerm && !loading && (
-          filteredGroupedCards.length > 0
-            ? `Found ${filteredGroupedCards.reduce((total, group) => total + group.cards.length, 0)} cards matching "${searchTerm}"`
+          groupedCards.length > 0
+            ? `Found ${groupedCards.reduce((total, group) => total + group.cards.length, 0)} cards matching "${searchTerm}"`
             : `No cards found matching "${searchTerm}"`
         )}
       </div>
