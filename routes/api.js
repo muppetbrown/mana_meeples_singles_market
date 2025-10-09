@@ -38,6 +38,9 @@ const strictRateLimit = createRateLimit(60000, 30, 'Too many expensive operation
 const normalRateLimit = createRateLimit(60000, 100, 'Too many requests');             // 100 req/min
 const lenientRateLimit = createRateLimit(60000, 200, 'Too many requests');            // 200 req/min
 
+// Generic rateLimit function for dynamic rate limiting
+const rateLimit = (windowMs, max, message = 'Too many requests') => createRateLimit(windowMs, max, message);
+
 // ============================================
 // PUBLIC ROUTES
 // ============================================
