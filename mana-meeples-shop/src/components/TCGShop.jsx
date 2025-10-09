@@ -1444,7 +1444,7 @@ const TCGShop = () => {
                         const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
                         return (
-                          <GridCardItem
+                          <CardItem    // ← CHANGED: CardItem instead of GridCardItem
                             card={card}
                             selectedQuality={selectedQuality}
                             selectedVariation={selectedVariation}
@@ -1454,7 +1454,7 @@ const TCGShop = () => {
                           />
                         );
                       }}
-                      cardHeight={450}
+                      cardHeight={550}    // ← CHANGED: 550 instead of 450
                       containerHeight={800}
                       enableProgressiveLoading={cards.length > 500}
                     />
@@ -1465,14 +1465,14 @@ const TCGShop = () => {
                 <div>
                   {groupedCards.map((group, groupIndex) => (
                     <div key={groupIndex} className="mb-8">
-                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">    {/* ← CHANGED: Better responsive columns */}
                         <SectionHeader title={group.section} count={group.cards.length} />
                         {group.cards.map(card => {
                           const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
                           const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
                           return (
-                            <GridCardItem
+                            <CardItem    // ← CHANGED: CardItem instead of GridCardItem
                               key={card.id}
                               card={card}
                               selectedQuality={selectedQuality}
@@ -1490,11 +1490,19 @@ const TCGShop = () => {
               )
             ) : (
               /* List View */
-              <div className="flex flex-col gap-2 overflow-hidden">
+              <div className="space-y-6">    {/* ← CHANGED: space-y-6 instead of flex flex-col gap-2 overflow-hidden */}
                 {groupedCards.map((group, groupIndex) => (
-                  <div key={groupIndex} className="mb-6">
+                  <div key={groupIndex}>
                     {group.section && (
-                      <SectionHeader title={group.section} count={group.cards.length} />
+                      <div className="mb-4">    {/* ← CHANGED: Inline section header instead of SectionHeader component */}
+                        <div className="flex items-center gap-4">
+                          <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg shadow-sm">
+                            <h3 className="text-lg font-bold">{group.section}</h3>
+                            <div className="text-xs opacity-90">{group.cards.length} cards</div>
+                          </div>
+                          <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-200 to-purple-200"></div>
+                        </div>
+                      </div>
                     )}
                     <div className="flex flex-col gap-2">
                       {group.cards.map(card => {
