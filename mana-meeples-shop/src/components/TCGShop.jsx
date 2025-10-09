@@ -493,7 +493,7 @@ const TCGShop = () => {
 
         if (!groupedCards[key]) {
           groupedCards[key] = {
-            id: item.id,
+            id: key, // Use stable key as ID instead of inventory-specific item.id
             name: item.name,
             game_name: item.game_name,
             set_name: item.set_name,

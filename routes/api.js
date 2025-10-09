@@ -161,24 +161,36 @@ router.get('/cards', normalRateLimit, async (req, res) => {
     }
 
     if (search) {
-      // Use simple ILIKE search for better compatibility
-      const searchTerms = search.trim().split(/\s+/);
-      const searchConditions = [];
+      // Sanitize search input to prevent SQL injection and limit length
+      const sanitizedSearch = search
+        .trim()
+        .slice(0, 100) // Limit to 100 characters
+        .replace(/['"\\;--]/g, ''); // Remove dangerous SQL characters
 
-      searchTerms.forEach(term => {
-        const termPattern = `%${term}%`;
-        searchConditions.push(`(
-          c.name ILIKE $${paramCount}
-          OR c.card_number ILIKE $${paramCount + 1}
-          OR c.card_type ILIKE $${paramCount + 2}
-          OR cs.name ILIKE $${paramCount + 3}
-        )`);
-        params.push(termPattern, termPattern, termPattern, termPattern);
-        paramCount += 4;
-      });
+      if (sanitizedSearch.length === 0) {
+        // Skip search if sanitized input is empty
+      } else {
+        // Use simple ILIKE search for better compatibility
+        const searchTerms = sanitizedSearch.split(/\s+/).filter(term => term.length > 0);
+        const searchConditions = [];
 
-      if (searchConditions.length > 0) {
-        conditions.push(`(${searchConditions.join(' AND ')})`);
+        searchTerms.forEach(term => {
+          // Additional character escaping for ILIKE patterns
+          const escapedTerm = term.replace(/[%_]/g, '\\$&');
+          const termPattern = `%${escapedTerm}%`;
+          searchConditions.push(`(
+            c.name ILIKE $${paramCount}
+            OR c.card_number ILIKE $${paramCount + 1}
+            OR c.card_type ILIKE $${paramCount + 2}
+            OR cs.name ILIKE $${paramCount + 3}
+          )`);
+          params.push(termPattern, termPattern, termPattern, termPattern);
+          paramCount += 4;
+        });
+
+        if (searchConditions.length > 0) {
+          conditions.push(`(${searchConditions.join(' AND ')})`);
+        }
       }
     }
 
@@ -546,16 +558,76 @@ router.post('/orders', async (req, res) => {
 
     const { customer, items, total, currency, timestamp } = req.body;
 
-    // Validate required fields
+    // Comprehensive input validation
+    const validationErrors = [];
+
+    // Validate required fields exist
     if (!customer || !items || !total || !currency) {
       return res.status(400).json({
         error: 'Missing required fields: customer, items, total, currency'
       });
     }
 
+    // Validate customer fields with format validation
     if (!customer.email || !customer.firstName || !customer.lastName) {
+      validationErrors.push('Missing required customer fields: email, firstName, lastName');
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (customer.email && !emailRegex.test(customer.email)) {
+      validationErrors.push('Invalid email format');
+    }
+
+    // Name validation (remove dangerous characters)
+    if (customer.firstName && (customer.firstName.length > 50 || /[<>'"&]/.test(customer.firstName))) {
+      validationErrors.push('Invalid firstName format or too long');
+    }
+    if (customer.lastName && (customer.lastName.length > 50 || /[<>'"&]/.test(customer.lastName))) {
+      validationErrors.push('Invalid lastName format or too long');
+    }
+
+    // Phone validation if provided
+    if (customer.phone) {
+      const phoneRegex = /^[+]?[\d\s\-\(\)]+$/;
+      if (!phoneRegex.test(customer.phone) || customer.phone.length > 20) {
+        validationErrors.push('Invalid phone number format');
+      }
+    }
+
+    // Validate items array
+    if (!Array.isArray(items) || items.length === 0) {
+      validationErrors.push('Items must be a non-empty array');
+    } else if (items.length > 100) {
+      validationErrors.push('Too many items in cart (maximum 100)');
+    }
+
+    // Validate each item
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      if (!item.inventory_id || typeof item.inventory_id !== 'string') {
+        validationErrors.push(`Item ${i + 1}: Invalid inventory_id`);
+      }
+      if (!item.quantity || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 50) {
+        validationErrors.push(`Item ${i + 1}: Invalid quantity (must be 1-50)`);
+      }
+    }
+
+    // Validate total
+    if (typeof total !== 'number' || total < 0 || total > 10000) {
+      validationErrors.push('Invalid total amount');
+    }
+
+    // Validate currency
+    const allowedCurrencies = ['USD', 'EUR', 'GBP', 'NZD', 'AUD'];
+    if (typeof currency !== 'string' || !allowedCurrencies.includes(currency)) {
+      validationErrors.push('Invalid currency code');
+    }
+
+    if (validationErrors.length > 0) {
       return res.status(400).json({
-        error: 'Missing required customer fields: email, firstName, lastName'
+        error: 'Validation failed',
+        details: validationErrors
       });
     }
 

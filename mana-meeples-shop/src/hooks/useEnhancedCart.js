@@ -215,28 +215,52 @@ export const useEnhancedCart = (API_URL) => {
     }
   }, [cart, API_URL, addNotification]);
 
-  // Add item to cart
+  // Add item to cart with error handling
   const addToCart = useCallback((item) => {
-    setCart(prevCart => {
-      const existingIndex = prevCart.findIndex(
-        cartItem => cartItem.id === item.id && cartItem.quality === item.quality
-      );
-
-      if (existingIndex >= 0) {
-        // Update quantity
-        const updated = [...prevCart];
-        updated[existingIndex] = {
-          ...updated[existingIndex],
-          quantity: updated[existingIndex].quantity + 1
-        };
-        return updated;
-      } else {
-        // Add new item
-        return [...prevCart, { ...item, quantity: 1, addedAt: Date.now() }];
+    try {
+      // Validate item before adding
+      if (!item || !item.id || !item.name || !item.price) {
+        addNotification('Invalid item - cannot add to cart', 'error');
+        return;
       }
-    });
 
-    addNotification(`Added ${item.name} to cart`, 'success', 3000);
+      // Check if item is still in stock
+      if (item.stock <= 0) {
+        addNotification(`${item.name} is out of stock`, 'error');
+        return;
+      }
+
+      setCart(prevCart => {
+        const existingIndex = prevCart.findIndex(
+          cartItem => cartItem.id === item.id && cartItem.quality === item.quality
+        );
+
+        if (existingIndex >= 0) {
+          // Check if we can add more
+          const existingItem = prevCart[existingIndex];
+          if (existingItem.quantity >= item.stock) {
+            addNotification(`Cannot add more - only ${item.stock} in stock`, 'warning');
+            return prevCart;
+          }
+
+          // Update quantity
+          const updated = [...prevCart];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            quantity: Math.min(existingItem.quantity + 1, item.stock)
+          };
+          return updated;
+        } else {
+          // Add new item
+          return [...prevCart, { ...item, quantity: 1, addedAt: Date.now() }];
+        }
+      });
+
+      addNotification(`Added ${item.name} to cart`, 'success', 3000);
+    } catch (error) {
+      console.error('Error adding item to cart:', error);
+      addNotification('Failed to add item to cart. Please try again.', 'error');
+    }
   }, [addNotification]);
 
   // Remove item from cart
