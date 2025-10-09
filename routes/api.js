@@ -15,43 +15,28 @@ const db = global.db;
 const { adminAuthJWT: adminAuth } = require('../middleware/auth');
 
 // ============================================
-// RATE LIMITING MIDDLEWARE
+// RATE LIMITING MIDDLEWARE - Fixed memory leak
 // ============================================
-const rateLimitStore = new Map();
+const expressRateLimit = require('express-rate-limit');
 
-const rateLimit = (windowMs = 60000, maxRequests = 100) => (req, res, next) => {
-  const clientId = req.ip || req.connection.remoteAddress;
-  const now = Date.now();
-  const windowStart = now - windowMs;
+// Create memory-safe rate limiters using express-rate-limit
+const createRateLimit = (windowMs, max, message = 'Too many requests') => expressRateLimit({
+  windowMs,
+  max,
+  message: {
+    error: message,
+    retryAfter: Math.ceil(windowMs / 1000)
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+  // Built-in memory store with automatic cleanup
+  store: new expressRateLimit.MemoryStore()
+});
 
-  // Clean old entries
-  for (const [key, timestamps] of rateLimitStore.entries()) {
-    rateLimitStore.set(key, timestamps.filter(time => time > windowStart));
-    if (rateLimitStore.get(key).length === 0) {
-      rateLimitStore.delete(key);
-    }
-  }
-
-  const clientRequests = rateLimitStore.get(clientId) || [];
-
-  if (clientRequests.length >= maxRequests) {
-    // Add Retry-After header to help clients
-    res.setHeader('Retry-After', Math.ceil(windowMs / 1000));
-    return res.status(429).json({ 
-      error: 'Too many requests',
-      retryAfter: Math.ceil(windowMs / 1000)
-    });
-  }
-
-  clientRequests.push(now);
-  rateLimitStore.set(clientId, clientRequests);
-  next();
-};
-
-// Different limits for different endpoints
-const strictRateLimit = rateLimit(60000, 30);  // 30 req/min for expensive operations
-const normalRateLimit = rateLimit(60000, 100); // 100 req/min for normal operations
-const lenientRateLimit = rateLimit(60000, 200); // 200 req/min for light operations
+// Different limits for different endpoints (Fixed memory leak)
+const strictRateLimit = createRateLimit(60000, 30, 'Too many expensive operations');  // 30 req/min
+const normalRateLimit = createRateLimit(60000, 100, 'Too many requests');             // 100 req/min
+const lenientRateLimit = createRateLimit(60000, 200, 'Too many requests');            // 200 req/min
 
 // ============================================
 // PUBLIC ROUTES
@@ -260,14 +245,16 @@ router.get('/cards', normalRateLimit, async (req, res) => {
     const order = sort_order === 'desc' ? 'DESC' : 'ASC';
 
     if (search) {
-      // When searching, prioritize exact matches first, then by selected sort field
+      // When searching, prioritize exact matches first, then by selected sort field (Fixed SQL injection)
       query += ` ORDER BY
         CASE
-          WHEN c.name ILIKE '${search.replace(/'/g, "''")}%' THEN 1
-          WHEN c.name ILIKE '%${search.replace(/'/g, "''")}%' THEN 2
-          WHEN c.card_number ILIKE '%${search.replace(/'/g, "''")}%' THEN 3
+          WHEN c.name ILIKE $${paramCount} THEN 1
+          WHEN c.name ILIKE $${paramCount + 1} THEN 2
+          WHEN c.card_number ILIKE $${paramCount + 2} THEN 3
           ELSE 4
         END, ${sortField} ${order}`;
+      params.push(`${search}%`, `%${search}%`, `%${search}%`);
+      paramCount += 3;
     } else if (sort_by === 'number') {
       // Safe numeric sorting for card numbers
       query += ` ORDER BY NULLIF(regexp_replace(c.card_number, '\\D','','g'),'')::int ${order} NULLS LAST, c.card_number ${order}`;
@@ -615,7 +602,8 @@ router.post('/orders', async (req, res) => {
       });
     }
 
-    // Create customer details JSON
+    // Store customer details in payment_intent_id field temporarily (JSON format)
+    // TODO: Create proper customer table in future database migration
     const customerData = {
       firstName: customer.firstName,
       lastName: customer.lastName,
@@ -628,24 +616,28 @@ router.post('/orders', async (req, res) => {
       notes: customer.notes
     };
 
-    // Create order
+    // Create order - Fixed to match database schema
     const orderResult = await client.query(
       `INSERT INTO orders (
         customer_email,
         customer_name,
-        customer_data,
-        currency,
+        subtotal,
+        tax,
+        shipping,
         total,
         status,
+        payment_intent_id,
         created_at
-      ) VALUES ($1, $2, $3, $4, $5, 'pending', $6)
+      ) VALUES ($1, $2, $3, $4, $5, $6, 'pending', $7, $8)
        RETURNING id`,
       [
         customer.email,
         `${customer.firstName} ${customer.lastName}`,
-        JSON.stringify(customerData),
-        currency,
+        total, // For now, use total as subtotal
+        0, // Tax - to be calculated properly later
+        0, // Shipping - to be calculated properly later
         total,
+        JSON.stringify(customerData), // Store customer data temporarily in payment_intent_id
         timestamp || new Date().toISOString()
       ]
     );
@@ -964,43 +956,32 @@ router.get('/search/autocomplete', rateLimit(60000, 50), async (req, res) => {
     try {
       const suggestions = await db.query('SELECT * FROM get_search_suggestions($1, $2)', [q, 10]);
 
-      // Format for frontend compatibility and filter for cards with stock
-      const formattedSuggestions = await Promise.all(
-        suggestions.rows.map(async (row) => {
-          if (row.match_type === 'card') {
-            // Check if card has stock
-            const stockCheck = await db.query(
-              'SELECT ci.stock_quantity > 0 as has_stock FROM card_inventory ci JOIN cards c ON ci.card_id = c.id WHERE c.name = $1 LIMIT 1',
-              [row.name]
-            );
-            if (stockCheck.rows.length > 0 && stockCheck.rows[0].has_stock) {
-              return {
-                name: row.name,
-                set_name: row.set_name,
-                image_url: row.image_url,
-                match_type: row.match_type
-              };
-            }
-          }
-          return row.match_type === 'set' ? {
-            name: row.name,
-            set_name: '',
-            image_url: '',
-            match_type: row.match_type
-          } : null;
-        })
-      );
+      // Fixed N+1 query by using database function that already includes stock check
+      const formattedSuggestions = suggestions.rows.map((row) => {
+        return {
+          name: row.name,
+          set_name: row.set_name,
+          image_url: row.image_url,
+          match_type: row.match_type
+        };
+      });
 
       res.json({ suggestions: formattedSuggestions.filter(Boolean) });
     } catch (functionError) {
-      // Fallback to enhanced basic search if full-text functions aren't available
+      // Fallback to enhanced basic search if full-text functions aren't available (Fixed N+1 query)
       const fallbackSuggestions = await db.query(`
-        SELECT DISTINCT c.name, c.image_url, cs.name as set_name, 'card' as match_type
+        SELECT DISTINCT
+          c.name,
+          c.image_url,
+          cs.name as set_name,
+          'card' as match_type,
+          MAX(ci.stock_quantity) > 0 as has_stock
         FROM cards c
         JOIN card_sets cs ON c.set_id = cs.id
         JOIN card_inventory ci ON ci.card_id = c.id
         WHERE (c.name ILIKE $1 OR c.card_number ILIKE $1)
-          AND ci.stock_quantity > 0
+        GROUP BY c.id, c.name, c.image_url, cs.name
+        HAVING MAX(ci.stock_quantity) > 0
         ORDER BY
           CASE
             WHEN c.name ILIKE $2 THEN 1
@@ -1248,7 +1229,11 @@ router.get('/analytics/trending', async (req, res) => {
   try {
     const { days = 7, limit = 10 } = req.query;
 
-    // For now, we'll simulate trending by recent sales and stock turnover
+    // Sanitize and validate inputs to prevent SQL injection
+    const sanitizedDays = Math.max(1, Math.min(365, parseInt(days, 10))) || 7;
+    const sanitizedLimit = Math.max(1, Math.min(100, parseInt(limit, 10))) || 10;
+
+    // For now, we'll simulate trending by recent sales and stock turnover (Fixed SQL injection)
     const trending = await db.query(`
       SELECT
         c.id,
@@ -1256,17 +1241,17 @@ router.get('/analytics/trending', async (req, res) => {
         c.image_url,
         cs.name as set_name,
         AVG(ci.price) as avg_price,
-        SUM(CASE WHEN oi.created_at > NOW() - INTERVAL '${days} days' THEN oi.quantity ELSE 0 END) as recent_sales
+        SUM(CASE WHEN oi.created_at > NOW() - INTERVAL $1 || ' days' THEN oi.quantity ELSE 0 END) as recent_sales
       FROM cards c
       JOIN card_sets cs ON c.set_id = cs.id
       JOIN card_inventory ci ON ci.card_id = c.id
       LEFT JOIN order_items oi ON oi.inventory_id = ci.id
       WHERE ci.stock_quantity > 0
       GROUP BY c.id, c.name, c.image_url, cs.name
-      HAVING SUM(CASE WHEN oi.created_at > NOW() - INTERVAL '${days} days' THEN oi.quantity ELSE 0 END) > 0
+      HAVING SUM(CASE WHEN oi.created_at > NOW() - INTERVAL $1 || ' days' THEN oi.quantity ELSE 0 END) > 0
       ORDER BY recent_sales DESC, avg_price DESC
-      LIMIT $1
-    `, [limit]);
+      LIMIT $2
+    `, [sanitizedDays, sanitizedLimit]);
 
     res.json({ trending: trending.rows });
   } catch (error) {
