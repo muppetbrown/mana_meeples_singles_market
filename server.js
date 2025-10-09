@@ -17,14 +17,18 @@ app.set('trust proxy', 1);
 // ============================================
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  },
-  max: 5,                       // Reduced for free tier stability
-  min: 1,                       // Keep 1 connection alive
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 10000,
-  acquireTimeoutMillis: 10000,
+  ssl: process.env.NODE_ENV === 'production'
+    ? {
+        rejectUnauthorized: true
+      }
+    : {
+        rejectUnauthorized: false
+      },
+  max: parseInt(process.env.DB_POOL_MAX) || 10,        // Increased default for better performance
+  min: parseInt(process.env.DB_POOL_MIN) || 2,         // Keep more connections alive
+  idleTimeoutMillis: parseInt(process.env.DB_IDLE_TIMEOUT_MS) || 30000,
+  connectionTimeoutMillis: parseInt(process.env.DB_CONNECTION_TIMEOUT_MS) || 10000,
+  acquireTimeoutMillis: parseInt(process.env.DB_ACQUIRE_TIMEOUT_MS) || 10000,
   allowExitOnIdle: false
 });
 
@@ -273,8 +277,13 @@ app.get('/api/db-stats', async (req, res) => {
   }
 });
 
-// CORS debug endpoint (useful for debugging)
+// CORS debug endpoint (useful for debugging) - Secured for production
 app.get('/api/cors-debug', (req, res) => {
+  // Don't expose debug info in production
+  if (process.env.NODE_ENV === 'production') {
+    return res.status(404).json({ error: 'Not found' });
+  }
+
   res.json({
     allowedOrigins,
     environmentVariables: {
