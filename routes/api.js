@@ -554,7 +554,20 @@ router.post('/orders', async (req, res) => {
   try {
     await client.query('BEGIN');
 
-    const { customer_email, customer_name, items, shipping_info } = req.body;
+    const { customer, items, total, currency, timestamp } = req.body;
+
+    // Validate required fields
+    if (!customer || !items || !total || !currency) {
+      return res.status(400).json({
+        error: 'Missing required fields: customer, items, total, currency'
+      });
+    }
+
+    if (!customer.email || !customer.firstName || !customer.lastName) {
+      return res.status(400).json({
+        error: 'Missing required customer fields: email, firstName, lastName'
+      });
+    }
 
     // Enhanced stock validation with overselling prevention
     const stockIssues = [];
@@ -602,18 +615,39 @@ router.post('/orders', async (req, res) => {
       });
     }
 
-    // Calculate totals using server-side prices
-    const subtotal = stockUpdates.reduce((sum, item) => sum + (item.current_price * item.quantity), 0);
-    const tax = subtotal * 0.1; // Example: 10% tax
-    const shipping = 5.99; // Flat shipping
-    const total = subtotal + tax + shipping;
+    // Create customer details JSON
+    const customerData = {
+      firstName: customer.firstName,
+      lastName: customer.lastName,
+      email: customer.email,
+      phone: customer.phone,
+      address: customer.address,
+      city: customer.city,
+      postalCode: customer.postalCode,
+      country: customer.country,
+      notes: customer.notes
+    };
 
     // Create order
     const orderResult = await client.query(
-      `INSERT INTO orders (customer_email, customer_name, subtotal, tax, shipping, total, status)
-       VALUES ($1, $2, $3, $4, $5, $6, 'pending')
+      `INSERT INTO orders (
+        customer_email,
+        customer_name,
+        customer_data,
+        currency,
+        total,
+        status,
+        created_at
+      ) VALUES ($1, $2, $3, $4, $5, 'pending', $6)
        RETURNING id`,
-      [customer_email, customer_name, subtotal, tax, shipping, total]
+      [
+        customer.email,
+        `${customer.firstName} ${customer.lastName}`,
+        JSON.stringify(customerData),
+        currency,
+        total,
+        timestamp || new Date().toISOString()
+      ]
     );
 
     const orderId = orderResult.rows[0].id;
@@ -632,10 +666,14 @@ router.post('/orders', async (req, res) => {
       );
     }
 
+    // TODO: Send email confirmation to customer and shop owner
+    // This would integrate with an email service like SendGrid, Mailgun, or SMTP
+    console.log(`Order ${orderId} created for ${customer.email}. Confirmation email should be sent.`);
+
     await client.query('COMMIT');
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       order_id: orderId,
       total: total
     });
@@ -643,6 +681,193 @@ router.post('/orders', async (req, res) => {
     await client.query('ROLLBACK');
     console.error('Error creating order:', error);
     res.status(500).json({ error: error.message || 'Failed to create order' });
+  } finally {
+    client.release();
+  }
+});
+
+// GET /api/admin/orders - Get all orders for admin management
+router.get('/admin/orders', adminAuth, async (req, res) => {
+  try {
+    const { status, page = 1, limit = 50 } = req.query;
+
+    const offset = (page - 1) * limit;
+
+    let query = `
+      SELECT
+        o.id,
+        o.customer_email,
+        o.customer_name,
+        o.customer_data,
+        o.currency,
+        o.total,
+        o.status,
+        o.created_at,
+        o.updated_at,
+        COUNT(oi.id) as item_count
+      FROM orders o
+      LEFT JOIN order_items oi ON oi.order_id = o.id
+    `;
+
+    const params = [];
+    let paramCount = 1;
+
+    if (status) {
+      query += ` WHERE o.status = $${paramCount}`;
+      params.push(status);
+      paramCount++;
+    }
+
+    query += `
+      GROUP BY o.id, o.customer_email, o.customer_name, o.customer_data,
+               o.currency, o.total, o.status, o.created_at, o.updated_at
+      ORDER BY o.created_at DESC
+      LIMIT $${paramCount} OFFSET $${paramCount + 1}
+    `;
+
+    params.push(limit, offset);
+
+    const result = await db.query(query, params);
+
+    res.json({
+      orders: result.rows,
+      pagination: {
+        page: parseInt(page),
+        limit: parseInt(limit)
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Failed to fetch orders' });
+  }
+});
+
+// GET /api/admin/orders/:id - Get detailed order information
+router.get('/admin/orders/:id', adminAuth, async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const orderQuery = `
+      SELECT o.*,
+             json_agg(
+               json_build_object(
+                 'id', oi.id,
+                 'inventory_id', oi.inventory_id,
+                 'card_name', oi.card_name,
+                 'quality', oi.quality,
+                 'quantity', oi.quantity,
+                 'unit_price', oi.unit_price,
+                 'total_price', oi.total_price
+               )
+             ) as items
+      FROM orders o
+      LEFT JOIN order_items oi ON oi.order_id = o.id
+      WHERE o.id = $1
+      GROUP BY o.id
+    `;
+
+    const result = await db.query(orderQuery, [id]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    res.status(500).json({ error: 'Failed to fetch order details' });
+  }
+});
+
+// PUT /api/admin/orders/:id/status - Update order status
+router.put('/admin/orders/:id/status', adminAuth, async (req, res) => {
+  const client = await db.getClient();
+
+  try {
+    await client.query('BEGIN');
+
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ['pending', 'confirmed', 'cancelled', 'completed'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({
+        error: `Invalid status. Must be one of: ${validStatuses.join(', ')}`
+      });
+    }
+
+    // Get current order details
+    const currentOrder = await client.query(
+      'SELECT status FROM orders WHERE id = $1',
+      [id]
+    );
+
+    if (currentOrder.rows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    const currentStatus = currentOrder.rows[0].status;
+
+    // If cancelling order, restore inventory
+    if (status === 'cancelled' && currentStatus !== 'cancelled') {
+      const orderItems = await client.query(
+        'SELECT inventory_id, quantity FROM order_items WHERE order_id = $1',
+        [id]
+      );
+
+      for (const item of orderItems.rows) {
+        await client.query(
+          'UPDATE card_inventory SET stock_quantity = stock_quantity + $1 WHERE id = $2',
+          [item.quantity, item.inventory_id]
+        );
+      }
+    }
+
+    // If un-cancelling order (rare), re-reserve inventory
+    if (currentStatus === 'cancelled' && status !== 'cancelled') {
+      const orderItems = await client.query(
+        'SELECT inventory_id, quantity FROM order_items WHERE order_id = $1',
+        [id]
+      );
+
+      for (const item of orderItems.rows) {
+        // Check stock before re-reserving
+        const stockCheck = await client.query(
+          'SELECT stock_quantity FROM card_inventory WHERE id = $1',
+          [item.inventory_id]
+        );
+
+        if (stockCheck.rows.length === 0 || stockCheck.rows[0].stock_quantity < item.quantity) {
+          await client.query('ROLLBACK');
+          return res.status(400).json({
+            error: `Cannot un-cancel order: insufficient stock for item ${item.inventory_id}`
+          });
+        }
+
+        await client.query(
+          'UPDATE card_inventory SET stock_quantity = stock_quantity - $1 WHERE id = $2',
+          [item.quantity, item.inventory_id]
+        );
+      }
+    }
+
+    // Update order status
+    const updateResult = await client.query(
+      'UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+      [status, id]
+    );
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      order: updateResult.rows[0]
+    });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error updating order status:', error);
+    res.status(500).json({ error: 'Failed to update order status' });
   } finally {
     client.release();
   }
@@ -1213,27 +1438,29 @@ router.get('/currency/detect', async (req, res) => {
     // Simple IP-based detection (in production, use a proper geolocation service)
     const clientIP = req.ip || req.connection.remoteAddress;
 
-    // For now, default to USD, but can be enhanced with IP geolocation
-    let currency = 'USD';
-    let symbol = '$';
+    // Default to NZD for NZ-based shop
+    let currency = 'NZD';
+    let symbol = 'NZ$';
+    let rate = 1.6;
 
-    // Check if request is from New Zealand (simplified example)
+    // Check if request is from US/other countries to show USD
     const userAgent = req.headers['user-agent'] || '';
     const acceptLanguage = req.headers['accept-language'] || '';
 
-    if (acceptLanguage.includes('en-NZ') || userAgent.includes('NZ')) {
-      currency = 'NZD';
-      symbol = 'NZ$';
+    if (acceptLanguage.includes('en-US') || acceptLanguage.includes('en-CA') || acceptLanguage.includes('en-GB')) {
+      currency = 'USD';
+      symbol = '$';
+      rate = 1.0;
     }
 
     res.json({
       currency,
       symbol,
-      rate: currency === 'NZD' ? 1.6 : 1.0 // Simplified conversion rate
+      rate
     });
   } catch (error) {
     console.error('Error detecting currency:', error);
-    res.json({ currency: 'USD', symbol: '$', rate: 1.0 });
+    res.json({ currency: 'NZD', symbol: 'NZ$', rate: 1.6 });
   }
 });
 
