@@ -109,7 +109,6 @@ export const useEnhancedCart = (API_URL) => {
 
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartWithMetadata));
       setLastSync(timestamp);
-      setCartVersion(newVersion);
       cartVersionRef.current = newVersion;
 
       // Broadcast cart update to other tabs
@@ -141,7 +140,6 @@ export const useEnhancedCart = (API_URL) => {
       if (version > cartVersionRef.current) {
         setCart(storedCart || []);
         setLastSync(timestamp);
-        setCartVersion(version);
         cartVersionRef.current = version;
       }
     } catch (error) {
@@ -157,7 +155,6 @@ export const useEnhancedCart = (API_URL) => {
       // Update from another tab
       setCart(broadcastCart || []);
       setLastSync(timestamp);
-      setCartVersion(version);
       cartVersionRef.current = version;
       addNotification('Cart synced from another tab', 'info', 2000);
     }
