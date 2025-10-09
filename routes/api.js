@@ -661,9 +661,46 @@ router.post('/orders', async (req, res) => {
       );
     }
 
-    // TODO: Send email confirmation to customer and shop owner
-    // This would integrate with an email service like SendGrid, Mailgun, or SMTP
-    console.log(`Order ${orderId} created for ${customer.email}. Confirmation email should be sent.`);
+    // Send email confirmations
+    try {
+      const emailService = require('../services/emailService');
+
+      // Prepare email data with detailed order information
+      const emailOrderData = {
+        order_id: orderId,
+        customer: customerData,
+        items: stockUpdates.map(item => ({
+          name: item.card_name,
+          quality: item.quality,
+          quantity: item.quantity,
+          price: item.current_price,
+          inventory_id: item.inventory_id
+        })),
+        total: parseFloat(total),
+        currency: currency === 'NZD' ? 'NZ$' : (currency === 'USD' ? '$' : currency),
+        timestamp: timestamp || new Date().toISOString()
+      };
+
+      // Send emails (non-blocking - order success doesn't depend on email delivery)
+      const emailResults = await emailService.sendOrderEmails(emailOrderData);
+
+      // Log email results for debugging
+      if (emailResults.customerEmail.success) {
+        console.log(`✅ Customer confirmation email sent for order ${orderId}`);
+      } else {
+        console.log(`⚠️ Customer email failed for order ${orderId}:`, emailResults.customerEmail.reason || emailResults.customerEmail.error);
+      }
+
+      if (emailResults.ownerEmail.success) {
+        console.log(`✅ Owner notification email sent for order ${orderId}`);
+      } else {
+        console.log(`⚠️ Owner email failed for order ${orderId}:`, emailResults.ownerEmail.reason || emailResults.ownerEmail.error);
+      }
+
+    } catch (emailError) {
+      // Log email errors but don't fail the order
+      console.error(`⚠️ Email service error for order ${orderId}:`, emailError.message);
+    }
 
     await client.query('COMMIT');
 
@@ -693,8 +730,8 @@ router.get('/admin/orders', adminAuth, async (req, res) => {
         o.id,
         o.customer_email,
         o.customer_name,
-        o.customer_data,
-        o.currency,
+        o.payment_intent_id as customer_data,
+        'NZD' as currency,
         o.total,
         o.status,
         o.created_at,
@@ -714,8 +751,8 @@ router.get('/admin/orders', adminAuth, async (req, res) => {
     }
 
     query += `
-      GROUP BY o.id, o.customer_email, o.customer_name, o.customer_data,
-               o.currency, o.total, o.status, o.created_at, o.updated_at
+      GROUP BY o.id, o.customer_email, o.customer_name, o.payment_intent_id,
+               o.total, o.status, o.created_at, o.updated_at
       ORDER BY o.created_at DESC
       LIMIT $${paramCount} OFFSET $${paramCount + 1}
     `;

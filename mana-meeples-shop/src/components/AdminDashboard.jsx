@@ -18,10 +18,13 @@ import {
   XCircle,
   AlertTriangle,
   Loader2,
-  Plus
+  Plus,
+  ShoppingCart,
+  BarChart3
 } from 'lucide-react';
 
 import CurrencySelector from './CurrencySelector';
+import AdminOrders from './AdminOrders';
 import { API_URL } from '../config/api';
 
 const getAdminHeaders = () => {
@@ -61,7 +64,8 @@ const AdminDashboard = () => {
   const [csvResults, setCsvResults] = useState(null);
   const [csvStep, setCsvStep] = useState(1);
   const [dragActive, setDragActive] = useState(false);
-  
+  const [activeTab, setActiveTab] = useState('inventory');
+
   // ✅ FIXED: Authentication and inventory fetch in single useEffect
   useEffect(() => {
     const checkAuth = async () => {
@@ -711,8 +715,41 @@ const AdminDashboard = () => {
         </div>
       </header>
 
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <nav className="flex space-x-8">
+            <button
+              onClick={() => setActiveTab('inventory')}
+              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'inventory'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              } transition-colors`}
+            >
+              <Package className="w-4 h-4" />
+              Inventory
+            </button>
+            <button
+              onClick={() => setActiveTab('orders')}
+              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'orders'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              } transition-colors`}
+            >
+              <ShoppingCart className="w-4 h-4" />
+              Orders
+            </button>
+          </nav>
+        </div>
+      </div>
+
       <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {/* Stats Grid */}
+        {/* Tab Content */}
+        {activeTab === 'inventory' && (
+          <>
+            {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
             <div className="flex items-center justify-between mb-2">
@@ -1570,6 +1607,13 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+        )}
+          </>
+        )}
+
+        {/* Orders Tab */}
+        {activeTab === 'orders' && (
+          <AdminOrders />
         )}
       </main>
     </div>
