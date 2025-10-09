@@ -395,7 +395,7 @@ const AdminOrders = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (confirm('Are you sure you want to cancel this order? This will restore inventory.')) {
+                              if (window.confirm('Are you sure you want to cancel this order? This will restore inventory.')) {
                                 updateOrderStatus(order.id, 'cancelled');
                               }
                             }}
