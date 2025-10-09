@@ -1469,11 +1469,11 @@ const TCGShop = () => {
               )
             ) : (
               /* List View */
-              <div className="space-y-6">    {/* ← CHANGED: space-y-6 instead of flex flex-col gap-2 overflow-hidden */}
+              <div>
                 {groupedCards.map((group, groupIndex) => (
-                  <div key={groupIndex}>
+                  <div key={groupIndex} className="mb-8">
                     {group.section && (
-                      <div className="mb-4">    {/* ← CHANGED: Inline section header instead of SectionHeader component */}
+                      <div className="mb-4">
                         <div className="flex items-center gap-4">
                           <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg shadow-sm">
                             <h3 className="text-lg font-bold">{group.section}</h3>
@@ -1483,7 +1483,7 @@ const TCGShop = () => {
                         </div>
                       </div>
                     )}
-                    <div className="flex flex-col gap-2">
+                    <div className="space-y-2">
                       {group.cards.map(card => {
                         const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
                         const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
