@@ -45,7 +45,18 @@ const rateLimit = (windowMs, max, message = 'Too many requests') => createRateLi
 // PUBLIC ROUTES
 // ============================================
 
-// GET /api/games - Get all active games
+/**
+ * GET /api/games - Get all active games
+ * @description Retrieves a list of all active games available in the system
+ * @route GET /api/games
+ * @returns {Array} Array of game objects with id, name, and active status
+ * @example
+ * // Response:
+ * [
+ *   { "id": 1, "name": "Magic: The Gathering", "active": true },
+ *   { "id": 2, "name": "Pokemon", "active": true }
+ * ]
+ */
 router.get('/games', normalRateLimit, async (req, res) => {
   try {
     const games = await db.query(
@@ -549,7 +560,53 @@ router.get('/cards/:id', async (req, res) => {
   }
 });
 
-// POST /api/orders - Create a new order with overselling prevention
+/**
+ * POST /api/orders - Create a new order with overselling prevention
+ * @description Creates a new order with comprehensive validation and stock management
+ * @route POST /api/orders
+ * @param {Object} req.body - Order data
+ * @param {Object} req.body.customer - Customer information
+ * @param {string} req.body.customer.email - Customer email (validated)
+ * @param {string} req.body.customer.phone - Customer phone (validated)
+ * @param {string} req.body.customer.name - Customer name
+ * @param {Array} req.body.items - Array of order items
+ * @param {string} req.body.items[].inventory_id - Inventory item ID
+ * @param {number} req.body.items[].quantity - Quantity ordered (1-99)
+ * @param {number} req.body.items[].price - Price per item
+ * @param {number} req.body.total - Total order amount
+ * @param {string} req.body.currency - Currency code (e.g., 'USD', 'NZD')
+ * @param {string} req.body.timestamp - Order timestamp
+ * @returns {Object} Success response with order ID
+ * @throws {400} Validation errors for invalid input
+ * @throws {409} Insufficient stock for requested items
+ * @throws {500} Database or processing errors
+ * @example
+ * // Request body:
+ * {
+ *   "customer": {
+ *     "email": "customer@example.com",
+ *     "phone": "+64-21-123-4567",
+ *     "name": "John Doe"
+ *   },
+ *   "items": [
+ *     {
+ *       "inventory_id": "abc123",
+ *       "quantity": 2,
+ *       "price": 15.99
+ *     }
+ *   ],
+ *   "total": 31.98,
+ *   "currency": "NZD",
+ *   "timestamp": "2023-12-01T10:30:00Z"
+ * }
+ *
+ * // Response:
+ * {
+ *   "success": true,
+ *   "orderId": "order_789",
+ *   "message": "Order created successfully"
+ * }
+ */
 router.post('/orders', async (req, res) => {
   const client = await db.getClient();
 
