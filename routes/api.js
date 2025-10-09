@@ -176,7 +176,7 @@ router.get('/cards', normalRateLimit, async (req, res) => {
       const sanitizedSearch = search
         .trim()
         .slice(0, 100) // Limit to 100 characters
-        .replace(/['"\\;--]/g, ''); // Remove dangerous SQL characters
+        .replace(/['"\\;-]/g, ''); // Remove dangerous SQL characters
 
       if (sanitizedSearch.length === 0) {
         // Skip search if sanitized input is empty
