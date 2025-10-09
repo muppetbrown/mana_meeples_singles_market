@@ -21,6 +21,7 @@ import {
   Plus
 } from 'lucide-react';
 
+import CurrencySelector from './CurrencySelector';
 import { API_URL } from '../config/api';
 
 const getAdminHeaders = () => {
@@ -606,12 +607,8 @@ const AdminDashboard = () => {
     window.URL.revokeObjectURL(url);
   };
 
-  const toggleCurrency = () => {
-    setCurrency(prev => ({
-      symbol: prev.code === 'USD' ? 'NZ$' : '$',
-      rate: prev.code === 'USD' ? 1.6 : 1.0,
-      code: prev.code === 'USD' ? 'NZD' : 'USD'
-    }));
+  const handleCurrencyChange = (newCurrency) => {
+    setCurrency(newCurrency);
   };
 
   const formatDate = (dateString) => {
@@ -677,15 +674,11 @@ const AdminDashboard = () => {
               </span>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={toggleCurrency}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-                aria-label={`Switch currency to ${currency.code === 'USD' ? 'NZD' : 'USD'}`}
-              >
-                <span className="text-slate-700">{currency.code}</span>
-                <span className="text-slate-400">→</span>
-                <span className="text-slate-500">{currency.code === 'USD' ? 'NZD' : 'USD'}</span>
-              </button>
+              <CurrencySelector
+                currency={currency}
+                onCurrencyChange={handleCurrencyChange}
+                className="flex-shrink-0"
+              />
 
               <button
                 onClick={refreshPrices}

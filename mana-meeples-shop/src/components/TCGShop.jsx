@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } fr
 import { useSearchParams } from 'react-router-dom';
 import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
+import CurrencySelector from './CurrencySelector';
 import { useFilterCounts } from '../hooks/useFilterCounts';
 import { API_URL } from '../config/api';
 
@@ -22,6 +23,23 @@ const highlightMatch = (text, query) => {
   );
 };
 
+// Section Header Component
+const SectionHeader = ({ title, count }) => {
+  if (!title) return null;
+
+  return (
+    <div className="col-span-full mb-4">
+      <div className="flex items-center gap-4">
+        <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-4 py-2 rounded-lg shadow-sm">
+          <h3 className="text-lg font-bold">{title}</h3>
+          <div className="text-xs opacity-90">{count} cards</div>
+        </div>
+        <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-200 to-purple-200"></div>
+      </div>
+    </div>
+  );
+};
+
 // Memoized Card Component for performance
 const CardItem = React.memo(({
   card,
@@ -32,100 +50,99 @@ const CardItem = React.memo(({
   onAddToCart
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200">
-      <OptimizedImage
-        src={card.image_url}
-        alt={`${card.name} from ${card.set_name}`}
-        width={250}
-        height={350}
-        className="bg-gradient-to-br from-slate-100 to-slate-200"
-        placeholder="blur"
-        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
-      />
-      <div className="p-4">
-        <h3 className="font-bold text-lg text-slate-900 mb-1">{card.name}</h3>
-        <p className="text-xs text-slate-600 mb-3">
-          {card.set_name} • #{card.card_number}
-        </p>
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200 flex flex-col h-full">
+      {/* Card Image */}
+      <div className="relative">
+        <OptimizedImage
+          src={card.image_url}
+          alt={`${card.name} from ${card.set_name}`}
+          width={250}
+          height={350}
+          className="bg-gradient-to-br from-slate-100 to-slate-200 w-full"
+          placeholder="blur"
+          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+        />
+      </div>
 
-        <div className="mb-3">
-          <label className="block text-xs font-medium text-slate-600 mb-1">
-            Condition & Finish:
+      {/* Card Content */}
+      <div className="p-5 flex flex-col gap-4 flex-grow">
+        {/* Title & Set Info - Fixed height for alignment */}
+        <div className="min-h-[4rem]">
+          <h3 className="font-semibold text-lg leading-tight text-slate-900 mb-2 line-clamp-2">
+            {card.name}
+          </h3>
+          <p className="text-sm text-slate-600 pb-4 border-b border-slate-100">
+            {card.set_name} • #{card.card_number}
+          </p>
+        </div>
+
+        {/* Condition Selector */}
+        <div className="space-y-2">
+          <label
+            htmlFor={`condition-${card.id}`}
+            className="block text-xs font-semibold text-slate-700 uppercase tracking-wide"
+          >
+            Condition & Finish
           </label>
           <select
+            id={`condition-${card.id}`}
             value={selectedQuality}
             onChange={onQualityChange}
-            className="w-full text-sm px-2 py-1.5 border border-slate-300 rounded bg-white focus:ring-2 focus:ring-blue-500"
+            className="w-full text-sm px-3 py-2.5 border-2 border-slate-300 rounded-lg bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-colors"
           >
             {card.variations.map(variation => (
               <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
-                {variation.quality}{variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
+                {variation.quality}
+                {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
                 {variation.language !== 'English' ? ` • ${variation.language}` : ''}
                 {variation.variation_name ? ` • ${variation.variation_name}` : ''}
-                {' '}({variation.stock} available)
               </option>
             ))}
           </select>
-
-          {/* Show available foil types and variations for this card */}
-          <div className="mt-1 text-xs text-slate-600">
-            {(() => {
-              const foilTypes = [...new Set(card.variations.map(v => v.foil_type))];
-              const hasSpecialVariations = card.variations.some(v => v.variation_name);
-              return (
-                <>
-                  Available: {foilTypes.join(', ')}
-                  {hasSpecialVariations && (
-                    <div className="text-blue-600">
-                      ✨ Special versions available
-                    </div>
-                  )}
-                </>
-              );
-            })()}
-          </div>
         </div>
 
-        {/* Selected variation highlights */}
-        {selectedVariation && (
-          <div className="mb-3 flex flex-wrap gap-1">
-            {selectedVariation.foil_type !== 'Regular' && (
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-gradient-to-r from-yellow-50 to-yellow-100 text-yellow-900 rounded-full text-xs font-medium">
-                ✨ {selectedVariation.foil_type}
+        {/* Availability Status */}
+        <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
+          {selectedVariation?.stock > 0 ? (
+            <>
+              <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+              <span className="text-sm font-medium text-emerald-700">
+                {selectedVariation.stock} available
               </span>
-            )}
-            {selectedVariation.language !== 'English' && (
-              <span className="inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-900 rounded-full text-xs font-medium">
-                🌍 {selectedVariation.language}
-              </span>
-            )}
-            {selectedVariation.variation_name && (
-              <span className="inline-flex items-center px-2 py-0.5 bg-purple-50 text-purple-900 rounded-full text-xs font-medium">
-                ⭐ {selectedVariation.variation_name}
-              </span>
-            )}
-          </div>
-        )}
+            </>
+          ) : (
+            <>
+              <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+              <span className="text-sm font-medium text-slate-500">Out of stock</span>
+            </>
+          )}
+        </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <div>
-            <div className="text-2xl font-bold text-blue-600">
-              {currency.symbol}{selectedVariation?.price.toFixed(2)}
+        {/* Price & CTA Section - Pushed to bottom */}
+        <div className="mt-auto pt-2">
+          <div className="flex items-center justify-between gap-3">
+            {/* Price Display */}
+            <div className="flex flex-col">
+              <span className="text-2xl font-bold text-slate-900 leading-none">
+                {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
+              </span>
+              {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
+                <span className="text-xs font-semibold text-red-600 mt-1">
+                  Only {selectedVariation.stock} left!
+                </span>
+              )}
             </div>
-            {selectedVariation?.stock < 5 && selectedVariation?.stock > 0 && (
-              <div className="text-xs text-red-600 font-medium mt-1">
-                Only {selectedVariation.stock} left
-              </div>
-            )}
+
+            {/* Add to Cart Button */}
+            <button
+              onClick={onAddToCart}
+              disabled={!selectedVariation || selectedVariation.stock === 0}
+              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] flex items-center justify-center whitespace-nowrap"
+              aria-label={`Add ${card.name} to cart`}
+            >
+              Add to Cart
+            </button>
           </div>
-          <button
-            onClick={onAddToCart}
-            disabled={!selectedVariation || selectedVariation.stock === 0}
-            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none text-sm"
-            aria-label={`Add ${card.name} ${selectedQuality} condition to cart for ${currency.symbol}${selectedVariation?.price.toFixed(2)}`}
-          >
-            {selectedVariation?.stock === 0 ? 'Sold Out' : 'Add to Cart'}
-          </button>
         </div>
       </div>
     </div>
@@ -426,14 +443,9 @@ const TCGShop = () => {
     return active;
   }, [filters, searchTerm, selectedGame]);
 
-  // Currency toggle function
-  const toggleCurrency = () => {
-    const isUSD = currency.code === 'USD';
-    setCurrency({
-      symbol: isUSD ? 'NZ$' : '$',
-      rate: isUSD ? 1.6 : 1.0,
-      code: isUSD ? 'NZD' : 'USD'
-    });
+  // Currency change function
+  const handleCurrencyChange = (newCurrency) => {
+    setCurrency(newCurrency);
   };
 
   // Load cart from localStorage
@@ -503,6 +515,55 @@ const TCGShop = () => {
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), [cart]);
   const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
 
+  // Group cards by sections for sorting
+  const groupedCards = useMemo(() => {
+    if (!cards.length) return [];
+
+    const { sortBy } = filters;
+
+    // If no sorting by name or set, return ungrouped
+    if (sortBy !== 'name' && sortBy !== 'set') {
+      return [{ section: null, cards }];
+    }
+
+    const groups = new Map();
+
+    cards.forEach(card => {
+      let sectionKey;
+      let sectionTitle;
+
+      if (sortBy === 'name') {
+        const firstLetter = card.name.charAt(0).toUpperCase();
+        sectionKey = firstLetter;
+        sectionTitle = firstLetter;
+      } else if (sortBy === 'set') {
+        sectionKey = card.set_name;
+        sectionTitle = card.set_name;
+      }
+
+      if (!groups.has(sectionKey)) {
+        groups.set(sectionKey, {
+          section: sectionTitle,
+          cards: []
+        });
+      }
+
+      groups.get(sectionKey).cards.push(card);
+    });
+
+    // Sort the sections
+    const sortedGroups = Array.from(groups.values()).sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.section.localeCompare(b.section);
+      } else if (sortBy === 'set') {
+        return a.section.localeCompare(b.section);
+      }
+      return 0;
+    });
+
+    return sortedGroups;
+  }, [cards, filters]);
+
   // Memoized card handlers
   const handleQualityChange = useCallback((cardId) => (e) => {
     setSelectedQualities(prev => ({
@@ -565,16 +626,12 @@ const TCGShop = () => {
               TCG Singles
             </h1>
             <div className="flex items-center gap-3">
-              {/* Currency Toggle */}
-              <button
-                onClick={toggleCurrency}
-                className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors motion-reduce:transition-none text-sm font-medium focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
-                aria-label={`Switch currency from ${currency.code} to ${currency.code === 'USD' ? 'NZD' : 'USD'}`}
-              >
-                <span className="text-slate-700">{currency.code}</span>
-                <span className="text-slate-700">|</span>
-                <span className="text-slate-700">{currency.code === 'USD' ? 'NZD' : 'USD'}</span>
-              </button>
+              {/* Currency Selector */}
+              <CurrencySelector
+                currency={currency}
+                onCurrencyChange={handleCurrencyChange}
+                className="flex-shrink-0"
+              />
 
               {/* Shopping Cart */}
               <button
@@ -941,7 +998,7 @@ const TCGShop = () => {
               </div>
             )}
 
-            {/* Cards Grid - With Virtual Scrolling for Performance */}
+            {/* Cards Grid - With Virtual Scrolling for Performance and Section Headers */}
             {cards.length > 100 ? (
               /* Virtual Scrolling for large datasets (100+ cards) */
               <Suspense
@@ -975,24 +1032,31 @@ const TCGShop = () => {
                 />
               </Suspense>
             ) : (
-              /* Standard Grid for smaller datasets (< 100 cards) */
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                {cards.map(card => {
-                  const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-                  const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+              /* Standard Grid for smaller datasets (< 100 cards) with sections */
+              <div>
+                {groupedCards.map((group, groupIndex) => (
+                  <div key={groupIndex} className="mb-8">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                      <SectionHeader title={group.section} count={group.cards.length} />
+                      {group.cards.map(card => {
+                        const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+                        const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
-                  return (
-                    <CardItem
-                      key={card.id}
-                      card={card}
-                      selectedQuality={selectedQuality}
-                      selectedVariation={selectedVariation}
-                      currency={currency}
-                      onQualityChange={handleQualityChange(card.id)}
-                      onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
-                    />
-                  );
-                })}
+                        return (
+                          <CardItem
+                            key={card.id}
+                            card={card}
+                            selectedQuality={selectedQuality}
+                            selectedVariation={selectedVariation}
+                            currency={currency}
+                            onQualityChange={handleQualityChange(card.id)}
+                            onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
 
