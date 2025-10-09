@@ -101,6 +101,7 @@ testDatabaseConnection();
 function validateEnvironment() {
   const required = ['DATABASE_URL'];
   const production = ['JWT_SECRET', 'ADMIN_USERNAME', 'ADMIN_PASSWORD_HASH'];
+  const optional = ['OWNER_EMAIL', 'SMTP_HOST', 'SMTP_USER', 'SMTP_PASSWORD'];  // Email settings are optional but recommended
 
   const missing = [];
 
@@ -127,6 +128,18 @@ function validateEnvironment() {
     }
   } else {
     console.log('✅ All required environment variables are set');
+  }
+
+  // Log email configuration status
+  const emailConfigured = process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASSWORD;
+  const ownerEmailConfigured = !!process.env.OWNER_EMAIL;
+
+  if (emailConfigured && ownerEmailConfigured) {
+    console.log('📧 Email service configured - Order emails will be sent');
+  } else if (emailConfigured && !ownerEmailConfigured) {
+    console.log('📧 SMTP configured but OWNER_EMAIL missing - Customer emails only');
+  } else {
+    console.log('📧 Email service not configured - Set SMTP_HOST, SMTP_USER, SMTP_PASSWORD, OWNER_EMAIL for order emails');
   }
 }
 
