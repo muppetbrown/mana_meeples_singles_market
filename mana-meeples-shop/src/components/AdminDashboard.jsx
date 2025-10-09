@@ -43,7 +43,7 @@ const AdminDashboard = () => {
   const [showAllCards, setShowAllCards] = useState(false);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingItems, setEditingItems] = useState(new Map());
-  const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
+  const [currency, setCurrency] = useState({ symbol: 'NZ$', rate: 1.0, code: 'NZD' });
   const [showFoilModal, setShowFoilModal] = useState(false);
   const [foilModalCard, setFoilModalCard] = useState(null);
   const [foilFormData, setFoilFormData] = useState({

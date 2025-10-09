@@ -536,8 +536,8 @@ const TCGShop = () => {
 
     const { sortBy } = filters;
 
-    // If no sorting by name or set, return ungrouped
-    if (sortBy !== 'name' && sortBy !== 'set') {
+    // If no sorting by name, set, rarity, or price, return ungrouped
+    if (!['name', 'set', 'rarity', 'price', 'price_low', 'price_high'].includes(sortBy)) {
       return [{ section: null, cards }];
     }
 
@@ -554,6 +554,34 @@ const TCGShop = () => {
       } else if (sortBy === 'set') {
         sectionKey = card.set_name;
         sectionTitle = card.set_name;
+      } else if (sortBy === 'rarity') {
+        // Group by rarity type
+        const rarity = card.rarity || 'Unknown';
+        sectionKey = rarity;
+        sectionTitle = rarity;
+      } else if (['price', 'price_low', 'price_high'].includes(sortBy)) {
+        // Group by price ranges
+        const price = card.variations?.[0]?.price || 0;
+        let priceRange;
+
+        if (price < 1) {
+          priceRange = 'Under $1';
+        } else if (price < 5) {
+          priceRange = '$1 - $4.99';
+        } else if (price < 10) {
+          priceRange = '$5 - $9.99';
+        } else if (price < 25) {
+          priceRange = '$10 - $24.99';
+        } else if (price < 50) {
+          priceRange = '$25 - $49.99';
+        } else if (price < 100) {
+          priceRange = '$50 - $99.99';
+        } else {
+          priceRange = '$100+';
+        }
+
+        sectionKey = priceRange;
+        sectionTitle = priceRange;
       }
 
       if (!groups.has(sectionKey)) {
@@ -572,6 +600,27 @@ const TCGShop = () => {
         return a.section.localeCompare(b.section);
       } else if (sortBy === 'set') {
         return a.section.localeCompare(b.section);
+      } else if (sortBy === 'rarity') {
+        // Sort rarities by power level
+        const rarityOrder = {
+          'Common': 1, 'Uncommon': 2, 'Rare': 3, 'Mythic': 4, 'Mythic Rare': 4,
+          'Special': 5, 'Legendary': 5, 'Basic': 0, 'Unknown': 6
+        };
+        return (rarityOrder[a.section] || 6) - (rarityOrder[b.section] || 6);
+      } else if (['price', 'price_low', 'price_high'].includes(sortBy)) {
+        // Sort price ranges numerically
+        const priceOrder = {
+          'Under $1': 1, '$1 - $4.99': 2, '$5 - $9.99': 3, '$10 - $24.99': 4,
+          '$25 - $49.99': 5, '$50 - $99.99': 6, '$100+': 7
+        };
+        const aOrder = priceOrder[a.section] || 8;
+        const bOrder = priceOrder[b.section] || 8;
+
+        // Reverse order for price_high
+        if (sortBy === 'price_high') {
+          return bOrder - aOrder;
+        }
+        return aOrder - bOrder;
       }
       return 0;
     });
