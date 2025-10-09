@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown } from 'lucide-react';
+import { ShoppingCart, X, Plus, Minus, Filter, Search, ChevronDown, LayoutGrid, List } from 'lucide-react';
 import OptimizedImage from './OptimizedImage';
 import CurrencySelector from './CurrencySelector';
 import Checkout from './Checkout';
@@ -167,6 +167,249 @@ const CardItem = React.memo(({
   );
 });
 
+// Grid Card Item Component for Grid View
+const GridCardItem = React.memo(({
+  card,
+  selectedQuality,
+  selectedVariation,
+  currency,
+  onQualityChange,
+  onAddToCart
+}) => {
+  return (
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200">
+      <div className="flex flex-col sm:flex-row">
+        {/* Card Image - Left Side */}
+        <div className="relative sm:w-48 sm:flex-shrink-0">
+          <OptimizedImage
+            src={card.image_url}
+            alt={`${card.name} from ${card.set_name}`}
+            width={250}
+            height={350}
+            className="bg-gradient-to-br from-slate-100 to-slate-200 w-full h-full object-cover"
+            placeholder="blur"
+            sizes="(max-width: 640px) 100vw, 192px"
+          />
+        </div>
+
+        {/* Card Details - Right Side */}
+        <div className="flex-1 p-4 sm:p-5 flex flex-col">
+          {/* Title & Set Info */}
+          <div className="mb-3">
+            <h3 className="font-semibold text-lg leading-tight text-slate-900 mb-1.5">
+              {card.name}
+            </h3>
+            <p className="text-sm text-slate-600">
+              {card.set_name} • #{card.card_number}
+            </p>
+          </div>
+
+          {/* Condition Selector */}
+          <div className="mb-3">
+            <label
+              htmlFor={`condition-grid-${card.id}`}
+              className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1.5"
+            >
+              Condition & Finish
+            </label>
+            <select
+              id={`condition-grid-${card.id}`}
+              value={selectedQuality}
+              onChange={onQualityChange}
+              className="w-full text-sm px-3 py-2 border-2 border-slate-300 rounded-lg bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-colors"
+            >
+              {card.variations.map(variation => (
+                <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
+                  {variation.quality}
+                  {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
+                  {variation.language !== 'English' ? ` • ${variation.language}` : ''}
+                  {variation.variation_name ? ` • ${variation.variation_name}` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Availability Status */}
+          <div className="flex items-center gap-2 mb-4">
+            {selectedVariation?.stock > 0 ? (
+              <>
+                <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
+                <span className="text-sm font-medium text-emerald-700">
+                  {selectedVariation.stock} available
+                </span>
+              </>
+            ) : (
+              <>
+                <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+                <span className="text-sm font-medium text-slate-500">Out of stock</span>
+              </>
+            )}
+          </div>
+
+          {/* Price & CTA Section - Bottom */}
+          <div className="mt-auto pt-3 border-t border-slate-100">
+            <div className="flex items-center justify-between gap-3">
+              {/* Price Display */}
+              <div className="flex flex-col">
+                <span className="text-2xl font-bold text-slate-900 leading-none">
+                  {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
+                </span>
+                {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
+                  <span className="text-xs font-semibold text-red-600 mt-1">
+                    Only {selectedVariation.stock} left!
+                  </span>
+                )}
+              </div>
+
+              {/* Add to Cart Button */}
+              <button
+                onClick={onAddToCart}
+                disabled={!selectedVariation || selectedVariation.stock === 0}
+                className="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap"
+                aria-label={`Add ${card.name} to cart`}
+              >
+                Add to Cart
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// List Card Item Component for List View
+const ListCardItem = React.memo(({
+  card,
+  selectedQuality,
+  selectedVariation,
+  currency,
+  onQualityChange,
+  onAddToCart
+}) => {
+  return (
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all motion-reduce:transition-none border border-slate-200 overflow-hidden">
+      <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
+        {/* Card Thumbnail - Small */}
+        <div className="relative w-12 h-16 sm:w-16 sm:h-24 flex-shrink-0">
+          <OptimizedImage
+            src={card.image_url}
+            alt={`${card.name} from ${card.set_name}`}
+            width={80}
+            height={112}
+            className="bg-gradient-to-br from-slate-100 to-slate-200 w-full h-full object-cover rounded"
+            placeholder="blur"
+            sizes="80px"
+          />
+        </div>
+
+        {/* Card Info - Flexible */}
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-base text-slate-900 truncate mb-0.5">
+            {card.name}
+          </h3>
+          <p className="text-xs text-slate-600 truncate">
+            {card.set_name} • #{card.card_number}
+          </p>
+
+          {/* Stock indicator - Mobile only */}
+          <div className="flex items-center gap-1.5 mt-1 sm:hidden">
+            <div className={`w-1.5 h-1.5 rounded-full ${
+              selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
+            }`}></div>
+            <span className={`text-xs font-medium ${
+              selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-slate-500'
+            }`}>
+              {selectedVariation?.stock > 0
+                ? `${selectedVariation.stock} in stock`
+                : 'Out of stock'
+              }
+            </span>
+          </div>
+        </div>
+
+        {/* Condition Selector - Hidden on mobile */}
+        <div className="hidden sm:block w-44 flex-shrink-0">
+          <select
+            id={`condition-list-${card.id}`}
+            value={selectedQuality}
+            onChange={onQualityChange}
+            className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors"
+          >
+            {card.variations.map(variation => (
+              <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
+                {variation.quality}
+                {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Stock - Desktop only */}
+        <div className="hidden sm:flex items-center gap-2 w-24 flex-shrink-0">
+          <div className={`w-2 h-2 rounded-full ${
+            selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
+          }`}></div>
+          <span className={`text-sm font-medium ${
+            selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-slate-500'
+          }`}>
+            {selectedVariation?.stock > 0
+              ? selectedVariation.stock
+              : 'Out'
+            }
+          </span>
+        </div>
+
+        {/* Price - Desktop gets large, Mobile gets medium */}
+        <div className="flex-shrink-0 w-20 sm:w-28 text-right">
+          <span className="text-lg sm:text-xl font-bold text-slate-900 block leading-none">
+            {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
+          </span>
+          {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
+            <span className="text-[10px] sm:text-xs font-semibold text-red-600 block mt-0.5">
+              {selectedVariation.stock} left
+            </span>
+          )}
+        </div>
+
+        {/* Add to Cart Button - Compact */}
+        <button
+          onClick={onAddToCart}
+          disabled={!selectedVariation || selectedVariation.stock === 0}
+          className="px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap"
+          aria-label={`Add ${card.name} to cart`}
+        >
+          <span className="hidden sm:inline">Add to Cart</span>
+          <span className="sm:hidden">Add</span>
+        </button>
+      </div>
+
+      {/* Condition selector for mobile - Expandable section */}
+      <div className="sm:hidden border-t border-slate-100 px-3 py-2 bg-slate-50">
+        <label
+          htmlFor={`condition-list-mobile-${card.id}`}
+          className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1"
+        >
+          Condition
+        </label>
+        <select
+          id={`condition-list-mobile-${card.id}`}
+          value={selectedQuality}
+          onChange={onQualityChange}
+          className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none"
+        >
+          {card.variations.map(variation => (
+            <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
+              {variation.quality}
+              {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
+            </option>
+          ))}
+        </select>
+      </div>
+    </div>
+  );
+});
+
 const TCGShop = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [cards, setCards] = useState([]);
@@ -178,6 +421,7 @@ const TCGShop = () => {
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [selectedQualities, setSelectedQualities] = useState({});
+  const [viewMode, setViewMode] = useState('grid');
 
   // Initialize state from URL parameters
   const searchTerm = searchParams.get('search') || '';
@@ -1097,11 +1341,41 @@ const TCGShop = () => {
           {/* Main Content */}
           <div className="flex-1">
             {/* Results Header */}
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
               <p className="text-slate-600" aria-live="polite">
                 <span className="font-medium">{cards.length}</span> cards found
               </p>
 
+              {/* View Toggle */}
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-slate-600 hidden sm:inline">View:</span>
+                <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5">
+                  <button
+                    onClick={() => setViewMode('grid')}
+                    className={`px-3 py-2 rounded-md transition-all ${
+                      viewMode === 'grid'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                    aria-pressed={viewMode === 'grid'}
+                    aria-label="Switch to grid view"
+                  >
+                    <LayoutGrid className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={() => setViewMode('list')}
+                    className={`px-3 py-2 rounded-md transition-all ${
+                      viewMode === 'list'
+                        ? 'bg-blue-600 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                    }`}
+                    aria-pressed={viewMode === 'list'}
+                    aria-label="Switch to list view"
+                  >
+                    <List className="w-5 h-5" />
+                  </button>
+                </div>
+              </div>
             </div>
 
             {/* Active Filter Badges */}
@@ -1142,65 +1416,88 @@ const TCGShop = () => {
               </div>
             )}
 
-            {/* Cards Grid - With Virtual Scrolling for Performance and Section Headers */}
-            {cards.length > 100 ? (
-              /* Virtual Scrolling for large datasets (100+ cards) */
-              <Suspense
-                fallback={
-                  <div className="text-center py-8">
-                    <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="text-slate-600 text-sm">Loading virtual scrolling...</p>
-                  </div>
-                }
-              >
-                <VirtualCardGrid
-                  cards={cards}
-                  CardComponent={({ card }) => {
-                    const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-                    const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
-
-                    return (
-                      <CardItem
-                        card={card}
-                        selectedQuality={selectedQuality}
-                        selectedVariation={selectedVariation}
-                        currency={currency}
-                        onQualityChange={handleQualityChange(card.id)}
-                        onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
-                      />
-                    );
-                  }}
-                  cardHeight={450}
-                  containerHeight={800}
-                  enableProgressiveLoading={cards.length > 500}
-                />
-              </Suspense>
-            ) : (
-              /* Standard Grid for smaller datasets (< 100 cards) with sections */
-              <div>
-                {groupedCards.map((group, groupIndex) => (
-                  <div key={groupIndex} className="mb-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
-                      <SectionHeader title={group.section} count={group.cards.length} />
-                      {group.cards.map(card => {
-                        const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-                        const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
-
-                        return (
-                          <CardItem
-                            key={card.id}
-                            card={card}
-                            selectedQuality={selectedQuality}
-                            selectedVariation={selectedVariation}
-                            currency={currency}
-                            onQualityChange={handleQualityChange(card.id)}
-                            onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
-                          />
-                        );
-                      })}
+            {/* Conditional Rendering Based on View Mode */}
+            {viewMode === 'grid' ? (
+              /* Grid View */
+              cards.length > 100 ? (
+                /* Virtual Scrolling for large datasets (100+ cards) */
+                <Suspense
+                  fallback={
+                    <div className="text-center py-8">
+                      <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                      <p className="text-slate-600 text-sm">Loading virtual scrolling...</p>
                     </div>
-                  </div>
-                ))}
+                  }
+                >
+                  <VirtualCardGrid
+                    cards={cards}
+                    CardComponent={({ card }) => {
+                      const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+                      const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+
+                      return (
+                        <GridCardItem
+                          card={card}
+                          selectedQuality={selectedQuality}
+                          selectedVariation={selectedVariation}
+                          currency={currency}
+                          onQualityChange={handleQualityChange(card.id)}
+                          onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                        />
+                      );
+                    }}
+                    cardHeight={450}
+                    containerHeight={800}
+                    enableProgressiveLoading={cards.length > 500}
+                  />
+                </Suspense>
+              ) : (
+                /* Standard Grid for smaller datasets (< 100 cards) with sections */
+                <div>
+                  {groupedCards.map((group, groupIndex) => (
+                    <div key={groupIndex} className="mb-8">
+                      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 sm:gap-5">
+                        <SectionHeader title={group.section} count={group.cards.length} />
+                        {group.cards.map(card => {
+                          const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+                          const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+
+                          return (
+                            <GridCardItem
+                              key={card.id}
+                              card={card}
+                              selectedQuality={selectedQuality}
+                              selectedVariation={selectedVariation}
+                              currency={currency}
+                              onQualityChange={handleQualityChange(card.id)}
+                              onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                            />
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )
+            ) : (
+              /* List View */
+              <div className="flex flex-col gap-2">
+                {cards.map(card => {
+                  const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
+                  const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+
+                  return (
+                    <ListCardItem
+                      key={card.id}
+                      card={card}
+                      selectedQuality={selectedQuality}
+                      selectedVariation={selectedVariation}
+                      currency={currency}
+                      onQualityChange={handleQualityChange(card.id)}
+                      onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                    />
+                  );
+                })}
               </div>
             )}
 
