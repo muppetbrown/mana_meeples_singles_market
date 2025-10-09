@@ -23,10 +23,36 @@ const adminAuthJWT = async (req, res, next) => {
     // Check if user has admin role
     if (decoded.role !== 'admin') {
       console.log('❌ User does not have admin role');
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Admin access required',
-        authenticated: false 
+        authenticated: false
       });
+    }
+
+    // Check if token is close to expiring (within 15 minutes) and refresh it
+    const now = Math.floor(Date.now() / 1000);
+    const timeToExpiry = decoded.exp - now;
+
+    if (timeToExpiry < 900) { // Less than 15 minutes
+      const refreshToken = jwt.sign(
+        {
+          username: decoded.username,
+          role: decoded.role
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: '24h' }
+      );
+
+      // Set new token as httpOnly cookie with security settings
+      res.cookie('adminToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+        domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
+      });
+
+      console.log('🔄 JWT token refreshed for user:', decoded.username);
     }
 
     // Attach user info to request
