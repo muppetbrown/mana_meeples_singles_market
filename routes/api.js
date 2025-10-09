@@ -88,7 +88,7 @@ router.get('/sets', normalRateLimit, async (req, res) => {
 });
 
 // GET /api/cards - Get cards with advanced filtering and pagination
-router.get('/cards', strictRateLimit, async (req, res) => {
+router.get('/cards', normalRateLimit, async (req, res) => {
   try {
     const {
       game_id,
@@ -173,14 +173,25 @@ router.get('/cards', strictRateLimit, async (req, res) => {
     }
 
     if (search) {
-      // Use full-text search with ranking for better results
-      conditions.push(`(
-        to_tsvector('english', c.name || ' ' || COALESCE(c.card_type, '') || ' ' || COALESCE(c.description, '')) @@ plainto_tsquery('english', $${paramCount})
-        OR similarity(c.name, $${paramCount + 1}) > 0.3
-        OR similarity(c.card_number, $${paramCount + 2}) > 0.4
-      )`);
-      params.push(search, search, search);
-      paramCount += 3;
+      // Use simple ILIKE search for better compatibility
+      const searchTerms = search.trim().split(/\s+/);
+      const searchConditions = [];
+
+      searchTerms.forEach(term => {
+        const termPattern = `%${term}%`;
+        searchConditions.push(`(
+          c.name ILIKE $${paramCount}
+          OR c.card_number ILIKE $${paramCount + 1}
+          OR c.card_type ILIKE $${paramCount + 2}
+          OR cs.name ILIKE $${paramCount + 3}
+        )`);
+        params.push(termPattern, termPattern, termPattern, termPattern);
+        paramCount += 4;
+      });
+
+      if (searchConditions.length > 0) {
+        conditions.push(`(${searchConditions.join(' AND ')})`);
+      }
     }
 
     if (collector_number) {
@@ -249,17 +260,14 @@ router.get('/cards', strictRateLimit, async (req, res) => {
     const order = sort_order === 'desc' ? 'DESC' : 'ASC';
 
     if (search) {
-      // When searching, prioritize by relevance first, then by selected sort field
-      const searchParam1 = paramCount++;
-      const searchParam2 = paramCount++;
-      const searchParam3 = paramCount++;
-      params.push(search, search, search);
-
-      query += ` ORDER BY GREATEST(
-        ts_rank(to_tsvector('english', c.name || ' ' || COALESCE(c.card_type, '') || ' ' || COALESCE(c.description, '')), plainto_tsquery('english', $${searchParam1})),
-        similarity(c.name, $${searchParam2}) * 0.8,
-        similarity(c.card_number, $${searchParam3}) * 0.6
-      ) DESC, ${sortField} ${order}`;
+      // When searching, prioritize exact matches first, then by selected sort field
+      query += ` ORDER BY
+        CASE
+          WHEN c.name ILIKE '${search.replace(/'/g, "''")}%' THEN 1
+          WHEN c.name ILIKE '%${search.replace(/'/g, "''")}%' THEN 2
+          WHEN c.card_number ILIKE '%${search.replace(/'/g, "''")}%' THEN 3
+          ELSE 4
+        END, ${sortField} ${order}`;
     } else if (sort_by === 'number') {
       // Safe numeric sorting for card numbers
       query += ` ORDER BY NULLIF(regexp_replace(c.card_number, '\\D','','g'),'')::int ${order} NULLS LAST, c.card_number ${order}`;
@@ -766,11 +774,16 @@ router.get('/search/autocomplete', rateLimit(60000, 50), async (req, res) => {
         FROM cards c
         JOIN card_sets cs ON c.set_id = cs.id
         JOIN card_inventory ci ON ci.card_id = c.id
-        WHERE (c.name ILIKE $1 OR c.card_number ILIKE $1 OR similarity(c.name, $2) > 0.3)
+        WHERE (c.name ILIKE $1 OR c.card_number ILIKE $1)
           AND ci.stock_quantity > 0
-        ORDER BY c.name
+        ORDER BY
+          CASE
+            WHEN c.name ILIKE $2 THEN 1
+            WHEN c.name ILIKE $3 THEN 2
+            ELSE 3
+          END, c.name
         LIMIT 10
-      `, [`%${q}%`, q]);
+      `, [`%${q}%`, `${q}%`, `%${q}%`]);
 
       res.json({ suggestions: fallbackSuggestions.rows });
     }

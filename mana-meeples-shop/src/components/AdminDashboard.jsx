@@ -37,8 +37,9 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterGame, setFilterGame] = useState('all');
-  const [stockView, setStockView] = useState('in-stock'); // 'in-stock', 'all', 'zero-stock'
-  const [showAllQualities, setShowAllQualities] = useState(false);
+  const [filterSet, setFilterSet] = useState('all');
+  const [availableSets, setAvailableSets] = useState([]);
+  const [showAllCards, setShowAllCards] = useState(false);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingItems, setEditingItems] = useState(new Map());
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
@@ -135,6 +136,49 @@ const AdminDashboard = () => {
     checkAuth();
   }, [navigate]);
 
+  // Fetch available sets when game changes
+  useEffect(() => {
+    const fetchSets = async () => {
+      if (filterGame === 'all') {
+        setAvailableSets([]);
+        return;
+      }
+
+      try {
+        const gameId = getGameIdFromName(filterGame);
+        if (!gameId) return;
+
+        const response = await fetch(`${API_URL}/sets?game_id=${gameId}`, {
+          headers: getAdminHeaders()
+        });
+
+        if (response.ok) {
+          const sets = await response.json();
+          setAvailableSets(sets);
+        } else {
+          console.error('Failed to fetch sets');
+          setAvailableSets([]);
+        }
+      } catch (error) {
+        console.error('Error fetching sets:', error);
+        setAvailableSets([]);
+      }
+    };
+
+    fetchSets();
+    setFilterSet('all'); // Reset set filter when game changes
+  }, [filterGame]);
+
+  // Helper function to get game ID from name
+  const getGameIdFromName = (gameName) => {
+    const gameMap = {
+      'Magic: The Gathering': 1,
+      'Pokemon': 2,
+      'Yu-Gi-Oh!': 3
+    };
+    return gameMap[gameName] || null;
+  };
+
   const groupedInventory = useMemo(() => {
     const groups = inventory.reduce((acc, item) => {
       const key = `${item.game}-${item.set}-${item.number}-${item.card_name}`;
@@ -167,7 +211,7 @@ const AdminDashboard = () => {
 
     return Object.entries(groups).map(([key, group]) => {
       const filteredQualities = group.qualities
-        .filter(quality => showAllQualities || quality.stock > 0)
+        .filter(quality => showAllCards || quality.stock > 0)
         .sort((a, b) => {
           const qualityOrder = { 'Near Mint': 1, 'Lightly Played': 2, 'Moderately Played': 3, 'Heavily Played': 4, 'Damaged': 5 };
           return (qualityOrder[a.quality] || 999) - (qualityOrder[b.quality] || 999);
@@ -187,7 +231,7 @@ const AdminDashboard = () => {
         hasLowStock: filteredHasLowStock
       };
     }).filter(group => group.qualities.length > 0); // Remove cards with no visible qualities
-  }, [inventory, showAllQualities]);
+  }, [inventory, showAllCards]);
 
   const filteredInventory = useMemo(() => {
     return groupedInventory.filter(group => {
@@ -196,23 +240,14 @@ const AdminDashboard = () => {
         group.qualities.some(q => q.sku?.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchesGame = filterGame === 'all' || group.game === filterGame;
+      const matchesSet = filterSet === 'all' || group.set === filterSet;
 
-      // Apply stock view filter
-      const matchesStockView = (() => {
-        switch (stockView) {
-          case 'in-stock':
-            return group.totalStock > 0;
-          case 'zero-stock':
-            return group.totalStock === 0;
-          case 'all':
-          default:
-            return true;
-        }
-      })();
+      // Show only cards with inventory by default, unless "show all cards" is enabled
+      const matchesInventory = showAllCards || group.totalStock > 0;
 
-      return matchesSearch && matchesGame && matchesStockView;
+      return matchesSearch && matchesGame && matchesSet && matchesInventory;
     });
-  }, [groupedInventory, searchTerm, filterGame, stockView]);
+  }, [groupedInventory, searchTerm, filterGame, filterSet, showAllCards]);
 
   const totalValue = useMemo(() => 
     inventory.reduce((sum, item) => sum + (item.price * item.stock), 0),
@@ -775,44 +810,40 @@ const AdminDashboard = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">
-                Stock View
+              <label htmlFor="filter-set" className="block text-sm font-medium text-slate-700 mb-2">
+                Set
               </label>
-              <div className="space-y-2">
-                {[
-                  { value: 'in-stock', label: 'In Stock Only' },
-                  { value: 'all', label: 'All Items' },
-                  { value: 'zero-stock', label: 'Zero Stock Only' }
-                ].map(({ value, label }) => (
-                  <label key={value} className="flex items-center gap-2 cursor-pointer select-none">
-                    <input
-                      type="radio"
-                      name="stock-view"
-                      value={value}
-                      checked={stockView === value}
-                      onChange={(e) => setStockView(e.target.value)}
-                      className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                    />
-                    <span className="text-sm text-slate-700">{label}</span>
-                  </label>
+              <select
+                id="filter-set"
+                value={filterSet}
+                onChange={(e) => setFilterSet(e.target.value)}
+                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white disabled:bg-slate-50 disabled:text-slate-500"
+                disabled={filterGame === 'all'}
+              >
+                <option value="all">All Sets</option>
+                {availableSets.map(set => (
+                  <option key={set.id} value={set.name}>{set.name}</option>
                 ))}
-              </div>
+              </select>
+              {filterGame === 'all' && (
+                <p className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
+              )}
             </div>
 
             <div className="flex items-center">
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
-                  checked={showAllQualities}
-                  onChange={(e) => setShowAllQualities(e.target.checked)}
+                  checked={showAllCards}
+                  onChange={(e) => setShowAllCards(e.target.checked)}
                   className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
                 />
                 <div className="flex flex-col">
                   <span className="text-sm font-medium text-slate-700">
-                    Show All Qualities
+                    Show All Cards
                   </span>
                   <span className="text-xs text-slate-500">
-                    Include zero-stock variations
+                    Include cards without inventory
                   </span>
                 </div>
               </label>
@@ -935,10 +966,10 @@ const AdminDashboard = () => {
                                 setShowFoilModal(true);
                               }}
                               className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none self-start"
-                              aria-label={`Add quality variation for ${group.card_name}`}
+                              aria-label={`Add card variation for ${group.card_name}`}
                             >
                               <Plus className="w-3 h-3" />
-                              Add Quality
+                              Add Card
                             </button>
                           </div>
                         </td>
