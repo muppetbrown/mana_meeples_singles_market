@@ -478,6 +478,9 @@ const TCGShop = () => {
           setShowSuggestions(false);
           e.preventDefault();
           break;
+        default:
+          // No action needed for other keys
+          break;
       }
     };
 
