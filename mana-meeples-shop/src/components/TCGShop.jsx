@@ -59,10 +59,20 @@ const CardItem = React.memo(({
           alt={`${card.name} from ${card.set_name}`}
           width={250}
           height={350}
-          className="bg-gradient-to-br from-slate-100 to-slate-200 w-full"
+          className={`w-full bg-gradient-to-br from-slate-100 to-slate-200 ${
+            selectedVariation?.foil_type !== 'Regular'
+              ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
+              : ''
+          }`}
           placeholder="blur"
           sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
         />
+        {/* Foil Badge */}
+        {selectedVariation?.foil_type !== 'Regular' && (
+          <div className="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md border border-yellow-300">
+            ✨ {selectedVariation.foil_type}
+          </div>
+        )}
       </div>
 
       {/* Card Content */}
@@ -94,7 +104,7 @@ const CardItem = React.memo(({
             {card.variations.map(variation => (
               <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
                 {variation.quality}
-                {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
+                {variation.foil_type !== 'Regular' ? ` ✨ ${variation.foil_type}` : ''}
                 {variation.language !== 'English' ? ` • ${variation.language}` : ''}
                 {variation.variation_name ? ` • ${variation.variation_name}` : ''}
               </option>
@@ -197,7 +207,7 @@ const TCGShop = () => {
   });
 
   // Currency and localization with toggle - Default to NZD for NZ-based shop
-  const [currency, setCurrency] = useState({ symbol: 'NZ$', rate: 1.6, code: 'NZD' });
+  const [currency, setCurrency] = useState({ symbol: 'NZ$', rate: 1.0, code: 'NZD' });
 
   // Search autocomplete with proper debouncing and request cancellation
   const [searchSuggestions, setSearchSuggestions] = useState([]);
@@ -226,11 +236,11 @@ const TCGShop = () => {
         const gamesData = await gamesRes.json();
         setGames(gamesData);
 
-        // Set currency if available
-        if (currencyRes.ok) {
-          const currencyData = await currencyRes.json();
-          setCurrency({ ...currencyData, code: currencyData.currency || 'USD' });
-        }
+        // Keep NZD as default for NZ-based shop - don't override with API detection
+        // if (currencyRes.ok) {
+        //   const currencyData = await currencyRes.json();
+        //   setCurrency({ ...currencyData, code: currencyData.currency || 'USD' });
+        // }
 
         // Set filter options if available
         if (filtersRes.ok) {
@@ -471,45 +481,50 @@ const TCGShop = () => {
   }, [cart, showCart]);
 
   const addToCart = useCallback((item) => {
-    const existingItem = cart.find(c =>
-      c.id === item.id && c.quality === item.quality
+    setCart(prevCart => {
+      const existingItem = prevCart.find(c =>
+        c.id === item.id && c.quality === item.quality
+      );
+
+      if (existingItem) {
+        if (existingItem.quantity < item.stock) {
+          return prevCart.map(c =>
+            c.id === item.id && c.quality === item.quality
+              ? { ...c, quantity: c.quantity + 1 }
+              : c
+          );
+        }
+        return prevCart; // Don't update if already at max stock
+      } else {
+        return [...prevCart, {
+          id: item.id,
+          inventory_id: item.inventory_id,
+          name: item.name,
+          image_url: item.image_url,
+          quality: item.quality,
+          price: item.price,
+          stock: item.stock,
+          quantity: 1
+        }];
+      }
+    });
+  }, []);
+
+  const updateCartQuantity = useCallback((id, quality, delta) => {
+    setCart(prevCart =>
+      prevCart.map(item => {
+        if (item.id === id && item.quality === quality) {
+          const newQuantity = Math.max(0, Math.min(item.stock, item.quantity + delta));
+          return { ...item, quantity: newQuantity };
+        }
+        return item;
+      }).filter(item => item.quantity > 0)
     );
+  }, []);
 
-    if (existingItem) {
-      if (existingItem.quantity < item.stock) {
-        setCart(cart.map(c =>
-          c.id === item.id && c.quality === item.quality
-            ? { ...c, quantity: c.quantity + 1 }
-            : c
-        ));
-      }
-    } else {
-      setCart([...cart, {
-        id: item.id,
-        inventory_id: item.inventory_id,
-        name: item.name,
-        image_url: item.image_url,
-        quality: item.quality,
-        price: item.price,
-        stock: item.stock,
-        quantity: 1
-      }]);
-    }
-  }, [cart, setCart]);
-
-  const updateCartQuantity = (id, quality, delta) => {
-    setCart(cart.map(item => {
-      if (item.id === id && item.quality === quality) {
-        const newQuantity = Math.max(0, Math.min(item.stock, item.quantity + delta));
-        return { ...item, quantity: newQuantity };
-      }
-      return item;
-    }).filter(item => item.quantity > 0));
-  };
-
-  const removeFromCart = (id, quality) => {
-    setCart(cart.filter(item => !(item.id === id && item.quality === quality)));
-  };
+  const removeFromCart = useCallback((id, quality) => {
+    setCart(prevCart => prevCart.filter(item => !(item.id === id && item.quality === quality)));
+  }, []);
 
   // Memoized expensive calculations
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), [cart]);
@@ -886,11 +901,59 @@ const TCGShop = () => {
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="all">All Rarities</option>
-                    {filterOptions.rarities.map(rarity => (
-                      <option key={rarity} value={rarity}>
-                        {rarity} {getCount('rarities', rarity)}
-                      </option>
-                    ))}
+                    <optgroup label="⚪ Common">
+                      {filterOptions.rarities.filter(rarity =>
+                        rarity.toLowerCase().includes('common') || rarity.toLowerCase().includes('basic')
+                      ).map(rarity => (
+                        <option key={rarity} value={rarity}>
+                          {rarity} {getCount('rarities', rarity)}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🟢 Uncommon">
+                      {filterOptions.rarities.filter(rarity =>
+                        rarity.toLowerCase().includes('uncommon')
+                      ).map(rarity => (
+                        <option key={rarity} value={rarity}>
+                          {rarity} {getCount('rarities', rarity)}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🟡 Rare">
+                      {filterOptions.rarities.filter(rarity =>
+                        rarity.toLowerCase().includes('rare') && !rarity.toLowerCase().includes('mythic')
+                      ).map(rarity => (
+                        <option key={rarity} value={rarity}>
+                          {rarity} {getCount('rarities', rarity)}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="🔴 Mythic & Special">
+                      {filterOptions.rarities.filter(rarity =>
+                        rarity.toLowerCase().includes('mythic') ||
+                        rarity.toLowerCase().includes('legendary') ||
+                        rarity.toLowerCase().includes('special')
+                      ).map(rarity => (
+                        <option key={rarity} value={rarity}>
+                          {rarity} {getCount('rarities', rarity)}
+                        </option>
+                      ))}
+                    </optgroup>
+                    <optgroup label="📦 Other">
+                      {filterOptions.rarities.filter(rarity =>
+                        !rarity.toLowerCase().includes('common') &&
+                        !rarity.toLowerCase().includes('basic') &&
+                        !rarity.toLowerCase().includes('uncommon') &&
+                        !rarity.toLowerCase().includes('rare') &&
+                        !rarity.toLowerCase().includes('mythic') &&
+                        !rarity.toLowerCase().includes('legendary') &&
+                        !rarity.toLowerCase().includes('special')
+                      ).map(rarity => (
+                        <option key={rarity} value={rarity}>
+                          {rarity} {getCount('rarities', rarity)}
+                        </option>
+                      ))}
+                    </optgroup>
                   </select>
                 </div>
 
@@ -956,11 +1019,19 @@ const TCGShop = () => {
                       onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                       className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                     >
-                      <option value="name">Name</option>
-                      <option value="price">Price</option>
-                      <option value="rarity">Rarity</option>
-                      <option value="set">Set</option>
-                      <option value="updated">Recently Updated</option>
+                      <optgroup label="📝 Basic">
+                        <option value="name">Name</option>
+                        <option value="set">Set</option>
+                        <option value="updated">Recently Updated</option>
+                      </optgroup>
+                      <optgroup label="💎 Rarity">
+                        <option value="rarity">By Rarity</option>
+                      </optgroup>
+                      <optgroup label="💰 Price">
+                        <option value="price">By Price</option>
+                        <option value="price_low">Price: Low to High</option>
+                        <option value="price_high">Price: High to Low</option>
+                      </optgroup>
                     </select>
                     <button
                       onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
@@ -982,30 +1053,6 @@ const TCGShop = () => {
                 <span className="font-medium">{cards.length}</span> cards found
               </p>
 
-              {/* Enhanced Currency indicator with exchange rate */}
-              <div className="text-sm text-slate-600 space-y-1">
-                <div>
-                  Prices shown in <span className="font-medium text-slate-700">{currency.code}</span>
-                  {currency.code !== 'USD' && (
-                    <div className="text-xs text-slate-500 mt-1 flex items-center gap-2">
-                      <span>Approximately, based on current exchange rates</span>
-                      <div
-                        className="group relative cursor-help"
-                        title={`Exchange rate: 1 USD = ${currency.rate} ${currency.code}\nRates updated daily and may vary at checkout`}
-                      >
-                        <div className="w-3 h-3 rounded-full bg-slate-300 flex items-center justify-center text-[10px] text-slate-600">
-                          ?
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {currency.code !== 'USD' && (
-                  <div className="text-xs text-slate-400">
-                    Rate: 1 USD = {currency.rate} {currency.code}
-                  </div>
-                )}
-              </div>
             </div>
 
             {/* Active Filter Badges */}
@@ -1171,11 +1218,59 @@ const TCGShop = () => {
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="all">All Rarities</option>
-                      {filterOptions.rarities.map(rarity => (
-                        <option key={rarity} value={rarity}>
-                          {rarity} {getCount('rarities', rarity)}
-                        </option>
-                      ))}
+                      <optgroup label="⚪ Common">
+                        {filterOptions.rarities.filter(rarity =>
+                          rarity.toLowerCase().includes('common') || rarity.toLowerCase().includes('basic')
+                        ).map(rarity => (
+                          <option key={rarity} value={rarity}>
+                            {rarity} {getCount('rarities', rarity)}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="🟢 Uncommon">
+                        {filterOptions.rarities.filter(rarity =>
+                          rarity.toLowerCase().includes('uncommon')
+                        ).map(rarity => (
+                          <option key={rarity} value={rarity}>
+                            {rarity} {getCount('rarities', rarity)}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="🟡 Rare">
+                        {filterOptions.rarities.filter(rarity =>
+                          rarity.toLowerCase().includes('rare') && !rarity.toLowerCase().includes('mythic')
+                        ).map(rarity => (
+                          <option key={rarity} value={rarity}>
+                            {rarity} {getCount('rarities', rarity)}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="🔴 Mythic & Special">
+                        {filterOptions.rarities.filter(rarity =>
+                          rarity.toLowerCase().includes('mythic') ||
+                          rarity.toLowerCase().includes('legendary') ||
+                          rarity.toLowerCase().includes('special')
+                        ).map(rarity => (
+                          <option key={rarity} value={rarity}>
+                            {rarity} {getCount('rarities', rarity)}
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label="📦 Other">
+                        {filterOptions.rarities.filter(rarity =>
+                          !rarity.toLowerCase().includes('common') &&
+                          !rarity.toLowerCase().includes('basic') &&
+                          !rarity.toLowerCase().includes('uncommon') &&
+                          !rarity.toLowerCase().includes('rare') &&
+                          !rarity.toLowerCase().includes('mythic') &&
+                          !rarity.toLowerCase().includes('legendary') &&
+                          !rarity.toLowerCase().includes('special')
+                        ).map(rarity => (
+                          <option key={rarity} value={rarity}>
+                            {rarity} {getCount('rarities', rarity)}
+                          </option>
+                        ))}
+                      </optgroup>
                     </select>
                   </div>
 
@@ -1225,11 +1320,19 @@ const TCGShop = () => {
                         onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                         className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                       >
-                        <option value="name">Name</option>
-                        <option value="price">Price</option>
-                        <option value="rarity">Rarity</option>
-                        <option value="set">Set</option>
-                        <option value="updated">Recently Updated</option>
+                        <optgroup label="📝 Basic">
+                          <option value="name">Name</option>
+                          <option value="set">Set</option>
+                          <option value="updated">Recently Updated</option>
+                        </optgroup>
+                        <optgroup label="💎 Rarity">
+                          <option value="rarity">By Rarity</option>
+                        </optgroup>
+                        <optgroup label="💰 Price">
+                          <option value="price">By Price</option>
+                          <option value="price_low">Price: Low to High</option>
+                          <option value="price_high">Price: High to Low</option>
+                        </optgroup>
                       </select>
                       <button
                         onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
