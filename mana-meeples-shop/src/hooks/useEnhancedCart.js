@@ -2,21 +2,49 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
  * Enhanced Cart Hook with expiry, cross-tab sync, and price validation
- * Provides robust cart management with advanced features
+ * Provides robust cart management with advanced features including:
+ * - Cross-tab synchronization using BroadcastChannel API and localStorage
+ * - Version-based optimistic locking to prevent concurrent update conflicts
+ * - Automatic expiry of cart items after 7 days
+ * - Price validation against current market prices
+ * - Stock checking for items in cart
+ * - User-friendly notifications for all cart operations
+ *
+ * @param {string} API_URL - The base URL for API calls
+ * @returns {Object} Cart management functions and state
+ * @returns {Array} cart - Array of cart items with quantities, versions, and metadata
+ * @returns {Array} cartNotifications - Array of user notification objects
+ * @returns {function} addToCart - Add item to cart with validation
+ * @returns {function} updateQuantity - Update item quantity with optimistic locking
+ * @returns {function} removeFromCart - Remove item from cart
+ * @returns {function} clearCart - Clear all items from cart
+ * @returns {function} validateCart - Validate all cart items against current prices
+ * @returns {function} checkStock - Check stock availability for all cart items
+ * @returns {function} getCartStats - Get cart statistics (total, count, etc.)
+ * @returns {function} clearExpiredItems - Remove expired items from cart
  */
 export const useEnhancedCart = (API_URL) => {
   const [cart, setCart] = useState([]);
   const [cartNotifications, setCartNotifications] = useState([]);
   const [lastSync, setLastSync] = useState(Date.now());
+  const [cartVersion, setCartVersion] = useState(0);
 
   const CART_STORAGE_KEY = 'tcg-shop-cart';
   const CART_EXPIRY_DAYS = 7;
   const SYNC_INTERVAL = 1000; // Check for changes every second
+  const BROADCAST_CHANNEL_NAME = 'tcg-cart-sync';
 
   const syncIntervalRef = useRef(null);
   const isUpdatingRef = useRef(false);
+  const broadcastChannelRef = useRef(null);
+  const cartVersionRef = useRef(0);
 
-  // Add notification
+  /**
+   * Add a user notification for cart operations
+   * @param {string} message - The notification message to display
+   * @param {string} type - Notification type: 'info', 'success', 'warning', or 'error'
+   * @param {number} duration - How long to show notification in milliseconds (default: 5000)
+   */
   const addNotification = useCallback((message, type = 'info', duration = 5000) => {
     const notification = {
       id: Date.now() + Math.random(),
@@ -33,7 +61,10 @@ export const useEnhancedCart = (API_URL) => {
     }, duration);
   }, []);
 
-  // Load cart from localStorage with expiry check
+  /**
+   * Load cart from localStorage with expiry validation
+   * @returns {Array} Cart items array, empty if expired or invalid
+   */
   const loadCartFromStorage = useCallback(() => {
     try {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
@@ -56,24 +87,48 @@ export const useEnhancedCart = (API_URL) => {
     }
   }, [addNotification]);
 
-  // Save cart to localStorage with timestamp
-  const saveCartToStorage = useCallback((cartData) => {
+  /**
+   * Save cart to localStorage with timestamp and version metadata
+   * Also broadcasts updates to other tabs via BroadcastChannel
+   * @param {Array} cartData - Array of cart items to save
+   * @param {number|null} forceVersion - Optional version number to force, otherwise increments
+   */
+  const saveCartToStorage = useCallback((cartData, forceVersion = null) => {
     try {
-      const cartWithTimestamp = {
-        cart: cartData,
-        timestamp: Date.now(),
-        version: 1 // For future compatibility
+      const newVersion = forceVersion !== null ? forceVersion : cartVersionRef.current + 1;
+      const timestamp = Date.now();
+
+      const cartWithMetadata = {
+        cart: cartData.map(item => ({
+          ...item,
+          version: newVersion,
+          lastModified: timestamp
+        })),
+        timestamp,
+        version: newVersion
       };
 
-      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartWithTimestamp));
-      setLastSync(Date.now());
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cartWithMetadata));
+      setLastSync(timestamp);
+      setCartVersion(newVersion);
+      cartVersionRef.current = newVersion;
+
+      // Broadcast cart update to other tabs
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.postMessage({
+          type: 'CART_UPDATED',
+          cart: cartWithMetadata.cart,
+          version: newVersion,
+          timestamp
+        });
+      }
     } catch (error) {
       console.error('Failed to save cart to storage:', error);
       addNotification('Failed to save cart. Please try again.', 'error');
     }
   }, [addNotification]);
 
-  // Cross-tab synchronization
+  // Cross-tab synchronization with version checking
   const syncWithStorage = useCallback(() => {
     if (isUpdatingRef.current) return;
 
@@ -81,25 +136,47 @@ export const useEnhancedCart = (API_URL) => {
       const stored = localStorage.getItem(CART_STORAGE_KEY);
       if (!stored) return;
 
-      const { cart: storedCart, timestamp } = JSON.parse(stored);
+      const { cart: storedCart, timestamp, version } = JSON.parse(stored);
 
-      // Only sync if storage was updated by another tab
-      if (timestamp > lastSync) {
+      // Only sync if storage has a newer version
+      if (version > cartVersionRef.current) {
         setCart(storedCart || []);
         setLastSync(timestamp);
+        setCartVersion(version);
+        cartVersionRef.current = version;
       }
     } catch (error) {
       console.error('Failed to sync with storage:', error);
     }
-  }, [lastSync]);
+  }, []);
 
-  // Listen for storage changes (cross-tab sync)
+  // Handle BroadcastChannel messages
+  const handleBroadcastMessage = useCallback((event) => {
+    const { type, cart: broadcastCart, version, timestamp } = event.data;
+
+    if (type === 'CART_UPDATED' && version > cartVersionRef.current) {
+      // Update from another tab
+      setCart(broadcastCart || []);
+      setLastSync(timestamp);
+      setCartVersion(version);
+      cartVersionRef.current = version;
+      addNotification('Cart synced from another tab', 'info', 2000);
+    }
+  }, [addNotification]);
+
+  // Listen for storage changes and BroadcastChannel messages
   useEffect(() => {
     const handleStorageChange = (e) => {
       if (e.key === CART_STORAGE_KEY) {
         syncWithStorage();
       }
     };
+
+    // Initialize BroadcastChannel
+    if (typeof BroadcastChannel !== 'undefined') {
+      broadcastChannelRef.current = new BroadcastChannel(BROADCAST_CHANNEL_NAME);
+      broadcastChannelRef.current.addEventListener('message', handleBroadcastMessage);
+    }
 
     window.addEventListener('storage', handleStorageChange);
 
@@ -111,8 +188,12 @@ export const useEnhancedCart = (API_URL) => {
       if (syncIntervalRef.current) {
         clearInterval(syncIntervalRef.current);
       }
+      if (broadcastChannelRef.current) {
+        broadcastChannelRef.current.removeEventListener('message', handleBroadcastMessage);
+        broadcastChannelRef.current.close();
+      }
     };
-  }, [syncWithStorage]);
+  }, [syncWithStorage, handleBroadcastMessage]);
 
   // Initialize cart from storage
   useEffect(() => {
@@ -215,7 +296,17 @@ export const useEnhancedCart = (API_URL) => {
     }
   }, [cart, API_URL, addNotification]);
 
-  // Add item to cart with error handling
+  /**
+   * Add item to cart with validation and optimistic locking
+   * Prevents adding items with version conflicts and validates stock
+   * @param {Object} item - Cart item to add
+   * @param {string} item.id - Unique identifier for the item
+   * @param {string} item.name - Display name of the item
+   * @param {number} item.price - Current price of the item
+   * @param {number} item.stock - Available stock quantity
+   * @param {string} item.quality - Quality/condition of the item
+   * @param {string} item.image_url - URL for the item's image
+   */
   const addToCart = useCallback((item) => {
     try {
       // Validate item before adding
@@ -231,10 +322,26 @@ export const useEnhancedCart = (API_URL) => {
       }
 
       setCart(prevCart => {
+        // Check for version conflicts (optimistic locking)
+        const currentStoredData = localStorage.getItem(CART_STORAGE_KEY);
+        if (currentStoredData) {
+          try {
+            const { version: storageVersion } = JSON.parse(currentStoredData);
+            if (storageVersion > cartVersionRef.current) {
+              addNotification('Cart was updated elsewhere. Please try again.', 'warning');
+              syncWithStorage();
+              return prevCart;
+            }
+          } catch (e) {
+            // Continue with operation if storage parsing fails
+          }
+        }
+
         const existingIndex = prevCart.findIndex(
           cartItem => cartItem.id === item.id && cartItem.quality === item.quality
         );
 
+        let updatedCart;
         if (existingIndex >= 0) {
           // Check if we can add more
           const existingItem = prevCart[existingIndex];
@@ -244,16 +351,25 @@ export const useEnhancedCart = (API_URL) => {
           }
 
           // Update quantity
-          const updated = [...prevCart];
-          updated[existingIndex] = {
-            ...updated[existingIndex],
-            quantity: Math.min(existingItem.quantity + 1, item.stock)
+          updatedCart = [...prevCart];
+          updatedCart[existingIndex] = {
+            ...updatedCart[existingIndex],
+            quantity: Math.min(existingItem.quantity + 1, item.stock),
+            version: cartVersionRef.current + 1,
+            lastModified: Date.now()
           };
-          return updated;
         } else {
           // Add new item
-          return [...prevCart, { ...item, quantity: 1, addedAt: Date.now() }];
+          updatedCart = [...prevCart, {
+            ...item,
+            quantity: 1,
+            addedAt: Date.now(),
+            version: cartVersionRef.current + 1,
+            lastModified: Date.now()
+          }];
         }
+
+        return updatedCart;
       });
 
       addNotification(`Added ${item.name} to cart`, 'success', 3000);
@@ -261,7 +377,7 @@ export const useEnhancedCart = (API_URL) => {
       console.error('Error adding item to cart:', error);
       addNotification('Failed to add item to cart. Please try again.', 'error');
     }
-  }, [addNotification]);
+  }, [addNotification, syncWithStorage]);
 
   // Remove item from cart
   const removeFromCart = useCallback((itemId, quality) => {
@@ -278,21 +394,41 @@ export const useEnhancedCart = (API_URL) => {
     });
   }, [addNotification]);
 
-  // Update item quantity
+  // Update item quantity with optimistic locking
   const updateQuantity = useCallback((itemId, quality, newQuantity) => {
     if (newQuantity <= 0) {
       removeFromCart(itemId, quality);
       return;
     }
 
-    setCart(prevCart =>
-      prevCart.map(item =>
+    setCart(prevCart => {
+      // Check for version conflicts (optimistic locking)
+      const currentStoredData = localStorage.getItem(CART_STORAGE_KEY);
+      if (currentStoredData) {
+        try {
+          const { version: storageVersion } = JSON.parse(currentStoredData);
+          if (storageVersion > cartVersionRef.current) {
+            addNotification('Cart was updated elsewhere. Please try again.', 'warning');
+            syncWithStorage();
+            return prevCart;
+          }
+        } catch (e) {
+          // Continue with operation if storage parsing fails
+        }
+      }
+
+      return prevCart.map(item =>
         item.id === itemId && item.quality === quality
-          ? { ...item, quantity: newQuantity }
+          ? {
+              ...item,
+              quantity: newQuantity,
+              version: cartVersionRef.current + 1,
+              lastModified: Date.now()
+            }
           : item
-      )
-    );
-  }, [removeFromCart]);
+      );
+    });
+  }, [removeFromCart, addNotification, syncWithStorage]);
 
   // Clear entire cart
   const clearCart = useCallback(() => {

@@ -7,6 +7,7 @@ import Checkout from './Checkout';
 import { useFilterCounts } from '../hooks/useFilterCounts';
 import { useEnhancedCart } from '../hooks/useEnhancedCart';
 import ErrorBoundary from './ErrorBoundary';
+import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import { API_URL } from '../config/api';
 
 // Lazy load VirtualCardGrid for code splitting
@@ -326,6 +327,7 @@ const TCGShop = () => {
   const [showCart, setShowCart] = useState(false);
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [selectedQualities, setSelectedQualities] = useState({});
   const [viewMode, setViewMode] = useState('grid');
 
@@ -419,6 +421,68 @@ const TCGShop = () => {
     };
 
     fetchInitialData();
+  }, []);
+
+  // Global keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Only handle shortcuts when not typing in inputs
+      if (e.target.matches('input, textarea, select')) {
+        // Exception: allow "?" shortcut even in inputs if it's just a question mark
+        if (e.key === '?' && !e.ctrlKey && !e.metaKey && !e.altKey) {
+          setShowKeyboardShortcuts(true);
+          e.preventDefault();
+        }
+        return;
+      }
+
+      switch (e.key) {
+        case '?':
+          setShowKeyboardShortcuts(true);
+          e.preventDefault();
+          break;
+        case 'f':
+        case 'F':
+          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            setShowMobileFilters(prev => !prev);
+            e.preventDefault();
+          }
+          break;
+        case 'g':
+        case 'G':
+          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            setViewMode(prev => prev === 'grid' ? 'list' : 'grid');
+            e.preventDefault();
+          }
+          break;
+        case 'c':
+        case 'C':
+          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            setShowCart(true);
+            e.preventDefault();
+          }
+          break;
+        case '/':
+          // Focus search input
+          const searchInput = document.querySelector('input[type="search"]');
+          if (searchInput) {
+            searchInput.focus();
+            e.preventDefault();
+          }
+          break;
+        case 'Escape':
+          // Close any open modals/panels
+          setShowKeyboardShortcuts(false);
+          setShowCart(false);
+          setShowMobileFilters(false);
+          setShowSuggestions(false);
+          e.preventDefault();
+          break;
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
   // Fetch available sets when game changes (matching AdminDashboard logic)
@@ -1816,12 +1880,47 @@ const TCGShop = () => {
                 notification.type === 'warning' ? 'bg-orange-50 border-orange-200 text-orange-800' :
                 'bg-blue-50 border-blue-200 text-blue-800'
               } border`}
+              role="status"
+              aria-live="polite"
             >
               {notification.message}
             </div>
           ))}
         </div>
       )}
+
+      {/* ARIA Live Regions for Screen Reader Announcements */}
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
+        {filteredGroupedCards.length > 0 && (
+          `Showing ${filteredGroupedCards.reduce((total, group) => total + group.cards.length, 0)} cards`
+        )}
+      </div>
+      <div aria-live="assertive" aria-atomic="true" className="sr-only">
+        {loading && "Loading cards..."}
+        {error && `Error: ${error}`}
+      </div>
+
+      {/* Search Results Announcement */}
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        className="sr-only"
+        key={`search-${searchTerm}-${filteredGroupedCards.length}`}
+      >
+        {searchTerm && !loading && (
+          filteredGroupedCards.length > 0
+            ? `Found ${filteredGroupedCards.reduce((total, group) => total + group.cards.length, 0)} cards matching "${searchTerm}"`
+            : `No cards found matching "${searchTerm}"`
+        )}
+      </div>
+
+      {/* Keyboard Shortcuts Modal */}
+      <KeyboardShortcutsModal
+        isOpen={showKeyboardShortcuts}
+        onClose={() => setShowKeyboardShortcuts(false)}
+      />
+
     </div>
   );
 };
