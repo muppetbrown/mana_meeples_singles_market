@@ -49,10 +49,10 @@ const SectionHeader = ({ title, count }) => {
 // Mobile: Image left, details right (horizontal card for better mobile scrolling)
 const CardItem = React.memo(({
   card,
-  selectedQuality,
+  selectedVariationKey,
   selectedVariation,
   currency,
-  onQualityChange,
+  onVariationChange,
   onAddToCart
 }) => {
   return (
@@ -102,12 +102,12 @@ const CardItem = React.memo(({
           </label>
           <select
             id={`condition-${card.id}`}
-            value={selectedQuality}
-            onChange={onQualityChange}
+            value={selectedVariationKey}
+            onChange={onVariationChange}
             className="w-full text-xs lg:text-sm px-2 lg:px-3 py-1.5 lg:py-2.5 border-2 border-slate-300 rounded-lg bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-colors"
           >
             {card.variations.map(variation => (
-              <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
+              <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
                 {variation.quality}
                 {variation.foil_type !== 'Regular' ? ` ✨` : ''}
                 {variation.language !== 'English' ? ` • ${variation.language}` : ''}
@@ -164,7 +164,7 @@ const CardItem = React.memo(({
   // Custom comparison function to prevent unnecessary re-renders
   return (
     prevProps.card.id === nextProps.card.id &&
-    prevProps.selectedQuality === nextProps.selectedQuality &&
+    prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
     prevProps.currency.symbol === nextProps.currency.symbol &&
     prevProps.currency.rate === nextProps.currency.rate &&
     JSON.stringify(prevProps.selectedVariation) === JSON.stringify(nextProps.selectedVariation)
@@ -175,10 +175,10 @@ const CardItem = React.memo(({
 // Fixed to prevent horizontal scrolling by using fixed widths
 const ListCardItem = React.memo(({
   card,
-  selectedQuality,
+  selectedVariationKey,
   selectedVariation,
   currency,
-  onQualityChange,
+  onVariationChange,
   onAddToCart
 }) => {
   return (
@@ -228,12 +228,12 @@ const ListCardItem = React.memo(({
           <div className="w-36 max-w-[144px]">
             <select
               id={`condition-list-${card.id}`}
-              value={selectedQuality}
-              onChange={onQualityChange}
+              value={selectedVariationKey}
+              onChange={onVariationChange}
               className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors truncate"
             >
               {card.variations.map(variation => (
-                <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
+                <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
                   {variation.quality}
                   {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
                 </option>
@@ -302,12 +302,12 @@ const ListCardItem = React.memo(({
         </label>
         <select
           id={`condition-list-mobile-${card.id}`}
-          value={selectedQuality}
-          onChange={onQualityChange}
+          value={selectedVariationKey}
+          onChange={onVariationChange}
           className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none"
         >
           {card.variations.map(variation => (
-            <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
+            <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
               {variation.quality}
               {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
             </option>
@@ -328,7 +328,7 @@ const TCGShop = () => {
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
-  const [selectedQualities, setSelectedQualities] = useState({});
+  const [selectedVariations, setSelectedVariations] = useState({});
   const [viewMode, setViewMode] = useState('grid');
 
   // Enhanced cart hook with localStorage persistence
@@ -581,7 +581,9 @@ const TCGShop = () => {
           foil_type: item.foil_type || 'Regular',
           language: item.language || 'English',
           price: parseFloat(item.price) * currency.rate,
-          stock: item.stock_quantity
+          stock: item.stock_quantity,
+          // Add unique identifier for variation selection
+          variation_key: `${item.quality}-${item.foil_type || 'Regular'}-${item.language || 'English'}`
         });
       });
 
@@ -854,20 +856,20 @@ const TCGShop = () => {
   }, [cards, filters]);
 
   // Memoized card handlers
-  const handleQualityChange = useCallback((cardId) => (e) => {
-    setSelectedQualities(prev => ({
+  const handleVariationChange = useCallback((cardId) => (e) => {
+    setSelectedVariations(prev => ({
       ...prev,
       [cardId]: e.target.value
     }));
   }, []);
 
-  const handleAddToCart = useCallback((card, selectedQuality, selectedVariation) => () => {
+  const handleAddToCart = useCallback((card, selectedVariation) => () => {
     addToCart({
       id: card.id,
       inventory_id: selectedVariation.inventory_id,
       name: card.name,
       image_url: card.image_url,
-      quality: selectedQuality,
+      quality: selectedVariation.quality,
       price: selectedVariation.price,
       stock: selectedVariation.stock,
       foil_type: selectedVariation.foil_type,
@@ -1413,17 +1415,17 @@ const TCGShop = () => {
                     <VirtualCardGrid
                       cards={cards}
                       CardComponent={({ card }) => {
-                        const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-                        const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+                        const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
+                        const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
 
                         return (
                           <CardItem
                             card={card}
-                            selectedQuality={selectedQuality}
+                            selectedVariationKey={selectedVariationKey}
                             selectedVariation={selectedVariation}
                             currency={currency}
-                            onQualityChange={handleQualityChange(card.id)}
-                            onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                            onVariationChange={handleVariationChange(card.id)}
+                            onAddToCart={handleAddToCart(card, selectedVariation)}
                           />
                         );
                       }}
@@ -1441,18 +1443,18 @@ const TCGShop = () => {
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                         <SectionHeader title={group.section} count={group.cards.length} />
                         {group.cards.map(card => {
-                          const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-                          const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+                          const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
+                          const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
 
                           return (
                             <CardItem
                               key={card.id}
                               card={card}
-                              selectedQuality={selectedQuality}
+                              selectedVariationKey={selectedVariationKey}
                               selectedVariation={selectedVariation}
                               currency={currency}
-                              onQualityChange={handleQualityChange(card.id)}
-                              onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                              onVariationChange={handleVariationChange(card.id)}
+                              onAddToCart={handleAddToCart(card, selectedVariation)}
                             />
                           );
                         })}
@@ -1479,18 +1481,18 @@ const TCGShop = () => {
                     )}
                     <div className="flex flex-col gap-2">
                       {group.cards.map(card => {
-                        const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
-                        const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
+                        const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
+                        const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
 
                         return (
                           <ListCardItem
                             key={card.id}
                             card={card}
-                            selectedQuality={selectedQuality}
+                            selectedVariationKey={selectedVariationKey}
                             selectedVariation={selectedVariation}
                             currency={currency}
-                            onQualityChange={handleQualityChange(card.id)}
-                            onAddToCart={handleAddToCart(card, selectedQuality, selectedVariation)}
+                            onVariationChange={handleVariationChange(card.id)}
+                            onAddToCart={handleAddToCart(card, selectedVariation)}
                           />
                         );
                       })}
