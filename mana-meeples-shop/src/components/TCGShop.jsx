@@ -1472,8 +1472,8 @@ const TCGShop = () => {
               <div>
                 {groupedCards.map((group, groupIndex) => (
                   <div key={groupIndex} className="mb-8">
+                    <SectionHeader title={group.section} count={group.cards.length} isGrid={false} />
                     <div className="space-y-2">
-                      <SectionHeader title={group.section} count={group.cards.length} isGrid={false} />
                       {group.cards.map(card => {
                         const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
                         const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
