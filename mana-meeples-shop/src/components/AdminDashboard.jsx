@@ -17,7 +17,8 @@ import {
   CheckCircle,
   XCircle,
   AlertTriangle,
-  Loader2
+  Loader2,
+  Plus
 } from 'lucide-react';
 
 import { API_URL } from '../config/api';
@@ -36,11 +37,8 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterGame, setFilterGame] = useState('all');
-  const [filterPriceSource, setFilterPriceSource] = useState('all');
-  const [showLowStock, setShowLowStock] = useState(false);
-  const [showInStock, setShowInStock] = useState(false);
-  const [showZeroStock, setShowZeroStock] = useState(false);
-  const [showZeroStockQualities, setShowZeroStockQualities] = useState(false);
+  const [stockView, setStockView] = useState('in-stock'); // 'in-stock', 'all', 'zero-stock'
+  const [showAllQualities, setShowAllQualities] = useState(false);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingItems, setEditingItems] = useState(new Map());
   const [currency, setCurrency] = useState({ symbol: '$', rate: 1.0, code: 'USD' });
@@ -169,7 +167,7 @@ const AdminDashboard = () => {
 
     return Object.entries(groups).map(([key, group]) => {
       const filteredQualities = group.qualities
-        .filter(quality => showZeroStockQualities || quality.stock > 0)
+        .filter(quality => showAllQualities || quality.stock > 0)
         .sort((a, b) => {
           const qualityOrder = { 'Near Mint': 1, 'Lightly Played': 2, 'Moderately Played': 3, 'Heavily Played': 4, 'Damaged': 5 };
           return (qualityOrder[a.quality] || 999) - (qualityOrder[b.quality] || 999);
@@ -189,7 +187,7 @@ const AdminDashboard = () => {
         hasLowStock: filteredHasLowStock
       };
     }).filter(group => group.qualities.length > 0); // Remove cards with no visible qualities
-  }, [inventory, showZeroStockQualities]);
+  }, [inventory, showAllQualities]);
 
   const filteredInventory = useMemo(() => {
     return groupedInventory.filter(group => {
@@ -198,14 +196,23 @@ const AdminDashboard = () => {
         group.qualities.some(q => q.sku?.toLowerCase().includes(searchTerm.toLowerCase()));
 
       const matchesGame = filterGame === 'all' || group.game === filterGame;
-      const matchesPriceSource = filterPriceSource === 'all' || group.qualities.some(q => q.price_source === filterPriceSource);
-      const matchesLowStock = !showLowStock || group.hasLowStock;
-      const matchesInStock = !showInStock || group.totalStock > 0;
-      const matchesZeroStock = showZeroStock || group.totalStock > 0;
 
-      return matchesSearch && matchesGame && matchesPriceSource && matchesLowStock && matchesInStock && matchesZeroStock;
+      // Apply stock view filter
+      const matchesStockView = (() => {
+        switch (stockView) {
+          case 'in-stock':
+            return group.totalStock > 0;
+          case 'zero-stock':
+            return group.totalStock === 0;
+          case 'all':
+          default:
+            return true;
+        }
+      })();
+
+      return matchesSearch && matchesGame && matchesStockView;
     });
-  }, [groupedInventory, searchTerm, filterGame, filterPriceSource, showLowStock, showInStock, showZeroStock]);
+  }, [groupedInventory, searchTerm, filterGame, stockView]);
 
   const totalValue = useMemo(() => 
     inventory.reduce((sum, item) => sum + (item.price * item.stock), 0),
@@ -256,7 +263,7 @@ const AdminDashboard = () => {
     }
   }, []);
 
-  const createFoil = async () => {
+  const createInventoryVariation = async () => {
     if (!foilModalCard || !foilFormData.price || foilFormData.price <= 0) return;
 
     setFoilModalLoading(true);
@@ -277,24 +284,24 @@ const AdminDashboard = () => {
 
       if (!response.ok) {
         const error = await response.text();
-        throw new Error(error || 'Failed to create foil');
+        throw new Error(error || 'Failed to create inventory variation');
       }
 
-      alert(`Success! Created ${foilFormData.foilType} version of ${foilModalCard.card_name}`);
+      alert(`Success! Created ${foilFormData.quality} ${foilFormData.foilType} version of ${foilModalCard.card_name}`);
 
       setShowFoilModal(false);
       setFoilModalCard(null);
       setFoilFormData({
-        foilType: 'Foil',
+        foilType: 'Regular',
         quality: 'Near Mint',
         price: '',
-        initialStock: 0
+        initialStock: 1
       });
 
       window.location.reload();
 
     } catch (error) {
-      console.error('Error creating foil:', error);
+      console.error('Error creating inventory variation:', error);
       alert(`Error: ${error.message}`);
     } finally {
       setFoilModalLoading(false);
@@ -749,7 +756,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <div>
               <label htmlFor="filter-game" className="block text-sm font-medium text-slate-700 mb-2">
                 Game
@@ -768,74 +775,46 @@ const AdminDashboard = () => {
             </div>
 
             <div>
-              <label htmlFor="filter-price-source" className="block text-sm font-medium text-slate-700 mb-2">
-                Price Source
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Stock View
               </label>
-              <select
-                id="filter-price-source"
-                value={filterPriceSource}
-                onChange={(e) => setFilterPriceSource(e.target.value)}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              >
-                <option value="all">All Sources</option>
-                <option value="manual">Manual</option>
-                <option value="api_scryfall">Scryfall API</option>
-                <option value="api_pokemon">Pokemon API</option>
-              </select>
+              <div className="space-y-2">
+                {[
+                  { value: 'in-stock', label: 'In Stock Only' },
+                  { value: 'all', label: 'All Items' },
+                  { value: 'zero-stock', label: 'Zero Stock Only' }
+                ].map(({ value, label }) => (
+                  <label key={value} className="flex items-center gap-2 cursor-pointer select-none">
+                    <input
+                      type="radio"
+                      name="stock-view"
+                      value={value}
+                      checked={stockView === value}
+                      onChange={(e) => setStockView(e.target.value)}
+                      className="w-4 h-4 text-blue-600 border-slate-300 focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                    />
+                    <span className="text-sm text-slate-700">{label}</span>
+                  </label>
+                ))}
+              </div>
             </div>
 
-            <div className="flex items-end">
+            <div className="flex items-center">
               <label className="flex items-center gap-2 cursor-pointer select-none">
                 <input
                   type="checkbox"
-                  checked={showInStock}
-                  onChange={(e) => setShowInStock(e.target.checked)}
+                  checked={showAllQualities}
+                  onChange={(e) => setShowAllQualities(e.target.checked)}
                   className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
                 />
-                <span className="text-sm font-medium text-slate-700">
-                  In Stock Only
-                </span>
-              </label>
-            </div>
-
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={showLowStock}
-                  onChange={(e) => setShowLowStock(e.target.checked)}
-                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className="text-sm font-medium text-slate-700">
-                  Low Stock Only
-                </span>
-              </label>
-            </div>
-
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={showZeroStock}
-                  onChange={(e) => setShowZeroStock(e.target.checked)}
-                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className="text-sm font-medium text-slate-700">
-                  Show Zero Stock
-                </span>
-              </label>
-            </div>
-            <div className="flex items-end">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={showZeroStockQualities}
-                  onChange={(e) => setShowZeroStockQualities(e.target.checked)}
-                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                />
-                <span className="text-sm font-medium text-slate-700">
-                  Show Zero Stock Qualities
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-sm font-medium text-slate-700">
+                    Show All Qualities
+                  </span>
+                  <span className="text-xs text-slate-500">
+                    Include zero-stock variations
+                  </span>
+                </div>
               </label>
             </div>
           </div>
@@ -916,21 +895,51 @@ const AdminDashboard = () => {
                           </span>
                         </td>
                         <td className="px-4 py-3">
-                          <div className="flex gap-1 flex-wrap">
-                            {group.qualities.map(quality => (
-                              <span
-                                key={quality.id}
-                                className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                                  quality.stock === 0
-                                    ? 'bg-slate-100 text-slate-500'
-                                    : quality.stock <= quality.low_stock_threshold
-                                      ? 'bg-amber-100 text-amber-900'
-                                      : 'bg-green-100 text-green-900'
-                                }`}
-                              >
-                                {quality.quality.substring(0, 2).toUpperCase()} ({quality.stock})
-                              </span>
-                            ))}
+                          <div className="flex flex-col gap-2">
+                            <div className="flex gap-1 flex-wrap">
+                              {group.qualities.map(quality => (
+                                <span
+                                  key={quality.id}
+                                  className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
+                                    quality.stock === 0
+                                      ? 'bg-slate-100 text-slate-500'
+                                      : quality.stock <= quality.low_stock_threshold
+                                        ? 'bg-amber-100 text-amber-900'
+                                        : 'bg-green-100 text-green-900'
+                                  }`}
+                                >
+                                  {quality.quality.substring(0, 2).toUpperCase()} ({quality.stock})
+                                  {quality.price_source && (
+                                    <span className="ml-1 text-xs opacity-60">
+                                      {quality.price_source === 'manual' ? '✋' :
+                                       quality.price_source?.includes('scryfall') ? '🔮' : '🔗'}
+                                    </span>
+                                  )}
+                                </span>
+                              ))}
+                            </div>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                const representative = group.qualities[0];
+                                setFoilModalCard({
+                                  ...representative,
+                                  card_name: group.card_name
+                                });
+                                setFoilFormData({
+                                  foilType: 'Regular',
+                                  quality: 'Near Mint',
+                                  price: representative.price?.toFixed(2) || '0.00',
+                                  initialStock: 1
+                                });
+                                setShowFoilModal(true);
+                              }}
+                              className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none self-start"
+                              aria-label={`Add quality variation for ${group.card_name}`}
+                            >
+                              <Plus className="w-3 h-3" />
+                              Add Quality
+                            </button>
                           </div>
                         </td>
                         <td className="px-4 py-3">
@@ -1112,17 +1121,17 @@ const AdminDashboard = () => {
           </div>
         )}
 
-        {/* Foil Creation Modal */}
+        {/* Add Inventory Modal */}
         {showFoilModal && foilModalCard && (
-          <div 
+          <div
             className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
             role="dialog"
             aria-modal="true"
-            aria-labelledby="foil-modal-title"
+            aria-labelledby="inventory-modal-title"
           >
             <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
               <div className="flex items-center justify-between mb-4">
-                <h2 id="foil-modal-title" className="text-lg font-bold text-slate-900">Create Foil Version</h2>
+                <h2 id="inventory-modal-title" className="text-lg font-bold text-slate-900">Add Inventory Variation</h2>
                 <button
                   onClick={() => {
                     setShowFoilModal(false);
@@ -1154,7 +1163,7 @@ const AdminDashboard = () => {
 
                 <div>
                   <label htmlFor="foil-type" className="block text-sm font-medium text-slate-700 mb-2">
-                    Foil Type
+                    Card Type
                   </label>
                   <select
                     id="foil-type"
@@ -1162,10 +1171,13 @@ const AdminDashboard = () => {
                     onChange={(e) => setFoilFormData({ ...foilFormData, foilType: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
+                    <option value="Regular">Regular</option>
                     <option value="Foil">Regular Foil</option>
                     <option value="Etched">Etched Foil</option>
-                    <option value="Showcase">Showcase Foil</option>
-                    <option value="Extended Art">Extended Art Foil</option>
+                    <option value="Showcase">Showcase</option>
+                    <option value="Extended Art">Extended Art</option>
+                    <option value="Borderless">Borderless</option>
+                    <option value="Retro">Retro Frame</option>
                   </select>
                 </div>
 
@@ -1203,7 +1215,10 @@ const AdminDashboard = () => {
                     required
                   />
                   <p className="text-xs text-slate-500 mt-1">
-                    Suggested: {currency.symbol}{(foilModalCard.price * 2.5).toFixed(2)} (2.5x regular price)
+                    {foilFormData.foilType === 'Regular'
+                      ? `Base price: ${currency.symbol}${foilModalCard.price?.toFixed(2) || '0.00'}`
+                      : `Suggested: ${currency.symbol}${(foilModalCard.price * (foilFormData.foilType.includes('Foil') ? 2.5 : 1.5)).toFixed(2)} (${foilFormData.foilType.includes('Foil') ? '2.5x' : '1.5x'} base price)`
+                    }
                   </p>
                 </div>
 
@@ -1223,7 +1238,7 @@ const AdminDashboard = () => {
 
                 <div className="flex gap-3 mt-6">
                   <button
-                    onClick={createFoil}
+                    onClick={createInventoryVariation}
                     disabled={foilModalLoading || !foilFormData.price || foilFormData.price <= 0}
                     className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
                   >
@@ -1233,7 +1248,7 @@ const AdminDashboard = () => {
                         Creating...
                       </>
                     ) : (
-                      'Create Foil Version'
+                      'Add Inventory'
                     )}
                   </button>
                   <button
