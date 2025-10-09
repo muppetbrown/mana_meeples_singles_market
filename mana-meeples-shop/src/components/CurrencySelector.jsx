@@ -7,18 +7,18 @@ const CurrencySelector = ({ currency, onCurrencyChange, className = "" }) => {
 
   const currencies = [
     {
-      code: 'USD',
-      symbol: '$',
-      label: 'US Dollar (USD)',
-      rate: 1.0,
-      flag: '🇺🇸'
-    },
-    {
       code: 'NZD',
       symbol: 'NZ$',
       label: 'New Zealand Dollar (NZD)',
-      rate: 1.6,
+      rate: 1.0,
       flag: '🇳🇿'
+    },
+    {
+      code: 'USD',
+      symbol: '$',
+      label: 'US Dollar (USD)',
+      rate: 0.625,
+      flag: '🇺🇸'
     }
   ];
 
