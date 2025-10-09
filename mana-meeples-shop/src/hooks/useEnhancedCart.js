@@ -27,7 +27,6 @@ export const useEnhancedCart = (API_URL) => {
   const [cart, setCart] = useState([]);
   const [cartNotifications, setCartNotifications] = useState([]);
   const [lastSync, setLastSync] = useState(Date.now());
-  const [cartVersion, setCartVersion] = useState(0);
 
   const CART_STORAGE_KEY = 'tcg-shop-cart';
   const CART_EXPIRY_DAYS = 7;
