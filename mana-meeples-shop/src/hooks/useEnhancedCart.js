@@ -75,7 +75,9 @@ export const useEnhancedCart = (API_URL) => {
       const expiryTime = CART_EXPIRY_DAYS * 24 * 60 * 60 * 1000; // 7 days in ms
       if (Date.now() - timestamp > expiryTime) {
         localStorage.removeItem(CART_STORAGE_KEY);
-        addNotification('Your cart has expired and been cleared.', 'info');
+        if (addNotificationRef.current) {
+          addNotificationRef.current('Your cart has expired and been cleared.', 'info');
+        }
         return [];
       }
 
@@ -84,7 +86,11 @@ export const useEnhancedCart = (API_URL) => {
       console.error('Failed to load cart from storage:', error);
       return [];
     }
-  }, [addNotification]);
+  }, []);
+
+  // Stable reference for addNotification to prevent recreations
+  const addNotificationRef = useRef();
+  addNotificationRef.current = addNotification;
 
   /**
    * Save cart to localStorage with timestamp and version metadata
@@ -122,9 +128,11 @@ export const useEnhancedCart = (API_URL) => {
       }
     } catch (error) {
       console.error('Failed to save cart to storage:', error);
-      addNotification('Failed to save cart. Please try again.', 'error');
+      if (addNotificationRef.current) {
+        addNotificationRef.current('Failed to save cart. Please try again.', 'error');
+      }
     }
-  }, [addNotification]);
+  }, []); // No dependencies to prevent recreation
 
   // Cross-tab synchronization with version checking
   const syncWithStorage = useCallback(() => {
@@ -156,9 +164,11 @@ export const useEnhancedCart = (API_URL) => {
       setCart(broadcastCart || []);
       setLastSync(timestamp);
       cartVersionRef.current = version;
-      addNotification('Cart synced from another tab', 'info', 2000);
+      if (addNotificationRef.current) {
+        addNotificationRef.current('Cart synced from another tab', 'info', 2000);
+      }
     }
-  }, [addNotification]);
+  }, []);
 
   // Listen for storage changes and BroadcastChannel messages
   useEffect(() => {
@@ -197,16 +207,16 @@ export const useEnhancedCart = (API_URL) => {
     setCart(storedCart);
   }, [loadCartFromStorage]);
 
-  // Save cart to storage whenever it changes
+  // Save cart to storage whenever it changes (excluding lastSync to prevent loops)
   useEffect(() => {
-    if (cart.length > 0 || lastSync > 0) {
+    if (cart.length > 0) {
       isUpdatingRef.current = true;
       saveCartToStorage(cart);
       setTimeout(() => {
         isUpdatingRef.current = false;
       }, 100);
     }
-  }, [cart, lastSync, saveCartToStorage]);
+  }, [cart, saveCartToStorage]);
 
   // Validate item prices against current market data
   const validateItemPrice = useCallback(async (item) => {
@@ -246,17 +256,19 @@ export const useEnhancedCart = (API_URL) => {
       const priceChangedItems = validatedItems.filter(item => item.priceChanged);
 
       if (priceChangedItems.length > 0) {
-        addNotification(
-          `Price changes detected for ${priceChangedItems.length} item(s). Please review your cart.`,
-          'warning',
-          10000
-        );
+        if (addNotificationRef.current) {
+          addNotificationRef.current(
+            `Price changes detected for ${priceChangedItems.length} item(s). Please review your cart.`,
+            'warning',
+            10000
+          );
+        }
         setCart(validatedItems);
       }
     } catch (error) {
       console.error('Failed to validate cart:', error);
     }
-  }, [cart, validateItemPrice, addNotification]);
+  }, [cart, validateItemPrice]);
 
   // Check for out of stock items
   const checkStock = useCallback(async () => {
@@ -280,17 +292,19 @@ export const useEnhancedCart = (API_URL) => {
       const outOfStockItems = stockChecks.filter(item => item.outOfStock);
 
       if (outOfStockItems.length > 0) {
-        addNotification(
-          `${outOfStockItems.length} item(s) in your cart are now out of stock.`,
-          'error',
-          10000
-        );
+        if (addNotificationRef.current) {
+          addNotificationRef.current(
+            `${outOfStockItems.length} item(s) in your cart are now out of stock.`,
+            'error',
+            10000
+          );
+        }
         setCart(stockChecks);
       }
     } catch (error) {
       console.error('Failed to check stock:', error);
     }
-  }, [cart, API_URL, addNotification]);
+  }, [cart, API_URL]);
 
   /**
    * Add item to cart with validation and optimistic locking
@@ -307,13 +321,17 @@ export const useEnhancedCart = (API_URL) => {
     try {
       // Validate item before adding
       if (!item || !item.id || !item.name || !item.price) {
-        addNotification('Invalid item - cannot add to cart', 'error');
+        if (addNotificationRef.current) {
+          addNotificationRef.current('Invalid item - cannot add to cart', 'error');
+        }
         return;
       }
 
       // Check if item is still in stock
       if (item.stock <= 0) {
-        addNotification(`${item.name} is out of stock`, 'error');
+        if (addNotificationRef.current) {
+          addNotificationRef.current(`${item.name} is out of stock`, 'error');
+        }
         return;
       }
 
@@ -324,8 +342,12 @@ export const useEnhancedCart = (API_URL) => {
           try {
             const { version: storageVersion } = JSON.parse(currentStoredData);
             if (storageVersion > cartVersionRef.current) {
-              addNotification('Cart was updated elsewhere. Please try again.', 'warning');
-              syncWithStorage();
+              if (addNotificationRef.current) {
+                addNotificationRef.current('Cart was updated elsewhere. Please try again.', 'warning');
+              }
+              if (syncWithStorageRef.current) {
+                syncWithStorageRef.current();
+              }
               return prevCart;
             }
           } catch (e) {
@@ -342,7 +364,9 @@ export const useEnhancedCart = (API_URL) => {
           // Check if we can add more
           const existingItem = prevCart[existingIndex];
           if (existingItem.quantity >= item.stock) {
-            addNotification(`Cannot add more - only ${item.stock} in stock`, 'warning');
+            if (addNotificationRef.current) {
+              addNotificationRef.current(`Cannot add more - only ${item.stock} in stock`, 'warning');
+            }
             return prevCart;
           }
 
@@ -368,12 +392,16 @@ export const useEnhancedCart = (API_URL) => {
         return updatedCart;
       });
 
-      addNotification(`Added ${item.name} to cart`, 'success', 3000);
+      if (addNotificationRef.current) {
+        addNotificationRef.current(`Added ${item.name} to cart`, 'success', 3000);
+      }
     } catch (error) {
       console.error('Error adding item to cart:', error);
-      addNotification('Failed to add item to cart. Please try again.', 'error');
+      if (addNotificationRef.current) {
+        addNotificationRef.current('Failed to add item to cart. Please try again.', 'error');
+      }
     }
-  }, [addNotification, syncWithStorage]);
+  }, []);
 
   // Remove item from cart
   const removeFromCart = useCallback((itemId, quality) => {
@@ -382,13 +410,17 @@ export const useEnhancedCart = (API_URL) => {
         item => !(item.id === itemId && item.quality === quality)
       );
 
-      if (filtered.length !== prevCart.length) {
-        addNotification('Item removed from cart', 'info', 2000);
+      if (filtered.length !== prevCart.length && addNotificationRef.current) {
+        addNotificationRef.current('Item removed from cart', 'info', 2000);
       }
 
       return filtered;
     });
-  }, [addNotification]);
+  }, []);
+
+  // Stable references for other callbacks
+  const syncWithStorageRef = useRef();
+  syncWithStorageRef.current = syncWithStorage;
 
   // Update item quantity with optimistic locking
   const updateQuantity = useCallback((itemId, quality, newQuantity) => {
@@ -404,8 +436,12 @@ export const useEnhancedCart = (API_URL) => {
         try {
           const { version: storageVersion } = JSON.parse(currentStoredData);
           if (storageVersion > cartVersionRef.current) {
-            addNotification('Cart was updated elsewhere. Please try again.', 'warning');
-            syncWithStorage();
+            if (addNotificationRef.current) {
+              addNotificationRef.current('Cart was updated elsewhere. Please try again.', 'warning');
+            }
+            if (syncWithStorageRef.current) {
+              syncWithStorageRef.current();
+            }
             return prevCart;
           }
         } catch (e) {
@@ -424,14 +460,16 @@ export const useEnhancedCart = (API_URL) => {
           : item
       );
     });
-  }, [removeFromCart, addNotification, syncWithStorage]);
+  }, [removeFromCart]);
 
   // Clear entire cart
   const clearCart = useCallback(() => {
     setCart([]);
     localStorage.removeItem(CART_STORAGE_KEY);
-    addNotification('Cart cleared', 'info', 2000);
-  }, [addNotification]);
+    if (addNotificationRef.current) {
+      addNotificationRef.current('Cart cleared', 'info', 2000);
+    }
+  }, []);
 
   // Clear expired items (older than 7 days)
   const clearExpiredItems = useCallback(() => {
@@ -444,9 +482,9 @@ export const useEnhancedCart = (API_URL) => {
         return age < expiredThreshold;
       });
 
-      if (filtered.length !== prevCart.length) {
+      if (filtered.length !== prevCart.length && addNotificationRef.current) {
         const removedCount = prevCart.length - filtered.length;
-        addNotification(
+        addNotificationRef.current(
           `Removed ${removedCount} expired item(s) from cart`,
           'info',
           5000
@@ -455,7 +493,7 @@ export const useEnhancedCart = (API_URL) => {
 
       return filtered;
     });
-  }, [addNotification]);
+  }, []);
 
   // Get cart statistics
   const getCartStats = useCallback(() => {
