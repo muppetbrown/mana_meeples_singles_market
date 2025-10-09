@@ -172,7 +172,7 @@ const CardItem = React.memo(({
 });
 
 // List Card Item Component for List View
-// Fixed to prevent horizontal scrolling by using fixed widths
+// Responsive version to prevent overflow past shopping cart boundary
 const ListCardItem = React.memo(({
   card,
   selectedVariationKey,
@@ -182,8 +182,8 @@ const ListCardItem = React.memo(({
   onAddToCart
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all motion-reduce:transition-none border border-slate-200 overflow-hidden">
-      <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
+    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all motion-reduce:transition-none border border-slate-200">
+      <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4">
         {/* Card Thumbnail - Fixed small size */}
         <div className="relative w-12 h-16 sm:w-16 sm:h-24 flex-shrink-0">
           <OptimizedImage
@@ -198,8 +198,8 @@ const ListCardItem = React.memo(({
         </div>
 
         {/* Card Info - Flexible with overflow handling */}
-        <div className="flex-1 min-w-0 overflow-hidden">
-          <h3 className="font-semibold text-base text-slate-900 truncate mb-0.5">
+        <div className="flex-1 min-w-0">
+          <h3 className="font-semibold text-sm sm:text-base text-slate-900 truncate mb-0.5">
             {card.name}
           </h3>
           <p className="text-xs text-slate-600 truncate">
@@ -222,60 +222,56 @@ const ListCardItem = React.memo(({
           </div>
         </div>
 
-        {/* Desktop-only responsive columns with flex layout */}
-        <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
-          {/* Condition Selector - Fixed max width */}
-          <div className="w-36 max-w-[144px]">
-            <select
-              id={`condition-list-${card.id}`}
-              value={selectedVariationKey}
-              onChange={onVariationChange}
-              className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors truncate"
-            >
-              {card.variations.map(variation => (
-                <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
-                  {variation.quality}
-                  {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
+        {/* Desktop-only responsive columns - Now truly flexible */}
+        <div className="hidden sm:flex items-center gap-2 flex-shrink-0">
+          {/* Condition Selector - Responsive width */}
+          <select
+            id={`condition-list-${card.id}`}
+            value={selectedVariationKey}
+            onChange={onVariationChange}
+            className="w-24 md:w-32 lg:w-36 text-xs lg:text-sm px-2 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors"
+          >
+            {card.variations.map(variation => (
+              <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
+                {variation.quality}
+                {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type.slice(0,1)}` : ''}
+              </option>
+            ))}
+          </select>
 
-          {/* Stock - Fixed width */}
-          <div className="flex items-center gap-2 w-16">
-            <div className={`w-2 h-2 rounded-full ${
+          {/* Stock - Compact */}
+          <div className="flex items-center gap-1 w-10 md:w-12">
+            <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
               selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
             }`}></div>
-            <span className={`text-sm font-medium ${
+            <span className={`text-xs font-medium ${
               selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-slate-500'
             }`}>
-              {selectedVariation?.stock > 0
-                ? selectedVariation.stock
-                : '0'
-              }
+              {selectedVariation?.stock > 0 ? selectedVariation.stock : '0'}
             </span>
           </div>
 
-          {/* Price - Fixed width, right aligned */}
-          <div className="text-right w-24">
-            <span className="text-lg font-bold text-slate-900 block leading-none">
+          {/* Price - Responsive width */}
+          <div className="text-right w-16 md:w-20 lg:w-24 flex-shrink-0">
+            <span className="text-sm lg:text-lg font-bold text-slate-900 block leading-none">
               {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
             </span>
             {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
               <span className="text-xs font-semibold text-red-600 block mt-0.5">
-                {selectedVariation.stock} left
+                {selectedVariation.stock}
               </span>
             )}
           </div>
 
-          {/* Add to Cart Button - Fixed width */}
+          {/* Add to Cart Button - Responsive */}
           <button
             onClick={onAddToCart}
             disabled={!selectedVariation || selectedVariation.stock === 0}
-            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap w-28"
+            className="px-2 md:px-3 lg:px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-xs lg:text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] w-20 md:w-24 lg:w-28 flex-shrink-0"
             aria-label={`Add ${card.name} to cart`}
           >
-            Add to Cart
+            <span className="hidden lg:inline">Add to Cart</span>
+            <span className="lg:hidden">Add</span>
           </button>
         </div>
 
@@ -1403,55 +1399,84 @@ const TCGShop = () => {
             )}
 
             {/* Conditional Rendering Based on View Mode */}
-            {viewMode === 'grid' ? (
-              /* Grid View */
-              cards.length > 100 ? (
-                /* Virtual Scrolling for large datasets (100+ cards) */
-                <ErrorBoundary>
-                  <Suspense
-                    fallback={
-                      <div className="text-center py-8">
-                        <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                        <p className="text-slate-600 text-sm">Loading virtual scrolling...</p>
-                      </div>
-                    }
-                  >
-                    <VirtualCardGrid
-                      cards={cards}
-                      CardComponent={({ card }) => {
-                        const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
-                        const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
-
-                        return (
-                          <CardItem
-                            card={card}
-                            selectedVariationKey={selectedVariationKey}
-                            selectedVariation={selectedVariation}
-                            currency={currency}
-                            onVariationChange={handleVariationChange(card.id)}
-                            onAddToCart={handleAddToCart(card, selectedVariation)}
-                          />
-                        );
-                      }}
-                      cardHeight={500}    // Increased for vertical card layout on desktop
-                      containerHeight={800}
-                      enableProgressiveLoading={cards.length > 500}
-                    />
-                  </Suspense>
-                </ErrorBoundary>
-              ) : (
-                /* Standard Grid for smaller datasets (< 100 cards) with sections */
-                <div>
-                  {groupedCards.map((group, groupIndex) => (
-                    <div key={groupIndex} className="mb-8">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-                        <SectionHeader title={group.section} count={group.cards.length} isGrid={true} />
-                        {group.cards.map(card => {
+            <div className="w-full">
+              {viewMode === 'grid' ? (
+                /* Grid View */
+                cards.length > 100 ? (
+                  /* Virtual Scrolling for large datasets (100+ cards) */
+                  <ErrorBoundary>
+                    <Suspense
+                      fallback={
+                        <div className="text-center py-8">
+                          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                          <p className="text-slate-600 text-sm">Loading virtual scrolling...</p>
+                        </div>
+                      }
+                    >
+                      <VirtualCardGrid
+                        cards={cards}
+                        CardComponent={({ card }) => {
                           const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
                           const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
 
                           return (
                             <CardItem
+                              card={card}
+                              selectedVariationKey={selectedVariationKey}
+                              selectedVariation={selectedVariation}
+                              currency={currency}
+                              onVariationChange={handleVariationChange(card.id)}
+                              onAddToCart={handleAddToCart(card, selectedVariation)}
+                            />
+                          );
+                        }}
+                        cardHeight={500}    // Increased for vertical card layout on desktop
+                        containerHeight={800}
+                        enableProgressiveLoading={cards.length > 500}
+                      />
+                    </Suspense>
+                  </ErrorBoundary>
+                ) : (
+                  /* Standard Grid for smaller datasets (< 100 cards) with sections */
+                  <div>
+                    {groupedCards.map((group, groupIndex) => (
+                      <div key={groupIndex} className="mb-8">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+                          <SectionHeader title={group.section} count={group.cards.length} isGrid={true} />
+                          {group.cards.map(card => {
+                            const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
+                            const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
+
+                            return (
+                              <CardItem
+                                key={card.id}
+                                card={card}
+                                selectedVariationKey={selectedVariationKey}
+                                selectedVariation={selectedVariation}
+                                currency={currency}
+                                onVariationChange={handleVariationChange(card.id)}
+                                onAddToCart={handleAddToCart(card, selectedVariation)}
+                              />
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                /* List View */
+                <div>
+                  {groupedCards.map((group, groupIndex) => (
+                    <div key={groupIndex} className="mb-8">
+                      <SectionHeader title={group.section} count={group.cards.length} isGrid={false} />
+                      <div className="space-y-2">
+                        {group.cards.map(card => {
+                          const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
+                          const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
+
+                          return (
+                            <ListCardItem
                               key={card.id}
                               card={card}
                               selectedVariationKey={selectedVariationKey}
@@ -1466,35 +1491,8 @@ const TCGShop = () => {
                     </div>
                   ))}
                 </div>
-              )
-            ) : (
-              /* List View - Structured to match Grid View */
-              <div>
-                {groupedCards.map((group, groupIndex) => (
-                  <div key={groupIndex} className="mb-8">
-                    <SectionHeader title={group.section} count={group.cards.length} isGrid={false} />
-                    <div className="space-y-2">
-                      {group.cards.map(card => {
-                        const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
-                        const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
-
-                        return (
-                          <ListCardItem
-                            key={card.id}
-                            card={card}
-                            selectedVariationKey={selectedVariationKey}
-                            selectedVariation={selectedVariation}
-                            currency={currency}
-                            onVariationChange={handleVariationChange(card.id)}
-                            onAddToCart={handleAddToCart(card, selectedVariation)}
-                          />
-                        );
-                      })}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+              )}
+            </div>
 
             {cards.length === 0 && !loading && (
               <div className="text-center py-12 bg-white rounded-xl shadow-sm">
