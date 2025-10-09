@@ -43,7 +43,7 @@ const SectionHeader = ({ title, count }) => {
   );
 };
 
-// Memoized Card Component for performance
+// Memoized Card Component for performance - Horizontal layout for grid view
 const CardItem = React.memo(({
   card,
   selectedQuality,
@@ -53,21 +53,21 @@ const CardItem = React.memo(({
   onAddToCart
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200 flex flex-col h-full">
-      {/* Card Image */}
-      <div className="relative">
+    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200 flex flex-col sm:flex-row h-full">
+      {/* Card Image - Left side on desktop, top on mobile */}
+      <div className="relative flex-shrink-0 sm:w-48 md:w-52 lg:w-56">
         <OptimizedImage
           src={card.image_url}
           alt={`${card.name} from ${card.set_name}`}
           width={250}
           height={350}
-          className={`w-full bg-gradient-to-br from-slate-100 to-slate-200 ${
+          className={`w-full h-48 sm:h-full object-cover bg-gradient-to-br from-slate-100 to-slate-200 ${
             selectedVariation?.foil_type !== 'Regular'
               ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
               : ''
           }`}
           placeholder="blur"
-          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 250px, 280px"
         />
         {/* Foil Badge */}
         {selectedVariation?.foil_type !== 'Regular' && (
@@ -77,20 +77,20 @@ const CardItem = React.memo(({
         )}
       </div>
 
-      {/* Card Content */}
-      <div className="p-5 flex flex-col gap-4 flex-grow">
-        {/* Title & Set Info - Fixed height for alignment */}
-        <div className="min-h-[4rem]">
+      {/* Card Content - Right side on desktop, bottom on mobile */}
+      <div className="p-4 sm:p-5 flex flex-col gap-3 sm:gap-4 flex-grow min-w-0">
+        {/* Title & Set Info */}
+        <div className="flex-shrink-0">
           <h3 className="font-semibold text-lg leading-tight text-slate-900 mb-2 line-clamp-2">
             {card.name}
           </h3>
-          <p className="text-sm text-slate-600 pb-4 border-b border-slate-100">
+          <p className="text-sm text-slate-600 pb-3 border-b border-slate-100">
             {card.set_name} • #{card.card_number}
           </p>
         </div>
 
         {/* Condition Selector */}
-        <div className="space-y-2">
+        <div className="space-y-2 flex-shrink-0">
           <label
             htmlFor={`condition-${card.id}`}
             className="block text-xs font-semibold text-slate-700 uppercase tracking-wide"
@@ -115,7 +115,7 @@ const CardItem = React.memo(({
         </div>
 
         {/* Availability Status */}
-        <div className="flex items-center gap-2 pb-4 border-b border-slate-100">
+        <div className="flex items-center gap-2 pb-3 border-b border-slate-100 flex-shrink-0">
           {selectedVariation?.stock > 0 ? (
             <>
               <div className="w-2 h-2 rounded-full bg-emerald-500"></div>
@@ -181,8 +181,8 @@ const ListCardItem = React.memo(({
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all motion-reduce:transition-none border border-slate-200 overflow-hidden">
-      <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4 min-w-0">
-        {/* Card Thumbnail - Small */}
+      <div className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4 min-w-0 w-full">
+        {/* Card Thumbnail - Fixed small size */}
         <div className="relative w-12 h-16 sm:w-16 sm:h-24 flex-shrink-0">
           <OptimizedImage
             src={card.image_url}
@@ -195,8 +195,8 @@ const ListCardItem = React.memo(({
           />
         </div>
 
-        {/* Card Info - Flexible */}
-        <div className="flex-1 min-w-0">
+        {/* Card Info - Flexible with min width */}
+        <div className="flex-1 min-w-0 max-w-none">
           <h3 className="font-semibold text-base text-slate-900 truncate mb-0.5">
             {card.name}
           </h3>
@@ -220,60 +220,74 @@ const ListCardItem = React.memo(({
           </div>
         </div>
 
-        {/* Condition Selector - Hidden on mobile, responsive width */}
-        <div className="hidden sm:block w-36 lg:w-44 flex-shrink-0">
-          <select
-            id={`condition-list-${card.id}`}
-            value={selectedQuality}
-            onChange={onQualityChange}
-            className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors"
-          >
-            {card.variations.map(variation => (
-              <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
-                {variation.quality}
-                {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* Desktop-only responsive columns with flex layout */}
+        <div className="hidden sm:flex items-center gap-3 flex-shrink-0">
+          {/* Condition Selector - More flexible width */}
+          <div className="w-32 md:w-36 lg:w-40">
+            <select
+              id={`condition-list-${card.id}`}
+              value={selectedQuality}
+              onChange={onQualityChange}
+              className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors"
+            >
+              {card.variations.map(variation => (
+                <option key={`${card.id}-${variation.quality}`} value={variation.quality}>
+                  {variation.quality}
+                  {variation.foil_type !== 'Regular' ? ` • ${variation.foil_type}` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
 
-        {/* Stock - Desktop only, responsive width */}
-        <div className="hidden sm:flex items-center gap-2 w-16 lg:w-24 flex-shrink-0">
-          <div className={`w-2 h-2 rounded-full ${
-            selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
-          }`}></div>
-          <span className={`text-sm font-medium ${
-            selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-slate-500'
-          }`}>
-            {selectedVariation?.stock > 0
-              ? selectedVariation.stock
-              : 'Out'
-            }
-          </span>
-        </div>
-
-        {/* Price - Desktop gets large, Mobile gets medium, responsive width */}
-        <div className="flex-shrink-0 w-16 sm:w-20 lg:w-28 text-right">
-          <span className="text-lg sm:text-xl font-bold text-slate-900 block leading-none">
-            {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
-          </span>
-          {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
-            <span className="text-[10px] sm:text-xs font-semibold text-red-600 block mt-0.5">
-              {selectedVariation.stock} left
+          {/* Stock - Flexible width */}
+          <div className="flex items-center gap-2 w-14 md:w-16 lg:w-20">
+            <div className={`w-2 h-2 rounded-full ${
+              selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
+            }`}></div>
+            <span className={`text-sm font-medium ${
+              selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-slate-500'
+            }`}>
+              {selectedVariation?.stock > 0
+                ? selectedVariation.stock
+                : 'Out'
+              }
             </span>
-          )}
+          </div>
+
+          {/* Price - Flexible width, right aligned */}
+          <div className="text-right w-20 md:w-24 lg:w-28">
+            <span className="text-lg font-bold text-slate-900 block leading-none">
+              {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
+            </span>
+            {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
+              <span className="text-[10px] sm:text-xs font-semibold text-red-600 block mt-0.5">
+                {selectedVariation.stock} left
+              </span>
+            )}
+          </div>
+
+          {/* Add to Cart Button - Fixed width */}
+          <button
+            onClick={onAddToCart}
+            disabled={!selectedVariation || selectedVariation.stock === 0}
+            className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap w-24 md:w-28"
+            aria-label={`Add ${card.name} to cart`}
+          >
+            Add to Cart
+          </button>
         </div>
 
-        {/* Add to Cart Button - Compact */}
-        <button
-          onClick={onAddToCart}
-          disabled={!selectedVariation || selectedVariation.stock === 0}
-          className="px-3 sm:px-4 py-2 sm:py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap"
-          aria-label={`Add ${card.name} to cart`}
-        >
-          <span className="hidden sm:inline">Add to Cart</span>
-          <span className="sm:hidden">Add</span>
-        </button>
+        {/* Mobile-only Add button */}
+        <div className="sm:hidden">
+          <button
+            onClick={onAddToCart}
+            disabled={!selectedVariation || selectedVariation.stock === 0}
+            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap"
+            aria-label={`Add ${card.name} to cart`}
+          >
+            Add
+          </button>
+        </div>
       </div>
 
       {/* Condition selector for mobile - Expandable section */}
@@ -1331,7 +1345,7 @@ const TCGShop = () => {
                         const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
                         return (
-                          <CardItem    // ← CHANGED: CardItem instead of GridCardItem
+                          <CardItem
                             card={card}
                             selectedQuality={selectedQuality}
                             selectedVariation={selectedVariation}
@@ -1341,7 +1355,7 @@ const TCGShop = () => {
                           />
                         );
                       }}
-                      cardHeight={550}    // ← CHANGED: 550 instead of 450
+                      cardHeight={300}    // ← CHANGED: 300 for horizontal layout instead of 550
                       containerHeight={800}
                       enableProgressiveLoading={cards.length > 500}
                     />
@@ -1352,14 +1366,14 @@ const TCGShop = () => {
                 <div>
                   {groupedCards.map((group, groupIndex) => (
                     <div key={groupIndex} className="mb-8">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">    {/* ← CHANGED: Better responsive columns */}
+                      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
                         <SectionHeader title={group.section} count={group.cards.length} />
                         {group.cards.map(card => {
                           const selectedQuality = selectedQualities[card.id] || card.variations[0]?.quality;
                           const selectedVariation = card.variations.find(v => v.quality === selectedQuality) || card.variations[0];
 
                           return (
-                            <CardItem    // ← CHANGED: CardItem instead of GridCardItem
+                            <CardItem
                               key={card.id}
                               card={card}
                               selectedQuality={selectedQuality}
