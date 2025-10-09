@@ -1323,13 +1323,15 @@ const TCGShop = () => {
           {/* Main Content */}
           <div className="flex-1">
             {/* Results Header */}
-            <div className="flex justify-between items-center mb-4 flex-wrap gap-3">
-              <p className="text-slate-600" aria-live="polite">
-                <span className="font-medium">{cards.length}</span> cards found
-              </p>
+            <div className="flex items-center mb-4 gap-3">
+              <div className="flex-1">
+                <p className="text-slate-600" aria-live="polite">
+                  <span className="font-medium">{cards.length}</span> cards found
+                </p>
+              </div>
 
-              {/* View Toggle */}
-              <div className="flex items-center gap-2">
+              {/* View Toggle - Fixed Position */}
+              <div className="flex items-center gap-2 flex-shrink-0">
                 <span className="text-sm text-slate-600 hidden sm:inline">View:</span>
                 <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5">
                   <button
