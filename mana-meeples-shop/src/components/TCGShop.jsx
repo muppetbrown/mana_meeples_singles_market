@@ -355,7 +355,7 @@ const TCGShop = () => {
   }), [searchParams]);
 
   // Filter counts hook for dynamic counts in dropdowns
-  const { getCount } = useFilterCounts(API_URL, { ...filters, game: selectedGame });
+  const { getCount, filterCounts } = useFilterCounts(API_URL, { ...filters, game: selectedGame });
 
   const [showMobileFilters, setShowMobileFilters] = useState(false);
   const [filterOptions, setFilterOptions] = useState({
