@@ -40,7 +40,7 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
         return input.replace(/[<>'"&{}]/g, '').trim().toLowerCase();
       case 'phone':
         // Allow only phone number characters
-        return input.replace(/[^+\d\s\-\(\)]/g, '').trim();
+        return input.replace(/[^+\d\s\-()]/g, '').trim();
       case 'address':
         // Remove scripts but allow address characters
         return input.replace(/[<>'"&{}]/g, '').trim();
@@ -63,7 +63,7 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
       newErrors.firstName = 'First name is required';
     } else if (sanitizedFirstName.length > 50) {
       newErrors.firstName = 'First name is too long (max 50 characters)';
-    } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'\.]+$/.test(sanitizedFirstName)) {
+    } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'.]+$/.test(sanitizedFirstName)) {
       newErrors.firstName = 'First name contains invalid characters';
     }
 
@@ -71,7 +71,7 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
       newErrors.lastName = 'Last name is required';
     } else if (sanitizedLastName.length > 50) {
       newErrors.lastName = 'Last name is too long (max 50 characters)';
-    } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'\.]+$/.test(sanitizedLastName)) {
+    } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'.]+$/.test(sanitizedLastName)) {
       newErrors.lastName = 'Last name contains invalid characters';
     }
 
@@ -87,7 +87,7 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
 
     // Phone validation (optional but validated if provided)
     const sanitizedPhone = sanitizeInput(formData.phone, 'phone');
-    if (sanitizedPhone && !/^[+]?[\d\s\-\(\)]{7,20}$/.test(sanitizedPhone)) {
+    if (sanitizedPhone && !/^[+]?[\d\s\-()]{7,20}$/.test(sanitizedPhone)) {
       newErrors.phone = 'Please enter a valid phone number';
     }
 
@@ -111,7 +111,7 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
     const sanitizedPostalCode = sanitizeInput(formData.postalCode);
     if (!sanitizedPostalCode) {
       newErrors.postalCode = 'Postal code is required';
-    } else if (!/^[A-Z0-9\s\-]{3,10}$/i.test(sanitizedPostalCode)) {
+    } else if (!/^[A-Z0-9\s-]{3,10}$/i.test(sanitizedPostalCode)) {
       newErrors.postalCode = 'Please enter a valid postal code';
     }
 

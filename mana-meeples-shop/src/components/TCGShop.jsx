@@ -387,7 +387,7 @@ const TCGShop = () => {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { handleError, handleApiCall } = useErrorHandler();
+  const { handleError } = useErrorHandler();
   const [showCart, setShowCart] = useState(false);
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -488,7 +488,7 @@ const TCGShop = () => {
     };
 
     fetchInitialData();
-  }, []);
+  }, [handleError]);
 
   // Offline detection
   useEffect(() => {
@@ -508,7 +508,7 @@ const TCGShop = () => {
       window.removeEventListener('online', handleOnline);
       window.removeEventListener('offline', handleOffline);
     };
-  }, []);
+  }, [showNotification]);
 
   // Clear stale variation selections when filters or search change
   useEffect(() => {
@@ -740,7 +740,7 @@ const TCGShop = () => {
       const formattedError = handleError(err, { operation: 'fetchCards' });
       setError(`${formattedError.title}: ${formattedError.message} Try adjusting your filters or refreshing the page.`);
     }
-  }, [searchTerm, selectedGame, filters, games, currency.rate]);
+  }, [searchTerm, selectedGame, filters, games, currency.rate, handleError]);
 
   useEffect(() => {
     if (games.length > 0) {
