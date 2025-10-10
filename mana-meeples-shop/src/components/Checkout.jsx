@@ -27,28 +27,123 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
 
   const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
+  // Input sanitization function
+  const sanitizeInput = (input, type = 'text') => {
+    if (typeof input !== 'string') return '';
+
+    switch (type) {
+      case 'name':
+        // Remove dangerous characters but allow international names
+        return input.replace(/[<>'"&{}]/g, '').trim();
+      case 'email':
+        // Basic email sanitization
+        return input.replace(/[<>'"&{}]/g, '').trim().toLowerCase();
+      case 'phone':
+        // Allow only phone number characters
+        return input.replace(/[^+\d\s\-\(\)]/g, '').trim();
+      case 'address':
+        // Remove scripts but allow address characters
+        return input.replace(/[<>'"&{}]/g, '').trim();
+      case 'notes':
+        // More restrictive for notes field (XSS prevention)
+        return input.replace(/[<>'"&{}<script>]/gi, '').trim();
+      default:
+        return input.replace(/[<>'"&{}]/g, '').trim();
+    }
+  };
+
   const validateForm = () => {
     const newErrors = {};
 
-    // Required field validation
-    if (!formData.firstName.trim()) newErrors.firstName = 'First name is required';
-    if (!formData.lastName.trim()) newErrors.lastName = 'Last name is required';
-    if (!formData.email.trim()) {
+    // Sanitize and validate names
+    const sanitizedFirstName = sanitizeInput(formData.firstName, 'name');
+    const sanitizedLastName = sanitizeInput(formData.lastName, 'name');
+
+    if (!sanitizedFirstName) {
+      newErrors.firstName = 'First name is required';
+    } else if (sanitizedFirstName.length > 50) {
+      newErrors.firstName = 'First name is too long (max 50 characters)';
+    } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'\.]+$/.test(sanitizedFirstName)) {
+      newErrors.firstName = 'First name contains invalid characters';
+    }
+
+    if (!sanitizedLastName) {
+      newErrors.lastName = 'Last name is required';
+    } else if (sanitizedLastName.length > 50) {
+      newErrors.lastName = 'Last name is too long (max 50 characters)';
+    } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'\.]+$/.test(sanitizedLastName)) {
+      newErrors.lastName = 'Last name contains invalid characters';
+    }
+
+    // Email validation with sanitization
+    const sanitizedEmail = sanitizeInput(formData.email, 'email');
+    if (!sanitizedEmail) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (sanitizedEmail.length > 254) {
+      newErrors.email = 'Email address is too long';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedEmail)) {
       newErrors.email = 'Please enter a valid email address';
     }
-    // Phone number is now optional - no validation required
-    if (!formData.address.trim()) newErrors.address = 'Address is required';
-    if (!formData.city.trim()) newErrors.city = 'City is required';
-    if (!formData.postalCode.trim()) newErrors.postalCode = 'Postal code is required';
+
+    // Phone validation (optional but validated if provided)
+    const sanitizedPhone = sanitizeInput(formData.phone, 'phone');
+    if (sanitizedPhone && !/^[+]?[\d\s\-\(\)]{7,20}$/.test(sanitizedPhone)) {
+      newErrors.phone = 'Please enter a valid phone number';
+    }
+
+    // Address validation
+    const sanitizedAddress = sanitizeInput(formData.address, 'address');
+    if (!sanitizedAddress) {
+      newErrors.address = 'Address is required';
+    } else if (sanitizedAddress.length > 200) {
+      newErrors.address = 'Address is too long (max 200 characters)';
+    }
+
+    // City validation
+    const sanitizedCity = sanitizeInput(formData.city, 'name');
+    if (!sanitizedCity) {
+      newErrors.city = 'City is required';
+    } else if (sanitizedCity.length > 100) {
+      newErrors.city = 'City name is too long (max 100 characters)';
+    }
+
+    // Postal code validation
+    const sanitizedPostalCode = sanitizeInput(formData.postalCode);
+    if (!sanitizedPostalCode) {
+      newErrors.postalCode = 'Postal code is required';
+    } else if (!/^[A-Z0-9\s\-]{3,10}$/i.test(sanitizedPostalCode)) {
+      newErrors.postalCode = 'Please enter a valid postal code';
+    }
+
+    // Notes validation (optional)
+    const sanitizedNotes = sanitizeInput(formData.notes, 'notes');
+    if (sanitizedNotes.length > 500) {
+      newErrors.notes = 'Notes are too long (max 500 characters)';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // Sanitize input based on field type
+    let sanitizedValue = value;
+    const sanitizationType = {
+      firstName: 'name',
+      lastName: 'name',
+      email: 'email',
+      phone: 'phone',
+      address: 'address',
+      city: 'name',
+      notes: 'notes'
+    };
+
+    if (sanitizationType[field]) {
+      sanitizedValue = sanitizeInput(value, sanitizationType[field]);
+    }
+
+    setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
+
     // Clear error when user starts typing
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
@@ -65,11 +160,30 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
     setIsSubmitting(true);
 
     try {
+      // Create sanitized customer data for submission
+      const sanitizedCustomer = {
+        firstName: sanitizeInput(formData.firstName, 'name'),
+        lastName: sanitizeInput(formData.lastName, 'name'),
+        email: sanitizeInput(formData.email, 'email'),
+        phone: sanitizeInput(formData.phone, 'phone'),
+        address: sanitizeInput(formData.address, 'address'),
+        suburb: sanitizeInput(formData.suburb, 'address'),
+        city: sanitizeInput(formData.city, 'name'),
+        region: sanitizeInput(formData.region, 'name'),
+        postalCode: sanitizeInput(formData.postalCode),
+        country: sanitizeInput(formData.country, 'name'),
+        notes: sanitizeInput(formData.notes, 'notes')
+      };
+
       const orderData = {
-        customer: formData,
-        items: cart,
-        total: cartTotal,
-        currency: currency.code,
+        customer: sanitizedCustomer,
+        items: cart.map(item => ({
+          inventory_id: item.inventory_id || item.id,
+          quantity: Math.max(1, Math.min(50, parseInt(item.quantity) || 1)), // Sanitize quantity
+          price: Math.max(0, parseFloat(item.price) || 0) // Sanitize price
+        })),
+        total: Math.max(0, parseFloat(cartTotal) || 0), // Sanitize total
+        currency: currency.code || 'NZD',
         timestamp: new Date().toISOString(),
       };
 
@@ -81,7 +195,7 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
       setSubmitted(true);
     } catch (error) {
       console.error('Order submission failed:', error);
-      // Handle error - could show an error message
+      setErrors({ submit: 'Failed to submit order. Please try again.' });
     } finally {
       setIsSubmitting(false);
     }
