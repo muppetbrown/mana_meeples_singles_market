@@ -16,6 +16,7 @@ import {
   Eye
 } from 'lucide-react';
 import { API_URL } from '../config/api';
+import { logError } from '../services/errorHandler';
 
 const getAdminHeaders = () => ({
   'Content-Type': 'application/json'
@@ -48,9 +49,7 @@ const AdminOrders = () => {
       setOrders(data.orders || []);
       setError(null);
     } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching orders:', err);
-      }
+      logError(err, { operation: 'fetchOrders', context: 'AdminOrders' });
       setError('Failed to load orders');
     } finally {
       setLoading(false);
@@ -86,8 +85,40 @@ const AdminOrders = () => {
     });
   }, []);
 
-  // Update order status
+  // Business logic validation for order status changes
+  const validateStatusChange = (currentStatus, newStatus) => {
+    const validTransitions = {
+      'pending': ['confirmed', 'cancelled'],
+      'confirmed': ['completed', 'cancelled'],
+      'completed': [], // No transitions from completed
+      'cancelled': [] // No transitions from cancelled
+    };
+
+    if (!validTransitions[currentStatus]?.includes(newStatus)) {
+      return {
+        valid: false,
+        message: `Cannot change order from ${currentStatus} to ${newStatus}`
+      };
+    }
+
+    return { valid: true };
+  };
+
+  // Update order status with validation
   const updateOrderStatus = useCallback(async (orderId, newStatus) => {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) {
+      alert('Order not found');
+      return;
+    }
+
+    // Validate the status transition
+    const validation = validateStatusChange(order.status, newStatus);
+    if (!validation.valid) {
+      alert(validation.message);
+      return;
+    }
+
     try {
       const response = await fetch(`${API_URL}/admin/orders/${orderId}/status`, {
         method: 'PUT',
@@ -103,12 +134,10 @@ const AdminOrders = () => {
       // Refresh orders
       fetchOrders();
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error updating order status:', error);
-      }
+      logError(error, { operation: 'updateOrderStatus', orderId, newStatus });
       alert('Failed to update order status');
     }
-  }, [fetchOrders]);
+  }, [orders, fetchOrders]);
 
   // Show order details in modal
   const showOrderDetails = useCallback(async (orderId) => {
@@ -133,13 +162,13 @@ const AdminOrders = () => {
     }
   }, []);
 
-  // Status badge component
+  // Status badge component with AAA contrast ratios
   const StatusBadge = ({ status }) => {
     const statusConfig = {
-      pending: { color: 'bg-yellow-100 text-yellow-800', icon: Clock },
-      confirmed: { color: 'bg-blue-100 text-blue-800', icon: CheckCircle },
-      completed: { color: 'bg-green-100 text-green-800', icon: CheckCircle },
-      cancelled: { color: 'bg-red-100 text-red-800', icon: XCircle }
+      pending: { color: 'bg-yellow-50 text-yellow-900 border border-yellow-200', icon: Clock },
+      confirmed: { color: 'bg-blue-50 text-blue-900 border border-blue-200', icon: CheckCircle },
+      completed: { color: 'bg-green-50 text-green-900 border border-green-200', icon: CheckCircle },
+      cancelled: { color: 'bg-red-50 text-red-900 border border-red-200', icon: XCircle }
     };
 
     const config = statusConfig[status] || statusConfig.pending;

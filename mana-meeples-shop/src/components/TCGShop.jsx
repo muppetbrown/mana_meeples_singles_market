@@ -9,6 +9,8 @@ import { useEnhancedCart } from '../hooks/useEnhancedCart';
 import ErrorBoundary from './ErrorBoundary';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import { API_URL } from '../config/api';
+import { useErrorHandler, withRetry } from '../services/errorHandler';
+import { FILTER_CONFIG, ACCESSIBILITY_CONFIG, VIRTUAL_SCROLL_CONFIG } from '../config/constants';
 
 // Lazy load VirtualCardGrid for code splitting
 const VirtualCardGrid = React.lazy(() => import('./VirtualCardGrid'));
@@ -26,6 +28,40 @@ const highlightMatch = (text, query) => {
       part
   );
 };
+
+// Card Skeleton Component for loading states
+const CardSkeleton = () => (
+  <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-slate-200 flex flex-row lg:flex-col h-full animate-pulse">
+    {/* Image Skeleton */}
+    <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full">
+      <div className="w-full h-32 sm:h-44 lg:h-64 bg-slate-200"></div>
+    </div>
+
+    {/* Content Skeleton */}
+    <div className="p-4 sm:p-5 lg:p-5 flex flex-col gap-3 lg:gap-3 flex-grow min-w-0">
+      {/* Title Skeleton */}
+      <div className="space-y-2">
+        <div className="h-4 lg:h-5 bg-slate-200 rounded w-3/4"></div>
+        <div className="h-3 lg:h-4 bg-slate-200 rounded w-1/2"></div>
+      </div>
+
+      {/* Dropdown Skeleton */}
+      <div className="h-11 bg-slate-200 rounded-lg"></div>
+
+      {/* Status Skeleton */}
+      <div className="flex items-center gap-2">
+        <div className="w-2 h-2 bg-slate-200 rounded-full"></div>
+        <div className="h-3 bg-slate-200 rounded w-16"></div>
+      </div>
+
+      {/* Price & Button Skeleton */}
+      <div className="mt-auto pt-2 space-y-3">
+        <div className="h-6 bg-slate-200 rounded w-20"></div>
+        <div className="h-11 bg-slate-200 rounded-lg"></div>
+      </div>
+    </div>
+  </div>
+);
 
 // Section Header Component
 const SectionHeader = ({ title, count, isGrid = false }) => {
@@ -58,7 +94,7 @@ const CardItem = React.memo(({
   return (
     <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200 flex flex-row lg:flex-col h-full">
       {/* Card Image - Left on mobile, top on desktop */}
-      <div className="relative flex-shrink-0 w-24 sm:w-32 lg:w-full">
+      <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full">
         <OptimizedImage
           src={card.image_url}
           alt={`${card.name} from ${card.set_name}`}
@@ -81,7 +117,7 @@ const CardItem = React.memo(({
       </div>
 
       {/* Card Content - Right on mobile, bottom on desktop */}
-      <div className="p-3 sm:p-4 lg:p-5 flex flex-col gap-2 lg:gap-3 flex-grow min-w-0">
+      <div className="p-4 sm:p-5 lg:p-5 flex flex-col gap-3 lg:gap-3 flex-grow min-w-0">
         {/* Title & Set Info */}
         <div className="flex-shrink-0">
           <h3 className="font-semibold text-sm lg:text-lg leading-tight text-slate-900 mb-1 lg:mb-2 line-clamp-2">
@@ -104,7 +140,8 @@ const CardItem = React.memo(({
             id={`condition-${card.id}`}
             value={selectedVariationKey}
             onChange={onVariationChange}
-            className="w-full text-xs lg:text-sm px-2 lg:px-3 py-1.5 lg:py-2.5 border-2 border-slate-300 rounded-lg bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-colors"
+            className={`w-full text-sm lg:text-sm px-3 lg:px-3 py-2.5 lg:py-2.5 border-2 border-slate-300 rounded-lg bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-colors`}
+            style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
           >
             {card.variations.map(variation => (
               <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
@@ -151,7 +188,8 @@ const CardItem = React.memo(({
           <button
             onClick={onAddToCart}
             disabled={!selectedVariation || selectedVariation.stock === 0}
-            className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm lg:text-base font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px]"
+            className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm lg:text-base font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none"
+            style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
             aria-label={`Add ${card.name} to cart`}
           >
             Add to Cart
@@ -349,11 +387,13 @@ const TCGShop = () => {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { handleError, handleApiCall } = useErrorHandler();
   const [showCart, setShowCart] = useState(false);
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [selectedVariations, setSelectedVariations] = useState({});
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [viewMode, setViewMode] = useState('grid');
 
   // Enhanced cart hook with localStorage persistence
@@ -434,10 +474,8 @@ const TCGShop = () => {
         }
 
       } catch (err) {
-        if (process.env.NODE_ENV === 'development') {
-          console.error('Error:', err);
-        }
-        setError('Failed to load data. The API might be waking up. Please wait 30 seconds and try again.');
+        const formattedError = handleError(err, { operation: 'loadInitialData' });
+        setError(`${formattedError.title}: ${formattedError.message} Please refresh the page or check your connection.`);
       } finally {
         setLoading(false);
       }
@@ -445,6 +483,44 @@ const TCGShop = () => {
 
     fetchInitialData();
   }, []);
+
+  // Offline detection
+  useEffect(() => {
+    const handleOnline = () => {
+      setIsOffline(false);
+      showNotification('Connection restored', 'success');
+    };
+    const handleOffline = () => {
+      setIsOffline(true);
+      showNotification('You are offline. Some features may not work.', 'warning');
+    };
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  // Clear stale variation selections when filters or search change
+  useEffect(() => {
+    setSelectedVariations(prev => {
+      // Get current card IDs from cards array
+      const currentCardIds = new Set(cards.map(card => card.id));
+
+      // Keep only selections for cards that still exist
+      const filteredSelections = {};
+      Object.keys(prev).forEach(cardId => {
+        if (currentCardIds.has(cardId)) {
+          filteredSelections[cardId] = prev[cardId];
+        }
+      });
+
+      return filteredSelections;
+    });
+  }, [cards, searchTerm, selectedGame, filters]);
 
   // Global keyboard shortcuts
   useEffect(() => {
@@ -611,13 +687,13 @@ const TCGShop = () => {
       if (filters.minPrice) queryParams.append('min_price', filters.minPrice);
       if (filters.maxPrice) queryParams.append('max_price', filters.maxPrice);
 
-      const cardsRes = await fetch(`${API_URL}/cards?${queryParams}`);
-
-      if (!cardsRes.ok) {
-        throw new Error('API request failed');
-      }
-
-      const cardsData = await cardsRes.json();
+      const cardsData = await withRetry(async () => {
+        const cardsRes = await fetch(`${API_URL}/cards?${queryParams}`);
+        if (!cardsRes.ok) {
+          throw new Error('API request failed');
+        }
+        return cardsRes.json();
+      }, 3, 1000);
 
       // Group cards by base card (consolidated variants)
       const groupedCards = {};
@@ -655,10 +731,8 @@ const TCGShop = () => {
 
       setCards(Object.values(groupedCards));
     } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching cards:', err);
-      }
-      setError('Failed to load cards. Please try again.');
+      const formattedError = handleError(err, { operation: 'fetchCards' });
+      setError(`${formattedError.title}: ${formattedError.message} Try adjusting your filters or refreshing the page.`);
     }
   }, [searchTerm, selectedGame, filters, games, currency.rate]);
 
@@ -730,7 +804,7 @@ const TCGShop = () => {
             }
           }
         }
-      }, 300); // 300ms debounce
+      }, FILTER_CONFIG.DEBOUNCE_DELAY); // 300ms debounce for better UX
     } else {
       setSearchSuggestions([]);
       setShowSuggestions(false);
@@ -1006,11 +1080,59 @@ const TCGShop = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="inline-block animate-spin motion-reduce:animate-none rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          <p className="mt-4 text-slate-600">Loading cards...</p>
-          <p className="mt-2 text-sm text-slate-700">If this takes a while, the API might be waking up...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+        {/* Skip to main content link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+        >
+          Skip to main content
+        </a>
+
+        {/* Skeleton Header */}
+        <header className="bg-white shadow-sm border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-center justify-between gap-4">
+              <div className="h-8 bg-slate-200 rounded w-32 animate-pulse"></div>
+              <div className="flex items-center gap-4">
+                <div className="h-6 bg-slate-200 rounded w-24 animate-pulse"></div>
+                <div className="h-10 bg-slate-200 rounded w-10 animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Skeleton Content */}
+        <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            {/* Skeleton Sidebar */}
+            <aside className="lg:w-64 space-y-6">
+              {[1,2,3,4,5].map(i => (
+                <div key={i} className="bg-white rounded-lg p-4 shadow-sm">
+                  <div className="h-4 bg-slate-200 rounded w-20 mb-3 animate-pulse"></div>
+                  <div className="h-10 bg-slate-200 rounded animate-pulse"></div>
+                </div>
+              ))}
+            </aside>
+
+            {/* Skeleton Cards Grid */}
+            <div className="flex-1">
+              <div className="mb-6">
+                <div className="h-6 bg-slate-200 rounded w-48 animate-pulse"></div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                {Array.from({ length: 12 }, (_, i) => (
+                  <CardSkeleton key={i} />
+                ))}
+              </div>
+            </div>
+          </div>
+        </main>
+
+        {/* Accessible loading announcement */}
+        <div className="sr-only" aria-live="polite" aria-atomic="true">
+          Loading cards... If this takes a while, the API might be waking up.
         </div>
       </div>
     );
@@ -1057,6 +1179,13 @@ const TCGShop = () => {
       >
         Skip to main content
       </a>
+      {/* Offline indicator */}
+      {isOffline && (
+        <div className="bg-red-600 text-white text-center py-2 px-4 text-sm font-medium">
+          ⚠️ You are offline. Some features may not work properly.
+        </div>
+      )}
+
       <header className="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between gap-4">
@@ -1078,15 +1207,13 @@ const TCGShop = () => {
                 aria-label={`Open shopping cart with ${cartCount} items`}
               >
                 <ShoppingCart className="w-6 h-6 text-slate-700" />
-                {cartCount > 0 && (
-                  <span
-                    className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center"
-                    aria-live="assertive"
-                    aria-label={`${cartCount} items in cart`}
-                  >
+                <span
+                  className={`absolute -top-1 -right-1 ${cartCount > 0 ? 'bg-blue-600' : 'bg-slate-400'} text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center`}
+                  aria-live="assertive"
+                  aria-label={`${cartCount} items in cart`}
+                >
                     {cartCount}
                   </span>
-                )}
               </button>
             </div>
           </div>
@@ -1507,7 +1634,7 @@ const TCGShop = () => {
             <div className="w-full">
               {viewMode === 'grid' ? (
                 /* Grid View */
-                cards.length > 100 ? (
+                cards.length > VIRTUAL_SCROLL_CONFIG.INITIAL_BATCH_SIZE ? (
                   /* Virtual Scrolling for large datasets (100+ cards) */
                   <ErrorBoundary>
                     <Suspense
@@ -1613,6 +1740,7 @@ const TCGShop = () => {
             <div
               ref={mobileFiltersRef}
               className="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl overflow-y-auto"
+              style={{ paddingTop: 'env(safe-area-inset-top)', paddingBottom: 'env(safe-area-inset-bottom)' }}
               onClick={(e) => e.stopPropagation()}
               role="dialog"
               aria-modal="true"
@@ -1918,9 +2046,9 @@ const TCGShop = () => {
 
       {showCart && (
         <div className="fixed inset-0 bg-black/50 z-50" onClick={() => setShowCart(false)}>
-          <div className="absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col" onClick={(e) => e.stopPropagation()}>
-            <div className="px-6 py-4 border-b flex items-center justify-between">
-              <h2 className="text-2xl font-bold">Cart</h2>
+          <div className="absolute right-0 top-0 h-full w-full max-w-md min-w-0 bg-white shadow-2xl flex flex-col overflow-hidden" onClick={(e) => e.stopPropagation()}>
+            <div className="px-4 sm:px-6 py-4 border-b flex items-center justify-between">
+              <h2 className="text-xl sm:text-2xl font-bold">Cart</h2>
               <button
                 onClick={() => setShowCart(false)}
                 className="p-2 hover:bg-slate-100 rounded-lg focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
@@ -1930,7 +2058,7 @@ const TCGShop = () => {
               </button>
             </div>
             
-            <div className="flex-1 overflow-y-auto px-6 py-4">
+            <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
               {cart.length === 0 ? (
                 <div className="text-center py-12">
                   <ShoppingCart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
