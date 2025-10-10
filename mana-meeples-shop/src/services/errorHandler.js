@@ -202,21 +202,14 @@ export const withRetry = async (operation, maxRetries = 3, delay = 1000) => {
     } catch (error) {
       lastError = error;
 
-      // For 429 (Rate Limit) errors, use much longer delays and fewer retries
+      // Enhanced 429 handling: Don't retry, fail immediately to prevent cascading
       if (error.status === 429) {
-        if (attempt === 1) { // Only retry once for 429 errors
-          // Use a much longer delay for rate limit errors (10-30 seconds)
-          const rateLimitDelay = 10000 + Math.random() * 20000; // 10-30 seconds
-          await new Promise(resolve => setTimeout(resolve, rateLimitDelay));
-          continue;
-        } else {
-          // Don't retry 429 errors more than once - just fail
-          throw logError(error, {
-            attempts: attempt,
-            operation: operation.name || 'anonymous',
-            rateLimited: true
-          });
-        }
+        throw logError(error, {
+          attempts: attempt,
+          operation: operation.name || 'anonymous',
+          rateLimited: true,
+          message: 'Rate limit exceeded. Please wait before making more requests.'
+        });
       }
 
       if (attempt === maxRetries) {
@@ -234,6 +227,23 @@ export const withRetry = async (operation, maxRetries = 3, delay = 1000) => {
   throw lastError;
 };
 
+/**
+ * Throttled fetch wrapper that prevents overwhelming the API
+ */
+export const throttledFetch = async (url, options = {}) => {
+  const requestThrottler = (await import('./requestThrottler')).default;
+
+  try {
+    return await requestThrottler.fetch(url, options);
+  } catch (error) {
+    // Enhance error with status if it's a response error
+    if (error.response) {
+      error.status = error.response.status;
+    }
+    throw error;
+  }
+};
+
 const errorHandler = {
   ERROR_TYPES,
   categorizeError,
@@ -242,7 +252,8 @@ const errorHandler = {
   handleApiError,
   useErrorHandler,
   setupGlobalErrorHandling,
-  withRetry
+  withRetry,
+  throttledFetch
 };
 
 export default errorHandler;
