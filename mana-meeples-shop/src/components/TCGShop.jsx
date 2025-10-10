@@ -625,6 +625,21 @@ const TCGShop = () => {
     }
   }, [fetchCards, games]);
 
+  // Cleanup effect to prevent memory leaks
+  useEffect(() => {
+    return () => {
+      // Clear any pending timeouts
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+
+      // Cancel any ongoing requests
+      if (abortController.current) {
+        abortController.current.abort();
+      }
+    };
+  }, []); // Empty dependency array means this runs only on unmount
+
   // Improved autocomplete search with debouncing and request cancellation
   const handleSearchChange = useCallback(async (value) => {
     // Update URL immediately for responsiveness
@@ -975,12 +990,14 @@ const TCGShop = () => {
   // Show checkout if checkout is active
   if (showCheckout) {
     return (
-      <Checkout
-        cart={cart}
-        currency={currency}
-        onBack={handleBackFromCheckout}
-        onOrderSubmit={handleOrderSubmit}
-      />
+      <ErrorBoundary>
+        <Checkout
+          cart={cart}
+          currency={currency}
+          onBack={handleBackFromCheckout}
+          onOrderSubmit={handleOrderSubmit}
+        />
+      </ErrorBoundary>
     );
   }
 
