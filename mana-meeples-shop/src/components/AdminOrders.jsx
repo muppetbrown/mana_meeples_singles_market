@@ -48,7 +48,9 @@ const AdminOrders = () => {
       setOrders(data.orders || []);
       setError(null);
     } catch (err) {
-      console.error('Error fetching orders:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching orders:', err);
+      }
       setError('Failed to load orders');
     } finally {
       setLoading(false);
@@ -101,7 +103,9 @@ const AdminOrders = () => {
       // Refresh orders
       fetchOrders();
     } catch (error) {
-      console.error('Error updating order status:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error updating order status:', error);
+      }
       alert('Failed to update order status');
     }
   }, [fetchOrders]);
@@ -122,7 +126,9 @@ const AdminOrders = () => {
       setSelectedOrder(orderData);
       setShowOrderModal(true);
     } catch (error) {
-      console.error('Error fetching order details:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching order details:', error);
+      }
       alert('Failed to load order details');
     }
   }, []);

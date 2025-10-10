@@ -36,7 +36,9 @@ const AdminLogin = () => {
         navigate('/admin');
       }
     } catch (err) {
-      console.error('Login error:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Login error:', err);
+      }
       setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);

@@ -425,11 +425,6 @@ const TCGShop = () => {
         const gamesData = await gamesRes.json();
         setGames(gamesData);
 
-        // Keep NZD as default for NZ-based shop - don't override with API detection
-        // if (currencyRes.ok) {
-        //   const currencyData = await currencyRes.json();
-        //   setCurrency({ ...currencyData, code: currencyData.currency || 'USD' });
-        // }
 
         // Set filter options if available
         if (filtersRes.ok) {
@@ -438,7 +433,9 @@ const TCGShop = () => {
         }
 
       } catch (err) {
-        console.error('Error:', err);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error:', err);
+        }
         setError('Failed to load data. The API might be waking up. Please wait 30 seconds and try again.');
       } finally {
         setLoading(false);
@@ -531,11 +528,15 @@ const TCGShop = () => {
           const sets = await response.json();
           setAvailableSets(sets);
         } else {
-          console.error('Failed to fetch sets');
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to fetch sets');
+          }
           setAvailableSets([]);
         }
       } catch (error) {
-        console.error('Error fetching sets:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error fetching sets:', error);
+        }
         setAvailableSets([]);
       }
     };
@@ -614,7 +615,9 @@ const TCGShop = () => {
 
       setCards(Object.values(groupedCards));
     } catch (err) {
-      console.error('Error fetching cards:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching cards:', err);
+      }
       setError('Failed to load cards. Please try again.');
     }
   }, [searchTerm, selectedGame, filters, games, currency.rate]);
@@ -682,7 +685,9 @@ const TCGShop = () => {
           }
         } catch (err) {
           if (err.name !== 'AbortError') {
-            console.error('Autocomplete error:', err);
+            if (process.env.NODE_ENV === 'development') {
+              console.error('Autocomplete error:', err);
+            }
           }
         }
       }, 300); // 300ms debounce
@@ -952,7 +957,9 @@ const TCGShop = () => {
         throw new Error('Failed to submit order');
       }
     } catch (error) {
-      console.error('Order submission error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Order submission error:', error);
+      }
       throw error;
     }
   }, [clearCart]);

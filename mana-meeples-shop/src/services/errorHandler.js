@@ -92,11 +92,13 @@ export const logError = (error, context = {}) => {
   const formattedError = formatError(error);
 
   // In production, you'd send this to an error monitoring service like Sentry
-  console.group(`🚨 ${formattedError.title}`);
-  console.error('Error:', formattedError.originalError);
-  console.log('Context:', context);
-  console.log('Formatted:', formattedError);
-  console.groupEnd();
+  if (process.env.NODE_ENV === 'development') {
+    console.group(`🚨 ${formattedError.title}`);
+    console.error('Error:', formattedError.originalError);
+    console.log('Context:', context);
+    console.log('Formatted:', formattedError);
+    console.groupEnd();
+  }
 
   // Return formatted error for further handling
   return formattedError;
