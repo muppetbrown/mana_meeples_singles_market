@@ -8,7 +8,7 @@ const globalCache = {
 };
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-const DEBOUNCE_DELAY = 500; // Increased from 300ms
+const DEBOUNCE_DELAY = 1000; // Increased to 1000ms to reduce API load
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 2000; // 2 seconds between retries
 
@@ -29,7 +29,11 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
     if (!globalCache.data || !globalCache.timestamp) return false;
 
     const cacheAge = Date.now() - globalCache.timestamp;
-    const filtersMatch = JSON.stringify(globalCache.filters) === JSON.stringify(currentFilters);
+
+    // Optimized filters comparison - avoid expensive JSON.stringify
+    const cachedFilters = globalCache.filters || {};
+    const filtersMatch = Object.keys(currentFilters).length === Object.keys(cachedFilters).length &&
+      Object.entries(currentFilters).every(([key, value]) => cachedFilters[key] === value);
 
     return cacheAge < CACHE_DURATION && filtersMatch;
   }, [currentFilters]);

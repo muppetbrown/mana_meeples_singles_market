@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Info } from 'lucide-react';
 
 const CurrencySelector = ({ currency, onCurrencyChange, className = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,14 +11,16 @@ const CurrencySelector = ({ currency, onCurrencyChange, className = "" }) => {
       symbol: 'NZ$',
       label: 'New Zealand Dollar (NZD)',
       rate: 1.0,
-      flag: '🇳🇿'
+      flag: '🇳🇿',
+      lastUpdated: '2024-01-01' // Static date to indicate these are approximate
     },
     {
       code: 'USD',
       symbol: '$',
       label: 'US Dollar (USD)',
       rate: 0.625,
-      flag: '🇺🇸'
+      flag: '🇺🇸',
+      lastUpdated: '2024-01-01' // Static date to indicate these are approximate
     }
   ];
 
@@ -89,6 +91,15 @@ const CurrencySelector = ({ currency, onCurrencyChange, className = "" }) => {
         {/* Currency Code */}
         <span className="font-medium">{currency.code}</span>
 
+        {/* Approximate indicator for non-NZD currencies */}
+        {currency.code !== 'NZD' && (
+          <Info
+            className="w-3 h-3 text-yellow-400"
+            aria-label="Exchange rates are approximate and may not reflect current market values"
+            title="Exchange rates are approximate"
+          />
+        )}
+
         {/* Chevron */}
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
@@ -118,6 +129,14 @@ const CurrencySelector = ({ currency, onCurrencyChange, className = "" }) => {
               <span>{curr.code}</span>
             </button>
           ))}
+
+          {/* Disclaimer for approximate rates */}
+          <div className="border-t border-slate-200 mt-1 pt-2 px-4 pb-2">
+            <p className="text-xs text-slate-500 flex items-center gap-1">
+              <Info className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+              <span>Exchange rates are approximate (Jan 2024)</span>
+            </p>
+          </div>
         </div>
       )}
     </div>

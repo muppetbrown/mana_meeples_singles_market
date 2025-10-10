@@ -162,12 +162,22 @@ const CardItem = React.memo(({
   );
 }, (prevProps, nextProps) => {
   // Custom comparison function to prevent unnecessary re-renders
+  // Avoid expensive JSON.stringify - use specific property comparison instead
+  const prevVar = prevProps.selectedVariation;
+  const nextVar = nextProps.selectedVariation;
+
   return (
     prevProps.card.id === nextProps.card.id &&
     prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
     prevProps.currency.symbol === nextProps.currency.symbol &&
     prevProps.currency.rate === nextProps.currency.rate &&
-    JSON.stringify(prevProps.selectedVariation) === JSON.stringify(nextProps.selectedVariation)
+    // Compare selectedVariation properties individually (much faster than JSON.stringify)
+    prevVar?.id === nextVar?.id &&
+    prevVar?.price === nextVar?.price &&
+    prevVar?.stock === nextVar?.stock &&
+    prevVar?.quality === nextVar?.quality &&
+    prevVar?.foil_type === nextVar?.foil_type &&
+    prevVar?.language === nextVar?.language
   );
 });
 
@@ -311,6 +321,25 @@ const ListCardItem = React.memo(({
         </select>
       </div>
     </div>
+  );
+}, (prevProps, nextProps) => {
+  // Custom comparison function to prevent unnecessary re-renders
+  // Same optimized comparison as CardItem
+  const prevVar = prevProps.selectedVariation;
+  const nextVar = nextProps.selectedVariation;
+
+  return (
+    prevProps.card.id === nextProps.card.id &&
+    prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
+    prevProps.currency.symbol === nextProps.currency.symbol &&
+    prevProps.currency.rate === nextProps.currency.rate &&
+    // Compare selectedVariation properties individually
+    prevVar?.id === nextVar?.id &&
+    prevVar?.price === nextVar?.price &&
+    prevVar?.stock === nextVar?.stock &&
+    prevVar?.quality === nextVar?.quality &&
+    prevVar?.foil_type === nextVar?.foil_type &&
+    prevVar?.language === nextVar?.language
   );
 });
 

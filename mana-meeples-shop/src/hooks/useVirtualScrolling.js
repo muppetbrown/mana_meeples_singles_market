@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 
 /**
  * Custom hook for virtual scrolling implementation
@@ -13,6 +13,38 @@ export const useVirtualScrolling = ({
 }) => {
   const [scrollTop, setScrollTop] = useState(0);
   const [containerSize, setContainerSize] = useState({ width: 0, height: containerHeight });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const scrollTimeoutRef = useRef(null);
+  const resizeObserverRef = useRef(null);
+  const previousItemsLengthRef = useRef(items.length);
+
+  // Reset scroll position when items change significantly (e.g., filter change)
+  useEffect(() => {
+    const itemsLengthChanged = items.length !== previousItemsLengthRef.current;
+
+    if (itemsLengthChanged) {
+      // Batch state updates to prevent race conditions
+      setIsLoading(true);
+
+      // Small delay to allow items to render before scroll calculation
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+
+      scrollTimeoutRef.current = setTimeout(() => {
+        setScrollTop(0); // Reset scroll to top on filter change
+        setIsLoading(false);
+        previousItemsLengthRef.current = items.length;
+      }, 50);
+    }
+
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [items.length]);
 
   // Calculate visible range
   const visibleRange = useMemo(() => {
@@ -60,15 +92,31 @@ export const useVirtualScrolling = ({
   const updateContainerSize = useCallback((element) => {
     if (!element) return;
 
+    // Clean up previous observer
+    if (resizeObserverRef.current) {
+      resizeObserverRef.current.disconnect();
+    }
+
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         const { width, height } = entry.contentRect;
-        setContainerSize({ width, height });
+        // Batch size updates to prevent flickering
+        setContainerSize((prev) => {
+          if (prev.width === width && prev.height === height) return prev;
+          return { width, height };
+        });
       }
     });
 
     resizeObserver.observe(element);
-    return () => resizeObserver.disconnect();
+    resizeObserverRef.current = resizeObserver;
+
+    return () => {
+      resizeObserver.disconnect();
+      if (resizeObserverRef.current === resizeObserver) {
+        resizeObserverRef.current = null;
+      }
+    };
   }, []);
 
   // Calculate responsive column count based on container width
@@ -89,6 +137,18 @@ export const useVirtualScrolling = ({
     return scrollPosition;
   }, [responsiveColumnCount, itemHeight]);
 
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      if (resizeObserverRef.current) {
+        resizeObserverRef.current.disconnect();
+      }
+    };
+  }, []);
+
   return {
     visibleItems,
     totalHeight,
@@ -97,7 +157,8 @@ export const useVirtualScrolling = ({
     updateContainerSize,
     responsiveColumnCount,
     scrollToItem,
-    visibleRange
+    visibleRange,
+    isLoading // Add loading state for consumers
   };
 };
 
