@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { FILTER_CONFIG } from '../config/constants';
 
 // Global cache to persist across component remounts
 const globalCache = {
@@ -8,7 +9,7 @@ const globalCache = {
 };
 
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-const DEBOUNCE_DELAY = 1000; // Increased to 1000ms to reduce API load
+const DEBOUNCE_DELAY = FILTER_CONFIG.DEBOUNCE_DELAY; // Use centralized config (now 300ms)
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 2000; // 2 seconds between retries
 

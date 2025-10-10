@@ -404,6 +404,7 @@ const TCGShop = () => {
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const abortController = useRef(null);
   const searchTimeoutRef = useRef(null);
+  const mobileFiltersRef = useRef(null);
 
   // Load initial data and currency detection
   useEffect(() => {
@@ -509,6 +510,45 @@ const TCGShop = () => {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
+
+  // Focus trap for mobile filters modal
+  useEffect(() => {
+    if (showMobileFilters && mobileFiltersRef.current) {
+      // Focus the first focusable element when modal opens
+      const focusableElements = mobileFiltersRef.current.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+
+      if (focusableElements.length > 0) {
+        focusableElements[0].focus();
+      }
+
+      // Handle tab key to trap focus within modal
+      const handleTabKey = (e) => {
+        if (e.key === 'Tab') {
+          const firstElement = focusableElements[0];
+          const lastElement = focusableElements[focusableElements.length - 1];
+
+          if (e.shiftKey) {
+            // Shift + Tab: going backwards
+            if (document.activeElement === firstElement) {
+              lastElement.focus();
+              e.preventDefault();
+            }
+          } else {
+            // Tab: going forwards
+            if (document.activeElement === lastElement) {
+              firstElement.focus();
+              e.preventDefault();
+            }
+          }
+        }
+      };
+
+      document.addEventListener('keydown', handleTabKey);
+      return () => document.removeEventListener('keydown', handleTabKey);
+    }
+  }, [showMobileFilters]);
 
   // Fetch available sets when game changes (matching AdminDashboard logic)
   useEffect(() => {
@@ -1302,11 +1342,13 @@ const TCGShop = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Foil Type</label>
+                  <label htmlFor="foil-filter" className="block text-sm font-medium text-slate-700 mb-2">Foil Type</label>
                   <select
+                    id="foil-filter"
                     value={filters.foilType}
                     onChange={(e) => handleFilterChange('foilType', e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    aria-label={`Filter by foil type, ${filterOptions.foilTypes.length} foil type options available`}
                   >
                     <option value="all">All Foil Types</option>
                     {filterOptions.foilTypes.map(foilType => (
@@ -1321,31 +1363,37 @@ const TCGShop = () => {
                   <label className="block text-sm font-medium text-slate-700 mb-2">Price Range ({currency.symbol})</label>
                   <div className="grid grid-cols-2 gap-2">
                     <input
+                      id="min-price-filter"
                       type="number"
                       placeholder="Min"
                       value={filters.minPrice}
                       onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                       className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                       step="0.01"
+                      aria-label={`Minimum price filter in ${currency.code}`}
                     />
                     <input
+                      id="max-price-filter"
                       type="number"
                       placeholder="Max"
                       value={filters.maxPrice}
                       onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
                       className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                       step="0.01"
+                      aria-label={`Maximum price filter in ${currency.code}`}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Sort By</label>
+                  <label htmlFor="sort-filter" className="block text-sm font-medium text-slate-700 mb-2">Sort By</label>
                   <div className="flex gap-2">
                     <select
+                      id="sort-filter"
                       value={filters.sortBy}
                       onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                       className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      aria-label="Sort cards by different criteria"
                     >
                       <optgroup label="📝 Basic">
                         <option value="name">Name</option>
@@ -1562,9 +1610,16 @@ const TCGShop = () => {
         {/* Mobile Filter Modal */}
         {showMobileFilters && (
           <div className="fixed inset-0 bg-black/50 z-50 lg:hidden" onClick={() => setShowMobileFilters(false)}>
-            <div className="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div
+              ref={mobileFiltersRef}
+              className="absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl overflow-y-auto"
+              onClick={(e) => e.stopPropagation()}
+              role="dialog"
+              aria-modal="true"
+              aria-labelledby="mobile-filters-title"
+            >
               <div className="px-6 py-4 border-b flex items-center justify-between">
-                <h2 className="text-xl font-bold">Filters</h2>
+                <h2 id="mobile-filters-title" className="text-xl font-bold">Filters</h2>
                 <button
                   onClick={() => setShowMobileFilters(false)}
                   className="p-2 hover:bg-slate-100 rounded-lg focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
@@ -1593,11 +1648,13 @@ const TCGShop = () => {
                 {/* Mobile filters - same as desktop sidebar */}
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Game</label>
+                    <label htmlFor="mobile-game-filter" className="block text-sm font-medium text-slate-700 mb-2">Game</label>
                     <select
+                      id="mobile-game-filter"
                       value={selectedGame}
                       onChange={(e) => handleGameChange(e.target.value)}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      aria-label={`Filter by game, ${games.length} games available`}
                     >
                       <option value="all">All Games</option>
                       {games.map(game => (

@@ -12,7 +12,8 @@ const db = global.db;
 // ============================================
 // AUTHENTICATION MIDDLEWARE
 // ============================================
-const { adminAuthJWT: adminAuth, adminAuthWithCSRF, generateCSRFToken } = require('../middleware/auth');
+const { adminAuthJWT: adminAuth, adminAuthWithCSRF, generateCSRFToken, validateCSRFToken } = require('../middleware/auth');
+const { sanitizeCustomerData } = require('../utils/sanitization');
 
 // ============================================
 // RATE LIMITING MIDDLEWARE - Fixed memory leak
@@ -615,7 +616,7 @@ router.get('/cards/:id', async (req, res) => {
  *   "message": "Order created successfully"
  * }
  */
-router.post('/orders', async (req, res) => {
+router.post('/orders', validateCSRFToken, async (req, res) => {
   const client = await db.getClient();
 
   try {
@@ -742,19 +743,8 @@ router.post('/orders', async (req, res) => {
       });
     }
 
-    // Store customer details in payment_intent_id field temporarily (JSON format)
-    // TODO: Create proper customer table in future database migration
-    const customerData = {
-      firstName: customer.firstName,
-      lastName: customer.lastName,
-      email: customer.email,
-      phone: customer.phone,
-      address: customer.address,
-      city: customer.city,
-      postalCode: customer.postalCode,
-      country: customer.country,
-      notes: customer.notes
-    };
+    // Sanitize customer data to prevent XSS attacks
+    const customerData = sanitizeCustomerData(customer);
 
     // Create order - Fixed to match database schema
     const orderResult = await client.query(
