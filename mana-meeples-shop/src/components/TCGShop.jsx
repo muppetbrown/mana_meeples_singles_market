@@ -482,7 +482,6 @@ const TCGShop = () => {
       } catch (err) {
         const formattedError = handleError(err, { operation: 'loadInitialData' });
         setError(`${formattedError.title}: ${formattedError.message} Please refresh the page or check your connection.`);
-      } finally {
         setLoading(false);
       }
     };
@@ -671,6 +670,10 @@ const TCGShop = () => {
   // Fetch cards with current filters
   const fetchCards = useCallback(async () => {
     try {
+      // Set loading state to true when starting card fetch
+      setLoading(true);
+      setError(null);
+
       const queryParams = new URLSearchParams({
         limit: '100',
         search: searchTerm,
@@ -739,6 +742,9 @@ const TCGShop = () => {
     } catch (err) {
       const formattedError = handleError(err, { operation: 'fetchCards' });
       setError(`${formattedError.title}: ${formattedError.message} Try adjusting your filters or refreshing the page.`);
+    } finally {
+      // Always set loading to false when card fetch completes (success or error)
+      setLoading(false);
     }
   }, [searchTerm, selectedGame, filters, games, currency.rate, handleError]);
 
