@@ -119,6 +119,17 @@ export const ERROR_CONFIG = {
   CLIENT_ERROR_RANGE: [400, 499],
   SERVER_ERROR_RANGE: [500, 599],
   NETWORK_ERROR_CODES: ['NETWORK_ERROR', 'TIMEOUT', 'CONNECTION_REFUSED'],
+  // HTTP Status codes for different error categories
+  HTTP_STATUS: {
+    UNAUTHORIZED: 401,
+    FORBIDDEN: 403,
+    BAD_REQUEST: 400,
+    UNPROCESSABLE_ENTITY: 422,
+    INTERNAL_SERVER_ERROR: 500,
+  },
+  // Default retry configuration
+  DEFAULT_MAX_RETRIES: 3,
+  DEFAULT_RETRY_DELAY: 1000,
 };
 
 // Feature Flags
@@ -144,6 +155,25 @@ export const UI_TEXT = {
   CHECKOUT: 'Checkout',
   SEARCH_PLACEHOLDER: 'Search for cards...',
   FILTER_ALL: 'All',
+  LOADING_ORDERS: 'Loading orders...',
+  NO_ORDERS: 'No orders found',
+};
+
+// Admin and Business Logic Constants
+export const ADMIN_CONFIG = {
+  ORDERS_LIMIT: 100,
+  ORDER_STATUS: {
+    PENDING: 'pending',
+    CONFIRMED: 'confirmed',
+    COMPLETED: 'completed',
+    CANCELLED: 'cancelled'
+  },
+  ORDER_STATUS_TRANSITIONS: {
+    pending: ['confirmed', 'cancelled'],
+    confirmed: ['completed', 'cancelled'],
+    completed: [],
+    cancelled: []
+  }
 };
 
 // Keyboard Shortcuts
@@ -178,6 +208,7 @@ export const CONSTANTS = {
   CURRENCY_CONFIG,
   VALIDATION_CONFIG,
   ERROR_CONFIG,
+  ADMIN_CONFIG,
   FEATURES,
   UI_TEXT,
   KEYBOARD_SHORTCUTS,

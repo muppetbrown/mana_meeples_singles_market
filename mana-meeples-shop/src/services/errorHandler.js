@@ -3,6 +3,8 @@
  * Provides consistent error handling across the application with user-friendly messages
  */
 
+import { ERROR_CONFIG } from '../config/constants';
+
 // Error types for categorization
 export const ERROR_TYPES = {
   NETWORK: 'NETWORK',
@@ -51,17 +53,17 @@ export const categorizeError = (error) => {
   }
 
   // Authentication errors
-  if (error.status === 401 || error.status === 403) {
+  if (error.status === ERROR_CONFIG.HTTP_STATUS.UNAUTHORIZED || error.status === ERROR_CONFIG.HTTP_STATUS.FORBIDDEN) {
     return ERROR_TYPES.AUTH;
   }
 
   // Validation errors
-  if (error.status === 400 || error.status === 422) {
+  if (error.status === ERROR_CONFIG.HTTP_STATUS.BAD_REQUEST || error.status === ERROR_CONFIG.HTTP_STATUS.UNPROCESSABLE_ENTITY) {
     return ERROR_TYPES.VALIDATION;
   }
 
   // API errors
-  if (error.status >= 500 || (error.status >= 400 && error.status < 500)) {
+  if (error.status >= ERROR_CONFIG.HTTP_STATUS.INTERNAL_SERVER_ERROR || (error.status >= ERROR_CONFIG.CLIENT_ERROR_RANGE[0] && error.status < ERROR_CONFIG.SERVER_ERROR_RANGE[0])) {
     return ERROR_TYPES.API;
   }
 
@@ -193,7 +195,7 @@ export const setupGlobalErrorHandling = () => {
 /**
  * Retry utility for failed operations with special handling for rate limiting
  */
-export const withRetry = async (operation, maxRetries = 3, delay = 1000) => {
+export const withRetry = async (operation, maxRetries = ERROR_CONFIG.DEFAULT_MAX_RETRIES, delay = ERROR_CONFIG.DEFAULT_RETRY_DELAY) => {
   let lastError;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
