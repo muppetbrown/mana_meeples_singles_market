@@ -403,8 +403,14 @@ const TCGShop = () => {
     addToCart,
     updateQuantity,
     removeFromCart,
-    clearCart
+    clearCart,
+    addNotification
   } = useEnhancedCart(API_URL);
+
+  // Create a simple showNotification function that uses addNotification
+  const showNotification = useCallback((message, type = 'info', duration = 5000) => {
+    addNotification(message, type, duration);
+  }, [addNotification]);
 
   // Initialize state from URL parameters
   const searchTerm = searchParams.get('search') || '';
@@ -1631,7 +1637,7 @@ const TCGShop = () => {
             )}
 
             {/* Conditional Rendering Based on View Mode */}
-            <div className="w-full">
+            <div className={`w-full ${viewMode === 'list' ? 'max-w-6xl mx-auto' : ''}`}>
               {viewMode === 'grid' ? (
                 /* Grid View */
                 cards.length > VIRTUAL_SCROLL_CONFIG.INITIAL_BATCH_SIZE ? (

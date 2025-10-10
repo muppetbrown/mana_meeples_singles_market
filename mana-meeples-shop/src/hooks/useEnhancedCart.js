@@ -526,6 +526,7 @@ export const useEnhancedCart = (API_URL) => {
     validateCart,
     checkStock,
     getCartStats,
-    clearExpiredItems
+    clearExpiredItems,
+    addNotification
   };
 };
