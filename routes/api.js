@@ -12,7 +12,7 @@ const db = global.db;
 // ============================================
 // AUTHENTICATION MIDDLEWARE
 // ============================================
-const { adminAuthJWT: adminAuth } = require('../middleware/auth');
+const { adminAuthJWT: adminAuth, adminAuthWithCSRF, generateCSRFToken } = require('../middleware/auth');
 
 // ============================================
 // RATE LIMITING MIDDLEWARE - Fixed memory leak
@@ -323,6 +323,14 @@ router.get('/cards', normalRateLimit, async (req, res) => {
     console.error('Error fetching cards:', error);
     res.status(500).json({ error: 'Failed to fetch cards' });
   }
+});
+
+// GET /api/admin/csrf-token - Get CSRF token for authenticated admin
+router.get('/admin/csrf-token', adminAuth, generateCSRFToken, (req, res) => {
+  res.json({
+    success: true,
+    csrfToken: req.csrfToken
+  });
 });
 
 // GET /api/admin/inventory - Get ALL inventory with dynamic quality/foil combinations
@@ -941,7 +949,7 @@ router.get('/admin/orders/:id', adminAuth, async (req, res) => {
 });
 
 // PUT /api/admin/orders/:id/status - Update order status
-router.put('/admin/orders/:id/status', adminAuth, async (req, res) => {
+router.put('/admin/orders/:id/status', adminAuthWithCSRF, async (req, res) => {
   const client = await db.getClient();
 
   try {
@@ -1035,7 +1043,7 @@ router.put('/admin/orders/:id/status', adminAuth, async (req, res) => {
 });
 
 // PUT /api/admin/inventory/:id - Update inventory price and/or stock (handles virtual entries)
-router.put('/admin/inventory/:id', adminAuth, async (req, res) => {
+router.put('/admin/inventory/:id', adminAuthWithCSRF, async (req, res) => {
   try {
     const { id } = req.params;
     const { price, stock_quantity, quality, foil_type, language, card_id } = req.body;
@@ -1430,7 +1438,7 @@ router.get('/analytics/trending', async (req, res) => {
 });
 
 // POST /api/admin/bulk-update - Bulk update prices and stock
-router.post('/admin/bulk-update', adminAuth, async (req, res) => {
+router.post('/admin/bulk-update', adminAuthWithCSRF, async (req, res) => {
   const client = await db.getClient();
 
   try {
@@ -1494,7 +1502,7 @@ router.post('/admin/bulk-update', adminAuth, async (req, res) => {
 });
 
 // POST /api/admin/csv-import - Bulk import/update from CSV with overselling prevention
-router.post('/admin/csv-import', adminAuth, async (req, res) => {
+router.post('/admin/csv-import', adminAuthWithCSRF, async (req, res) => {
   const client = await db.getClient();
 
   try {
@@ -1751,7 +1759,7 @@ router.get('/cards/sectioned', async (req, res) => {
 });
 
 // POST /api/admin/create-foil - Create foil version of existing card
-router.post('/admin/create-foil', adminAuth, async (req, res) => {
+router.post('/admin/create-foil', adminAuthWithCSRF, async (req, res) => {
   try {
     const { card_id, quality, foil_type, price, stock_quantity = 0, language = 'English' } = req.body;
 
@@ -1806,7 +1814,7 @@ router.post('/admin/create-foil', adminAuth, async (req, res) => {
 });
 
 // POST /api/admin/bulk-create-foils - Bulk create foil versions for multiple cards
-router.post('/admin/bulk-create-foils', adminAuth, async (req, res) => {
+router.post('/admin/bulk-create-foils', adminAuthWithCSRF, async (req, res) => {
   const client = await db.getClient();
 
   try {
@@ -1895,7 +1903,7 @@ router.post('/admin/bulk-create-foils', adminAuth, async (req, res) => {
 });
 
 // POST /api/admin/refresh-prices - Refresh MTG prices from Scryfall CardKingdom
-router.post('/admin/refresh-prices', adminAuth, async (req, res) => {
+router.post('/admin/refresh-prices', adminAuthWithCSRF, async (req, res) => {
   const client = await db.getClient();
 
   try {

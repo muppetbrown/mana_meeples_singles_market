@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const crypto = require('crypto');
 
 // ============================================
 // JWT-BASED AUTHENTICATION MIDDLEWARE
@@ -138,9 +139,88 @@ const adminAuthBasic = async (req, res, next) => {
   }
 };
 
+// ============================================
+// CSRF PROTECTION MIDDLEWARE
+// ============================================
+
+/**
+ * Generate CSRF token and set as cookie
+ */
+const generateCSRFToken = (req, res, next) => {
+  const csrfToken = crypto.randomBytes(32).toString('hex');
+
+  // Store token in session or as a signed cookie
+  res.cookie('csrfToken', csrfToken, {
+    httpOnly: false, // Allow JavaScript access to read token for request headers
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
+  });
+
+  // Also store in a secure, httpOnly cookie for server verification
+  res.cookie('_csrfSecret', csrfToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'strict',
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
+  });
+
+  req.csrfToken = csrfToken;
+  next();
+};
+
+/**
+ * Validate CSRF token for state-changing operations
+ */
+const validateCSRFToken = (req, res, next) => {
+  // Only validate CSRF for state-changing methods
+  if (!['POST', 'PUT', 'DELETE', 'PATCH'].includes(req.method)) {
+    return next();
+  }
+
+  const clientToken = req.headers['x-csrf-token'] || req.body._csrfToken;
+  const serverToken = req.cookies._csrfSecret;
+
+  if (!clientToken || !serverToken) {
+    console.log('❌ CSRF token missing');
+    return res.status(403).json({
+      error: 'CSRF token required',
+      code: 'CSRF_TOKEN_MISSING'
+    });
+  }
+
+  if (clientToken !== serverToken) {
+    console.log('❌ CSRF token mismatch');
+    return res.status(403).json({
+      error: 'Invalid CSRF token',
+      code: 'CSRF_TOKEN_INVALID'
+    });
+  }
+
+  next();
+};
+
+/**
+ * Combined admin authentication with CSRF protection
+ */
+const adminAuthWithCSRF = (req, res, next) => {
+  // First validate CSRF token
+  validateCSRFToken(req, res, (err) => {
+    if (err) return next(err);
+
+    // Then validate admin authentication
+    adminAuthJWT(req, res, next);
+  });
+};
+
 // Export both middleware options
 module.exports = {
-  adminAuthJWT,     // ✅ Use this for cookie-based JWT auth
-  adminAuthBasic,   // Legacy Basic Auth
-  adminAuth: adminAuthJWT  // Default export is JWT
+  adminAuthJWT,        // ✅ Use this for cookie-based JWT auth
+  adminAuthBasic,      // Legacy Basic Auth
+  adminAuth: adminAuthJWT,  // Default export is JWT
+  generateCSRFToken,   // ✅ CSRF token generation
+  validateCSRFToken,   // ✅ CSRF token validation
+  adminAuthWithCSRF    // ✅ Combined admin auth + CSRF protection
 };

@@ -1151,6 +1151,8 @@ const TCGShop = () => {
                   onChange={(e) => handleFilterChange('set', e.target.value)}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white disabled:bg-slate-50 disabled:text-slate-500 text-sm"
                   disabled={selectedGame === 'all'}
+                  aria-describedby={selectedGame === 'all' ? "set-help-text" : undefined}
+                  aria-label={`Filter by card set${selectedGame !== 'all' ? `, currently ${availableSets.length} sets available` : ' (select a game first)'}`}
                 >
                   <option value="all">All Sets</option>
                   {availableSets.map(set => (
@@ -1158,18 +1160,20 @@ const TCGShop = () => {
                   ))}
                 </select>
                 {selectedGame === 'all' && (
-                  <p className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
+                  <p id="set-help-text" className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
                 )}
               </div>
 
               {/* Other Filters */}
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Rarity</label>
+                  <label htmlFor="rarity-filter" className="block text-sm font-medium text-slate-700 mb-2">Rarity</label>
                   <select
+                    id="rarity-filter"
                     value={filters.rarity}
                     onChange={(e) => handleFilterChange('rarity', e.target.value)}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    aria-label={`Filter by card rarity, ${Object.keys(filterCounts.rarities || {}).length} rarity types available`}
                   >
                     <option value="all">All Rarities</option>
                     <optgroup label="⚪ Common">
@@ -1632,11 +1636,13 @@ const TCGShop = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Condition</label>
+                    <label htmlFor="condition-filter" className="block text-sm font-medium text-slate-700 mb-2">Condition</label>
                     <select
+                      id="condition-filter"
                       value={filters.quality}
                       onChange={(e) => handleFilterChange('quality', e.target.value)}
                       className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      aria-label={`Filter by card condition, ${filterOptions.qualities.length} condition types available`}
                     >
                       <option value="all">All Conditions</option>
                       {filterOptions.qualities.map(quality => (
@@ -1648,34 +1654,44 @@ const TCGShop = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Price Range ({currency.symbol})</label>
-                    <div className="grid grid-cols-2 gap-2">
-                      <input
-                        type="number"
-                        placeholder="Min"
-                        value={filters.minPrice}
-                        onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                        step="0.01"
-                      />
-                      <input
-                        type="number"
-                        placeholder="Max"
-                        value={filters.maxPrice}
-                        onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
-                        step="0.01"
-                      />
-                    </div>
+                    <fieldset>
+                      <legend className="block text-sm font-medium text-slate-700 mb-2">Price Range ({currency.symbol})</legend>
+                      <div className="grid grid-cols-2 gap-2">
+                        <input
+                          id="min-price"
+                          type="number"
+                          placeholder="Min"
+                          value={filters.minPrice}
+                          onChange={(e) => handleFilterChange('minPrice', e.target.value)}
+                          className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                          step="0.01"
+                          min="0"
+                          aria-label={`Minimum price filter in ${currency.symbol}`}
+                        />
+                        <input
+                          id="max-price"
+                          type="number"
+                          placeholder="Max"
+                          value={filters.maxPrice}
+                          onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
+                          className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                          step="0.01"
+                          min="0"
+                          aria-label={`Maximum price filter in ${currency.symbol}`}
+                        />
+                      </div>
+                    </fieldset>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Sort By</label>
+                    <label htmlFor="sort-by" className="block text-sm font-medium text-slate-700 mb-2">Sort By</label>
                     <div className="flex gap-2">
                       <select
+                        id="sort-by"
                         value={filters.sortBy}
                         onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                         className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                        aria-label="Choose sorting method for cards"
                       >
                         <optgroup label="📝 Basic">
                           <option value="name">Name</option>
@@ -1693,8 +1709,9 @@ const TCGShop = () => {
                       </select>
                       <button
                         onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none min-w-[44px] min-h-[44px] flex items-center justify-center"
                         aria-label={`Sort ${filters.sortOrder === 'asc' ? 'descending' : 'ascending'}`}
+                        title={`Currently sorting ${filters.sortOrder === 'asc' ? 'ascending' : 'descending'}. Click to reverse.`}
                       >
                         {filters.sortOrder === 'asc' ? '↑' : '↓'}
                       </button>
@@ -1903,8 +1920,9 @@ const TCGShop = () => {
                 notification.type === 'warning' ? 'bg-orange-50 border-orange-200 text-orange-800' :
                 'bg-blue-50 border-blue-200 text-blue-800'
               } border`}
-              role="status"
-              aria-live="polite"
+              role={notification.type === 'error' ? 'alert' : 'status'}
+              aria-live={notification.type === 'error' ? 'assertive' : 'polite'}
+              aria-atomic="true"
             >
               {notification.message}
             </div>
