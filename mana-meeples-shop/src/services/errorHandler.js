@@ -210,7 +210,7 @@ export const withRetry = async (operation, maxRetries = ERROR_CONFIG.DEFAULT_MAX
           attempts: attempt,
           operation: operation.name || 'anonymous',
           rateLimited: true,
-          message: 'Rate limit exceeded. Please wait before making more requests.'
+          message: 'Rate limit exceeded. The server is currently busy. Please wait a moment and refresh the page.'
         });
       }
 

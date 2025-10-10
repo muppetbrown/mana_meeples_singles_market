@@ -9,8 +9,8 @@ class RequestThrottler {
     this.activeRequests = new Map();
     // Track request timestamps to implement rate limiting
     this.requestHistory = new Map();
-    // Minimum delay between requests to same endpoint (in ms)
-    this.minDelay = 500;
+    // Minimum delay between requests to same endpoint (in ms) - increased to prevent 429s
+    this.minDelay = 800;
     // Maximum concurrent requests per endpoint
     this.maxConcurrent = 1;
   }
