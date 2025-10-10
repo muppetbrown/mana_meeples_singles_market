@@ -484,8 +484,14 @@ const TCGShop = () => {
         // Load games first (most important)
         const gamesRes = await withRetry(() => throttledFetch(`${API_URL}/games`));
 
+        // Add a delay before the next API call to ensure rate limiting
+        await new Promise(resolve => setTimeout(resolve, 600));
+
         // Load filters next
         const filtersRes = await withRetry(() => throttledFetch(`${API_URL}/filters`));
+
+        // Add another delay before optional currency detection
+        await new Promise(resolve => setTimeout(resolve, 600));
 
         // Currency detection can happen in background (optional)
         withRetry(() => throttledFetch(`${API_URL}/currency/detect`)).catch(err => {
@@ -798,7 +804,7 @@ const TCGShop = () => {
       setLoading(false);
       requestInFlight.current.cards = false;
     }
-  }, [searchTerm, selectedGame, filters, games, currency.rate]);
+  }, [searchTerm, selectedGame, filters, games, currency.rate, handleError]);
 
   useEffect(() => {
     if (games.length > 0) {

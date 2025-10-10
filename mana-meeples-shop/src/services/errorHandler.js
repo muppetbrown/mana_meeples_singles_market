@@ -208,7 +208,7 @@ export const withRetry = async (operation, maxRetries = 3, delay = 1000) => {
           attempts: attempt,
           operation: operation.name || 'anonymous',
           rateLimited: true,
-          message: 'Rate limit exceeded. Please wait before making more requests.'
+          message: 'Rate limit exceeded. The server is currently busy. Please wait a moment and refresh the page.'
         });
       }
 
