@@ -191,7 +191,7 @@ export const setupGlobalErrorHandling = () => {
 };
 
 /**
- * Retry utility for failed operations
+ * Retry utility for failed operations with special handling for rate limiting
  */
 export const withRetry = async (operation, maxRetries = 3, delay = 1000) => {
   let lastError;
@@ -202,6 +202,23 @@ export const withRetry = async (operation, maxRetries = 3, delay = 1000) => {
     } catch (error) {
       lastError = error;
 
+      // For 429 (Rate Limit) errors, use much longer delays and fewer retries
+      if (error.status === 429) {
+        if (attempt === 1) { // Only retry once for 429 errors
+          // Use a much longer delay for rate limit errors (10-30 seconds)
+          const rateLimitDelay = 10000 + Math.random() * 20000; // 10-30 seconds
+          await new Promise(resolve => setTimeout(resolve, rateLimitDelay));
+          continue;
+        } else {
+          // Don't retry 429 errors more than once - just fail
+          throw logError(error, {
+            attempts: attempt,
+            operation: operation.name || 'anonymous',
+            rateLimited: true
+          });
+        }
+      }
+
       if (attempt === maxRetries) {
         throw logError(error, {
           attempts: maxRetries,
@@ -209,7 +226,7 @@ export const withRetry = async (operation, maxRetries = 3, delay = 1000) => {
         });
       }
 
-      // Wait before retrying, with exponential backoff
+      // Normal exponential backoff for other errors
       await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt - 1)));
     }
   }

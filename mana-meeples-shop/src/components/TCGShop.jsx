@@ -387,7 +387,12 @@ const TCGShop = () => {
   const [games, setGames] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const { handleError } = useErrorHandler();
+
+  // Create a stable handleError function to prevent unnecessary re-renders
+  const errorHandler = useErrorHandler();
+  const handleError = useCallback((error, context) => {
+    return errorHandler.handleError(error, context);
+  }, [errorHandler]);
   const [showCart, setShowCart] = useState(false);
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
@@ -395,6 +400,13 @@ const TCGShop = () => {
   const [selectedVariations, setSelectedVariations] = useState({});
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [viewMode, setViewMode] = useState('grid');
+
+  // Request throttling - prevent multiple simultaneous calls to same endpoint
+  const requestInFlight = useRef({
+    cards: false,
+    initialData: false,
+    sets: false
+  });
 
   // Enhanced cart hook with localStorage persistence
   const {
@@ -455,14 +467,21 @@ const TCGShop = () => {
   // Load initial data and currency detection
   useEffect(() => {
     const fetchInitialData = async () => {
+      // Prevent multiple simultaneous initial data calls
+      if (requestInFlight.current.initialData) {
+        return;
+      }
+
       try {
+        requestInFlight.current.initialData = true;
         setLoading(true);
         setError(null);
 
+        // Use withRetry for API calls to handle 429 errors properly
         const [gamesRes, , filtersRes] = await Promise.all([
-          fetch(`${API_URL}/games`),
-          fetch(`${API_URL}/currency/detect`),
-          fetch(`${API_URL}/filters`)
+          withRetry(() => fetch(`${API_URL}/games`)),
+          withRetry(() => fetch(`${API_URL}/currency/detect`)),
+          withRetry(() => fetch(`${API_URL}/filters`))
         ]);
 
         if (!gamesRes.ok) {
@@ -483,6 +502,8 @@ const TCGShop = () => {
         const formattedError = handleError(err, { operation: 'loadInitialData' });
         setError(`${formattedError.title}: ${formattedError.message} Please refresh the page or check your connection.`);
         setLoading(false);
+      } finally {
+        requestInFlight.current.initialData = false;
       }
     };
 
@@ -639,11 +660,17 @@ const TCGShop = () => {
         return;
       }
 
+      // Prevent multiple simultaneous set fetches
+      if (requestInFlight.current.sets) {
+        return;
+      }
+
       try {
+        requestInFlight.current.sets = true;
         const gameId = getGameIdFromName(selectedGame);
         if (!gameId) return;
 
-        const response = await fetch(`${API_URL}/sets?game_id=${gameId}`);
+        const response = await withRetry(() => fetch(`${API_URL}/sets?game_id=${gameId}`));
 
         if (response.ok) {
           const sets = await response.json();
@@ -659,6 +686,8 @@ const TCGShop = () => {
           console.error('Error fetching sets:', error);
         }
         setAvailableSets([]);
+      } finally {
+        requestInFlight.current.sets = false;
       }
     };
 
@@ -669,7 +698,13 @@ const TCGShop = () => {
 
   // Fetch cards with current filters
   const fetchCards = useCallback(async () => {
+    // Prevent multiple simultaneous card fetches
+    if (requestInFlight.current.cards) {
+      return;
+    }
+
     try {
+      requestInFlight.current.cards = true;
       // Set loading state to true when starting card fetch
       setLoading(true);
       setError(null);
@@ -745,8 +780,9 @@ const TCGShop = () => {
     } finally {
       // Always set loading to false when card fetch completes (success or error)
       setLoading(false);
+      requestInFlight.current.cards = false;
     }
-  }, [searchTerm, selectedGame, filters, games, currency.rate, handleError]);
+  }, [searchTerm, selectedGame, filters, games, currency.rate]);
 
   useEffect(() => {
     if (games.length > 0) {
