@@ -46,7 +46,7 @@ const ERROR_MESSAGES = {
  */
 export const categorizeError = (error) => {
   // Network errors
-  if (!navigator.onLine || error.name === 'TypeError' && error.message.includes('fetch')) {
+  if (!navigator.onLine || (error.name === 'TypeError' && error.message.includes('fetch'))) {
     return ERROR_TYPES.NETWORK;
   }
 
@@ -217,7 +217,7 @@ export const withRetry = async (operation, maxRetries = 3, delay = 1000) => {
   throw lastError;
 };
 
-export default {
+const errorHandler = {
   ERROR_TYPES,
   categorizeError,
   formatError,
@@ -227,3 +227,5 @@ export default {
   setupGlobalErrorHandling,
   withRetry
 };
+
+export default errorHandler;

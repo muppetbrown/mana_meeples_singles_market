@@ -27,7 +27,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 export const useEnhancedCart = (API_URL) => {
   const [cart, setCart] = useState([]);
   const [cartNotifications, setCartNotifications] = useState([]);
-  const [lastSync, setLastSync] = useState(Date.now());
   const [isLoading, setIsLoading] = useState(true);
 
   const CART_EXPIRY_DAYS = 7;

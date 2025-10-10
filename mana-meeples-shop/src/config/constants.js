@@ -106,7 +106,7 @@ export const CURRENCY_CONFIG = {
 // Form Validation
 export const VALIDATION_CONFIG = {
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  PHONE_REGEX: /^[\+]?[1-9][\d]{0,15}$/,
+  PHONE_REGEX: /^[+]?[1-9][\d]{0,15}$/,
   POSTAL_CODE_NZ_REGEX: /^\d{4}$/,
   MIN_PASSWORD_LENGTH: 8,
   MAX_INPUT_LENGTH: 255,
