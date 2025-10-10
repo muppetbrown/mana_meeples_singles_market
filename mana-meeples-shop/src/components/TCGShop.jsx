@@ -9,7 +9,7 @@ import { useEnhancedCart } from '../hooks/useEnhancedCart';
 import ErrorBoundary from './ErrorBoundary';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import { API_URL } from '../config/api';
-import { useErrorHandler, withRetry } from '../services/errorHandler';
+import { useErrorHandler, withRetry, throttledFetch } from '../services/errorHandler';
 import { FILTER_CONFIG, ACCESSIBILITY_CONFIG, VIRTUAL_SCROLL_CONFIG } from '../config/constants';
 
 // Lazy load VirtualCardGrid for code splitting
@@ -408,6 +408,9 @@ const TCGShop = () => {
     sets: false
   });
 
+  // Track if initial load has been completed (React StrictMode compatibility)
+  const initialLoadComplete = useRef(false);
+
   // Enhanced cart hook with localStorage persistence
   const {
     cart,
@@ -467,8 +470,8 @@ const TCGShop = () => {
   // Load initial data and currency detection
   useEffect(() => {
     const fetchInitialData = async () => {
-      // Prevent multiple simultaneous initial data calls
-      if (requestInFlight.current.initialData) {
+      // Prevent multiple simultaneous initial data calls and React StrictMode duplicates
+      if (requestInFlight.current.initialData || initialLoadComplete.current) {
         return;
       }
 
@@ -477,12 +480,18 @@ const TCGShop = () => {
         setLoading(true);
         setError(null);
 
-        // Use withRetry for API calls to handle 429 errors properly
-        const [gamesRes, , filtersRes] = await Promise.all([
-          withRetry(() => fetch(`${API_URL}/games`)),
-          withRetry(() => fetch(`${API_URL}/currency/detect`)),
-          withRetry(() => fetch(`${API_URL}/filters`))
-        ]);
+        // Use sequential requests with throttling to prevent rate limiting
+        // Load games first (most important)
+        const gamesRes = await withRetry(() => throttledFetch(`${API_URL}/games`));
+
+        // Load filters next
+        const filtersRes = await withRetry(() => throttledFetch(`${API_URL}/filters`));
+
+        // Currency detection can happen in background (optional)
+        withRetry(() => throttledFetch(`${API_URL}/currency/detect`)).catch(err => {
+          // Silently fail currency detection - it's not critical
+          console.log('Currency detection failed (non-critical):', err);
+        });
 
         if (!gamesRes.ok) {
           throw new Error('Failed to fetch games');
@@ -504,6 +513,7 @@ const TCGShop = () => {
         setLoading(false);
       } finally {
         requestInFlight.current.initialData = false;
+        initialLoadComplete.current = true; // Mark initial load as complete
       }
     };
 
@@ -670,7 +680,7 @@ const TCGShop = () => {
         const gameId = getGameIdFromName(selectedGame);
         if (!gameId) return;
 
-        const response = await withRetry(() => fetch(`${API_URL}/sets?game_id=${gameId}`));
+        const response = await withRetry(() => throttledFetch(`${API_URL}/sets?game_id=${gameId}`));
 
         if (response.ok) {
           const sets = await response.json();
@@ -732,8 +742,14 @@ const TCGShop = () => {
       if (filters.maxPrice) queryParams.append('max_price', filters.maxPrice);
 
       const cardsData = await withRetry(async () => {
-        const cardsRes = await fetch(`${API_URL}/cards?${queryParams}`);
+        const cardsRes = await throttledFetch(`${API_URL}/cards?${queryParams}`);
         if (!cardsRes.ok) {
+          // Handle 429 errors specifically
+          if (cardsRes.status === 429) {
+            const error = new Error('Rate limit exceeded');
+            error.status = 429;
+            throw error;
+          }
           throw new Error('API request failed');
         }
         return cardsRes.json();
