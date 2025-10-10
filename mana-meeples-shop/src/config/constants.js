@@ -12,7 +12,7 @@ export const API_CONFIG = {
 
 // Filter and Search Configuration
 export const FILTER_CONFIG = {
-  DEBOUNCE_DELAY: 1000, // 1 second debounce for API calls
+  DEBOUNCE_DELAY: 300, // 300ms debounce for better UX (was 1000ms)
   CACHE_DURATION: 5 * 60 * 1000, // 5 minutes cache
   MIN_SEARCH_LENGTH: 2, // Minimum characters to trigger search
   MAX_SUGGESTIONS: 10, // Maximum autocomplete suggestions

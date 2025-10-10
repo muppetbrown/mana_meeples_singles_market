@@ -48,7 +48,7 @@ const adminAuthJWT = async (req, res, next) => {
       res.cookie('adminToken', refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
+        sameSite: process.env.NODE_ENV === 'production' && process.env.CROSS_ORIGIN === 'true' ? 'none' : 'strict',
         maxAge: 24 * 60 * 60 * 1000, // 24 hours
         domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
       });
@@ -153,7 +153,7 @@ const generateCSRFToken = (req, res, next) => {
   res.cookie('csrfToken', csrfToken, {
     httpOnly: false, // Allow JavaScript access to read token for request headers
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' && process.env.CROSS_ORIGIN === 'true' ? 'none' : 'strict',
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
   });
@@ -162,7 +162,7 @@ const generateCSRFToken = (req, res, next) => {
   res.cookie('_csrfSecret', csrfToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    sameSite: process.env.NODE_ENV === 'production' && process.env.CROSS_ORIGIN === 'true' ? 'none' : 'strict',
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
     domain: process.env.NODE_ENV === 'production' ? process.env.COOKIE_DOMAIN : undefined
   });
