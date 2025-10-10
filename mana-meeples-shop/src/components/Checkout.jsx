@@ -194,7 +194,9 @@ const Checkout = ({ cart, currency, onBack, onOrderSubmit }) => {
 
       setSubmitted(true);
     } catch (error) {
-      console.error('Order submission failed:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Order submission failed:', error);
+      }
       setErrors({ submit: 'Failed to submit order. Please try again.' });
     } finally {
       setIsSubmitting(false);

@@ -43,7 +43,9 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
     // Rate limiting: prevent requests within 1 second of last request
     const now = Date.now();
     if (now - lastFetchRef.current < 1000) {
-      console.log('Rate limiting: skipping request');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Rate limiting: skipping request');
+      }
       return;
     }
     lastFetchRef.current = now;
@@ -78,7 +80,9 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
       if (response.status === 429) {
         // Rate limited - don't retry immediately, use cached data
         if (retryCount < MAX_RETRIES) {
-          console.warn(`Rate limited, retry ${retryCount + 1}/${MAX_RETRIES} in ${RETRY_DELAY}ms`);
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`Rate limited, retry ${retryCount + 1}/${MAX_RETRIES} in ${RETRY_DELAY}ms`);
+          }
           await new Promise(resolve => setTimeout(resolve, RETRY_DELAY * Math.pow(2, retryCount)));
           return fetchFilterCounts(filters, retryCount + 1);
         } else {
@@ -101,16 +105,22 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
       setError(null);
     } catch (error) {
       if (error.name === 'AbortError') {
-        console.log('Request aborted');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Request aborted');
+        }
         return;
       }
 
-      console.error('Filter counts error:', error.message);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Filter counts error:', error.message);
+      }
       setError(error.message);
       
       // Use cached data if available, don't fall back to fetching all cards
       if (globalCache.data) {
-        console.log('Using cached filter counts');
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Using cached filter counts');
+        }
         setFilterCounts(globalCache.data);
       } else {
         // Only show empty counts on first load failure
@@ -131,7 +141,9 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
   useEffect(() => {
     // Check cache first
     if (isCacheValid()) {
-      console.log('Using valid cached filter counts');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Using valid cached filter counts');
+      }
       setFilterCounts(globalCache.data);
       return;
     }

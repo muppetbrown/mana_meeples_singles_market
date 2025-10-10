@@ -49,7 +49,9 @@ export const useEnhancedCart = (API_URL) => {
       }
       return btoa(encrypted);
     } catch (error) {
-      console.warn('Failed to encrypt cart data:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to encrypt cart data:', error);
+      }
       return null;
     }
   }, []);
@@ -65,7 +67,9 @@ export const useEnhancedCart = (API_URL) => {
       }
       return JSON.parse(decrypted);
     } catch (error) {
-      console.warn('Failed to decrypt cart data:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to decrypt cart data:', error);
+      }
       return null;
     }
   }, []);
@@ -83,7 +87,9 @@ export const useEnhancedCart = (API_URL) => {
         localStorage.setItem(CART_STORAGE_KEY, encrypted);
       }
     } catch (error) {
-      console.warn('Failed to save cart to storage:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to save cart to storage:', error);
+      }
       // Continue without storage - cart will work in memory only
     }
   }, [encryptCartData]);
@@ -111,7 +117,9 @@ export const useEnhancedCart = (API_URL) => {
 
       return decrypted.items || [];
     } catch (error) {
-      console.warn('Failed to load cart from storage:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Failed to load cart from storage:', error);
+      }
       // Clear potentially corrupted data
       localStorage.removeItem(CART_STORAGE_KEY);
       return [];
@@ -157,7 +165,9 @@ export const useEnhancedCart = (API_URL) => {
           // Note: validation will happen in periodic validation
         }
       } catch (error) {
-        console.error('Failed to initialize cart:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Failed to initialize cart:', error);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -194,7 +204,9 @@ export const useEnhancedCart = (API_URL) => {
 
       return item;
     } catch (error) {
-      console.error('Failed to validate price for item:', item.id, error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to validate price for item:', item.id, error);
+      }
       return item; // Keep original item if validation fails
     }
   }, [API_URL]);
@@ -221,7 +233,9 @@ export const useEnhancedCart = (API_URL) => {
         setCart(validatedItems);
       }
     } catch (error) {
-      console.error('Failed to validate cart:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to validate cart:', error);
+      }
     }
   }, [cart, validateItemPrice]);
 
@@ -257,7 +271,9 @@ export const useEnhancedCart = (API_URL) => {
         setCart(stockChecks);
       }
     } catch (error) {
-      console.error('Failed to check stock:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to check stock:', error);
+      }
     }
   }, [cart, API_URL]);
 
@@ -356,7 +372,9 @@ export const useEnhancedCart = (API_URL) => {
         addNotificationRef.current(`Added ${item.name} to cart`, 'success', 3000);
       }
     } catch (error) {
-      console.error('Error adding item to cart:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error adding item to cart:', error);
+      }
       if (addNotificationRef.current) {
         addNotificationRef.current('Failed to add item to cart. Please try again.', 'error');
       }

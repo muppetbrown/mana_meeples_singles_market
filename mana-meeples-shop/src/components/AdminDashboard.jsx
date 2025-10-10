@@ -116,10 +116,14 @@ const AdminDashboard = () => {
               }));
               
               setInventory(formatted);
-              console.log('✅ Loaded inventory:', formatted.length, 'items');
-              
+              if (process.env.NODE_ENV === 'development') {
+                console.log('✅ Loaded inventory:', formatted.length, 'items');
+              }
+
             } catch (err) {
-              console.error('❌ Error loading inventory:', err);
+              if (process.env.NODE_ENV === 'development') {
+                console.error('❌ Error loading inventory:', err);
+              }
             } finally {
               setLoading(false);
             }
@@ -130,7 +134,9 @@ const AdminDashboard = () => {
           navigate('/admin/login');
         }
       } catch (error) {
-        console.error('Auth check failed:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Auth check failed:', error);
+        }
         navigate('/admin/login');
       } finally {
         setAuthChecking(false);
@@ -160,11 +166,15 @@ const AdminDashboard = () => {
           const sets = await response.json();
           setAvailableSets(sets);
         } else {
-          console.error('Failed to fetch sets');
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to fetch sets');
+          }
           setAvailableSets([]);
         }
       } catch (error) {
-        console.error('Error fetching sets:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('Error fetching sets:', error);
+        }
         setAvailableSets([]);
       }
     };
@@ -297,7 +307,9 @@ const AdminDashboard = () => {
 
       return true;
     } catch (err) {
-      console.error('Failed to update item:', err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to update item:', err);
+      }
       return false;
     }
   }, []);
@@ -340,7 +352,9 @@ const AdminDashboard = () => {
       window.location.reload();
 
     } catch (error) {
-      console.error('Error creating inventory variation:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error creating inventory variation:', error);
+      }
       alert(`Error: ${error.message}`);
     } finally {
       setFoilModalLoading(false);
@@ -414,18 +428,24 @@ const AdminDashboard = () => {
   const refreshPrices = async () => {
     setLoading(true);
     try {
-      console.log('🔄 Starting price refresh...');
+      if (process.env.NODE_ENV === 'development') {
+        console.log('🔄 Starting price refresh...');
+      }
       const response = await fetch(`${API_URL}/admin/refresh-prices`, {
         method: 'POST',
         credentials: 'include',
         headers: getAdminHeaders()
       });
 
-      console.log('📊 Price refresh response status:', response.status);
+      if (process.env.NODE_ENV === 'development') {
+        console.log('📊 Price refresh response status:', response.status);
+      }
 
       if (response.ok) {
         const result = await response.json();
-        console.log('✅ Price refresh completed:', result);
+        if (process.env.NODE_ENV === 'development') {
+          console.log('✅ Price refresh completed:', result);
+        }
 
         const errorDetails = result.errors?.length > 0
           ? `\n\nErrors (${result.errors.length}):\n${result.errors.slice(0, 3).join('\n')}${result.errors.length > 3 ? '\n...' : ''}`
@@ -435,11 +455,15 @@ const AdminDashboard = () => {
         window.location.reload();
       } else {
         const error = await response.json().catch(() => ({ details: `HTTP ${response.status}: ${response.statusText}` }));
-        console.error('❌ Price refresh API error:', error);
+        if (process.env.NODE_ENV === 'development') {
+          console.error('❌ Price refresh API error:', error);
+        }
         throw new Error(error.details || error.error || 'Failed to refresh prices');
       }
     } catch (error) {
-      console.error('❌ Price refresh error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('❌ Price refresh error:', error);
+      }
 
       // Provide more helpful error messages
       let errorMessage = 'Price refresh failed: ';
@@ -588,7 +612,9 @@ const AdminDashboard = () => {
         }, 2000);
       }
     } catch (error) {
-      console.error('CSV import error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('CSV import error:', error);
+      }
       alert(`CSV import failed: ${error.message}`);
     } finally {
       setCsvImporting(false);
