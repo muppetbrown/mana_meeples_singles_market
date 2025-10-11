@@ -2019,5 +2019,443 @@ router.post('/admin/refresh-prices', adminAuthWithCSRF, async (req, res) => {
   }
 });
 
+// POST /api/admin/bulk-create-variations - Create multiple card variations at once
+router.post('/admin/bulk-create-variations', adminAuthWithCSRF, async (req, res) => {
+  const client = await db.getClient();
+
+  try {
+    await client.query('BEGIN');
+
+    const { card_ids, variations, create_inventory = true } = req.body;
+
+    // Validation
+    if (!card_ids || !Array.isArray(card_ids) || card_ids.length === 0) {
+      return res.status(400).json({ error: 'card_ids must be a non-empty array' });
+    }
+
+    if (!variations || !Array.isArray(variations) || variations.length === 0) {
+      return res.status(400).json({ error: 'variations must be a non-empty array' });
+    }
+
+    // Validate variation structure
+    for (const variation of variations) {
+      if (!variation.name || typeof variation.name !== 'string') {
+        return res.status(400).json({ error: 'Each variation must have a name string' });
+      }
+    }
+
+    const results = {
+      success: 0,
+      errors: [],
+      created_variations: [],
+      created_inventory: 0
+    };
+
+    const qualities = ['Near Mint', 'Lightly Played', 'Moderately Played', 'Heavily Played', 'Damaged'];
+    const foilTypes = ['Regular', 'Foil'];
+    const languages = ['English'];
+
+    for (const cardId of card_ids) {
+      try {
+        // Get card details for pricing reference
+        const cardData = await client.query(
+          `SELECT c.*, cp.base_price, cp.foil_price, g.name as game_name
+           FROM cards c
+           LEFT JOIN card_pricing cp ON cp.card_id = c.id
+           LEFT JOIN games g ON g.id = c.game_id
+           WHERE c.id = $1`,
+          [cardId]
+        );
+
+        if (cardData.rows.length === 0) {
+          results.errors.push(`Card ${cardId} not found`);
+          continue;
+        }
+
+        const card = cardData.rows[0];
+
+        for (const variation of variations) {
+          try {
+            // Create the card variation
+            const variationResult = await client.query(
+              `INSERT INTO card_variations (card_id, variation_name, variation_code, image_url)
+               VALUES ($1, $2, $3, $4)
+               ON CONFLICT DO NOTHING
+               RETURNING id`,
+              [cardId, variation.name, variation.code || null, variation.image_url || card.image_url]
+            );
+
+            let variationId;
+            if (variationResult.rows.length > 0) {
+              variationId = variationResult.rows[0].id;
+              results.created_variations.push({
+                card_id: cardId,
+                card_name: card.name,
+                variation_id: variationId,
+                variation_name: variation.name
+              });
+              results.success++;
+            } else {
+              // Variation already exists, get its ID
+              const existingVar = await client.query(
+                `SELECT id FROM card_variations WHERE card_id = $1 AND variation_name = $2`,
+                [cardId, variation.name]
+              );
+              variationId = existingVar.rows[0]?.id;
+            }
+
+            if (create_inventory && variationId) {
+              // Create inventory entries for all quality/foil/language combinations
+              for (const quality of qualities) {
+                for (const foilType of foilTypes) {
+                  for (const language of languages) {
+                    // Calculate price based on quality and foil
+                    const basePrice = foilType === 'Foil' ?
+                      (parseFloat(card.foil_price) || parseFloat(card.base_price) * 2.5 || 0) :
+                      (parseFloat(card.base_price) || 0);
+
+                    // Apply quality discount
+                    const qualityDiscounts = {
+                      'Near Mint': 0,
+                      'Lightly Played': 0.15,
+                      'Moderately Played': 0.30,
+                      'Heavily Played': 0.45,
+                      'Damaged': 0.65
+                    };
+
+                    const discount = qualityDiscounts[quality] || 0;
+                    const finalPrice = basePrice * (1 - discount);
+
+                    try {
+                      await client.query(
+                        `INSERT INTO card_inventory (
+                          card_id, variation_id, quality, foil_type, language,
+                          stock_quantity, price, price_source, created_at, updated_at
+                        ) VALUES ($1, $2, $3, $4, $5, 0, $6, 'bulk_create', NOW(), NOW())
+                        ON CONFLICT (card_id, variation_id, quality, foil_type, language) DO NOTHING`,
+                        [cardId, variationId, quality, foilType, language, finalPrice]
+                      );
+                      results.created_inventory++;
+                    } catch (invErr) {
+                      console.log(`Warning: Could not create inventory for ${card.name} ${variation.name} ${quality} ${foilType} ${language}`);
+                    }
+                  }
+                }
+              }
+            }
+
+          } catch (varErr) {
+            results.errors.push(`Error creating variation ${variation.name} for card ${cardId}: ${varErr.message}`);
+          }
+        }
+
+      } catch (cardErr) {
+        results.errors.push(`Error processing card ${cardId}: ${cardErr.message}`);
+      }
+    }
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      message: `Created ${results.success} variations with ${results.created_inventory} inventory entries`,
+      details: results
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error in bulk create variations:', error);
+    res.status(500).json({
+      error: 'Failed to create variations',
+      details: error.message
+    });
+  } finally {
+    client.release();
+  }
+});
+
+// POST /api/admin/import-card-data - Import cards and variations from JSON
+router.post('/admin/import-card-data', adminAuthWithCSRF, async (req, res) => {
+  const client = await db.getClient();
+
+  try {
+    await client.query('BEGIN');
+
+    const { game_code, set_data, cards_data } = req.body;
+
+    if (!game_code || !set_data || !cards_data || !Array.isArray(cards_data)) {
+      return res.status(400).json({
+        error: 'Required fields: game_code, set_data, cards_data (array)'
+      });
+    }
+
+    // Get or create game
+    const gameResult = await client.query(
+      `INSERT INTO games (name, code, active)
+       VALUES ($1, $2, true)
+       ON CONFLICT (code) DO UPDATE SET active = true
+       RETURNING id`,
+      [set_data.game_name || game_code.toUpperCase(), game_code.toLowerCase()]
+    );
+
+    const gameId = gameResult.rows[0].id;
+
+    // Get or create set
+    const setResult = await client.query(
+      `INSERT INTO card_sets (game_id, name, code, release_date, active)
+       VALUES ($1, $2, $3, $4, true)
+       ON CONFLICT (game_id, code)
+       DO UPDATE SET name = EXCLUDED.name, release_date = EXCLUDED.release_date
+       RETURNING id`,
+      [gameId, set_data.name, set_data.code, set_data.release_date]
+    );
+
+    const setId = setResult.rows[0].id;
+
+    const results = {
+      game_id: gameId,
+      set_id: setId,
+      cards_imported: 0,
+      cards_updated: 0,
+      variations_created: 0,
+      inventory_entries: 0,
+      errors: []
+    };
+
+    for (const cardData of cards_data) {
+      try {
+        // Insert or update card
+        const cardResult = await client.query(
+          `INSERT INTO cards (game_id, set_id, name, card_number, rarity, card_type, description, image_url)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+           ON CONFLICT (set_id, card_number)
+           DO UPDATE SET
+             name = EXCLUDED.name,
+             rarity = EXCLUDED.rarity,
+             card_type = EXCLUDED.card_type,
+             description = EXCLUDED.description,
+             image_url = EXCLUDED.image_url,
+             updated_at = NOW()
+           RETURNING id, (xmax = 0) as inserted`,
+          [
+            gameId, setId, cardData.name, cardData.card_number,
+            cardData.rarity, cardData.card_type, cardData.description,
+            cardData.image_url
+          ]
+        );
+
+        const cardId = cardResult.rows[0].id;
+        const wasInserted = cardResult.rows[0].inserted;
+
+        if (wasInserted) {
+          results.cards_imported++;
+        } else {
+          results.cards_updated++;
+        }
+
+        // Store pricing data
+        if (cardData.base_price || cardData.foil_price) {
+          await client.query(
+            `INSERT INTO card_pricing (card_id, base_price, foil_price, price_source, updated_at)
+             VALUES ($1, $2, $3, 'import', NOW())
+             ON CONFLICT (card_id)
+             DO UPDATE SET
+               base_price = EXCLUDED.base_price,
+               foil_price = EXCLUDED.foil_price,
+               updated_at = NOW()`,
+            [cardId, cardData.base_price || 0, cardData.foil_price || cardData.base_price * 2.5 || 0]
+          );
+        }
+
+        // Create variations if provided
+        if (cardData.variations && Array.isArray(cardData.variations)) {
+          for (const variation of cardData.variations) {
+            const variationResult = await client.query(
+              `INSERT INTO card_variations (card_id, variation_name, variation_code, image_url)
+               VALUES ($1, $2, $3, $4)
+               ON CONFLICT DO NOTHING
+               RETURNING id`,
+              [cardId, variation.name, variation.code || null, variation.image_url || cardData.image_url]
+            );
+
+            if (variationResult.rows.length > 0) {
+              results.variations_created++;
+              const variationId = variationResult.rows[0].id;
+
+              // Create inventory entries if provided
+              if (variation.inventory && Array.isArray(variation.inventory)) {
+                for (const inventory of variation.inventory) {
+                  try {
+                    await client.query(
+                      `INSERT INTO card_inventory (
+                        card_id, variation_id, quality, foil_type, language,
+                        stock_quantity, price, price_source, created_at, updated_at
+                      ) VALUES ($1, $2, $3, $4, $5, $6, $7, 'import', NOW(), NOW())
+                      ON CONFLICT (card_id, variation_id, quality, foil_type, language)
+                      DO UPDATE SET
+                        stock_quantity = EXCLUDED.stock_quantity,
+                        price = EXCLUDED.price,
+                        updated_at = NOW()`,
+                      [
+                        cardId, variationId,
+                        inventory.quality || 'Near Mint',
+                        inventory.foil_type || 'Regular',
+                        inventory.language || 'English',
+                        inventory.stock_quantity || 0,
+                        inventory.price || 0
+                      ]
+                    );
+                    results.inventory_entries++;
+                  } catch (invErr) {
+                    results.errors.push(`Inventory error for ${cardData.name}: ${invErr.message}`);
+                  }
+                }
+              }
+            }
+          }
+        }
+
+      } catch (cardErr) {
+        results.errors.push(`Error importing card ${cardData.name}: ${cardErr.message}`);
+      }
+    }
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      message: `Import completed: ${results.cards_imported} new cards, ${results.cards_updated} updated`,
+      results: results
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error in import card data:', error);
+    res.status(500).json({
+      error: 'Failed to import card data',
+      details: error.message
+    });
+  } finally {
+    client.release();
+  }
+});
+
+// GET /api/admin/variations/:card_id - Get all variations for a card
+router.get('/admin/variations/:card_id', adminAuth, async (req, res) => {
+  try {
+    const cardId = parseInt(req.params.card_id);
+
+    if (isNaN(cardId)) {
+      return res.status(400).json({ error: 'Invalid card ID' });
+    }
+
+    // Get card details
+    const cardResult = await db.query(
+      `SELECT c.*, g.name as game_name, cs.name as set_name
+       FROM cards c
+       JOIN games g ON g.id = c.game_id
+       JOIN card_sets cs ON cs.id = c.set_id
+       WHERE c.id = $1`,
+      [cardId]
+    );
+
+    if (cardResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Card not found' });
+    }
+
+    // Get all variations with inventory counts
+    const variationsResult = await db.query(
+      `SELECT
+        cv.*,
+        COUNT(ci.id) as inventory_count,
+        SUM(ci.stock_quantity) as total_stock,
+        MIN(ci.price) as min_price,
+        MAX(ci.price) as max_price
+       FROM card_variations cv
+       LEFT JOIN card_inventory ci ON ci.variation_id = cv.id
+       WHERE cv.card_id = $1
+       GROUP BY cv.id, cv.card_id, cv.variation_name, cv.variation_code, cv.image_url, cv.created_at
+       ORDER BY cv.created_at`,
+      [cardId]
+    );
+
+    res.json({
+      card: cardResult.rows[0],
+      variations: variationsResult.rows
+    });
+
+  } catch (error) {
+    console.error('Error fetching variations:', error);
+    res.status(500).json({ error: 'Failed to fetch variations' });
+  }
+});
+
+// DELETE /api/admin/variations/:variation_id - Delete a card variation
+router.delete('/admin/variations/:variation_id', adminAuthWithCSRF, async (req, res) => {
+  const client = await db.getClient();
+
+  try {
+    await client.query('BEGIN');
+
+    const variationId = parseInt(req.params.variation_id);
+
+    if (isNaN(variationId)) {
+      return res.status(400).json({ error: 'Invalid variation ID' });
+    }
+
+    // Check if variation exists and get info
+    const variationResult = await client.query(
+      `SELECT cv.*, c.name as card_name
+       FROM card_variations cv
+       JOIN cards c ON c.id = cv.card_id
+       WHERE cv.id = $1`,
+      [variationId]
+    );
+
+    if (variationResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Variation not found' });
+    }
+
+    const variation = variationResult.rows[0];
+
+    // Check if there's any inventory with stock
+    const stockResult = await client.query(
+      `SELECT SUM(stock_quantity) as total_stock
+       FROM card_inventory
+       WHERE variation_id = $1`,
+      [variationId]
+    );
+
+    const totalStock = parseInt(stockResult.rows[0].total_stock) || 0;
+
+    if (totalStock > 0) {
+      return res.status(400).json({
+        error: `Cannot delete variation with ${totalStock} items in stock`,
+        suggestion: 'Set stock quantities to 0 first, or transfer stock to another variation'
+      });
+    }
+
+    // Delete all inventory entries for this variation
+    await client.query('DELETE FROM card_inventory WHERE variation_id = $1', [variationId]);
+
+    // Delete the variation
+    await client.query('DELETE FROM card_variations WHERE id = $1', [variationId]);
+
+    await client.query('COMMIT');
+
+    res.json({
+      success: true,
+      message: `Deleted variation "${variation.variation_name}" for card "${variation.card_name}"`
+    });
+
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error('Error deleting variation:', error);
+    res.status(500).json({ error: 'Failed to delete variation' });
+  } finally {
+    client.release();
+  }
+});
+
 // Export the router
 module.exports = router;
