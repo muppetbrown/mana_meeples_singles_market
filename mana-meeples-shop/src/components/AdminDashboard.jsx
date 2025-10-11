@@ -44,6 +44,7 @@ const AdminDashboard = () => {
   const [filters, setFilters] = useState({
     quality: 'all',
     foilType: 'all',
+    cardType: 'all',
     stockLevel: 'all',
     minPrice: '',
     maxPrice: '',
@@ -52,6 +53,12 @@ const AdminDashboard = () => {
     viewMode: 'table'
   });
   const [availableSets, setAvailableSets] = useState([]);
+  const [filterOptions, setFilterOptions] = useState({
+    foilTypes: [],
+    cardTypes: [],
+    qualities: [],
+    rarities: []
+  });
   const [showAllCards, setShowAllCards] = useState(false);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingItems, setEditingItems] = useState(new Map());
@@ -112,6 +119,7 @@ const AdminDashboard = () => {
                 id: card.inventory_id || card.id,
                 sku: `${card.game_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.set_code || card.set_name?.substring(0,3).toUpperCase() || 'UNK'}-${card.card_number || '000'}-${card.quality?.substring(0,2).toUpperCase() || 'NM'}-${card.foil_type === 'Regular' || card.foil_type === 'Non-foil' ? 'NF' : 'F'}`,
                 card_name: card.name || card.card_name,
+                card_type: card.card_type,
                 game: card.game_name,
                 set: card.set_name,
                 set_code: card.set_code,
@@ -159,11 +167,12 @@ const AdminDashboard = () => {
     checkAuth();
   }, [navigate]);
 
-  // Fetch available sets when game changes
+  // Fetch available sets and filter options when game changes
   useEffect(() => {
-    const fetchSets = async () => {
+    const fetchGameData = async () => {
       if (filterGame === 'all') {
         setAvailableSets([]);
+        setFilterOptions({ foilTypes: [], cardTypes: [], qualities: [], rarities: [] });
         return;
       }
 
@@ -171,12 +180,19 @@ const AdminDashboard = () => {
         const gameId = getGameIdFromName(filterGame);
         if (!gameId) return;
 
-        const response = await fetch(`${API_URL}/sets?game_id=${gameId}`, {
-          headers: getAdminHeaders()
-        });
+        // Fetch sets and filter options in parallel
+        const [setsResponse, filterOptionsResponse] = await Promise.all([
+          fetch(`${API_URL}/sets?game_id=${gameId}`, {
+            headers: getAdminHeaders()
+          }),
+          fetch(`${API_URL}/filter-options?game_id=${gameId}`, {
+            headers: getAdminHeaders()
+          })
+        ]);
 
-        if (response.ok) {
-          const sets = await response.json();
+        // Handle sets response
+        if (setsResponse.ok) {
+          const sets = await setsResponse.json();
           setAvailableSets(sets);
         } else {
           if (process.env.NODE_ENV === 'development') {
@@ -184,16 +200,34 @@ const AdminDashboard = () => {
           }
           setAvailableSets([]);
         }
+
+        // Handle filter options response
+        if (filterOptionsResponse.ok) {
+          const options = await filterOptionsResponse.json();
+          setFilterOptions({
+            foilTypes: options.foilTypes || [],
+            cardTypes: options.cardTypes || [],
+            qualities: options.qualities || [],
+            rarities: options.rarities || []
+          });
+        } else {
+          if (process.env.NODE_ENV === 'development') {
+            console.error('Failed to fetch filter options');
+          }
+          setFilterOptions({ foilTypes: [], cardTypes: [], qualities: [], rarities: [] });
+        }
       } catch (error) {
         if (process.env.NODE_ENV === 'development') {
-          console.error('Error fetching sets:', error);
+          console.error('Error fetching game data:', error);
         }
         setAvailableSets([]);
+        setFilterOptions({ foilTypes: [], cardTypes: [], qualities: [], rarities: [] });
       }
     };
 
-    fetchSets();
+    fetchGameData();
     setFilterSet('all'); // Reset set filter when game changes
+    setFilters(prev => ({ ...prev, cardType: 'all', foilType: 'all' })); // Reset type filters
   }, [filterGame]);
 
   // Helper function to get game ID from name
@@ -212,6 +246,7 @@ const AdminDashboard = () => {
       if (!acc[key]) {
         acc[key] = {
           card_name: item.card_name,
+          card_type: item.card_type,
           game: item.game,
           set: item.set,
           number: item.number,
@@ -287,6 +322,10 @@ const AdminDashboard = () => {
           return foilType === filters.foilType;
         });
 
+      // Card type filter
+      const matchesCardType = filters.cardType === 'all' ||
+        (group.card_type && group.card_type === filters.cardType);
+
       // Stock level filter
       const matchesStockLevel = filters.stockLevel === 'all' || (() => {
         switch (filters.stockLevel) {
@@ -321,7 +360,7 @@ const AdminDashboard = () => {
       const matchesInventory = showAllCards || group.totalStock > 0;
 
       return matchesSearch && matchesGame && matchesSet && matchesQuality &&
-             matchesFoilType && matchesStockLevel && matchesPriceRange &&
+             matchesFoilType && matchesCardType && matchesStockLevel && matchesPriceRange &&
              matchesPriceSource && matchesInventory;
     });
 
@@ -1492,16 +1531,37 @@ const AdminDashboard = () => {
                 value={filters.foilType || 'all'}
                 onChange={(e) => setFilters(prev => ({ ...prev, foilType: e.target.value }))}
                 className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+                disabled={filterGame === 'all'}
               >
                 <option value="all">All Types</option>
-                <option value="Regular">Non-foil</option>
-                <option value="Foil">Regular Foil</option>
-                <option value="Etched">Etched Foil</option>
-                <option value="Showcase">Showcase</option>
-                <option value="Extended Art">Extended Art</option>
-                <option value="Borderless">Borderless</option>
-                <option value="Retro">Retro Frame</option>
+                {filterOptions.foilTypes.map(foilType => (
+                  <option key={foilType} value={foilType}>{foilType}</option>
+                ))}
               </select>
+              {filterGame === 'all' && (
+                <p className="text-xs text-slate-500 mt-1">Select a game first</p>
+              )}
+            </div>
+
+            <div>
+              <label htmlFor="filter-card-type" className="block text-sm font-medium text-slate-700 mb-2">
+                Card Type
+              </label>
+              <select
+                id="filter-card-type"
+                value={filters.cardType || 'all'}
+                onChange={(e) => setFilters(prev => ({ ...prev, cardType: e.target.value }))}
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+                disabled={filterGame === 'all'}
+              >
+                <option value="all">All Types</option>
+                {filterOptions.cardTypes.map(cardType => (
+                  <option key={cardType} value={cardType}>{cardType}</option>
+                ))}
+              </select>
+              {filterGame === 'all' && (
+                <p className="text-xs text-slate-500 mt-1">Select a game first</p>
+              )}
             </div>
 
             <div>
@@ -1598,6 +1658,7 @@ const AdminDashboard = () => {
                   setFilters({
                     quality: 'all',
                     foilType: 'all',
+                    cardType: 'all',
                     stockLevel: 'all',
                     minPrice: '',
                     maxPrice: '',
@@ -1617,6 +1678,7 @@ const AdminDashboard = () => {
           {(searchTerm || filterGame !== 'all' || filterSet !== 'all' ||
             (filters.quality && filters.quality !== 'all') ||
             (filters.foilType && filters.foilType !== 'all') ||
+            (filters.cardType && filters.cardType !== 'all') ||
             (filters.stockLevel && filters.stockLevel !== 'all') ||
             filters.minPrice || filters.maxPrice ||
             (filters.priceSource && filters.priceSource !== 'all')) && (
@@ -1672,6 +1734,17 @@ const AdminDashboard = () => {
                   <button
                     onClick={() => setFilters(prev => ({ ...prev, foilType: 'all' }))}
                     className="hover:bg-yellow-100 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {filters.cardType && filters.cardType !== 'all' && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm">
+                  Type: {filters.cardType}
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, cardType: 'all' }))}
+                    className="hover:bg-purple-100 rounded-full w-4 h-4 flex items-center justify-center"
                   >
                     <X className="w-3 h-3" />
                   </button>
@@ -2092,7 +2165,7 @@ const AdminDashboard = () => {
 
                 <div>
                   <label htmlFor="foil-type" className="block text-sm font-medium text-slate-700 mb-2">
-                    Card Type
+                    Foil Type
                   </label>
                   <select
                     id="foil-type"
@@ -2100,13 +2173,17 @@ const AdminDashboard = () => {
                     onChange={(e) => setFoilFormData({ ...foilFormData, foilType: e.target.value })}
                     className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
-                    <option value="Regular">Regular</option>
-                    <option value="Foil">Regular Foil</option>
-                    <option value="Etched">Etched Foil</option>
-                    <option value="Showcase">Showcase</option>
-                    <option value="Extended Art">Extended Art</option>
-                    <option value="Borderless">Borderless</option>
-                    <option value="Retro">Retro Frame</option>
+                    {filterOptions.foilTypes.length > 0 ? (
+                      filterOptions.foilTypes.map(foilType => (
+                        <option key={foilType} value={foilType}>{foilType}</option>
+                      ))
+                    ) : (
+                      // Fallback options if no game is selected or API fails
+                      <>
+                        <option value="Regular">Regular</option>
+                        <option value="Foil">Regular Foil</option>
+                      </>
+                    )}
                   </select>
                 </div>
 
