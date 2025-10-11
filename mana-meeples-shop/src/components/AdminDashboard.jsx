@@ -995,6 +995,7 @@ const AdminDashboard = () => {
                                   }`}
                                 >
                                   {quality.quality.substring(0, 2).toUpperCase()} ({quality.stock})
+                                  {console.log('Foil type for', quality.quality, ':', quality.foil_type, typeof quality.foil_type)}
                                   {quality.foil_type === 'Foil' && (
                                     <span className="ml-1 text-xs opacity-75" title="Foil Variation">✨</span>
                                   )}
