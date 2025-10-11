@@ -6,9 +6,86 @@ const pool = new Pool({
   ssl: { rejectUnauthorized: false }
 });
 
+// Retry helper for API calls
+async function fetchWithRetry(url, headers, maxRetries = 3, delay = 2000) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`   Attempt ${attempt}/${maxRetries}...`);
+      
+      const response = await fetch(url, { 
+        headers,
+        timeout: 30000 // 30 second timeout
+      });
+      
+      if (!response.ok) {
+        if (response.status === 504 || response.status === 503) {
+          if (attempt < maxRetries) {
+            console.log(`   ⏳ Server timeout, waiting ${delay}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2; // Exponential backoff
+            continue;
+          }
+        }
+        throw new Error(`Pokemon TCG API error: ${response.status} ${response.statusText}`);
+      }
+      
+      return await response.json();
+    } catch (err) {
+      if (attempt === maxRetries) throw err;
+      console.log(`   ⚠️  ${err.message}, retrying in ${delay}ms...`);
+      await new Promise(resolve => setTimeout(resolve, delay));
+      delay *= 2;
+    }
+  }
+}
+
+// Validate set ID format
+function validateSetId(setId) {
+  const normalized = setId.toLowerCase().trim();
+  
+  // Common patterns: sv3, swsh12, sm1, xy1, bw1, etc.
+  const validPattern = /^[a-z]{1,6}\d{1,3}[a-z]?$/;
+  
+  if (!validPattern.test(normalized)) {
+    console.log(`\n⚠️  Warning: "${setId}" doesn't match typical set ID patterns`);
+    console.log('   Expected formats: sv3, swsh12, sm1, xy1, etc.');
+    console.log('   Proceeding anyway...\n');
+  }
+  
+  return normalized;
+}
+
 // Import Pokemon set from Pokemon TCG API
 async function importPokemonSet(setId) {
-  console.log(`\n🎴 Starting import for Pokemon set: ${setId.toUpperCase()}`);
+  const normalizedSetId = validateSetId(setId);
+  
+  console.log(`\n🎴 Starting import for Pokemon set: ${normalizedSetId.toUpperCase()}`);
+  console.log('━'.repeat(60));
+  
+  // First, verify the set exists
+  console.log('🔍 Verifying set exists...');
+  try {
+    const setData = await fetchWithRetry(
+      `https://api.pokemontcg.io/v2/sets/${normalizedSetId}`,
+      {
+        'X-Api-Key': process.env.POKEMON_TCG_API_KEY || ''
+      }
+    );
+    
+    if (setData.data) {
+      console.log(`✅ Found set: ${setData.data.name}`);
+      console.log(`   Release Date: ${setData.data.releaseDate}`);
+      console.log(`   Total Cards: ${setData.data.total || 'Unknown'}`);
+    }
+  } catch (err) {
+    console.log(`❌ Could not verify set: ${err.message}`);
+    console.log('\n💡 Suggestions:');
+    console.log('   1. Check set ID at: https://pokemontcg.io/sets');
+    console.log('   2. Ensure the set ID is correct (case-insensitive)');
+    console.log('   3. Try again in a few minutes if API is down\n');
+    throw err;
+  }
+  
   console.log('━'.repeat(60));
   
   let allCards = [];
@@ -17,22 +94,14 @@ async function importPokemonSet(setId) {
   
   // Fetch all pages from Pokemon TCG API
   while (page <= totalPages) {
-    console.log(`📥 Fetching page ${page}...`);
+    console.log(`\n📥 Fetching page ${page}...`);
     
-    const response = await fetch(
-      `https://api.pokemontcg.io/v2/cards?q=set.id:${setId}&page=${page}&pageSize=250`,
+    const data = await fetchWithRetry(
+      `https://api.pokemontcg.io/v2/cards?q=set.id:${normalizedSetId}&page=${page}&pageSize=250`,
       {
-        headers: {
-          'X-Api-Key': process.env.POKEMON_TCG_API_KEY || ''
-        }
+        'X-Api-Key': process.env.POKEMON_TCG_API_KEY || ''
       }
     );
-    
-    if (!response.ok) {
-      throw new Error(`Pokemon TCG API error: ${response.status} ${response.statusText}`);
-    }
-    
-    const data = await response.json();
     
     if (!data.data || data.data.length === 0) {
       console.log('⚠️  No cards found for this set ID');
@@ -41,13 +110,14 @@ async function importPokemonSet(setId) {
     
     allCards = allCards.concat(data.data);
     totalPages = data.totalPages || 1;
-    console.log(`   Found ${data.data.length} cards on this page`);
+    console.log(`   ✅ Found ${data.data.length} cards on this page`);
     
     page++;
     
-    // Rate limit: wait 100ms between requests
+    // Rate limit: wait 500ms between requests (more conservative)
     if (page <= totalPages) {
-      await new Promise(resolve => setTimeout(resolve, 100));
+      console.log(`   ⏳ Waiting 500ms before next request...`);
+      await new Promise(resolve => setTimeout(resolve, 500));
     }
   }
 
@@ -64,14 +134,14 @@ async function importPokemonSet(setId) {
   const firstCard = allCards[0];
   
   // Create or get the set
-  console.log(`\n📦 Creating/updating set: ${firstCard.set.name} (${setId.toUpperCase()})`);
+  console.log(`\n📦 Creating/updating set: ${firstCard.set.name} (${normalizedSetId.toUpperCase()})`);
   const setResult = await pool.query(
     `INSERT INTO card_sets (game_id, name, code, release_date, active)
      VALUES ($1, $2, $3, $4, true)
      ON CONFLICT (game_id, code) 
      DO UPDATE SET name = EXCLUDED.name, release_date = EXCLUDED.release_date
      RETURNING id`,
-    [gameId, firstCard.set.name, setId.toUpperCase(), firstCard.set.releaseDate]
+    [gameId, firstCard.set.name, normalizedSetId.toUpperCase(), firstCard.set.releaseDate]
   );
   
   const setId_db = setResult.rows[0].id;
@@ -141,15 +211,6 @@ async function importPokemonSet(setId) {
         imported++;
       }
 
-      // Store price data for reference without creating zero-quantity inventory entries
-      const qualities = [
-        { name: 'Near Mint', discount: 0 },
-        { name: 'Lightly Played', discount: 0.1 },
-        { name: 'Moderately Played', discount: 0.2 },
-        { name: 'Heavily Played', discount: 0.3 },
-        { name: 'Damaged', discount: 0.5 }
-      ];
-
       // Get price - try market price first, then fall back to others
       const basePrice = parseFloat(
         card.cardmarket?.prices?.averageSellPrice ||
@@ -160,8 +221,7 @@ async function importPokemonSet(setId) {
         0
       );
 
-      // Store base pricing information for the card (no inventory entries created)
-      // This allows the admin interface to calculate prices dynamically when adding inventory
+      // Store base pricing information
       await pool.query(
         `INSERT INTO card_pricing (card_id, base_price, foil_price, price_source, updated_at)
          VALUES ($1, $2, $3, 'api_pokemon', NOW())
@@ -176,12 +236,12 @@ async function importPokemonSet(setId) {
              ELSE EXCLUDED.foil_price
            END,
            updated_at = NOW()`,
-        [cardId, basePrice, basePrice * 1.5] // Pokemon doesn't have separate foil pricing, estimate 1.5x
+        [cardId, basePrice, basePrice * 1.5]
       );
 
       // Progress indicator
-      if ((idx + 1) % 50 === 0) {
-        console.log(`   Processed ${idx + 1}/${allCards.length} cards...`);
+      if ((idx + 1) % 25 === 0 || idx === allCards.length - 1) {
+        console.log(`   📊 Processed ${idx + 1}/${allCards.length} cards (${Math.round((idx + 1) / allCards.length * 100)}%)`);
       }
 
     } catch (err) {
