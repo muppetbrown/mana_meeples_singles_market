@@ -29,9 +29,12 @@ const TCGShop = () => {
 
   // Create a stable handleError function to prevent unnecessary re-renders
   const errorHandler = useErrorHandler();
+  const errorHandlerRef = useRef(errorHandler);
+  errorHandlerRef.current = errorHandler; // Always keep ref up to date
+
   const handleError = useCallback((error, context) => {
-    return errorHandler.handleError(error, context);
-  }, [errorHandler]);
+    return errorHandlerRef.current.handleError(error, context);
+  }, []); // No dependencies - use ref for current value
   const [showCart, setShowCart] = useState(false);
   const [showMiniCart, setShowMiniCart] = useState(false);
   const [showCheckout, setShowCheckout] = useState(false);
