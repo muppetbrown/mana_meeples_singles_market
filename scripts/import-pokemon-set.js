@@ -18,14 +18,25 @@ async function fetchWithRetry(url, headers, maxRetries = 3, delay = 2000) {
       });
       
       if (!response.ok) {
-        if (response.status === 504 || response.status === 503) {
+        if (response.status === 504 || response.status === 503 || response.status === 502) {
           if (attempt < maxRetries) {
-            console.log(`   ⏳ Server timeout, waiting ${delay}ms before retry...`);
+            console.log(`   ⏳ Server error (${response.status}), waiting ${delay}ms before retry...`);
             await new Promise(resolve => setTimeout(resolve, delay));
             delay *= 2; // Exponential backoff
             continue;
           }
         }
+        
+        // For 404 on card queries, it might be a timing issue
+        if (response.status === 404 && url.includes('/cards?')) {
+          if (attempt < maxRetries) {
+            console.log(`   ⏳ Cards not found (404), waiting ${delay}ms before retry...`);
+            await new Promise(resolve => setTimeout(resolve, delay));
+            delay *= 2;
+            continue;
+          }
+        }
+        
         throw new Error(`Pokemon TCG API error: ${response.status} ${response.statusText}`);
       }
       
@@ -43,16 +54,44 @@ async function fetchWithRetry(url, headers, maxRetries = 3, delay = 2000) {
 function validateSetId(setId) {
   const normalized = setId.toLowerCase().trim();
   
-  // Common patterns: sv3, swsh12, sm1, xy1, bw1, etc.
-  const validPattern = /^[a-z]{1,6}\d{1,3}[a-z]?$/;
+  // Common patterns including the weird Black Bolt/White Flare codes
+  const validPattern = /^[a-z]{1,6}\d{1,3}[a-z0-9]*$/;
   
   if (!validPattern.test(normalized)) {
     console.log(`\n⚠️  Warning: "${setId}" doesn't match typical set ID patterns`);
-    console.log('   Expected formats: sv3, swsh12, sm1, xy1, etc.');
+    console.log('   Expected formats: sv3, swsh12, sm1, xy1, zsv10pt5, etc.');
     console.log('   Proceeding anyway...\n');
   }
   
   return normalized;
+}
+
+// Try multiple query formats for finding cards
+async function fetchCardsMultipleFormats(setId, page, headers) {
+  const queries = [
+    // Standard query
+    `https://api.pokemontcg.io/v2/cards?q=set.id:${setId}&page=${page}&pageSize=250`,
+    // Try with quotes
+    `https://api.pokemontcg.io/v2/cards?q=set.id:"${setId}"&page=${page}&pageSize=250`,
+    // Try with uppercase
+    `https://api.pokemontcg.io/v2/cards?q=set.id:${setId.toUpperCase()}&page=${page}&pageSize=250`,
+  ];
+  
+  for (let i = 0; i < queries.length; i++) {
+    try {
+      console.log(`   🔍 Query format ${i + 1}/${queries.length}...`);
+      const data = await fetchWithRetry(queries[i], headers, 2, 1000);
+      if (data.data && data.data.length > 0) {
+        console.log(`   ✅ Success with query format ${i + 1}`);
+        return data;
+      }
+    } catch (err) {
+      console.log(`   ❌ Query format ${i + 1} failed: ${err.message}`);
+      if (i === queries.length - 1) throw err;
+    }
+  }
+  
+  return { data: [], totalPages: 0 };
 }
 
 // Import Pokemon set from Pokemon TCG API
@@ -64,6 +103,7 @@ async function importPokemonSet(setId) {
   
   // First, verify the set exists
   console.log('🔍 Verifying set exists...');
+  let setInfo;
   try {
     const setData = await fetchWithRetry(
       `https://api.pokemontcg.io/v2/sets/${normalizedSetId}`,
@@ -73,57 +113,95 @@ async function importPokemonSet(setId) {
     );
     
     if (setData.data) {
-      console.log(`✅ Found set: ${setData.data.name}`);
-      console.log(`   Release Date: ${setData.data.releaseDate}`);
-      console.log(`   Total Cards: ${setData.data.total || 'Unknown'}`);
+      setInfo = setData.data;
+      console.log(`✅ Found set: ${setInfo.name}`);
+      console.log(`   Release Date: ${setInfo.releaseDate}`);
+      console.log(`   Total Cards: ${setInfo.total || 'Unknown'}`);
+      console.log(`   Series: ${setInfo.series || 'Unknown'}`);
     }
   } catch (err) {
     console.log(`❌ Could not verify set: ${err.message}`);
     console.log('\n💡 Suggestions:');
     console.log('   1. Check set ID at: https://pokemontcg.io/sets');
     console.log('   2. Ensure the set ID is correct (case-insensitive)');
-    console.log('   3. Try again in a few minutes if API is down\n');
+    console.log('   3. Try again in a few minutes if API is down');
+    console.log('   4. For very new sets, card data may not be available yet\n');
     throw err;
   }
   
   console.log('━'.repeat(60));
   
+  // Special handling for new sets that might not have cards indexed yet
+  if (setInfo && setInfo.releaseDate) {
+    const releaseDate = new Date(setInfo.releaseDate);
+    const now = new Date();
+    const daysSinceRelease = Math.floor((now - releaseDate) / (1000 * 60 * 60 * 24));
+    
+    if (daysSinceRelease < 0) {
+      console.log(`\n⚠️  WARNING: This set releases in ${Math.abs(daysSinceRelease)} days!`);
+      console.log('   Card data may not be available yet.\n');
+    } else if (daysSinceRelease < 7) {
+      console.log(`\n⚠️  NOTE: This set was released ${daysSinceRelease} days ago.`);
+      console.log('   Card data might still be getting indexed.\n');
+    }
+  }
+  
   let allCards = [];
   let page = 1;
   let totalPages = 1;
+  
+  const headers = {
+    'X-Api-Key': process.env.POKEMON_TCG_API_KEY || ''
+  };
   
   // Fetch all pages from Pokemon TCG API
   while (page <= totalPages) {
     console.log(`\n📥 Fetching page ${page}...`);
     
-    const data = await fetchWithRetry(
-      `https://api.pokemontcg.io/v2/cards?q=set.id:${normalizedSetId}&page=${page}&pageSize=250`,
-      {
-        'X-Api-Key': process.env.POKEMON_TCG_API_KEY || ''
+    try {
+      const data = await fetchCardsMultipleFormats(normalizedSetId, page, headers);
+      
+      if (!data.data || data.data.length === 0) {
+        if (page === 1) {
+          console.log('\n❌ No cards found for this set.');
+          console.log('\n💡 Possible reasons:');
+          console.log('   • Set is too new and cards aren\'t indexed yet');
+          console.log('   • API is having issues with this specific set');
+          console.log('   • Set exists but has no cards published');
+          console.log('\n💡 Suggestions:');
+          console.log('   • Try again in 24-48 hours');
+          console.log('   • Check https://pokemontcg.io/cards for card availability');
+          console.log('   • Contact Pokemon TCG API support if issue persists\n');
+        }
+        break;
       }
-    );
-    
-    if (!data.data || data.data.length === 0) {
-      console.log('⚠️  No cards found for this set ID');
-      break;
-    }
-    
-    allCards = allCards.concat(data.data);
-    totalPages = data.totalPages || 1;
-    console.log(`   ✅ Found ${data.data.length} cards on this page`);
-    
-    page++;
-    
-    // Rate limit: wait 500ms between requests (more conservative)
-    if (page <= totalPages) {
-      console.log(`   ⏳ Waiting 500ms before next request...`);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      allCards = allCards.concat(data.data);
+      totalPages = data.totalPages || 1;
+      console.log(`   ✅ Found ${data.data.length} cards on this page`);
+      
+      page++;
+      
+      // Rate limit: wait 1000ms between requests (very conservative)
+      if (page <= totalPages) {
+        console.log(`   ⏳ Waiting 1000ms before next request...`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+    } catch (err) {
+      console.log(`\n❌ Failed to fetch page ${page}: ${err.message}`);
+      
+      if (allCards.length > 0) {
+        console.log(`\n⚠️  Partial import: Retrieved ${allCards.length} cards before error.`);
+        console.log('Proceeding with available cards...\n');
+        break;
+      } else {
+        throw err;
+      }
     }
   }
 
   if (allCards.length === 0) {
-    console.log('\n❌ No cards found. Check your set ID.');
-    console.log('Find set IDs at: https://pokemontcg.io/sets');
+    console.log('\n❌ No cards to import.');
     return;
   }
 
@@ -257,6 +335,13 @@ async function importPokemonSet(setId) {
   console.log(`🔄 Existing cards updated: ${updated}`);
   console.log(`❌ Errors:                 ${errors}`);
   console.log(`📦 Total in database:      ${imported + updated}`);
+  if (setInfo && setInfo.total) {
+    console.log(`📋 Expected total:         ${setInfo.total}`);
+    if (imported + updated < setInfo.total) {
+      console.log(`⚠️  Missing cards:          ${setInfo.total - (imported + updated)}`);
+      console.log(`   (May need to retry later if API is still indexing)`);
+    }
+  }
   console.log('━'.repeat(60));
 }
 
@@ -269,8 +354,9 @@ if (!setId) {
   console.error('\n📝 Examples:');
   console.error('   node scripts/import-pokemon-set.js sv3        (Obsidian Flames)');
   console.error('   node scripts/import-pokemon-set.js sv4        (Paradox Rift)');
-  console.error('   node scripts/import-pokemon-set.js sv5        (Temporal Forces)');
-  console.error('   node scripts/import-pokemon-set.js swsh12     (Silver Tempest)');
+  console.error('   node scripts/import-pokemon-set.js sv9        (Journey Together)');
+  console.error('   node scripts/import-pokemon-set.js zsv10pt5   (Black Bolt)');
+  console.error('   node scripts/import-pokemon-set.js rsv10pt5   (White Flare)');
   console.error('\n🔗 Find set IDs at: https://pokemontcg.io/sets\n');
   process.exit(1);
 }
