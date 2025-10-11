@@ -7,19 +7,22 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        primary: {
-          50: '#eff6ff',
-          100: '#dbeafe',
-          200: '#bfdbfe',
-          300: '#93c5fd',
-          400: '#60a5fa',
-          500: '#3b82f6',
-          600: '#2563eb',
-          700: '#1d4ed8',
-          800: '#1e40af',
-          900: '#1e3a8a',
+        // Mana & Meeples Brand Colors
+        mm: {
+          cream: '#f4f1e8',        // Body background
+          warmAccent: '#e4dcd2',   // Card borders, alternate backgrounds
+          darkForest: '#1f2f2d',   // Primary text
+          forest: '#2d4a47',       // Headers, dark borders
+          teal: '#4a6b67',         // Secondary text
+          tealLight: '#e8f4f1',    // Section backgrounds, hover states
+          tealBright: '#4a9b8e',   // Primary actions, accents
+          gold: '#8b6914',         // CTAs, special highlights
+          goldDark: '#6b5010',     // Hover states for gold
         },
-        secondary: {
+        // Keep some utility colors
+        white: '#ffffff',
+        black: '#000000',
+        slate: {
           50: '#f8fafc',
           100: '#f1f5f9',
           200: '#e2e8f0',
@@ -33,7 +36,20 @@ module.exports = {
         }
       },
       fontFamily: {
-        sans: ['-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+        sans: ['Segoe UI', 'Tahoma', 'Geneva', 'Verdana', 'sans-serif'],
+      },
+      boxShadow: {
+        'mm-card': '0 2px 4px rgba(0,0,0,0.05)',
+        'mm-card-hover': '0 4px 12px rgba(0,0,0,0.1)',
+        'mm-section': '0 4px 12px rgba(0,0,0,0.1)',
+        'mm-strong': '0 6px 20px rgba(0,0,0,0.15)',
+      },
+      borderRadius: {
+        'mm-sm': '5px',
+        'mm-md': '8px',
+        'mm-lg': '10px',
+        'mm-xl': '12px',
+        'mm-2xl': '15px',
       },
       animation: {
         'spin-slow': 'spin 2s linear infinite',
