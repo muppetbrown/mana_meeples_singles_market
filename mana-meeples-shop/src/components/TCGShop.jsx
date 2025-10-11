@@ -792,23 +792,23 @@ const TCGShop = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+      <div className="min-h-screen bg-gradient-to-br from-mm-cream to-mm-tealLight">
         {/* Skip to main content link for accessibility */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+          className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-mm-gold focus:text-white focus:rounded-lg focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none"
         >
           Skip to main content
         </a>
 
         {/* Skeleton Header */}
-        <header className="bg-white shadow-sm border-b border-slate-200">
+        <header className="bg-white shadow-sm border-b border-mm-warmAccent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
             <div className="flex items-center justify-between gap-4">
-              <div className="h-8 bg-slate-200 rounded w-32 animate-pulse"></div>
+              <div className="h-8 bg-mm-warmAccent rounded w-32 animate-pulse"></div>
               <div className="flex items-center gap-4">
-                <div className="h-6 bg-slate-200 rounded w-24 animate-pulse"></div>
-                <div className="h-10 bg-slate-200 rounded w-10 animate-pulse"></div>
+                <div className="h-6 bg-mm-warmAccent rounded w-24 animate-pulse"></div>
+                <div className="h-10 bg-mm-warmAccent rounded w-10 animate-pulse"></div>
               </div>
             </div>
           </div>
@@ -821,8 +821,8 @@ const TCGShop = () => {
             <aside className="lg:w-64 space-y-6">
               {[1,2,3,4,5].map(i => (
                 <div key={i} className="bg-white rounded-lg p-4 shadow-sm">
-                  <div className="h-4 bg-slate-200 rounded w-20 mb-3 animate-pulse"></div>
-                  <div className="h-10 bg-slate-200 rounded animate-pulse"></div>
+                  <div className="h-4 bg-mm-warmAccent rounded w-20 mb-3 animate-pulse"></div>
+                  <div className="h-10 bg-mm-warmAccent rounded animate-pulse"></div>
                 </div>
               ))}
             </aside>
@@ -830,7 +830,7 @@ const TCGShop = () => {
             {/* Skeleton Cards Grid */}
             <div className="flex-1">
               <div className="mb-6">
-                <div className="h-6 bg-slate-200 rounded w-48 animate-pulse"></div>
+                <div className="h-6 bg-mm-warmAccent rounded w-48 animate-pulse"></div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -852,14 +852,14 @@ const TCGShop = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-mm-cream flex items-center justify-center">
         <div className="text-center max-w-md mx-auto p-6">
           <div className="text-6xl mb-4">⚠️</div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Connection Error</h2>
-          <p className="text-slate-600 mb-4">{error}</p>
+          <h2 className="text-2xl font-bold text-mm-darkForest mb-2">Connection Error</h2>
+          <p className="text-mm-teal mb-4">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg"
+            className="btn-mm-primary"
           >
             Retry Connection
           </button>
@@ -883,11 +883,11 @@ const TCGShop = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-mm-cream to-mm-tealLight">
       {/* Skip to main content link for accessibility */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-mm-gold focus:text-white focus:rounded-lg focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none"
       >
         Skip to main content
       </a>
@@ -898,10 +898,10 @@ const TCGShop = () => {
         </div>
       )}
 
-      <header className="bg-white shadow-sm sticky top-0 z-40 border-b border-slate-200">
+      <header className="bg-white shadow-sm sticky top-0 z-40 border-b border-mm-warmAccent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between gap-4">
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-mm-gold to-mm-tealBright bg-clip-text text-transparent">
               TCG Singles
             </h1>
             <div className="flex items-center gap-3">
@@ -915,12 +915,12 @@ const TCGShop = () => {
               {/* Shopping Cart */}
               <button
                 onClick={() => setShowCart(true)}
-                className="relative p-3 hover:bg-slate-100 rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                className="relative p-3 hover:bg-mm-tealLight rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none"
                 aria-label={`Open shopping cart with ${cartCount} items`}
               >
-                <ShoppingCart className="w-6 h-6 text-slate-700" />
+                <ShoppingCart className="w-6 h-6 text-mm-forest" />
                 <span
-                  className={`absolute -top-1 -right-1 ${cartCount > 0 ? 'bg-blue-600' : 'bg-slate-400'} text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center`}
+                  className={`absolute -top-1 -right-1 ${cartCount > 0 ? 'bg-mm-gold' : 'bg-mm-teal'} text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center`}
                   aria-live="assertive"
                   aria-label={`${cartCount} items in cart`}
                 >
@@ -937,13 +937,13 @@ const TCGShop = () => {
         <div className="lg:hidden mb-4">
           <button
             onClick={() => setShowMobileFilters(true)}
-            className="flex items-center gap-2 w-full px-4 py-3 bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+            className="btn-mm-secondary w-full"
             aria-label="Open filters and search panel"
             aria-expanded={showMobileFilters}
           >
-            <Filter className="w-5 h-5 text-slate-600" />
-            <span className="font-medium text-slate-700">Filters & Search</span>
-            <ChevronDown className="w-4 h-4 text-slate-600 ml-auto" />
+            <Filter className="w-5 h-5 text-mm-teal" />
+            <span className="font-medium text-mm-forest">Filters & Search</span>
+            <ChevronDown className="w-4 h-4 text-mm-teal ml-auto" />
           </button>
         </div>
 
@@ -951,14 +951,14 @@ const TCGShop = () => {
         <div className="lg:flex lg:gap-6">
           {/* Desktop Sidebar Filters */}
           <aside className="hidden lg:block w-80 flex-shrink-0">
-            <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200 sticky top-24">
-              <h2 className="text-lg font-semibold text-slate-900 mb-4">Search & Filters</h2>
+            <div className="card-mm sticky top-24">
+              <h2 className="text-lg font-semibold text-mm-darkForest mb-4">Search & Filters</h2>
 
               {/* Search Bar */}
               <div className="mb-6">
-                <label className="block text-sm font-medium text-slate-700 mb-2">Search</label>
+                <label className="block text-sm font-medium text-mm-forest mb-2">Search</label>
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-mm-teal w-4 h-4" />
                   <input
                     type="search"
                     placeholder="Card name, set, number..."
@@ -1005,7 +1005,7 @@ const TCGShop = () => {
                           break;
                       }
                     }}
-                    className="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                    className="input-mm"
                     aria-label="Search for cards by name, set, or number"
                     aria-describedby={showSuggestions ? "search-suggestions" : undefined}
                     aria-expanded={showSuggestions}
@@ -1019,15 +1019,15 @@ const TCGShop = () => {
                 {showSuggestions && searchSuggestions.length > 0 && (
                   <div
                     id="search-suggestions"
-                    className="absolute top-full left-0 right-0 bg-white border border-slate-300 rounded-lg mt-1 shadow-lg z-50 max-h-48 overflow-y-auto"
+                    className="absolute top-full left-0 right-0 bg-white border border-mm-warmAccent rounded-lg mt-1 shadow-lg z-50 max-h-48 overflow-y-auto"
                     role="listbox"
                   >
                     {searchSuggestions.map((suggestion, idx) => (
                       <button
                         key={idx}
                         id={`suggestion-${idx}`}
-                        className={`w-full px-3 py-2 text-left hover:bg-slate-50 focus:bg-slate-50 focus:ring-2 focus:ring-blue-500 focus:outline-none flex items-center gap-2 border-b last:border-b-0 ${
-                          selectedSuggestionIndex === idx ? 'bg-blue-50' : ''
+                        className={`w-full px-3 py-2 text-left hover:bg-mm-tealLight focus:bg-mm-tealLight focus:ring-2 focus:ring-mm-forest focus:outline-none flex items-center gap-2 border-b last:border-b-0 ${
+                          selectedSuggestionIndex === idx ? 'bg-mm-tealLight' : ''
                         }`}
                         onMouseDown={() => {
                           // Use onMouseDown instead of onClick to prevent blur issues
@@ -1050,7 +1050,7 @@ const TCGShop = () => {
                           <div className="text-xs font-medium">
                             {highlightMatch(suggestion.name, searchTerm)}
                           </div>
-                          <div className="text-xs text-slate-600">{suggestion.set_name}</div>
+                          <div className="text-xs text-mm-teal">{suggestion.set_name}</div>
                         </div>
                       </button>
                     ))}
@@ -1060,12 +1060,12 @@ const TCGShop = () => {
 
               {/* Game Filter - Dropdown Style */}
               <div className="mb-6">
-                <label htmlFor="game-filter" className="block text-sm font-medium text-slate-700 mb-2">Game</label>
+                <label htmlFor="game-filter" className="block text-sm font-medium text-mm-forest mb-2">Game</label>
                 <select
                   id="game-filter"
                   value={selectedGame}
                   onChange={(e) => handleGameChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+                  className="w-full px-3 py-2 border border-mm-warmAccent rounded-lg focus:ring-2 focus:ring-mm-forest focus:border-transparent bg-white text-sm"
                 >
                   <option value="all">All Games</option>
                   {games.map(game => (
@@ -1076,12 +1076,12 @@ const TCGShop = () => {
 
               {/* Set Filter - Dynamic based on selected game */}
               <div className="mb-6">
-                <label htmlFor="set-filter" className="block text-sm font-medium text-slate-700 mb-2">Set</label>
+                <label htmlFor="set-filter" className="block text-sm font-medium text-mm-forest mb-2">Set</label>
                 <select
                   id="set-filter"
                   value={filters.set}
                   onChange={(e) => handleFilterChange('set', e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white disabled:bg-slate-50 disabled:text-slate-500 text-sm"
+                  className="w-full px-3 py-2 border border-mm-warmAccent rounded-lg focus:ring-2 focus:ring-mm-forest focus:border-transparent bg-white disabled:bg-mm-tealLight disabled:text-mm-teal text-sm"
                   disabled={selectedGame === 'all'}
                   aria-describedby={selectedGame === 'all' ? "set-help-text" : undefined}
                   aria-label={`Filter by card set${selectedGame !== 'all' ? `, currently ${availableSets.length} sets available` : ' (select a game first)'}`}
@@ -1092,19 +1092,19 @@ const TCGShop = () => {
                   ))}
                 </select>
                 {selectedGame === 'all' && (
-                  <p id="set-help-text" className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
+                  <p id="set-help-text" className="text-xs text-mm-teal mt-1">Select a game to filter by set</p>
                 )}
               </div>
 
               {/* Other Filters */}
               <div className="space-y-4">
                 <div>
-                  <label htmlFor="rarity-filter" className="block text-sm font-medium text-slate-700 mb-2">Rarity</label>
+                  <label htmlFor="rarity-filter" className="block text-sm font-medium text-mm-forest mb-2">Rarity</label>
                   <select
                     id="rarity-filter"
                     value={filters.rarity}
                     onChange={(e) => handleFilterChange('rarity', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                     aria-label={`Filter by card rarity, ${Object.keys(filterCounts.rarities || {}).length} rarity types available`}
                   >
                     <option value="all">All Rarities</option>
@@ -1165,11 +1165,11 @@ const TCGShop = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Condition</label>
+                  <label className="block text-sm font-medium text-mm-forest mb-2">Condition</label>
                   <select
                     value={filters.quality}
                     onChange={(e) => handleFilterChange('quality', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                   >
                     <option value="all">All Conditions</option>
                     {filterOptions.qualities.map(quality => (
@@ -1181,12 +1181,12 @@ const TCGShop = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="foil-filter" className="block text-sm font-medium text-slate-700 mb-2">Foil Type</label>
+                  <label htmlFor="foil-filter" className="block text-sm font-medium text-mm-forest mb-2">Foil Type</label>
                   <select
                     id="foil-filter"
                     value={filters.foilType}
                     onChange={(e) => handleFilterChange('foilType', e.target.value)}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                    className="w-full px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                     aria-label={`Filter by foil type, ${filterOptions.foilTypes.length} foil type options available`}
                   >
                     <option value="all">All Foil Types</option>
@@ -1199,7 +1199,7 @@ const TCGShop = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Price Range ({currency.symbol})</label>
+                  <label className="block text-sm font-medium text-mm-forest mb-2">Price Range ({currency.symbol})</label>
                   <div className="grid grid-cols-2 gap-2">
                     <input
                       id="min-price-filter"
@@ -1207,7 +1207,7 @@ const TCGShop = () => {
                       placeholder="Min"
                       value={filters.minPrice}
                       onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                      className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                       step="0.01"
                       aria-label={`Minimum price filter in ${currency.code}`}
                     />
@@ -1217,7 +1217,7 @@ const TCGShop = () => {
                       placeholder="Max"
                       value={filters.maxPrice}
                       onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                      className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      className="px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                       step="0.01"
                       aria-label={`Maximum price filter in ${currency.code}`}
                     />
@@ -1225,13 +1225,13 @@ const TCGShop = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="sort-filter" className="block text-sm font-medium text-slate-700 mb-2">Sort By</label>
+                  <label htmlFor="sort-filter" className="block text-sm font-medium text-mm-forest mb-2">Sort By</label>
                   <div className="flex gap-2">
                     <select
                       id="sort-filter"
                       value={filters.sortBy}
                       onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      className="flex-1 px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                       aria-label="Sort cards by different criteria"
                     >
                       <optgroup label="📝 Basic">
@@ -1250,7 +1250,7 @@ const TCGShop = () => {
                     </select>
                     <button
                       onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-                      className="px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50"
+                      className="px-3 py-2 border border-mm-warmAccent rounded-lg text-sm hover:bg-mm-tealLight"
                     >
                       {filters.sortOrder === 'asc' ? '↑' : '↓'}
                     </button>
@@ -1265,21 +1265,21 @@ const TCGShop = () => {
             {/* Results Header */}
             <div className="flex items-center mb-4">
               <div className="flex-1 pr-4">
-                <p className="text-slate-600" aria-live="polite">
+                <p className="text-mm-teal" aria-live="polite">
                   <span className="font-medium">{cards.length}</span> cards found
                 </p>
               </div>
 
               {/* View Toggle - Absolutely Fixed Position */}
               <div className="flex items-center gap-2 flex-shrink-0" style={{ minWidth: '140px', width: '140px' }}>
-                <span className="text-sm text-slate-600 hidden sm:inline" style={{ width: '36px' }}>View:</span>
-                <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5" style={{ width: '96px' }}>
+                <span className="text-sm text-mm-teal hidden sm:inline" style={{ width: '36px' }}>View:</span>
+                <div className="inline-flex rounded-lg border border-mm-warmAccent bg-white p-0.5" style={{ width: '96px' }}>
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`px-3 py-2 rounded-md transition-colors motion-reduce:transition-none ${
                       viewMode === 'grid'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                        ? 'bg-mm-gold text-white shadow-sm'
+                        : 'text-mm-teal hover:text-mm-darkForest hover:bg-mm-tealLight'
                     }`}
                     style={{ width: '44px', minWidth: '44px' }}
                     aria-pressed={viewMode === 'grid'}
@@ -1291,8 +1291,8 @@ const TCGShop = () => {
                     onClick={() => setViewMode('list')}
                     className={`px-3 py-2 rounded-md transition-colors motion-reduce:transition-none ${
                       viewMode === 'list'
-                        ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                        ? 'bg-mm-gold text-white shadow-sm'
+                        : 'text-mm-teal hover:text-mm-darkForest hover:bg-mm-tealLight'
                     }`}
                     style={{ width: '44px', minWidth: '44px' }}
                     aria-pressed={viewMode === 'list'}
@@ -1307,11 +1307,11 @@ const TCGShop = () => {
             {/* Active Filter Badges */}
             {activeFilters.length > 0 && (
               <div className="mb-4 flex flex-wrap items-center gap-2">
-                <span className="text-sm text-slate-600 font-medium">Active filters:</span>
+                <span className="text-sm text-mm-teal font-medium">Active filters:</span>
                 {activeFilters.map((filter) => (
                   <span
                     key={filter.key}
-                    className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-900 rounded-full text-sm"
+                    className="inline-flex items-center gap-2 px-3 py-1 bg-mm-tealLight text-mm-tealBright rounded-full text-sm"
                   >
                     <span>{filter.displayName}: {filter.displayValue}</span>
                     <button
@@ -1324,7 +1324,7 @@ const TCGShop = () => {
                           handleFilterChange(filter.key, '');
                         }
                       }}
-                      className="ml-1 hover:bg-blue-200 rounded-full w-4 h-4 flex items-center justify-center focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                      className="ml-1 hover:bg-mm-warmAccent rounded-full w-4 h-4 flex items-center justify-center focus:ring-2 focus:ring-mm-forest focus:outline-none"
                       aria-label={`Clear ${filter.displayName} filter`}
                     >
                       <X className="w-3 h-3" />
@@ -1334,7 +1334,7 @@ const TCGShop = () => {
                 {activeFilters.length > 1 && (
                   <button
                     onClick={clearAllFilters}
-                    className="px-3 py-1 text-sm text-slate-600 hover:text-slate-800 hover:bg-slate-100 rounded-full border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                    className="px-3 py-1 text-sm text-mm-teal hover:text-mm-darkForest hover:bg-mm-tealLight rounded-full border border-mm-warmAccent focus:ring-2 focus:ring-mm-forest focus:outline-none"
                   >
                     Clear All
                   </button>
@@ -1352,8 +1352,8 @@ const TCGShop = () => {
                     <Suspense
                       fallback={
                         <div className="text-center py-8">
-                          <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                          <p className="text-slate-600 text-sm">Loading virtual scrolling...</p>
+                          <div className="w-6 h-6 border-2 border-mm-gold border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
+                          <p className="text-mm-teal text-sm">Loading virtual scrolling...</p>
                         </div>
                       }
                     >
@@ -1446,7 +1446,7 @@ const TCGShop = () => {
 
             {cards.length === 0 && !loading && (
               <div className="text-center py-12 bg-white rounded-xl shadow-sm">
-                <p className="text-slate-700 text-lg">No cards found matching your search</p>
+                <p className="text-mm-forest text-lg">No cards found matching your search</p>
               </div>
             )}
           </div>
@@ -1468,7 +1468,7 @@ const TCGShop = () => {
                 <h2 id="mobile-filters-title" className="text-xl font-bold">Filters</h2>
                 <button
                   onClick={() => setShowMobileFilters(false)}
-                  className="p-2 hover:bg-slate-100 rounded-lg focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                  className="p-2 hover:bg-mm-tealLight rounded-lg focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none"
                   aria-label="Close filters panel"
                 >
                   <X className="w-6 h-6" />
@@ -1477,15 +1477,15 @@ const TCGShop = () => {
               <div className="p-6">
                 {/* Mobile search */}
                 <div className="mb-6">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Search</label>
+                  <label className="block text-sm font-medium text-mm-forest mb-2">Search</label>
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-mm-teal w-4 h-4" />
                     <input
                       type="search"
                       placeholder="Card name, set, number..."
                       value={searchTerm}
                       onChange={(e) => handleSearchChange(e.target.value)}
-                      className="w-full pl-9 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
+                      className="input-mm"
                       aria-label="Search for cards by name, set, or number"
                     />
                   </div>
@@ -1494,12 +1494,12 @@ const TCGShop = () => {
                 {/* Mobile filters - same as desktop sidebar */}
                 <div className="space-y-4">
                   <div>
-                    <label htmlFor="mobile-game-filter" className="block text-sm font-medium text-slate-700 mb-2">Game</label>
+                    <label htmlFor="mobile-game-filter" className="block text-sm font-medium text-mm-forest mb-2">Game</label>
                     <select
                       id="mobile-game-filter"
                       value={selectedGame}
                       onChange={(e) => handleGameChange(e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                       aria-label={`Filter by game, ${games.length} games available`}
                     >
                       <option value="all">All Games</option>
@@ -1510,11 +1510,11 @@ const TCGShop = () => {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Set</label>
+                    <label className="block text-sm font-medium text-mm-forest mb-2">Set</label>
                     <select
                       value={filters.set}
                       onChange={(e) => handleFilterChange('set', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 disabled:bg-slate-50 disabled:text-slate-500"
+                      className="w-full px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest disabled:bg-mm-tealLight disabled:text-mm-teal"
                       disabled={selectedGame === 'all'}
                     >
                       <option value="all">All Sets</option>
@@ -1523,16 +1523,16 @@ const TCGShop = () => {
                       ))}
                     </select>
                     {selectedGame === 'all' && (
-                      <p className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
+                      <p className="text-xs text-mm-teal mt-1">Select a game to filter by set</p>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">Rarity</label>
+                    <label className="block text-sm font-medium text-mm-forest mb-2">Rarity</label>
                     <select
                       value={filters.rarity}
                       onChange={(e) => handleFilterChange('rarity', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                     >
                       <option value="all">All Rarities</option>
                       <optgroup label="⚪ Common">
@@ -1592,12 +1592,12 @@ const TCGShop = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="condition-filter" className="block text-sm font-medium text-slate-700 mb-2">Condition</label>
+                    <label htmlFor="condition-filter" className="block text-sm font-medium text-mm-forest mb-2">Condition</label>
                     <select
                       id="condition-filter"
                       value={filters.quality}
                       onChange={(e) => handleFilterChange('quality', e.target.value)}
-                      className="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                       aria-label={`Filter by card condition, ${filterOptions.qualities.length} condition types available`}
                     >
                       <option value="all">All Conditions</option>
@@ -1611,7 +1611,7 @@ const TCGShop = () => {
 
                   <div>
                     <fieldset>
-                      <legend className="block text-sm font-medium text-slate-700 mb-2">Price Range ({currency.symbol})</legend>
+                      <legend className="block text-sm font-medium text-mm-forest mb-2">Price Range ({currency.symbol})</legend>
                       <div className="grid grid-cols-2 gap-2">
                         <input
                           id="min-price"
@@ -1619,7 +1619,7 @@ const TCGShop = () => {
                           placeholder="Min"
                           value={filters.minPrice}
                           onChange={(e) => handleFilterChange('minPrice', e.target.value)}
-                          className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                          className="px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                           step="0.01"
                           min="0"
                           aria-label={`Minimum price filter in ${currency.symbol}`}
@@ -1630,7 +1630,7 @@ const TCGShop = () => {
                           placeholder="Max"
                           value={filters.maxPrice}
                           onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
-                          className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                          className="px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                           step="0.01"
                           min="0"
                           aria-label={`Maximum price filter in ${currency.symbol}`}
@@ -1640,13 +1640,13 @@ const TCGShop = () => {
                   </div>
 
                   <div>
-                    <label htmlFor="sort-by" className="block text-sm font-medium text-slate-700 mb-2">Sort By</label>
+                    <label htmlFor="sort-by" className="block text-sm font-medium text-mm-forest mb-2">Sort By</label>
                     <div className="flex gap-2">
                       <select
                         id="sort-by"
                         value={filters.sortBy}
                         onChange={(e) => handleFilterChange('sortBy', e.target.value)}
-                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-3 py-2 border border-mm-warmAccent rounded-lg text-sm focus:ring-2 focus:ring-mm-forest"
                         aria-label="Choose sorting method for cards"
                       >
                         <optgroup label="📝 Basic">
@@ -1665,7 +1665,7 @@ const TCGShop = () => {
                       </select>
                       <button
                         onClick={() => handleFilterChange('sortOrder', filters.sortOrder === 'asc' ? 'desc' : 'asc')}
-                        className="px-3 py-2 border border-slate-300 rounded-lg text-sm hover:bg-slate-50 focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none min-w-[44px] min-h-[44px] flex items-center justify-center"
+                        className="px-3 py-2 border border-mm-warmAccent rounded-lg text-sm hover:bg-mm-tealLight focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none min-w-[44px] min-h-[44px] flex items-center justify-center"
                         aria-label={`Sort ${filters.sortOrder === 'asc' ? 'descending' : 'ascending'}`}
                         title={`Currently sorting ${filters.sortOrder === 'asc' ? 'ascending' : 'descending'}. Click to reverse.`}
                       >
@@ -1677,7 +1677,7 @@ const TCGShop = () => {
 
                 <button
                   onClick={() => setShowMobileFilters(false)}
-                  className="w-full mt-6 px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                  className="btn-mm-primary w-full mt-6"
                 >
                   Apply Filters
                 </button>
@@ -1689,12 +1689,12 @@ const TCGShop = () => {
 
       {/* Persistent Mini Cart */}
       {showMiniCart && cart.length > 0 && !showCart && (
-        <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg border border-slate-200 p-4 z-40 max-w-sm">
+        <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg border border-mm-warmAccent p-4 z-40 max-w-sm">
           <div className="flex items-center justify-between mb-2">
-            <h3 className="font-semibold text-slate-900">Cart ({cartCount})</h3>
+            <h3 className="font-semibold text-mm-darkForest">Cart ({cartCount})</h3>
             <button
               onClick={() => setShowMiniCart(false)}
-              className="text-slate-400 hover:text-slate-600 focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none rounded"
+              className="text-mm-teal hover:text-mm-teal focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none rounded"
               aria-label="Close mini cart"
             >
               <X className="w-4 h-4" />
@@ -1714,7 +1714,7 @@ const TCGShop = () => {
                 />
                 <div className="flex-1 min-w-0">
                   <div className="truncate font-medium">{item.name}</div>
-                  <div className="text-xs text-slate-600">
+                  <div className="text-xs text-mm-teal">
                     <div className="truncate">{item.set_name} #{item.card_number}</div>
                     <div>{item.quality} × {item.quantity}</div>
                     {item.foil_type && item.foil_type !== 'Regular' && (
@@ -1725,13 +1725,13 @@ const TCGShop = () => {
                     )}
                   </div>
                 </div>
-                <div className="font-semibold text-blue-600">
+                <div className="font-semibold text-mm-tealBright">
                   {currency.symbol}{(item.price * item.quantity).toFixed(2)}
                 </div>
               </div>
             ))}
             {cart.length > 3 && (
-              <div className="text-xs text-slate-600 text-center">
+              <div className="text-xs text-mm-teal text-center">
                 ...and {cart.length - 3} more items
               </div>
             )}
@@ -1740,20 +1740,20 @@ const TCGShop = () => {
           <div className="border-t mt-3 pt-3">
             <div className="flex items-center justify-between mb-3">
               <span className="font-medium">Total:</span>
-              <span className="font-bold text-lg text-blue-600">
+              <span className="font-bold text-lg text-mm-tealBright">
                 {currency.symbol}{cartTotal.toFixed(2)}
               </span>
             </div>
             <div className="flex gap-2">
               <button
                 onClick={() => setShowCart(true)}
-                className="flex-1 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg text-sm transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                className="btn-mm-primary flex-1 text-sm"
               >
                 View Cart
               </button>
               <button
                 onClick={() => setShowMiniCart(false)}
-                className="px-3 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 text-sm focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                className="btn-mm-secondary text-sm"
               >
                 Continue
               </button>
@@ -1769,7 +1769,7 @@ const TCGShop = () => {
               <h2 className="text-xl sm:text-2xl font-bold">Cart</h2>
               <button
                 onClick={() => setShowCart(false)}
-                className="p-2 hover:bg-slate-100 rounded-lg focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                className="p-2 hover:bg-mm-tealLight rounded-lg focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none"
                 aria-label="Close cart"
               >
                 <X className="w-6 h-6" />
@@ -1779,13 +1779,13 @@ const TCGShop = () => {
             <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-4">
               {cart.length === 0 ? (
                 <div className="text-center py-12">
-                  <ShoppingCart className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                  <p className="text-slate-700">Your cart is empty</p>
+                  <ShoppingCart className="w-16 h-16 text-mm-teal mx-auto mb-4" />
+                  <p className="text-mm-forest">Your cart is empty</p>
                 </div>
               ) : (
                 <div className="space-y-4">
                   {cart.map(item => (
-                    <div key={`${item.id}-${item.quality}`} className="flex gap-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
+                    <div key={`${item.id}-${item.quality}`} className="flex gap-4 p-4 bg-mm-tealLight rounded-lg border border-mm-warmAccent">
                       <img
                         src={item.image_url}
                         alt={item.name}
@@ -1797,7 +1797,7 @@ const TCGShop = () => {
                       />
                       <div className="flex-1 min-w-0">
                         <h3 className="font-bold text-sm mb-1 line-clamp-2">{item.name}</h3>
-                        <div className="text-xs text-slate-600 mb-2 space-y-1">
+                        <div className="text-xs text-mm-teal mb-2 space-y-1">
                           <div className="font-medium">{item.game_name}</div>
                           <div>{item.set_name} #{item.card_number}</div>
                           <div>{item.quality}</div>
@@ -1808,15 +1808,15 @@ const TCGShop = () => {
                             </div>
                           )}
                           {item.language && item.language !== 'English' && (
-                            <div className="font-medium text-slate-700">{item.language}</div>
+                            <div className="font-medium text-mm-forest">{item.language}</div>
                           )}
                         </div>
-                        <p className="text-sm font-bold text-blue-600 mb-3">{currency.symbol}{item.price.toFixed(2)}</p>
+                        <p className="text-sm font-bold text-mm-tealBright mb-3">{currency.symbol}{item.price.toFixed(2)}</p>
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
                             <button
                               onClick={() => updateCartQuantity(item.id, item.quality, -1)}
-                              className="p-1.5 bg-white border rounded hover:bg-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              className="p-1.5 bg-white border rounded hover:bg-mm-tealLight focus:ring-2 focus:ring-mm-forest focus:outline-none"
                               aria-label={`Decrease quantity of ${item.name}`}
                             >
                               <Minus className="w-4 h-4" />
@@ -1825,7 +1825,7 @@ const TCGShop = () => {
                             <button
                               onClick={() => updateCartQuantity(item.id, item.quality, 1)}
                               disabled={item.quantity >= item.stock}
-                              className="p-1.5 bg-white border rounded hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                              className="p-1.5 bg-white border rounded hover:bg-mm-tealLight disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-mm-forest focus:outline-none"
                               aria-label={`Increase quantity of ${item.name}`}
                             >
                               <Plus className="w-4 h-4" />
@@ -1847,14 +1847,14 @@ const TCGShop = () => {
             </div>
 
             {cart.length > 0 && (
-              <div className="border-t px-6 py-4 bg-slate-50">
+              <div className="border-t px-6 py-4 bg-mm-tealLight">
                 <div className="flex justify-between mb-4">
                   <span className="text-lg font-medium">Total:</span>
-                  <span className="text-3xl font-bold text-blue-600">{currency.symbol}{cartTotal.toFixed(2)}</span>
+                  <span className="text-3xl font-bold text-mm-tealBright">{currency.symbol}{cartTotal.toFixed(2)}</span>
                 </div>
                 <button
                   onClick={handleCheckoutClick}
-                  className="w-full px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors motion-reduce:transition-none focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+                  className="btn-mm-primary w-full"
                 >
                   Proceed to Checkout
                 </button>
@@ -1874,7 +1874,7 @@ const TCGShop = () => {
                 notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
                 notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
                 notification.type === 'warning' ? 'bg-orange-50 border-orange-200 text-orange-800' :
-                'bg-blue-50 border-blue-200 text-blue-800'
+                'bg-mm-tealLight border-mm-tealBright text-mm-tealBright'
               } border`}
               role={notification.type === 'error' ? 'alert' : 'status'}
               aria-live={notification.type === 'error' ? 'assertive' : 'polite'}

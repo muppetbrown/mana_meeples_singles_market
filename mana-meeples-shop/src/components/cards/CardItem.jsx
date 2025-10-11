@@ -16,7 +16,7 @@ const CardItem = React.memo(({
   onAddToCart
 }) => {
   return (
-    <div className="bg-white rounded-xl shadow-sm hover:shadow-lg transition-all motion-reduce:transition-none overflow-hidden border border-slate-200 flex flex-row lg:flex-col h-full">
+    <div className="card-mm flex flex-row lg:flex-col h-full">
       {/* Card Image - Left on mobile, top on desktop */}
       <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full">
         <OptimizedImage
@@ -24,7 +24,7 @@ const CardItem = React.memo(({
           alt={`${card.name} from ${card.set_name}`}
           width={250}
           height={350}
-          className={`w-full h-32 sm:h-44 lg:h-64 object-cover bg-gradient-to-br from-slate-100 to-slate-200 ${
+          className={`w-full h-32 sm:h-44 lg:h-64 object-cover bg-gradient-to-br from-mm-warmAccent to-mm-tealLight ${
             selectedVariation?.foil_type !== 'Regular'
               ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
               : ''
@@ -34,7 +34,7 @@ const CardItem = React.memo(({
         />
         {/* Foil Badge */}
         {selectedVariation?.foil_type !== 'Regular' && (
-          <div className="absolute top-1 left-1 lg:top-2 lg:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-full shadow-md border border-yellow-300">
+          <div className="absolute top-1 left-1 lg:top-2 lg:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-mm-sm shadow-md border border-yellow-300">
             ✨ {selectedVariation.foil_type}
           </div>
         )}
@@ -44,10 +44,10 @@ const CardItem = React.memo(({
       <div className="p-4 sm:p-5 lg:p-5 flex flex-col gap-3 lg:gap-3 flex-grow min-w-0">
         {/* Title & Set Info */}
         <div className="flex-shrink-0">
-          <h3 className="font-semibold text-sm lg:text-lg leading-tight text-slate-900 mb-1 lg:mb-2 line-clamp-2">
+          <h3 className="font-semibold text-sm lg:text-lg leading-tight text-mm-darkForest mb-1 lg:mb-2 line-clamp-2">
             {card.name}
           </h3>
-          <p className="text-xs lg:text-sm text-slate-600 pb-2 lg:pb-3 border-b border-slate-100">
+          <p className="text-xs lg:text-sm text-mm-teal pb-2 lg:pb-3 border-b border-mm-warmAccent">
             {card.set_name} • #{card.card_number}
           </p>
         </div>
@@ -56,7 +56,7 @@ const CardItem = React.memo(({
         <div className="space-y-1 lg:space-y-2 flex-shrink-0">
           <label
             htmlFor={`condition-${card.id}`}
-            className="block text-xs font-semibold text-slate-700 uppercase tracking-wide"
+            className="block text-xs font-semibold text-mm-forest uppercase tracking-wide"
           >
             Condition
           </label>
@@ -64,7 +64,7 @@ const CardItem = React.memo(({
             id={`condition-${card.id}`}
             value={selectedVariationKey}
             onChange={onVariationChange}
-            className={`w-full text-sm lg:text-sm px-3 lg:px-3 py-2.5 lg:py-2.5 border-2 border-slate-300 rounded-lg bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 focus:outline-none transition-colors`}
+            className="input-mm w-full text-sm lg:text-sm"
             style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
           >
             {card.variations.map(variation => (
@@ -78,7 +78,7 @@ const CardItem = React.memo(({
         </div>
 
         {/* Availability Status */}
-        <div className="flex items-center gap-2 pb-2 lg:pb-3 border-b border-slate-100 flex-shrink-0">
+        <div className="flex items-center gap-2 pb-2 lg:pb-3 border-b border-mm-warmAccent flex-shrink-0">
           {selectedVariation?.stock > 0 ? (
             <>
               <div className="w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full bg-emerald-500"></div>
@@ -88,8 +88,8 @@ const CardItem = React.memo(({
             </>
           ) : (
             <>
-              <div className="w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full bg-slate-400"></div>
-              <span className="text-xs lg:text-sm font-medium text-slate-500">Out of stock</span>
+              <div className="w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full bg-mm-teal"></div>
+              <span className="text-xs lg:text-sm font-medium text-mm-teal">Out of stock</span>
             </>
           )}
         </div>
@@ -98,7 +98,7 @@ const CardItem = React.memo(({
         <div className="mt-auto pt-1 lg:pt-2">
           {/* Price Display */}
           <div className="mb-2 lg:mb-3">
-            <div className="text-lg lg:text-2xl font-bold text-slate-900 leading-none mb-1">
+            <div className="text-lg lg:text-2xl font-bold text-mm-darkForest leading-none mb-1">
               {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
             </div>
             {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
@@ -112,7 +112,7 @@ const CardItem = React.memo(({
           <button
             onClick={onAddToCart}
             disabled={!selectedVariation || selectedVariation.stock === 0}
-            className="w-full px-3 lg:px-4 py-2 lg:py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm lg:text-base font-semibold rounded-lg transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none"
+            className="btn-mm-primary w-full text-sm lg:text-base disabled:bg-mm-teal disabled:cursor-not-allowed disabled:shadow-none"
             style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
             aria-label={`Add ${card.name} to cart`}
           >

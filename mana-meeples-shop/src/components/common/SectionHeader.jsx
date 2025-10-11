@@ -11,12 +11,12 @@ import { LayoutGrid } from 'lucide-react';
  */
 const SectionHeader = ({ title, count, isGrid = false }) => {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="section-mm-gradient mb-6">
       <div className="flex items-center gap-3">
-        {isGrid && <LayoutGrid className="w-5 h-5 text-slate-600" />}
-        <h2 className="text-xl font-bold text-slate-800">{title}</h2>
+        {isGrid && <LayoutGrid className="w-5 h-5 text-mm-teal" />}
+        <h2 className="text-xl font-bold text-mm-forest">{title}</h2>
         {count !== undefined && (
-          <span className="px-3 py-1 bg-slate-100 text-slate-600 text-sm font-medium rounded-full">
+          <span className="px-3 py-1 bg-mm-tealLight text-mm-teal text-sm font-medium rounded-full">
             {count} {count === 1 ? 'card' : 'cards'}
           </span>
         )}

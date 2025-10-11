@@ -15,7 +15,7 @@ const ListCardItem = React.memo(({
   onAddToCart
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-all motion-reduce:transition-none border border-slate-200">
+    <div className="card-mm">
       <div className="flex items-center gap-2 sm:gap-3 p-3 sm:p-4">
         {/* Card Thumbnail - Fixed small size */}
         <div className="relative w-12 h-16 sm:w-16 sm:h-24 flex-shrink-0">
@@ -24,7 +24,7 @@ const ListCardItem = React.memo(({
             alt={`${card.name} from ${card.set_name}`}
             width={80}
             height={112}
-            className="bg-gradient-to-br from-slate-100 to-slate-200 w-full h-full object-cover rounded"
+            className="bg-gradient-to-br from-mm-warmAccent to-mm-tealLight w-full h-full object-cover rounded-mm-sm"
             placeholder="blur"
             sizes="80px"
           />
@@ -32,20 +32,20 @@ const ListCardItem = React.memo(({
 
         {/* Card Info - Flexible with overflow handling */}
         <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-sm sm:text-base text-slate-900 truncate mb-0.5">
+          <h3 className="font-semibold text-sm sm:text-base text-mm-darkForest truncate mb-0.5">
             {card.name}
           </h3>
-          <p className="text-xs text-slate-600 truncate">
+          <p className="text-xs text-mm-teal truncate">
             {card.set_name} • #{card.card_number}
           </p>
 
           {/* Stock indicator - Mobile only */}
           <div className="flex items-center gap-1.5 mt-1 sm:hidden">
             <div className={`w-1.5 h-1.5 rounded-full ${
-              selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
+              selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-mm-teal'
             }`}></div>
             <span className={`text-xs font-medium ${
-              selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-slate-500'
+              selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-mm-teal'
             }`}>
               {selectedVariation?.stock > 0
                 ? `${selectedVariation.stock} in stock`
@@ -62,7 +62,7 @@ const ListCardItem = React.memo(({
             id={`condition-list-${card.id}`}
             value={selectedVariationKey}
             onChange={onVariationChange}
-            className="flex-shrink-0 min-w-[100px] max-w-[160px] text-xs lg:text-sm px-2 py-2 border-2 border-slate-300 rounded-md bg-white hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none transition-colors"
+            className="input-mm flex-shrink-0 min-w-[100px] max-w-[160px] text-xs lg:text-sm px-2 py-2"
           >
             {card.variations.map(variation => (
               <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
@@ -75,10 +75,10 @@ const ListCardItem = React.memo(({
           {/* Stock - Compact, flexible */}
           <div className="flex items-center gap-1 flex-shrink-0 min-w-[32px]">
             <div className={`w-2 h-2 rounded-full flex-shrink-0 ${
-              selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-slate-400'
+              selectedVariation?.stock > 0 ? 'bg-emerald-500' : 'bg-mm-teal'
             }`}></div>
             <span className={`text-xs font-medium whitespace-nowrap ${
-              selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-slate-500'
+              selectedVariation?.stock > 0 ? 'text-emerald-700' : 'text-mm-teal'
             }`}>
               {selectedVariation?.stock > 0 ? selectedVariation.stock : '0'}
             </span>
@@ -86,7 +86,7 @@ const ListCardItem = React.memo(({
 
           {/* Price - Flexible but doesn't shrink below content */}
           <div className="text-right flex-shrink-0 min-w-[60px]">
-            <span className="text-sm lg:text-base font-bold text-slate-900 block leading-none whitespace-nowrap">
+            <span className="text-sm lg:text-base font-bold text-mm-darkForest block leading-none whitespace-nowrap">
               {currency.symbol}{(selectedVariation?.price * currency.rate).toFixed(2)}
             </span>
             {selectedVariation?.stock <= 3 && selectedVariation?.stock > 0 && (
@@ -100,7 +100,7 @@ const ListCardItem = React.memo(({
           <button
             onClick={onAddToCart}
             disabled={!selectedVariation || selectedVariation.stock === 0}
-            className="px-3 lg:px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] flex-shrink-0 whitespace-nowrap"
+            className="btn-mm-primary px-3 lg:px-4 py-2.5 text-sm min-h-[44px] flex-shrink-0 whitespace-nowrap disabled:bg-mm-teal disabled:cursor-not-allowed disabled:shadow-none"
             aria-label={`Add ${card.name} to cart`}
           >
             <span className="hidden lg:inline">Add to Cart</span>
@@ -113,7 +113,7 @@ const ListCardItem = React.memo(({
           <button
             onClick={onAddToCart}
             disabled={!selectedVariation || selectedVariation.stock === 0}
-            className="px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white text-sm font-semibold rounded-md transition-all motion-reduce:transition-none focus:ring-4 focus:ring-blue-500/50 focus:outline-none shadow-sm hover:shadow-md disabled:shadow-none min-h-[44px] whitespace-nowrap"
+            className="btn-mm-primary px-3 py-2 text-sm min-h-[44px] whitespace-nowrap disabled:bg-mm-teal disabled:cursor-not-allowed disabled:shadow-none"
             aria-label={`Add ${card.name} to cart`}
           >
             Add
@@ -122,10 +122,10 @@ const ListCardItem = React.memo(({
       </div>
 
       {/* Condition selector for mobile - Expandable section */}
-      <div className="sm:hidden border-t border-slate-100 px-3 py-2 bg-slate-50">
+      <div className="sm:hidden border-t border-mm-warmAccent px-3 py-2 bg-mm-tealLight">
         <label
           htmlFor={`condition-list-mobile-${card.id}`}
-          className="block text-xs font-semibold text-slate-700 uppercase tracking-wide mb-1"
+          className="block text-xs font-semibold text-mm-forest uppercase tracking-wide mb-1"
         >
           Condition
         </label>
@@ -133,7 +133,7 @@ const ListCardItem = React.memo(({
           id={`condition-list-mobile-${card.id}`}
           value={selectedVariationKey}
           onChange={onVariationChange}
-          className="w-full text-sm px-2.5 py-2 border-2 border-slate-300 rounded-md bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 focus:outline-none"
+          className="input-mm w-full text-sm px-2.5 py-2"
         >
           {card.variations.map(variation => (
             <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
