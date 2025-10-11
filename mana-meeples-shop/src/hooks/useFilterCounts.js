@@ -167,7 +167,7 @@ export const useFilterCounts = (API_URL, currentFilters = {}) => {
         abortControllerRef.current.abort();
       }
     };
-  }, [currentFilters, fetchFilterCounts, isCacheValid, API_URL]);
+  }, [currentFilters, fetchFilterCounts, API_URL]);
 
   // Format count for display
   const formatCount = (count) => {
