@@ -1385,8 +1385,11 @@ const TCGShop = () => {
                   <div>
                     {groupedCards.map((group, groupIndex) => (
                       <div key={groupIndex} className="mb-8">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+                        {/* Section Header positioned above the grid, not inside it */}
+                        {group.section && (
                           <SectionHeader title={group.section} count={group.cards.length} isGrid={true} />
+                        )}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                           {group.cards.map(card => {
                             const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
                             const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
@@ -1413,7 +1416,10 @@ const TCGShop = () => {
                 <div>
                   {groupedCards.map((group, groupIndex) => (
                     <div key={groupIndex} className="mb-8">
-                      <SectionHeader title={group.section} count={group.cards.length} isGrid={false} />
+                      {/* Section Header positioned above the list, ensuring proper styling */}
+                      {group.section && (
+                        <SectionHeader title={group.section} count={group.cards.length} isGrid={false} />
+                      )}
                       <div className="space-y-2">
                         {group.cards.map(card => {
                           const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
