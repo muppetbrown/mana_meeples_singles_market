@@ -50,7 +50,7 @@
 
   /* M&M Card Styles */
   .card-mm {
-    @apply bg-white border-2 border-mm-warmAccent rounded-mm-md transition-all duration-300 shadow-mm-card;
+    @apply bg-white border-2 border-mm-warmAccent rounded-mm-md p-6 transition-all duration-300 shadow-mm-card;
   }
 
   .card-mm:hover,
