@@ -87,6 +87,72 @@ router.get('/sets', normalRateLimit, async (req, res) => {
   }
 });
 
+// GET /api/filter-options?game_id=1 - Get filter options for a game
+router.get('/filter-options', normalRateLimit, async (req, res) => {
+  try {
+    const { game_id } = req.query;
+
+    if (!game_id) {
+      return res.status(400).json({ error: 'game_id is required' });
+    }
+
+    // Get distinct foil types for the game
+    const foilTypesQuery = await db.query(
+      `SELECT DISTINCT iv.foil_type
+       FROM inventory_variations iv
+       JOIN cards c ON iv.card_id = c.id
+       WHERE c.game_id = $1 AND iv.foil_type IS NOT NULL
+       ORDER BY iv.foil_type`,
+      [game_id]
+    );
+
+    // Get distinct card types for the game
+    const cardTypesQuery = await db.query(
+      `SELECT DISTINCT c.card_type
+       FROM cards c
+       WHERE c.game_id = $1 AND c.card_type IS NOT NULL
+       ORDER BY c.card_type`,
+      [game_id]
+    );
+
+    // Get distinct qualities
+    const qualitiesQuery = await db.query(
+      `SELECT DISTINCT iv.quality
+       FROM inventory_variations iv
+       JOIN cards c ON iv.card_id = c.id
+       WHERE c.game_id = $1 AND iv.quality IS NOT NULL
+       ORDER BY
+         CASE iv.quality
+           WHEN 'Near Mint' THEN 1
+           WHEN 'Lightly Played' THEN 2
+           WHEN 'Moderately Played' THEN 3
+           WHEN 'Heavily Played' THEN 4
+           WHEN 'Damaged' THEN 5
+           ELSE 6
+         END`
+    );
+
+    // Get distinct rarities for the game
+    const raritiesQuery = await db.query(
+      `SELECT DISTINCT c.rarity
+       FROM cards c
+       WHERE c.game_id = $1 AND c.rarity IS NOT NULL
+       ORDER BY c.rarity`,
+      [game_id]
+    );
+
+    res.json({
+      foilTypes: foilTypesQuery.rows.map(row => row.foil_type),
+      cardTypes: cardTypesQuery.rows.map(row => row.card_type),
+      qualities: qualitiesQuery.rows.map(row => row.quality),
+      rarities: raritiesQuery.rows.map(row => row.rarity)
+    });
+  } catch (error) {
+    console.error('Error fetching filter options:', error);
+    res.status(500).json({ error: 'Failed to fetch filter options' });
+  }
+});
+
 // GET /api/cards - Get cards with advanced filtering and pagination
 router.get('/cards', normalRateLimit, async (req, res) => {
   try {

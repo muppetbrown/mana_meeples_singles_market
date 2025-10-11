@@ -272,27 +272,30 @@ const AdminDashboard = () => {
     }, {});
 
     return Object.entries(groups).map(([key, group]) => {
-      const filteredQualities = group.qualities
-        .filter(quality => showAllCards || quality.stock > 0)
-        .sort((a, b) => {
-          const qualityOrder = { 'Near Mint': 1, 'Lightly Played': 2, 'Moderately Played': 3, 'Heavily Played': 4, 'Damaged': 5 };
-          return (qualityOrder[a.quality] || 999) - (qualityOrder[b.quality] || 999);
-        });
+      const allQualities = group.qualities.sort((a, b) => {
+        const qualityOrder = { 'Near Mint': 1, 'Lightly Played': 2, 'Moderately Played': 3, 'Heavily Played': 4, 'Damaged': 5 };
+        return (qualityOrder[a.quality] || 999) - (qualityOrder[b.quality] || 999);
+      });
 
-      // Recalculate totals based on filtered qualities
-      const filteredTotalValue = filteredQualities.reduce((sum, quality) => sum + (quality.price * quality.stock), 0);
-      const filteredTotalStock = filteredQualities.reduce((sum, quality) => sum + quality.stock, 0);
-      const filteredHasLowStock = filteredQualities.some(quality => quality.stock > 0 && quality.stock <= quality.low_stock_threshold);
+      const filteredQualities = showAllCards
+        ? allQualities
+        : allQualities.filter(quality => quality.stock > 0);
+
+      // Always calculate totals from ALL qualities to show true stock
+      const totalValue = group.qualities.reduce((sum, quality) => sum + (quality.price * quality.stock), 0);
+      const totalStock = group.qualities.reduce((sum, quality) => sum + quality.stock, 0);
+      const hasLowStock = group.qualities.some(quality => quality.stock > 0 && quality.stock <= quality.low_stock_threshold);
 
       return {
         ...group,
         key,
-        qualities: filteredQualities,
-        totalValue: filteredTotalValue,
-        totalStock: filteredTotalStock,
-        hasLowStock: filteredHasLowStock
+        qualities: allQualities, // Keep all qualities for expanded view
+        visibleQualities: filteredQualities, // Only for badge display
+        totalValue,
+        totalStock,
+        hasLowStock
       };
-    }).filter(group => group.qualities.length > 0); // Remove cards with no visible qualities
+    }); // Always show cards, even with zero stock
   }, [inventory, showAllCards]);
 
   const filteredInventory = useMemo(() => {
@@ -1887,15 +1890,13 @@ const AdminDashboard = () => {
                         <td className="px-4 py-3">
                           <div className="flex flex-col gap-2">
                             <div className="flex gap-1 flex-wrap">
-                              {group.qualities.map(quality => (
+                              {group.visibleQualities.map(quality => (
                                 <span
                                   key={quality.id}
                                   className={`inline-flex items-center px-2 py-1 rounded text-xs font-medium ${
-                                    quality.stock === 0
-                                      ? 'bg-slate-100 text-slate-500'
-                                      : quality.stock <= quality.low_stock_threshold
-                                        ? 'bg-amber-100 text-amber-900'
-                                        : 'bg-green-100 text-green-900'
+                                    quality.stock <= quality.low_stock_threshold
+                                      ? 'bg-amber-100 text-amber-900'
+                                      : 'bg-green-100 text-green-900'
                                   }`}
                                 >
                                   {quality.quality.substring(0, 2).toUpperCase()} ({quality.stock})
@@ -1927,7 +1928,11 @@ const AdminDashboard = () => {
                                 });
                                 setShowFoilModal(true);
                               }}
-                              className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-50 px-2 py-1 rounded transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none self-start"
+                              className={`flex items-center gap-1 text-xs px-2 py-1 rounded transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none self-start ${
+                                group.totalStock === 0
+                                  ? 'text-blue-800 bg-blue-100 border border-blue-300 font-medium hover:bg-blue-200'
+                                  : 'text-blue-600 hover:text-blue-800 hover:bg-blue-50'
+                              }`}
                               aria-label={`Add card variation for ${group.card_name}`}
                             >
                               <Plus className="w-3 h-3" />
@@ -1941,7 +1946,7 @@ const AdminDashboard = () => {
                       </tr>
 
                       {/* Expanded quality rows */}
-                      {isExpanded && group.qualities.map(item => {
+                      {isExpanded && group.qualities.filter(item => item.stock > 0).map(item => {
                         const isLowStock = item.stock <= item.low_stock_threshold && item.stock > 0;
                         const isEditing = editingItems.has(item.id);
                         const editedItem = editingItems.get(item.id);
