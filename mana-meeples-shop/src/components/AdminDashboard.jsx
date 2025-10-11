@@ -995,6 +995,9 @@ const AdminDashboard = () => {
                                   }`}
                                 >
                                   {quality.quality.substring(0, 2).toUpperCase()} ({quality.stock})
+                                  {quality.foil_type && quality.foil_type !== 'Regular' && quality.foil_type !== 'Non-foil' && (
+                                    <span className="ml-1 text-xs opacity-75" title="Foil Variation">✨</span>
+                                  )}
                                   {quality.price_source && (
                                     <span className="ml-1 text-xs opacity-60">
                                       {quality.price_source === 'manual' ? '✋' :

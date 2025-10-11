@@ -9,7 +9,7 @@ import ErrorBoundary from './ErrorBoundary';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import { API_URL } from '../config/api';
 import { useErrorHandler, withRetry, throttledFetch } from '../services/errorHandler';
-import { FILTER_CONFIG, ACCESSIBILITY_CONFIG, VIRTUAL_SCROLL_CONFIG } from '../config/constants';
+import { FILTER_CONFIG, VIRTUAL_SCROLL_CONFIG } from '../config/constants';
 // Extracted components
 import { highlightMatch } from './utils/searchUtils';
 import CardSkeleton from './skeletons/CardSkeleton';
