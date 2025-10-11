@@ -41,6 +41,16 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterGame, setFilterGame] = useState('all');
   const [filterSet, setFilterSet] = useState('all');
+  const [filters, setFilters] = useState({
+    quality: 'all',
+    foilType: 'all',
+    stockLevel: 'all',
+    minPrice: '',
+    maxPrice: '',
+    sortBy: 'name',
+    priceSource: 'all',
+    viewMode: 'table'
+  });
   const [availableSets, setAvailableSets] = useState([]);
   const [showAllCards, setShowAllCards] = useState(false);
   const [expandedCards, setExpandedCards] = useState(new Set());
@@ -64,6 +74,9 @@ const AdminDashboard = () => {
   const [csvStep, setCsvStep] = useState(1);
   const [dragActive, setDragActive] = useState(false);
   const [activeTab, setActiveTab] = useState('inventory');
+  const [selectedItems, setSelectedItems] = useState(new Set());
+  const [bulkOperation, setBulkOperation] = useState(null);
+  const [quickActionState, setQuickActionState] = useState('idle'); // idle, loading, success, error
 
   // ✅ FIXED: Authentication and inventory fetch in single useEffect
   useEffect(() => {
@@ -248,20 +261,102 @@ const AdminDashboard = () => {
   }, [inventory, showAllCards]);
 
   const filteredInventory = useMemo(() => {
-    return groupedInventory.filter(group => {
+    let filtered = groupedInventory.filter(group => {
+      // Enhanced search - includes rarity and more fields
       const matchesSearch =
         group.card_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        group.qualities.some(q => q.sku?.toLowerCase().includes(searchTerm.toLowerCase()));
+        group.qualities.some(q =>
+          q.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          q.quality?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          q.foil_type?.toLowerCase().includes(searchTerm.toLowerCase())
+        ) ||
+        group.set?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.game?.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesGame = filterGame === 'all' || group.game === filterGame;
       const matchesSet = filterSet === 'all' || group.set === filterSet;
 
+      // Quality filter
+      const matchesQuality = filters.quality === 'all' ||
+        group.qualities.some(q => q.quality === filters.quality);
+
+      // Foil type filter
+      const matchesFoilType = filters.foilType === 'all' ||
+        group.qualities.some(q => {
+          const foilType = q.foil_type || 'Regular';
+          return foilType === filters.foilType;
+        });
+
+      // Stock level filter
+      const matchesStockLevel = filters.stockLevel === 'all' || (() => {
+        switch (filters.stockLevel) {
+          case 'instock': return group.totalStock > 0;
+          case 'lowstock': return group.totalStock > 0 && group.totalStock <= 3;
+          case 'outofstock': return group.totalStock === 0;
+          case 'overstock': return group.totalStock > 20;
+          default: return true;
+        }
+      })();
+
+      // Price range filter
+      const matchesPriceRange = (() => {
+        const minPrice = parseFloat(filters.minPrice) || 0;
+        const maxPrice = parseFloat(filters.maxPrice) || Infinity;
+        return group.qualities.some(q => {
+          const price = q.price || 0;
+          return price >= minPrice && price <= maxPrice;
+        });
+      })();
+
+      // Price source filter
+      const matchesPriceSource = filters.priceSource === 'all' ||
+        group.qualities.some(q => {
+          if (filters.priceSource === 'manual') return q.price_source === 'manual';
+          if (filters.priceSource === 'api_scryfall') return q.price_source?.includes('scryfall');
+          if (filters.priceSource === 'api') return q.price_source && !q.price_source.includes('scryfall') && q.price_source !== 'manual';
+          return true;
+        });
+
       // Show only cards with inventory by default, unless "show all cards" is enabled
       const matchesInventory = showAllCards || group.totalStock > 0;
 
-      return matchesSearch && matchesGame && matchesSet && matchesInventory;
+      return matchesSearch && matchesGame && matchesSet && matchesQuality &&
+             matchesFoilType && matchesStockLevel && matchesPriceRange &&
+             matchesPriceSource && matchesInventory;
     });
-  }, [groupedInventory, searchTerm, filterGame, filterSet, showAllCards]);
+
+    // Apply sorting
+    const sortBy = filters.sortBy || 'name';
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'name':
+          return a.card_name?.localeCompare(b.card_name || '') || 0;
+        case 'game':
+          return a.game?.localeCompare(b.game || '') || 0;
+        case 'set':
+          return a.set?.localeCompare(b.set || '') || 0;
+        case 'price_asc':
+          return (a.qualities[0]?.price || 0) - (b.qualities[0]?.price || 0);
+        case 'price_desc':
+          return (b.qualities[0]?.price || 0) - (a.qualities[0]?.price || 0);
+        case 'stock_asc':
+          return a.totalStock - b.totalStock;
+        case 'stock_desc':
+          return b.totalStock - a.totalStock;
+        case 'quality':
+          const qualityOrder = { 'Near Mint': 1, 'Lightly Played': 2, 'Moderately Played': 3, 'Heavily Played': 4, 'Damaged': 5 };
+          return (qualityOrder[a.qualities[0]?.quality] || 999) - (qualityOrder[b.qualities[0]?.quality] || 999);
+        case 'updated':
+          return new Date(b.lastUpdated || 0) - new Date(a.lastUpdated || 0);
+        case 'value_desc':
+          return b.totalValue - a.totalValue;
+        default:
+          return a.card_name?.localeCompare(b.card_name || '') || 0;
+      }
+    });
+
+    return filtered;
+  }, [groupedInventory, searchTerm, filterGame, filterSet, filters, showAllCards]);
 
   const totalValue = useMemo(() => 
     inventory.reduce((sum, item) => sum + (item.price * item.stock), 0),
@@ -636,6 +731,150 @@ const AdminDashboard = () => {
     window.URL.revokeObjectURL(url);
   };
 
+  // Bulk Operations Functions
+  const handleSelectAll = useCallback((checked) => {
+    if (checked) {
+      const allIds = new Set();
+      filteredInventory.forEach(group => {
+        group.qualities.forEach(item => {
+          allIds.add(item.id);
+        });
+      });
+      setSelectedItems(allIds);
+    } else {
+      setSelectedItems(new Set());
+    }
+  }, [filteredInventory]);
+
+  const handleItemSelect = useCallback((itemId, checked) => {
+    setSelectedItems(prev => {
+      const newSet = new Set(prev);
+      if (checked) {
+        newSet.add(itemId);
+      } else {
+        newSet.delete(itemId);
+      }
+      return newSet;
+    });
+  }, []);
+
+  const executeBulkOperation = async (operation, data = {}) => {
+    if (selectedItems.size === 0) return;
+
+    setQuickActionState('loading');
+    try {
+      const selectedItemsArray = Array.from(selectedItems);
+
+      const response = await fetch(`${API_URL}/admin/bulk-operation`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: getAdminHeaders(),
+        body: JSON.stringify({
+          operation,
+          itemIds: selectedItemsArray,
+          data
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`Bulk operation failed: ${response.statusText}`);
+      }
+
+      const result = await response.json();
+      setQuickActionState('success');
+
+      // Refresh inventory after bulk operation
+      window.location.reload();
+
+      // Clear selections
+      setSelectedItems(new Set());
+      setBulkOperation(null);
+
+      alert(`Bulk operation completed! Updated ${result.updated} items.`);
+    } catch (error) {
+      setQuickActionState('error');
+      console.error('Bulk operation error:', error);
+      alert(`Bulk operation failed: ${error.message}`);
+    } finally {
+      setTimeout(() => setQuickActionState('idle'), 3000);
+    }
+  };
+
+  // Export filtered results
+  const exportFilteredResults = () => {
+    const currentResults = [];
+
+    filteredInventory.forEach(group => {
+      group.qualities.forEach(item => {
+        currentResults.push([
+          item.sku,
+          `"${group.card_name}"`,
+          group.game,
+          group.set,
+          item.set_code || '',
+          item.number || '',
+          item.quality,
+          item.foil_type || 'Regular',
+          item.language || 'English',
+          item.price,
+          item.stock,
+          item.price_source || '',
+          item.last_updated || ''
+        ].join(','));
+      });
+    });
+
+    const csv = [
+      ['SKU', 'Name', 'Game', 'Set', 'Set Code', 'Number', 'Quality', 'Foil Type', 'Language', 'Price', 'Stock', 'Price Source', 'Last Updated'].join(','),
+      ...currentResults
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `filtered-inventory-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
+  // Quick analytics calculation
+  const analyticsData = useMemo(() => {
+    const analytics = {
+      totalUniqueCards: filteredInventory.length,
+      totalVariations: filteredInventory.reduce((sum, group) => sum + group.qualities.length, 0),
+      totalValue: filteredInventory.reduce((sum, group) => sum + group.totalValue, 0),
+      totalStock: filteredInventory.reduce((sum, group) => sum + group.totalStock, 0),
+      lowStockItems: filteredInventory.filter(group => group.hasLowStock).length,
+      outOfStockItems: filteredInventory.filter(group => group.totalStock === 0).length,
+      gameBreakdown: {},
+      qualityBreakdown: {},
+      foilBreakdown: {},
+      priceSourceBreakdown: {}
+    };
+
+    filteredInventory.forEach(group => {
+      // Game breakdown
+      analytics.gameBreakdown[group.game] = (analytics.gameBreakdown[group.game] || 0) + 1;
+
+      group.qualities.forEach(item => {
+        // Quality breakdown
+        analytics.qualityBreakdown[item.quality] = (analytics.qualityBreakdown[item.quality] || 0) + 1;
+
+        // Foil breakdown
+        const foilType = item.foil_type || 'Regular';
+        analytics.foilBreakdown[foilType] = (analytics.foilBreakdown[foilType] || 0) + 1;
+
+        // Price source breakdown
+        const source = item.price_source === 'manual' ? 'Manual' :
+                       item.price_source?.includes('scryfall') ? 'Scryfall' : 'API';
+        analytics.priceSourceBreakdown[source] = (analytics.priceSourceBreakdown[source] || 0) + 1;
+      });
+    });
+
+    return analytics;
+  }, [filteredInventory]);
+
   const handleCurrencyChange = (newCurrency) => {
     setCurrency(newCurrency);
   };
@@ -829,24 +1068,364 @@ const AdminDashboard = () => {
           </div>
         </div>
 
-        {/* Filters & Search */}
+        {/* Quick Actions Toolbar */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-200">
+          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <h3 className="text-lg font-semibold text-slate-800">Quick Actions</h3>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-slate-600">
+                    {selectedItems.size > 0 && `${selectedItems.size} items selected`}
+                  </span>
+                  {quickActionState === 'loading' && (
+                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
+                  )}
+                  {quickActionState === 'success' && (
+                    <CheckCircle className="w-4 h-4 text-green-600" />
+                  )}
+                  {quickActionState === 'error' && (
+                    <XCircle className="w-4 h-4 text-red-600" />
+                  )}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <button
+                  onClick={exportFilteredResults}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <Download className="w-4 h-4" />
+                  Export Filtered
+                </button>
+
+                <button
+                  onClick={refreshPrices}
+                  disabled={loading}
+                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                >
+                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                  Refresh Prices
+                </button>
+
+                {selectedItems.size > 0 && (
+                  <>
+                    <div className="w-px h-6 bg-slate-300"></div>
+                    <span className="text-sm font-medium text-slate-700">Bulk Actions:</span>
+
+                    <button
+                      onClick={() => setBulkOperation('updatePrices')}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-green-500 focus:outline-none"
+                    >
+                      <DollarSign className="w-4 h-4" />
+                      Update Prices
+                    </button>
+
+                    <button
+                      onClick={() => setBulkOperation('updateStock')}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                    >
+                      <Package className="w-4 h-4" />
+                      Update Stock
+                    </button>
+
+                    <button
+                      onClick={() => setBulkOperation('changeQuality')}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                    >
+                      <Edit className="w-4 h-4" />
+                      Change Quality
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        if (confirm(`Delete ${selectedItems.size} selected items? This cannot be undone.`)) {
+                          executeBulkOperation('delete');
+                        }
+                      }}
+                      className="flex items-center gap-2 px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none"
+                    >
+                      <X className="w-4 h-4" />
+                      Delete Selected
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            <div className="text-right">
+              <div className="text-sm text-slate-600 space-y-1">
+                <div>Viewing: <span className="font-medium text-slate-800">{analyticsData.totalUniqueCards}</span> cards</div>
+                <div>Total Value: <span className="font-medium text-slate-800">{currency.symbol}{(analyticsData.totalValue * currency.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Analytics Dashboard */}
+        {Object.keys(analyticsData.gameBreakdown).length > 0 && (
+          <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 border border-slate-200 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-800">Analytics Overview</h3>
+              <span className="text-sm text-slate-500">Based on current filters</span>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+              <div className="bg-slate-50 rounded-lg p-3">
+                <div className="text-sm text-slate-600">Total Cards</div>
+                <div className="text-2xl font-bold text-slate-900">{analyticsData.totalUniqueCards}</div>
+                <div className="text-xs text-slate-500">{analyticsData.totalVariations} variations</div>
+              </div>
+              <div className="bg-green-50 rounded-lg p-3">
+                <div className="text-sm text-green-700">Total Stock</div>
+                <div className="text-2xl font-bold text-green-900">{analyticsData.totalStock}</div>
+                <div className="text-xs text-green-600">units available</div>
+              </div>
+              <div className="bg-amber-50 rounded-lg p-3">
+                <div className="text-sm text-amber-700">Low Stock</div>
+                <div className="text-2xl font-bold text-amber-900">{analyticsData.lowStockItems}</div>
+                <div className="text-xs text-amber-600">items need restocking</div>
+              </div>
+              <div className="bg-red-50 rounded-lg p-3">
+                <div className="text-sm text-red-700">Out of Stock</div>
+                <div className="text-2xl font-bold text-red-900">{analyticsData.outOfStockItems}</div>
+                <div className="text-xs text-red-600">items unavailable</div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {/* Game Breakdown */}
+              <div>
+                <h4 className="text-sm font-medium text-slate-700 mb-2">By Game</h4>
+                <div className="space-y-2">
+                  {Object.entries(analyticsData.gameBreakdown).map(([game, count]) => (
+                    <div key={game} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600 truncate">{game}</span>
+                      <span className="font-medium text-slate-900">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Quality Breakdown */}
+              <div>
+                <h4 className="text-sm font-medium text-slate-700 mb-2">By Quality</h4>
+                <div className="space-y-2">
+                  {Object.entries(analyticsData.qualityBreakdown).map(([quality, count]) => (
+                    <div key={quality} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600 truncate">{quality}</span>
+                      <span className="font-medium text-slate-900">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Price Source Breakdown */}
+              <div>
+                <h4 className="text-sm font-medium text-slate-700 mb-2">By Price Source</h4>
+                <div className="space-y-2">
+                  {Object.entries(analyticsData.priceSourceBreakdown).map(([source, count]) => (
+                    <div key={source} className="flex items-center justify-between text-sm">
+                      <span className="text-slate-600 truncate">{source}</span>
+                      <span className="font-medium text-slate-900">{count}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Bulk Operation Modals */}
+        {bulkOperation && (
+          <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+              <h3 className="text-lg font-bold text-slate-900 mb-4">
+                {bulkOperation === 'updatePrices' && 'Bulk Update Prices'}
+                {bulkOperation === 'updateStock' && 'Bulk Update Stock'}
+                {bulkOperation === 'changeQuality' && 'Bulk Change Quality'}
+              </h3>
+
+              {bulkOperation === 'updatePrices' && (
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-600">Update prices for {selectedItems.size} selected items</p>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Price Adjustment</label>
+                    <div className="flex gap-2">
+                      <select
+                        id="price-operation"
+                        className="px-3 py-2 border border-slate-300 rounded-lg"
+                        defaultValue="multiply"
+                      >
+                        <option value="set">Set to</option>
+                        <option value="multiply">Multiply by</option>
+                        <option value="add">Add</option>
+                        <option value="subtract">Subtract</option>
+                      </select>
+                      <input
+                        type="number"
+                        step="0.01"
+                        placeholder="1.0"
+                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg"
+                        id="price-value"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        const operation = document.getElementById('price-operation').value;
+                        const value = parseFloat(document.getElementById('price-value').value);
+                        if (value && value > 0) {
+                          executeBulkOperation('updatePrices', { operation, value });
+                        }
+                      }}
+                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+                    >
+                      Update Prices
+                    </button>
+                    <button
+                      onClick={() => setBulkOperation(null)}
+                      className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {bulkOperation === 'updateStock' && (
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-600">Update stock for {selectedItems.size} selected items</p>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">Stock Adjustment</label>
+                    <div className="flex gap-2">
+                      <select
+                        id="stock-operation"
+                        className="px-3 py-2 border border-slate-300 rounded-lg"
+                        defaultValue="set"
+                      >
+                        <option value="set">Set to</option>
+                        <option value="add">Add</option>
+                        <option value="subtract">Subtract</option>
+                      </select>
+                      <input
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        className="flex-1 px-3 py-2 border border-slate-300 rounded-lg"
+                        id="stock-value"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        const operation = document.getElementById('stock-operation').value;
+                        const value = parseInt(document.getElementById('stock-value').value);
+                        if (value >= 0) {
+                          executeBulkOperation('updateStock', { operation, value });
+                        }
+                      }}
+                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+                    >
+                      Update Stock
+                    </button>
+                    <button
+                      onClick={() => setBulkOperation(null)}
+                      className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {bulkOperation === 'changeQuality' && (
+                <div className="space-y-4">
+                  <p className="text-sm text-slate-600">Change quality for {selectedItems.size} selected items</p>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-700 mb-2">New Quality</label>
+                    <select
+                      id="quality-value"
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg"
+                    >
+                      <option value="Near Mint">Near Mint</option>
+                      <option value="Lightly Played">Lightly Played</option>
+                      <option value="Moderately Played">Moderately Played</option>
+                      <option value="Heavily Played">Heavily Played</option>
+                      <option value="Damaged">Damaged</option>
+                    </select>
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => {
+                        const quality = document.getElementById('quality-value').value;
+                        executeBulkOperation('changeQuality', { quality });
+                      }}
+                      className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg"
+                    >
+                      Change Quality
+                    </button>
+                    <button
+                      onClick={() => setBulkOperation(null)}
+                      className="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Enhanced Filters & Search - Positioned at Top */}
         <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 border border-slate-200 shadow-sm">
-          <div className="flex flex-col sm:flex-row gap-4 mb-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden="true" />
-              <label htmlFor="search-inventory" className="sr-only">Search inventory</label>
-              <input
-                id="search-inventory"
-                type="search"
-                placeholder="Search by card name or SKU..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-              />
+          {/* Search Bar - Full Width at Top */}
+          <div className="mb-6">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="flex-1 relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" aria-hidden="true" />
+                <label htmlFor="search-inventory" className="sr-only">Search inventory</label>
+                <input
+                  id="search-inventory"
+                  type="search"
+                  placeholder="Search by card name, SKU, set, or rarity..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow text-base"
+                />
+              </div>
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => setShowAllCards(prev => !prev)}
+                  className={`px-4 py-3 rounded-lg border transition-colors flex items-center gap-2 ${
+                    showAllCards
+                      ? 'bg-blue-50 border-blue-200 text-blue-700'
+                      : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <span className="text-sm font-medium">
+                    {showAllCards ? 'All Cards' : 'In Stock Only'}
+                  </span>
+                </button>
+                <select
+                  value={filters.viewMode || 'table'}
+                  onChange={(e) => setFilters(prev => ({ ...prev, viewMode: e.target.value }))}
+                  className="px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                  aria-label="Change view mode"
+                >
+                  <option value="table">Table View</option>
+                  <option value="grid">Grid View</option>
+                  <option value="compact">Compact List</option>
+                </select>
+              </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Filters Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4 mb-6">
             <div>
               <label htmlFor="filter-game" className="block text-sm font-medium text-slate-700 mb-2">
                 Game
@@ -855,7 +1434,7 @@ const AdminDashboard = () => {
                 id="filter-game"
                 value={filterGame}
                 onChange={(e) => setFilterGame(e.target.value)}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
               >
                 <option value="all">All Games</option>
                 <option value="Magic: The Gathering">Magic: The Gathering</option>
@@ -872,7 +1451,7 @@ const AdminDashboard = () => {
                 id="filter-set"
                 value={filterSet}
                 onChange={(e) => setFilterSet(e.target.value)}
-                className="w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white disabled:bg-slate-50 disabled:text-slate-500"
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white disabled:bg-slate-50 disabled:text-slate-500 text-sm"
                 disabled={filterGame === 'all'}
               >
                 <option value="all">All Sets</option>
@@ -881,29 +1460,258 @@ const AdminDashboard = () => {
                 ))}
               </select>
               {filterGame === 'all' && (
-                <p className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
+                <p className="text-xs text-slate-500 mt-1">Select a game first</p>
               )}
             </div>
 
-            <div className="flex items-center">
-              <label className="flex items-center gap-2 cursor-pointer select-none">
-                <input
-                  type="checkbox"
-                  checked={showAllCards}
-                  onChange={(e) => setShowAllCards(e.target.checked)}
-                  className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
-                />
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium text-slate-700">
-                    Show All Cards
-                  </span>
-                  <span className="text-xs text-slate-500">
-                    Include cards without inventory
-                  </span>
-                </div>
+            <div>
+              <label htmlFor="filter-quality" className="block text-sm font-medium text-slate-700 mb-2">
+                Quality/Condition
               </label>
+              <select
+                id="filter-quality"
+                value={filters.quality || 'all'}
+                onChange={(e) => setFilters(prev => ({ ...prev, quality: e.target.value }))}
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+              >
+                <option value="all">All Conditions</option>
+                <option value="Near Mint">Near Mint</option>
+                <option value="Lightly Played">Lightly Played</option>
+                <option value="Moderately Played">Moderately Played</option>
+                <option value="Heavily Played">Heavily Played</option>
+                <option value="Damaged">Damaged</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="filter-foil" className="block text-sm font-medium text-slate-700 mb-2">
+                Foil Type
+              </label>
+              <select
+                id="filter-foil"
+                value={filters.foilType || 'all'}
+                onChange={(e) => setFilters(prev => ({ ...prev, foilType: e.target.value }))}
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+              >
+                <option value="all">All Types</option>
+                <option value="Regular">Non-foil</option>
+                <option value="Foil">Regular Foil</option>
+                <option value="Etched">Etched Foil</option>
+                <option value="Showcase">Showcase</option>
+                <option value="Extended Art">Extended Art</option>
+                <option value="Borderless">Borderless</option>
+                <option value="Retro">Retro Frame</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="filter-stock" className="block text-sm font-medium text-slate-700 mb-2">
+                Stock Level
+              </label>
+              <select
+                id="filter-stock"
+                value={filters.stockLevel || 'all'}
+                onChange={(e) => setFilters(prev => ({ ...prev, stockLevel: e.target.value }))}
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+              >
+                <option value="all">All Stock Levels</option>
+                <option value="instock">In Stock (>0)</option>
+                <option value="lowstock">Low Stock (≤3)</option>
+                <option value="outofstock">Out of Stock (0)</option>
+                <option value="overstock">High Stock (>20)</option>
+              </select>
             </div>
           </div>
+
+          {/* Price Range and Sort */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-2">
+                Price Range ({currency.symbol})
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <input
+                  type="number"
+                  placeholder="Min"
+                  value={filters.minPrice || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                  step="0.01"
+                />
+                <input
+                  type="number"
+                  placeholder="Max"
+                  value={filters.maxPrice || ''}
+                  onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="sort-by" className="block text-sm font-medium text-slate-700 mb-2">
+                Sort By
+              </label>
+              <select
+                id="sort-by"
+                value={filters.sortBy || 'name'}
+                onChange={(e) => setFilters(prev => ({ ...prev, sortBy: e.target.value }))}
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+              >
+                <option value="name">Card Name</option>
+                <option value="game">Game</option>
+                <option value="set">Set Name</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="stock_asc">Stock: Low to High</option>
+                <option value="stock_desc">Stock: High to Low</option>
+                <option value="quality">Quality</option>
+                <option value="updated">Recently Updated</option>
+                <option value="value_desc">Total Value: High to Low</option>
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="filter-source" className="block text-sm font-medium text-slate-700 mb-2">
+                Price Source
+              </label>
+              <select
+                id="filter-source"
+                value={filters.priceSource || 'all'}
+                onChange={(e) => setFilters(prev => ({ ...prev, priceSource: e.target.value }))}
+                className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
+              >
+                <option value="all">All Sources</option>
+                <option value="manual">Manual Pricing</option>
+                <option value="api_scryfall">Scryfall API</option>
+                <option value="api">Other APIs</option>
+              </select>
+            </div>
+
+            <div className="flex items-end">
+              <button
+                onClick={() => {
+                  setSearchTerm('');
+                  setFilterGame('all');
+                  setFilterSet('all');
+                  setFilters({
+                    quality: 'all',
+                    foilType: 'all',
+                    stockLevel: 'all',
+                    minPrice: '',
+                    maxPrice: '',
+                    sortBy: 'name',
+                    priceSource: 'all',
+                    viewMode: 'table'
+                  });
+                }}
+                className="w-full px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors text-sm font-medium focus:ring-2 focus:ring-slate-500 focus:outline-none"
+              >
+                Clear All Filters
+              </button>
+            </div>
+          </div>
+
+          {/* Active Filters Display */}
+          {(searchTerm || filterGame !== 'all' || filterSet !== 'all' ||
+            (filters.quality && filters.quality !== 'all') ||
+            (filters.foilType && filters.foilType !== 'all') ||
+            (filters.stockLevel && filters.stockLevel !== 'all') ||
+            filters.minPrice || filters.maxPrice ||
+            (filters.priceSource && filters.priceSource !== 'all')) && (
+            <div className="flex flex-wrap items-center gap-2 pt-4 border-t border-slate-200">
+              <span className="text-sm text-slate-600 font-medium">Active filters:</span>
+              {searchTerm && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-sm">
+                  Search: {searchTerm}
+                  <button
+                    onClick={() => setSearchTerm('')}
+                    className="hover:bg-blue-100 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {filterGame !== 'all' && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-green-50 text-green-700 rounded-full text-sm">
+                  Game: {filterGame}
+                  <button
+                    onClick={() => setFilterGame('all')}
+                    className="hover:bg-green-100 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {filterSet !== 'all' && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-purple-50 text-purple-700 rounded-full text-sm">
+                  Set: {filterSet}
+                  <button
+                    onClick={() => setFilterSet('all')}
+                    className="hover:bg-purple-100 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {filters.quality && filters.quality !== 'all' && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-orange-50 text-orange-700 rounded-full text-sm">
+                  Quality: {filters.quality}
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, quality: 'all' }))}
+                    className="hover:bg-orange-100 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {filters.foilType && filters.foilType !== 'all' && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-50 text-yellow-700 rounded-full text-sm">
+                  Foil: {filters.foilType}
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, foilType: 'all' }))}
+                    className="hover:bg-yellow-100 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {filters.stockLevel && filters.stockLevel !== 'all' && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-red-50 text-red-700 rounded-full text-sm">
+                  Stock: {filters.stockLevel}
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, stockLevel: 'all' }))}
+                    className="hover:bg-red-100 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {(filters.minPrice || filters.maxPrice) && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm">
+                  Price: {filters.minPrice || '0'} - {filters.maxPrice || '∞'}
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, minPrice: '', maxPrice: '' }))}
+                    className="hover:bg-indigo-100 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+              {filters.priceSource && filters.priceSource !== 'all' && (
+                <span className="inline-flex items-center gap-2 px-3 py-1 bg-pink-50 text-pink-700 rounded-full text-sm">
+                  Source: {filters.priceSource === 'manual' ? 'Manual' : filters.priceSource === 'api_scryfall' ? 'Scryfall' : 'API'}
+                  <button
+                    onClick={() => setFilters(prev => ({ ...prev, priceSource: 'all' }))}
+                    className="hover:bg-pink-100 rounded-full w-4 h-4 flex items-center justify-center"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </span>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Inventory Table */}
@@ -912,6 +1720,15 @@ const AdminDashboard = () => {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-200">
                 <tr>
+                  <th scope="col" className="px-4 py-3 text-center w-12">
+                    <input
+                      type="checkbox"
+                      className="rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                      checked={selectedItems.size > 0 && selectedItems.size === filteredInventory.reduce((total, group) => total + group.qualities.length, 0)}
+                      onChange={(e) => handleSelectAll(e.target.checked)}
+                      aria-label="Select all items"
+                    />
+                  </th>
                   <th scope="col" className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase w-10">
                     <span className="sr-only">Expand</span>
                   </th>
@@ -933,13 +1750,27 @@ const AdminDashboard = () => {
                     <React.Fragment key={group.key}>
                       {/* Main card row */}
                       <tr
-                        className={`hover:bg-slate-50 cursor-pointer transition-colors ${
+                        className={`hover:bg-slate-50 transition-colors ${
                           hasLowStock ? 'bg-amber-50' : isZeroStock ? 'bg-slate-50' : ''
                         }`}
-                        onClick={() => toggleCardExpansion(group.key)}
                       >
                         <td className="px-4 py-3 text-center">
+                          <input
+                            type="checkbox"
+                            className="rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                            checked={group.qualities.every(q => selectedItems.has(q.id))}
+                            onChange={(e) => {
+                              group.qualities.forEach(q => {
+                                handleItemSelect(q.id, e.target.checked);
+                              });
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            aria-label={`Select all qualities for ${group.card_name}`}
+                          />
+                        </td>
+                        <td className="px-4 py-3 text-center">
                           <button
+                            onClick={() => toggleCardExpansion(group.key)}
                             className="p-1 hover:bg-slate-200 rounded transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
                             aria-label={isExpanded ? `Collapse ${group.card_name}` : `Expand ${group.card_name}`}
                             aria-expanded={isExpanded}
@@ -1044,6 +1875,15 @@ const AdminDashboard = () => {
 
                         return (
                           <tr key={item.id} className="bg-slate-50 border-l-4 border-l-blue-300">
+                            <td className="px-4 py-2 text-center">
+                              <input
+                                type="checkbox"
+                                className="rounded border-slate-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                                checked={selectedItems.has(item.id)}
+                                onChange={(e) => handleItemSelect(item.id, e.target.checked)}
+                                aria-label={`Select ${item.card_name} ${item.quality}`}
+                              />
+                            </td>
                             <td className="px-4 py-2"></td>
                             <td className="px-4 py-2">
                               <div className="w-8 h-10 bg-slate-200 rounded border border-slate-300 flex items-center justify-center">
