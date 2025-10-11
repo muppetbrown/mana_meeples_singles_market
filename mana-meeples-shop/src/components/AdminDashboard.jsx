@@ -1139,7 +1139,7 @@ const AdminDashboard = () => {
 
                     <button
                       onClick={() => {
-                        if (confirm(`Delete ${selectedItems.size} selected items? This cannot be undone.`)) {
+                        if (window.confirm(`Delete ${selectedItems.size} selected items? This cannot be undone.`)) {
                           executeBulkOperation('delete');
                         }
                       }}
