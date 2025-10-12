@@ -20,6 +20,9 @@ const { sanitizeCustomerData } = require('../utils/sanitization');
 // ============================================
 const expressRateLimit = require('express-rate-limit');
 
+const variationRoutes = require('./routes/variations');
+app.use('/api', variationRoutes);
+
 // Create memory-safe rate limiters using express-rate-limit
 const createRateLimit = (windowMs, max, message = 'Too many requests') => expressRateLimit({
   windowMs,
