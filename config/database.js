@@ -30,10 +30,26 @@ pool.on('error', (err) => {
   console.error('⚠️  Unexpected database error:', err.message);
 });
 
-// Export the pool as the default export
-module.exports = pool;
+// Create wrapper object with all methods
+const db = {
+  // Direct pool access
+  pool: pool,
+  
+  // Get a client from the pool
+  getClient: function() {
+    return pool.connect();
+  },
+  
+  // Execute a query
+  query: function(text, params) {
+    return pool.query(text, params);
+  },
+  
+  // End the pool
+  end: function() {
+    return pool.end();
+  }
+};
 
-// Add helper methods for compatibility with different usage patterns
-module.exports.getClient = () => pool.connect();
-module.exports.query = (text, params) => pool.query(text, params);
-module.exports.pool = pool;
+// Export the wrapper object as default
+module.exports = db;
