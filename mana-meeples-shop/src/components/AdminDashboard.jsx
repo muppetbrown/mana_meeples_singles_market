@@ -24,6 +24,7 @@ import {
 
 import CurrencySelector from './CurrencySelector';
 import AdminOrders from './AdminOrders';
+import AllCardsView from './AllCardsView';
 import { API_URL } from '../config/api';
 
 const getAdminHeaders = () => {
@@ -1046,6 +1047,17 @@ const AdminDashboard = () => {
             >
               <ShoppingCart className="w-4 h-4" />
               Orders
+            </button>
+            <button
+              onClick={() => setActiveTab('all-cards')}
+              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
+                activeTab === 'all-cards'
+                  ? 'border-blue-500 text-blue-600'
+                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
+              } transition-colors`}
+            >
+              <Package className="w-4 h-4" />
+              All Cards
             </button>
           </nav>
         </div>
@@ -2562,6 +2574,7 @@ const AdminDashboard = () => {
         )}
 
         {/* Orders Tab */}
+        {activeTab === 'all-cards' && <AllCardsView />}
         {activeTab === 'orders' && (
           <AdminOrders />
         )}
