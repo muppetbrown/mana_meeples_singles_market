@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Package, Search, Plus, Sparkles, Image as ImageIcon } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -20,9 +20,9 @@ const AllCardsView = () => {
   // Fetch cards from API
   useEffect(() => {
     fetchCards();
-  }, [filterGame, filterSet, filterTreatment, filterFinish]);
+  }, [fetchCards]);
 
-  const fetchCards = async () => {
+  const fetchCards = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({
@@ -50,7 +50,7 @@ const AllCardsView = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterGame, filterSet, filterTreatment, filterFinish]);
 
   // Filter cards by search term
   const filteredCards = useMemo(() => {

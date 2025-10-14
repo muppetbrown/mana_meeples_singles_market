@@ -25,7 +25,6 @@ import {
 import CurrencySelector from './CurrencySelector';
 import AdminOrders from './AdminOrders';
 import AllCardsView from './AllCardsView';
-import ErrorBoundary from './ErrorBoundary';
 import { useToast } from './Toast';
 import { API_URL } from '../config/api';
 
@@ -109,7 +108,8 @@ const AdminDashboard = () => {
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [bulkOperation, setBulkOperation] = useState(null);
   const [quickActionState, setQuickActionState] = useState('idle'); // idle, loading, success, error
-  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+  // TODO: Add analytics loading state when analytics feature is implemented
+  // const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
   // References for keyboard shortcuts
   const searchInputRef = React.useRef(null);
@@ -307,7 +307,7 @@ const AdminDashboard = () => {
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [searchTerm, toast]);
+  }, [searchTerm, toast, exportFilteredResults]);
 
   // Helper function to get game ID from name
   const getGameIdFromName = (gameName) => {
