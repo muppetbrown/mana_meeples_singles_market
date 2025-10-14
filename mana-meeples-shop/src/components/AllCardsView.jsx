@@ -18,10 +18,6 @@ const AllCardsView = () => {
   const [expandedCards, setExpandedCards] = useState(new Set());
 
   // Fetch cards from API
-  useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
-
   const fetchCards = useCallback(async () => {
     setLoading(true);
     try {
@@ -51,6 +47,10 @@ const AllCardsView = () => {
       setLoading(false);
     }
   }, [filterGame, filterSet, filterTreatment, filterFinish]);
+
+  useEffect(() => {
+    fetchCards();
+  }, [fetchCards]);
 
   // Filter cards by search term
   const filteredCards = useMemo(() => {

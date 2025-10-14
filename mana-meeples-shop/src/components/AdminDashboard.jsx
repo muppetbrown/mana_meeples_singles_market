@@ -269,6 +269,44 @@ const AdminDashboard = () => {
     }
   }, [filters]);
 
+  // Export filtered results
+  const exportFilteredResults = useCallback(() => {
+    const currentResults = [];
+
+    filteredInventory.forEach(group => {
+      group.qualities.forEach(item => {
+        currentResults.push([
+          item.sku,
+          `"${group.card_name}"`,
+          group.game,
+          group.set,
+          item.set_code || '',
+          item.number || '',
+          item.quality,
+          item.foil_type || 'Regular',
+          item.language || 'English',
+          item.price,
+          item.stock,
+          item.price_source || '',
+          item.last_updated || ''
+        ].join(','));
+      });
+    });
+
+    const csv = [
+      ['SKU', 'Name', 'Game', 'Set', 'Set Code', 'Number', 'Quality', 'Foil Type', 'Language', 'Price', 'Stock', 'Price Source', 'Last Updated'].join(','),
+      ...currentResults
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `filtered-inventory-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }, [filteredInventory]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e) => {
@@ -919,44 +957,6 @@ const AdminDashboard = () => {
     } finally {
       setTimeout(() => setQuickActionState('idle'), 3000);
     }
-  };
-
-  // Export filtered results
-  const exportFilteredResults = () => {
-    const currentResults = [];
-
-    filteredInventory.forEach(group => {
-      group.qualities.forEach(item => {
-        currentResults.push([
-          item.sku,
-          `"${group.card_name}"`,
-          group.game,
-          group.set,
-          item.set_code || '',
-          item.number || '',
-          item.quality,
-          item.foil_type || 'Regular',
-          item.language || 'English',
-          item.price,
-          item.stock,
-          item.price_source || '',
-          item.last_updated || ''
-        ].join(','));
-      });
-    });
-
-    const csv = [
-      ['SKU', 'Name', 'Game', 'Set', 'Set Code', 'Number', 'Quality', 'Foil Type', 'Language', 'Price', 'Stock', 'Price Source', 'Last Updated'].join(','),
-      ...currentResults
-    ].join('\n');
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `filtered-inventory-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
-    window.URL.revokeObjectURL(url);
   };
 
   // Quick analytics calculation
