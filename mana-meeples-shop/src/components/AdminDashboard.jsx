@@ -489,64 +489,6 @@ const AdminDashboard = () => {
     return gameMap[gameName] || null;
   };
 
-  const groupedInventory = useMemo(() => {
-    const groups = inventory.reduce((acc, item) => {
-      const key = `${item.game}-${item.set}-${item.number}-${item.card_name}`;
-      if (!acc[key]) {
-        acc[key] = {
-          card_name: item.card_name,
-          card_type: item.card_type,
-          game: item.game,
-          set: item.set,
-          number: item.number,
-          image_url: item.image_url,
-          qualities: [],
-          totalValue: 0,
-          totalStock: 0,
-          hasLowStock: false,
-          lastUpdated: item.last_updated
-        };
-      }
-
-      acc[key].qualities.push(item);
-      acc[key].totalValue += item.price * item.stock;
-      acc[key].totalStock += item.stock;
-      acc[key].hasLowStock = acc[key].hasLowStock || (item.stock > 0 && item.stock <= item.low_stock_threshold);
-
-      if (item.last_updated && (!acc[key].lastUpdated || new Date(item.last_updated) > new Date(acc[key].lastUpdated))) {
-        acc[key].lastUpdated = item.last_updated;
-      }
-
-      return acc;
-    }, {});
-
-    return Object.entries(groups).map(([key, group]) => {
-      const allQualities = group.qualities.sort((a, b) => {
-        const qualityOrder = { 'Near Mint': 1, 'Lightly Played': 2, 'Moderately Played': 3, 'Heavily Played': 4, 'Damaged': 5 };
-        return (qualityOrder[a.quality] || 999) - (qualityOrder[b.quality] || 999);
-      });
-
-      const filteredQualities = showAllCards
-        ? allQualities
-        : allQualities.filter(quality => quality.stock > 0);
-
-      // Always calculate totals from ALL qualities to show true stock
-      const totalValue = group.qualities.reduce((sum, quality) => sum + (quality.price * quality.stock), 0);
-      const totalStock = group.qualities.reduce((sum, quality) => sum + quality.stock, 0);
-      const hasLowStock = group.qualities.some(quality => quality.stock > 0 && quality.stock <= quality.low_stock_threshold);
-
-      return {
-        ...group,
-        key,
-        qualities: allQualities, // Keep all qualities for expanded view
-        visibleQualities: filteredQualities, // Only for badge display
-        totalValue,
-        totalStock,
-        hasLowStock
-      };
-    }); // Always show cards, even with zero stock
-  }, [inventory, showAllCards]);
-
   const filteredInventory = useMemo(() => {
     let filtered = groupedInventory.filter(group => {
       // Enhanced search - includes rarity and more fields
