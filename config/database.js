@@ -30,11 +30,10 @@ pool.on('error', (err) => {
   console.error('⚠️  Unexpected database error:', err.message);
 });
 
-// Export both pool and helper methods for compatibility
+// Export the pool as the default export
 module.exports = pool;
 
-// Add getClient method for services that need it
+// Add helper methods for compatibility with different usage patterns
 module.exports.getClient = () => pool.connect();
-
-// Add query method for direct queries
 module.exports.query = (text, params) => pool.query(text, params);
+module.exports.pool = pool;
