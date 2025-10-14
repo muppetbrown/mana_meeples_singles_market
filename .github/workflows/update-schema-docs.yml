@@ -1,0 +1,101 @@
+name: Update Database Schema Documentation
+
+on:
+  # Allow manual trigger from GitHub Actions tab
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Database environment to document'
+        required: true
+        default: 'production'
+        type: choice
+        options:
+          - production
+          - staging
+          - development
+  
+jobs:
+  update-schema-docs:
+    runs-on: ubuntu-latest
+    
+    # Prevent concurrent runs
+    concurrency:
+      group: schema-export
+      cancel-in-progress: false
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Export database schema
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          NODE_ENV: ${{ github.event.inputs.environment || 'production' }}
+        run: |
+          echo "📚 Exporting database schema..."
+          node scripts/export-database-schema.js
+      
+      - name: Check for changes
+        id: check_changes
+        run: |
+          git diff --exit-code docs/DATABASE_SCHEMA.md docs/database-stats.json || echo "changed=true" >> $GITHUB_OUTPUT
+      
+      - name: Commit and push changes
+        if: steps.check_changes.outputs.changed == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # Add the documentation files
+          git add docs/DATABASE_SCHEMA.md docs/database-stats.json
+          
+          # Create commit with detailed message
+          COMMIT_MSG="docs: Update database schema documentation
+
+          - Generated: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          - Trigger: ${{ github.event_name }}
+          - Environment: ${{ github.event.inputs.environment || 'production' }}
+          
+          [skip ci]"
+          
+          git commit -m "$COMMIT_MSG"
+          git push
+      
+      - name: Create summary
+        if: always()
+        run: |
+          echo "## Database Schema Export Summary 📚" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** ${{ job.status }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Trigger:** ${{ github.event_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Environment:** ${{ github.event.inputs.environment || 'production' }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Branch:** ${{ github.ref_name }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          if [ "${{ steps.check_changes.outputs.changed }}" == "true" ]; then
+            echo "✅ Schema documentation updated and committed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ No changes detected in schema" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📄 View documentation: [DATABASE_SCHEMA.md](docs/DATABASE_SCHEMA.md)" >> $GITHUB_STEP_SUMMARY
+          echo "📊 View statistics: [database-stats.json](docs/database-stats.json)" >> $GITHUB_STEP_SUMMARY
+      
+      - name: Notify on failure
+        if: failure()
+        run: |
+          echo "❌ Schema export failed!" >> $GITHUB_STEP_SUMMARY
+          echo "Check the logs above for details." >> $GITHUB_STEP_SUMMARY
