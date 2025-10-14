@@ -269,6 +269,138 @@ const AdminDashboard = () => {
     }
   }, [filters]);
 
+  const groupedInventory = useMemo(() => {
+    const groups = inventory.reduce((acc, item) => {
+      const key = `${item.game}-${item.set}-${item.number}-${item.card_name}`;
+      if (!acc[key]) {
+        acc[key] = {
+          card_name: item.card_name,
+          card_type: item.card_type,
+          game: item.game,
+          set: item.set,
+          number: item.number,
+          image_url: item.image_url,
+          qualities: [],
+          totalValue: 0,
+          totalStock: 0,
+          hasLowStock: false,
+          lastUpdated: item.last_updated
+        };
+      }
+
+      acc[key].qualities.push(item);
+      acc[key].totalValue += item.price * item.stock;
+      acc[key].totalStock += item.stock;
+      acc[key].hasLowStock = acc[key].hasLowStock || (item.stock > 0 && item.stock <= item.low_stock_threshold);
+
+      if (item.last_updated && (!acc[key].lastUpdated || new Date(item.last_updated) > new Date(acc[key].lastUpdated))) {
+        acc[key].lastUpdated = item.last_updated;
+      }
+
+      return acc;
+    }, {});
+
+    return Object.entries(groups).map(([key, group]) => {
+      const allQualities = group.qualities.sort((a, b) => {
+        const qualityOrder = { 'Near Mint': 1, 'Lightly Played': 2, 'Moderately Played': 3, 'Heavily Played': 4, 'Damaged': 5 };
+        return (qualityOrder[a.quality] || 999) - (qualityOrder[b.quality] || 999);
+      });
+
+      const filteredQualities = showAllCards
+        ? allQualities
+        : allQualities.filter(quality => quality.stock > 0);
+
+      // Always calculate totals from ALL qualities to show true stock
+      const totalValue = group.qualities.reduce((sum, quality) => sum + (quality.price * quality.stock), 0);
+      const totalStock = group.qualities.reduce((sum, quality) => sum + quality.stock, 0);
+      const hasLowStock = group.qualities.some(quality => quality.stock > 0 && quality.stock <= quality.low_stock_threshold);
+
+      return {
+        ...group,
+        key,
+        qualities: allQualities, // Keep all qualities for expanded view
+        visibleQualities: filteredQualities, // Only for badge display
+        totalValue,
+        totalStock,
+        hasLowStock
+      };
+    }); // Always show cards, even with zero stock
+  }, [inventory, showAllCards]);
+
+  const filteredInventory = useMemo(() => {
+    let filtered = groupedInventory.filter(group => {
+      // Enhanced search - includes rarity and more fields
+      const matchesSearch =
+        group.card_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.qualities.some(q =>
+          q.sku?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          q.quality?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          q.foil_type?.toLowerCase().includes(searchTerm.toLowerCase())
+        ) ||
+        group.set?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        group.game?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const matchesGame = filterGame === 'all' || group.game === filterGame;
+      const matchesSet = filterSet === 'all' || group.set === filterSet;
+
+      // Quality filter
+      const matchesQuality = filters.quality === 'all' ||
+        group.qualities.some(q => q.quality === filters.quality);
+
+      // Foil type filter
+      const matchesFoilType = filters.foilType === 'all' ||
+        group.qualities.some(q => {
+          const foilType = q.foil_type || 'Regular';
+          return foilType === filters.foilType;
+        });
+
+      // Card type filter
+      const matchesCardType = filters.cardType === 'all' ||
+        (group.card_type && group.card_type === filters.cardType);
+
+      // Stock level filter
+      const matchesStockLevel = filters.stockLevel === 'all' || (() => {
+        switch (filters.stockLevel) {
+          case 'instock': return group.totalStock > 0;
+          case 'lowstock': return group.totalStock > 0 && group.totalStock <= 3;
+          case 'outofstock': return group.totalStock === 0;
+          case 'overstock': return group.totalStock > 20;
+          default: return true;
+        }
+      })();
+
+      const matchesPrice = (() => {
+        if (filters.priceMin !== '' || filters.priceMax !== '') {
+          const min = parseFloat(filters.priceMin) || 0;
+          const max = parseFloat(filters.priceMax) || Infinity;
+          return group.qualities.some(q => q.price >= min && q.price <= max);
+        }
+        return true;
+      })();
+
+      return matchesSearch && matchesGame && matchesSet &&
+             matchesQuality && matchesFoilType && matchesCardType &&
+             matchesStockLevel && matchesPrice;
+    });
+
+    // Sort by priority: HasLowStock > TotalValue > Card name
+    filtered.sort((a, b) => {
+      // Primary sort: low stock items first
+      if (a.hasLowStock && !b.hasLowStock) return -1;
+      if (!a.hasLowStock && b.hasLowStock) return 1;
+
+      // Secondary sort: by total value (descending)
+      if (Math.abs(b.totalValue - a.totalValue) > 0.01) {
+        return b.totalValue - a.totalValue;
+      }
+
+      // Tertiary sort: by card name
+      return a.card_name.localeCompare(b.card_name);
+    });
+
+    return filtered;
+  }, [groupedInventory, searchTerm, filterGame, filterSet, filters]);
+
   // Export filtered results
   const exportFilteredResults = useCallback(() => {
     const currentResults = [];
