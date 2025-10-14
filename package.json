@@ -10,7 +10,11 @@
     "postinstall": "npm run build",
     "dev:frontend": "cd mana-meeples-shop && npm start",
     "clean": "rm -rf mana-meeples-shop/build mana-meeples-shop/node_modules node_modules",
-    "build:production": "NODE_ENV=production npm run build"
+    "build:production": "NODE_ENV=production npm run build",
+    "schema:export": "node scripts/export-database-schema.js",
+    "schema:export:prod": "NODE_ENV=production node scripts/export-database-schema.js",
+    "schema:export:dev": "NODE_ENV=development node scripts/export-database-schema.js",
+    "docs:update": "npm run schema:export && git add docs/DATABASE_SCHEMA.md docs/database-stats.json"
   },
   "keywords": [
     "tcg",
