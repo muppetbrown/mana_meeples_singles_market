@@ -1,0 +1,77 @@
+{
+  "table_count": 12,
+  "tables": {
+    "audit_log": {
+      "columns": 8,
+      "constraints": 4,
+      "indexes": 1,
+      "rows": 0
+    },
+    "card_inventory": {
+      "columns": 18,
+      "constraints": 50,
+      "indexes": 15,
+      "rows": 0
+    },
+    "card_pricing": {
+      "columns": 7,
+      "constraints": 6,
+      "indexes": 4,
+      "rows": 0
+    },
+    "card_sets": {
+      "columns": 8,
+      "constraints": 9,
+      "indexes": 3,
+      "rows": 1
+    },
+    "card_variations": {
+      "columns": 6,
+      "constraints": 4,
+      "indexes": 1,
+      "rows": 0
+    },
+    "cards": {
+      "columns": 21,
+      "constraints": 16,
+      "indexes": 20,
+      "rows": 1114
+    },
+    "game_variations_metadata": {
+      "columns": 13,
+      "constraints": 5,
+      "indexes": 4,
+      "rows": 1
+    },
+    "games": {
+      "columns": 6,
+      "constraints": 6,
+      "indexes": 3,
+      "rows": 2
+    },
+    "order_items": {
+      "columns": 9,
+      "constraints": 12,
+      "indexes": 1,
+      "rows": 0
+    },
+    "orders": {
+      "columns": 11,
+      "constraints": 9,
+      "indexes": 3,
+      "rows": 0
+    },
+    "price_history": {
+      "columns": 5,
+      "constraints": 4,
+      "indexes": 3,
+      "rows": 0
+    },
+    "set_variations_metadata": {
+      "columns": 13,
+      "constraints": 10,
+      "indexes": 7,
+      "rows": 1
+    }
+  }
+}

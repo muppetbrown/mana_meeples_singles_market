@@ -1494,7 +1494,208 @@ router.get('/analytics/trending', async (req, res) => {
     console.error('Error fetching trending cards:', error);
     res.status(500).json({ error: 'Failed to fetch trending cards' });
   }
+});/**
+ * GET /api/admin/all-cards
+ * 
+ * Returns ALL cards from the database with their variations
+ * Groups by base card (same name + card_number) and shows finish variations
+ * Does NOT generate inventory - just shows what's in the database
+ */
+router.get('/admin/all-cards', adminAuthJWT, async (req, res) => {
+  try {
+    const {
+      game_id,
+      set_id,
+      search,
+      treatment,
+      finish,
+      rarity,
+      limit = 100,
+      offset = 0
+    } = req.query;
+
+    let query = `
+      SELECT 
+        c.id as card_id,
+        c.name,
+        c.card_number,
+        c.rarity,
+        c.card_type,
+        c.description,
+        c.image_url,
+        c.border_color,
+        c.finish,
+        c.frame_effect,
+        c.promo_type,
+        c.treatment,
+        c.sku,
+        c.created_at,
+        c.updated_at,
+        cs.id as set_id,
+        cs.name as set_name,
+        cs.code as set_code,
+        g.id as game_id,
+        g.name as game_name,
+        g.code as game_code,
+        -- Count how many inventory entries exist for this card
+        (SELECT COUNT(*) FROM card_inventory ci WHERE ci.card_id = c.id) as inventory_count,
+        -- Get total stock across all inventory entries
+        (SELECT COALESCE(SUM(stock_quantity), 0) FROM card_inventory ci WHERE ci.card_id = c.id) as total_stock
+      FROM cards c
+      JOIN card_sets cs ON cs.id = c.set_id
+      JOIN games g ON g.id = c.game_id
+      WHERE 1=1
+    `;
+
+    const params = [];
+    let paramIndex = 1;
+
+    if (game_id) {
+      query += ` AND c.game_id = $${paramIndex}`;
+      params.push(game_id);
+      paramIndex++;
+    }
+
+    if (set_id) {
+      query += ` AND c.set_id = $${paramIndex}`;
+      params.push(set_id);
+      paramIndex++;
+    }
+
+    if (search) {
+      query += ` AND (
+        c.name ILIKE $${paramIndex} OR 
+        c.card_number ILIKE $${paramIndex} OR
+        c.sku ILIKE $${paramIndex}
+      )`;
+      params.push(`%${search}%`);
+      paramIndex++;
+    }
+
+    if (treatment) {
+      query += ` AND c.treatment = $${paramIndex}`;
+      params.push(treatment);
+      paramIndex++;
+    }
+
+    if (finish) {
+      query += ` AND c.finish = $${paramIndex}`;
+      params.push(finish);
+      paramIndex++;
+    }
+
+    if (rarity) {
+      query += ` AND c.rarity = $${paramIndex}`;
+      params.push(rarity);
+      paramIndex++;
+    }
+
+    // Get total count before pagination
+    const countQuery = query.replace(
+      /SELECT .+ FROM/s,
+      'SELECT COUNT(*) as total FROM'
+    );
+    const countResult = await db.query(countQuery, params);
+    const totalCards = parseInt(countResult.rows[0].total);
+
+    // Add ordering and pagination
+    query += ` ORDER BY c.name, c.card_number, c.treatment, c.finish`;
+    query += ` LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+    params.push(limit, offset);
+
+    const result = await db.query(query, params);
+
+    // Group cards by base card (name + card_number)
+    const cardMap = new Map();
+
+    result.rows.forEach(row => {
+      // Create a unique key for the base card (same name + card_number = same card)
+      const baseKey = `${row.name}-${row.card_number}`;
+
+      if (!cardMap.has(baseKey)) {
+        cardMap.set(baseKey, {
+          name: row.name,
+          card_number: row.card_number,
+          rarity: row.rarity,
+          card_type: row.card_type,
+          description: row.description,
+          set_id: row.set_id,
+          set_name: row.set_name,
+          set_code: row.set_code,
+          game_id: row.game_id,
+          game_name: row.game_name,
+          game_code: row.game_code,
+          // Use the first image as the main image
+          image_url: row.image_url,
+          // Track all variations of this card
+          variations: [],
+          // Track if ANY variation has inventory
+          has_inventory: false,
+          total_stock: 0
+        });
+      }
+
+      const baseCard = cardMap.get(baseKey);
+
+      // Add this variation to the card
+      baseCard.variations.push({
+        card_id: row.card_id,
+        treatment: row.treatment,
+        finish: row.finish,
+        border_color: row.border_color,
+        frame_effect: row.frame_effect,
+        promo_type: row.promo_type,
+        sku: row.sku,
+        inventory_count: parseInt(row.inventory_count),
+        stock: parseInt(row.total_stock),
+        created_at: row.created_at,
+        updated_at: row.updated_at
+      });
+
+      // Update base card inventory tracking
+      if (row.inventory_count > 0) {
+        baseCard.has_inventory = true;
+        baseCard.total_stock += parseInt(row.total_stock);
+      }
+    });
+
+    // Convert map to array and add useful metadata
+    const cards = Array.from(cardMap.values()).map(card => ({
+      ...card,
+      variation_count: card.variations.length,
+      // Sort variations: Standard first, then by finish
+      variations: card.variations.sort((a, b) => {
+        if (a.treatment === 'STANDARD' && b.treatment !== 'STANDARD') return -1;
+        if (a.treatment !== 'STANDARD' && b.treatment === 'STANDARD') return 1;
+        if (a.finish === 'nonfoil' && b.finish === 'foil') return -1;
+        if (a.finish === 'foil' && b.finish === 'nonfoil') return 1;
+        return 0;
+      })
+    }));
+
+    res.json({
+      success: true,
+      cards,
+      pagination: {
+        total: Math.ceil(totalCards / result.rows.length), // Total unique cards
+        total_variations: totalCards, // Total card variations
+        limit: parseInt(limit),
+        offset: parseInt(offset),
+        has_more: (parseInt(offset) + result.rows.length) < totalCards
+      }
+    });
+
+  } catch (error) {
+    console.error('Error fetching all cards:', error);
+    res.status(500).json({
+      error: 'Failed to fetch cards',
+      details: error.message
+    });
+  }
 });
+
+// Add this route ABOVE the existing routes in your api.js file
+module.exports = router;
 
 // POST /api/admin/bulk-update - Bulk update prices and stock
 router.post('/admin/bulk-update', adminAuthWithCSRF, async (req, res) => {
