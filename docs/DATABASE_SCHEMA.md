@@ -1,7 +1,7 @@
 
 # Database Schema Documentation
 
-**Generated:** 2025-10-14T07:57:10.709Z
+**Generated:** 2025-10-14T08:13:41.995Z
 **Database:** PostgreSQL (production)
 
 This document provides a comprehensive overview of the database structure, including tables, relationships, indexes, and sample data.
@@ -30,20 +30,20 @@ This document provides a comprehensive overview of the database structure, inclu
 
 | Table | Row Count |
 |-------|-----------|
-| card_sets | 6 |
-| set_variations_metadata | 4 |
+| cards | 1,114 |
 | games | 2 |
+| card_sets | 1 |
+| game_variations_metadata | 1 |
+| set_variations_metadata | 1 |
 | audit_log | 0 |
 | card_inventory | 0 |
 | card_pricing | 0 |
 | card_variations | 0 |
-| cards | 0 |
-| game_variations_metadata | 0 |
 | order_items | 0 |
 | orders | 0 |
 | price_history | 0 |
 
-**Total Records:** 12
+**Total Records:** 1,119
 
 ## Tables
 
@@ -295,7 +295,7 @@ CREATE INDEX idx_card_pricing_updated ON public.card_pricing USING btree (update
 
 ### card_sets
 
-**Row Count:** 6
+**Row Count:** 1
 
 **Columns:**
 
@@ -350,34 +350,14 @@ CREATE INDEX idx_card_sets_name_trgm ON public.card_sets USING gin (name gin_trg
 ```json
 [
   {
-    "id": 1,
+    "id": 11,
     "game_id": 1,
-    "name": "Bloomburrow",
-    "code": "BLB",
-    "release_date": "2024-08-01T12:00:00.000Z",
+    "name": "Final Fantasy",
+    "code": "FIN",
+    "release_date": "2025-06-12T12:00:00.000Z",
     "active": true,
-    "created_at": "2025-10-06T08:50:06.868Z",
-    "updated_at": "2025-10-06T08:50:06.868Z"
-  },
-  {
-    "id": 2,
-    "game_id": 1,
-    "name": "Modern Horizons 3",
-    "code": "MH3",
-    "release_date": "2024-06-13T12:00:00.000Z",
-    "active": true,
-    "created_at": "2025-10-06T08:50:06.868Z",
-    "updated_at": "2025-10-06T08:50:06.868Z"
-  },
-  {
-    "id": 3,
-    "game_id": 2,
-    "name": "Scarlet & Violet",
-    "code": "SVI",
-    "release_date": "2023-03-30T11:00:00.000Z",
-    "active": true,
-    "created_at": "2025-10-06T08:50:06.868Z",
-    "updated_at": "2025-10-06T08:50:06.868Z"
+    "created_at": "2025-10-13T19:01:32.046Z",
+    "updated_at": "2025-10-13T19:01:32.046Z"
   }
 ]
 ```
@@ -425,7 +405,7 @@ CREATE UNIQUE INDEX card_variations_pkey ON public.card_variations USING btree (
 
 ### cards
 
-**Row Count:** 0
+**Row Count:** 1,114
 
 **Columns:**
 
@@ -469,10 +449,15 @@ CREATE UNIQUE INDEX card_variations_pkey ON public.card_variations USING btree (
 - `cards_pkey`: id
 
 **UNIQUE:**
-- `cards_set_id_card_number_key`: card_number
-- `cards_set_id_card_number_key`: card_number
-- `cards_set_id_card_number_key`: set_id
-- `cards_set_id_card_number_key`: set_id
+- `cards_set_id_card_number_finish_key`: card_number
+- `cards_set_id_card_number_finish_key`: card_number
+- `cards_set_id_card_number_finish_key`: finish
+- `cards_set_id_card_number_finish_key`: finish
+- `cards_set_id_card_number_finish_key`: set_id
+- `cards_set_id_card_number_finish_key`: set_id
+- `cards_set_id_card_number_finish_key`: set_id
+- `cards_set_id_card_number_finish_key`: finish
+- `cards_set_id_card_number_finish_key`: card_number
 - `cards_sku_key`: sku
 
 
@@ -483,7 +468,7 @@ CREATE UNIQUE INDEX cards_pkey ON public.cards USING btree (id)
 ```
 
 ```sql
-CREATE UNIQUE INDEX cards_set_id_card_number_key ON public.cards USING btree (set_id, card_number)
+CREATE UNIQUE INDEX cards_set_id_card_number_finish_key ON public.cards USING btree (set_id, card_number, finish)
 ```
 
 ```sql
@@ -558,12 +543,88 @@ CREATE INDEX idx_cards_sku ON public.cards USING btree (sku)
 CREATE INDEX idx_cards_treatment ON public.cards USING btree (treatment)
 ```
 
+**Sample Data:**
+
+```json
+[
+  {
+    "id": 1042,
+    "game_id": 1,
+    "set_id": 11,
+    "name": "Absolute Virtue",
+    "card_number": "212",
+    "rarity": "mythic",
+    "card_type": "Legendary Creature — Avatar Warrior",
+    "description": "This spell can't be countered.\nFlying\nYou have protection from each of your opponents. (You can't be dealt damage, enchanted, or targeted by anything controlled by your opponents.)",
+    "image_url": "https://cards.scryfall.io/large/front/a/a/aa192912-c9ee-403f-8a46-a338c9edb4b9.jpg?1748706551",
+    "scryfall_id": "aa192912-c9ee-403f-8a46-a338c9edb4b9",
+    "tcgplayer_id": null,
+    "pokemontcg_id": null,
+    "created_at": "2025-10-13T19:01:32.357Z",
+    "updated_at": "2025-10-13T19:01:32.357Z",
+    "search_tsv": "'212':37 'absolut':1 'anyth':32 'avatar':5 'control':33 'counter':12 'creatur':4 'damag':27 'dealt':26 'enchant':28 'fli':13 'legendari':3 'oppon':21,36 'protect':16 'spell':8 'target':30 'virtu':2 'warrior':6",
+    "border_color": "black",
+    "finish": "nonfoil",
+    "frame_effect": null,
+    "promo_type": null,
+    "treatment": "STANDARD",
+    "sku": "FIN-212-STANDARD-NONFOIL"
+  },
+  {
+    "id": 1043,
+    "game_id": 1,
+    "set_id": 11,
+    "name": "Absolute Virtue",
+    "card_number": "212",
+    "rarity": "mythic",
+    "card_type": "Legendary Creature — Avatar Warrior",
+    "description": "This spell can't be countered.\nFlying\nYou have protection from each of your opponents. (You can't be dealt damage, enchanted, or targeted by anything controlled by your opponents.)",
+    "image_url": "https://cards.scryfall.io/large/front/a/a/aa192912-c9ee-403f-8a46-a338c9edb4b9.jpg?1748706551",
+    "scryfall_id": "aa192912-c9ee-403f-8a46-a338c9edb4b9",
+    "tcgplayer_id": null,
+    "pokemontcg_id": null,
+    "created_at": "2025-10-13T19:01:32.653Z",
+    "updated_at": "2025-10-13T19:01:32.653Z",
+    "search_tsv": "'212':37 'absolut':1 'anyth':32 'avatar':5 'control':33 'counter':12 'creatur':4 'damag':27 'dealt':26 'enchant':28 'fli':13 'legendari':3 'oppon':21,36 'protect':16 'spell':8 'target':30 'virtu':2 'warrior':6",
+    "border_color": "black",
+    "finish": "foil",
+    "frame_effect": null,
+    "promo_type": null,
+    "treatment": "STANDARD",
+    "sku": "FIN-212-STANDARD-FOIL"
+  },
+  {
+    "id": 1044,
+    "game_id": 1,
+    "set_id": 11,
+    "name": "Absolute Virtue",
+    "card_number": "476",
+    "rarity": "mythic",
+    "card_type": "Legendary Creature — Avatar Warrior",
+    "description": "This spell can't be countered.\nFlying\nYou have protection from each of your opponents. (You can't be dealt damage, enchanted, or targeted by anything controlled by your opponents.)",
+    "image_url": "https://cards.scryfall.io/large/front/5/0/50716867-4370-4c2f-aae5-9d791a5d5a2e.jpg?1748707531",
+    "scryfall_id": "50716867-4370-4c2f-aae5-9d791a5d5a2e",
+    "tcgplayer_id": null,
+    "pokemontcg_id": null,
+    "created_at": "2025-10-13T19:01:32.942Z",
+    "updated_at": "2025-10-13T19:01:32.942Z",
+    "search_tsv": "'476':37 'absolut':1 'anyth':32 'avatar':5 'control':33 'counter':12 'creatur':4 'damag':27 'dealt':26 'enchant':28 'fli':13 'legendari':3 'oppon':21,36 'protect':16 'spell':8 'target':30 'virtu':2 'warrior':6",
+    "border_color": "black",
+    "finish": "nonfoil",
+    "frame_effect": "extendedart",
+    "promo_type": null,
+    "treatment": "EXTENDED",
+    "sku": "FIN-476-EXTENDED-NONFOIL"
+  }
+]
+```
+
 ---
 
 
 ### game_variations_metadata
 
-**Row Count:** 0
+**Row Count:** 1
 
 **Columns:**
 
@@ -616,6 +677,50 @@ CREATE INDEX idx_game_variations_game ON public.game_variations_metadata USING b
 
 ```sql
 CREATE INDEX idx_game_variations_treatments ON public.game_variations_metadata USING gin (treatment_codes)
+```
+
+**Sample Data:**
+
+```json
+[
+  {
+    "id": 1,
+    "game_id": 1,
+    "visual_treatments": [
+      "extendedart",
+      "inverted"
+    ],
+    "special_foils": [
+      "surgefoil",
+      "chocobotrackfoil",
+      "neonink"
+    ],
+    "border_colors": [
+      "black",
+      "borderless"
+    ],
+    "frame_effects": [
+      "extendedart",
+      "inverted"
+    ],
+    "treatment_codes": [
+      "STANDARD",
+      "EXTENDED",
+      "STANDARD_SURGEFOIL",
+      "BORDERLESS_INVERTED",
+      "BORDERLESS_INVERTED_SURGEFOIL",
+      "BORDERLESS_INVERTED_CHOCOBOTRACKFOIL",
+      "BORDERLESS",
+      "BORDERLESS_NEONINK"
+    ],
+    "total_sets": 1,
+    "total_cards": 1114,
+    "total_variations": 1114,
+    "last_analyzed": "2025-10-13T19:13:13.244Z",
+    "created_at": "2025-10-13T19:13:13.244Z",
+    "updated_at": "2025-10-13T19:13:13.244Z"
+  }
+]
 ```
 
 ---
@@ -842,7 +947,7 @@ CREATE UNIQUE INDEX price_history_pkey ON public.price_history USING btree (id)
 
 ### set_variations_metadata
 
-**Row Count:** 4
+**Row Count:** 1
 
 **Columns:**
 
@@ -919,49 +1024,41 @@ CREATE UNIQUE INDEX set_variations_metadata_set_id_game_id_key ON public.set_var
 ```json
 [
   {
-    "id": 1667,
-    "set_id": 7,
+    "id": 2564,
+    "set_id": 11,
     "game_id": 1,
-    "visual_treatments": [],
-    "special_foils": [],
-    "border_colors": [],
-    "frame_effects": [],
-    "treatment_codes": [],
-    "total_cards": 0,
-    "total_variations": 0,
-    "last_analyzed": "2025-10-13T15:18:27.997Z",
-    "created_at": "2025-10-13T15:18:27.997Z",
-    "updated_at": "2025-10-13T15:18:27.997Z"
-  },
-  {
-    "id": 1676,
-    "set_id": 4,
-    "game_id": 2,
-    "visual_treatments": [],
-    "special_foils": [],
-    "border_colors": [],
-    "frame_effects": [],
-    "treatment_codes": [],
-    "total_cards": 0,
-    "total_variations": 0,
-    "last_analyzed": "2025-10-13T15:18:27.997Z",
-    "created_at": "2025-10-13T15:18:27.997Z",
-    "updated_at": "2025-10-13T15:18:27.997Z"
-  },
-  {
-    "id": 1738,
-    "set_id": 8,
-    "game_id": 2,
-    "visual_treatments": [],
-    "special_foils": [],
-    "border_colors": [],
-    "frame_effects": [],
-    "treatment_codes": [],
-    "total_cards": 0,
-    "total_variations": 0,
-    "last_analyzed": "2025-10-13T15:18:27.997Z",
-    "created_at": "2025-10-13T15:18:27.997Z",
-    "updated_at": "2025-10-13T15:18:27.997Z"
+    "visual_treatments": [
+      "extendedart",
+      "inverted"
+    ],
+    "special_foils": [
+      "surgefoil",
+      "chocobotrackfoil",
+      "neonink"
+    ],
+    "border_colors": [
+      "black",
+      "borderless"
+    ],
+    "frame_effects": [
+      "extendedart",
+      "inverted"
+    ],
+    "treatment_codes": [
+      "STANDARD",
+      "EXTENDED",
+      "STANDARD_SURGEFOIL",
+      "BORDERLESS_INVERTED",
+      "BORDERLESS_INVERTED_SURGEFOIL",
+      "BORDERLESS_INVERTED_CHOCOBOTRACKFOIL",
+      "BORDERLESS",
+      "BORDERLESS_NEONINK"
+    ],
+    "total_cards": 1114,
+    "total_variations": 1114,
+    "last_analyzed": "2025-10-13T19:13:12.383Z",
+    "created_at": "2025-10-13T19:01:32.357Z",
+    "updated_at": "2025-10-13T19:13:12.383Z"
   }
 ]
 ```
