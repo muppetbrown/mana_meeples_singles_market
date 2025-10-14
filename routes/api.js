@@ -1501,7 +1501,7 @@ router.get('/analytics/trending', async (req, res) => {
  * Groups by base card (same name + card_number) and shows finish variations
  * Does NOT generate inventory - just shows what's in the database
  */
-router.get('/admin/all-cards', adminAuthJWT, async (req, res) => {
+router.get('/admin/all-cards', adminAuth, async (req, res) => {
   try {
     const {
       game_id,
