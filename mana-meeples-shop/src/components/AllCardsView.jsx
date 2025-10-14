@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Package, Search, Plus, Sparkles, Image as ImageIcon } from 'lucide-react';
+import { Package, Search, Plus, Sparkles, Image as ImageIcon, CheckCircle, AlertTriangle, AlertCircle, Minus, Edit2 } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -94,6 +94,74 @@ const AllCardsView = () => {
     if (treatment.includes('SURGEFOIL')) return 'bg-yellow-100 text-yellow-800 border-yellow-300';
     if (treatment.includes('NEONINK')) return 'bg-pink-100 text-pink-800 border-pink-300';
     return 'bg-indigo-100 text-indigo-800 border-indigo-300';
+  };
+
+  // Highlight search terms in text
+  const highlightText = (text, search) => {
+    if (!search) return text;
+
+    const parts = text.split(new RegExp(`(${search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'));
+    return parts.map((part, i) =>
+      part.toLowerCase() === search.toLowerCase() ? (
+        <mark key={i} className="bg-yellow-200 text-yellow-900 rounded px-0.5">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
+  };
+
+  // Get stock health indicator
+  const getStockHealthIndicator = (stock) => {
+    if (stock >= 10) {
+      return {
+        icon: CheckCircle,
+        colorClass: 'text-green-600',
+        textClass: 'text-green-700',
+        bgClass: 'bg-green-50',
+        status: 'Healthy'
+      };
+    } else if (stock >= 3) {
+      return {
+        icon: AlertTriangle,
+        colorClass: 'text-amber-600',
+        textClass: 'text-amber-700',
+        bgClass: 'bg-amber-50',
+        status: 'Low'
+      };
+    } else if (stock > 0) {
+      return {
+        icon: AlertCircle,
+        colorClass: 'text-red-600',
+        textClass: 'text-red-700',
+        bgClass: 'bg-red-50',
+        status: 'Critical'
+      };
+    } else {
+      return {
+        icon: Package,
+        colorClass: 'text-slate-400',
+        textClass: 'text-slate-600',
+        bgClass: 'bg-slate-50',
+        status: 'Out of Stock'
+      };
+    }
+  };
+
+  // Get smart variation summary
+  const getVariationSummary = (card) => {
+    const variations = card.variations || [];
+    const hasSpecialTreatments = variations.some(v => v.treatment && v.treatment !== 'STANDARD');
+    const hasFoil = variations.some(v => v.finish === 'foil');
+    const specialTreatmentCount = variations.filter(v => v.treatment && v.treatment !== 'STANDARD').length;
+
+    return {
+      hasSpecialTreatments,
+      hasFoil,
+      specialTreatmentCount,
+      totalVariations: variations.length
+    };
   };
 
   if (loading) {
@@ -231,26 +299,83 @@ const AllCardsView = () => {
                       <div className="flex items-start justify-between gap-4">
                         <div className="flex-grow min-w-0">
                           <h3 className="font-semibold text-slate-900 truncate">
-                            {card.name}
+                            {highlightText(card.name, searchTerm)}
                           </h3>
                           <div className="flex items-center gap-2 mt-1 text-sm text-slate-600">
-                            <span className="font-mono">#{card.card_number}</span>
+                            <span className="font-mono">#{highlightText(card.card_number, searchTerm)}</span>
                             <span>•</span>
-                            <span>{card.set_name}</span>
+                            <span>{highlightText(card.set_name || '', searchTerm)}</span>
                             <span>•</span>
                             <span className="capitalize">{card.rarity}</span>
                           </div>
+
+                          {/* Smart Variation Summary */}
+                          <div className="flex items-center gap-2 mt-2 text-xs">
+                            {(() => {
+                              const summary = getVariationSummary(card);
+                              return (
+                                <>
+                                  {summary.hasSpecialTreatments && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-300 font-medium">
+                                      <Sparkles className="w-3 h-3" />
+                                      {summary.specialTreatmentCount} special
+                                    </span>
+                                  )}
+
+                                  {summary.hasFoil && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-900 border border-yellow-300 font-medium">
+                                      <Sparkles className="w-3 h-3" />
+                                      Foil
+                                    </span>
+                                  )}
+
+                                  <span className="text-slate-600">
+                                    {summary.totalVariations} variation{summary.totalVariations !== 1 ? 's' : ''}
+                                  </span>
+                                </>
+                              );
+                            })()}
+                          </div>
                         </div>
 
-                        {/* Variation Count & Stock Status */}
+                        {/* Stock Status & Actions */}
                         <div className="flex items-center gap-3 flex-shrink-0">
-                          <div className="text-right">
-                            <div className="text-sm font-medium text-slate-900">
-                              {card.variation_count} variation{card.variation_count !== 1 ? 's' : ''}
-                            </div>
-                            {card.has_inventory && (
-                              <div className="text-xs text-green-600 font-medium">
-                                {card.total_stock} in stock
+                          {/* Stock Health Indicator */}
+                          <div className="flex items-center gap-2">
+                            {card.total_stock > 0 ? (() => {
+                              const health = getStockHealthIndicator(card.total_stock);
+                              const Icon = health.icon;
+                              return (
+                                <>
+                                  <Icon className={`w-4 h-4 ${health.colorClass}`} />
+                                  <div className="text-right">
+                                    <span className={`text-sm font-medium ${health.textClass}`}>
+                                      {card.total_stock} in stock
+                                    </span>
+                                    <div className="text-xs text-slate-500">
+                                      {health.status}
+                                    </div>
+                                  </div>
+                                </>
+                              );
+                            })() : (
+                              <div className="text-right">
+                                <span className="text-xs text-slate-400 flex items-center gap-1">
+                                  <Package className="w-3 h-3" />
+                                  Not in inventory
+                                </span>
+                                {/* Quick Add Button */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    // TODO: Open quick add modal
+                                    console.log('Quick add for', card.name);
+                                  }}
+                                  className="mt-1 flex items-center gap-1 px-2 py-1 text-xs font-medium text-green-600 hover:bg-green-50 rounded border border-green-200 transition-colors"
+                                >
+                                  <Plus className="w-3 h-3" />
+                                  Quick Add
+                                </button>
                               </div>
                             )}
                           </div>
@@ -292,16 +417,19 @@ const AllCardsView = () => {
                                 )}
                               </div>
 
-                              {/* Stock Indicator */}
-                              {variation.stock > 0 ? (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800">
-                                  {variation.stock} in stock
-                                </span>
-                              ) : (
-                                <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">
-                                  No stock
-                                </span>
-                              )}
+                              {/* Enhanced Stock Indicator */}
+                              {(() => {
+                                const health = getStockHealthIndicator(variation.stock || 0);
+                                const Icon = health.icon;
+                                return (
+                                  <div className="flex items-center gap-1">
+                                    <Icon className={`w-3 h-3 ${health.colorClass}`} />
+                                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${health.textClass} ${health.bgClass.replace('bg-', 'bg-').replace('-50', '-100')} border`}>
+                                      {variation.stock > 0 ? `${variation.stock} in stock` : 'No stock'}
+                                    </span>
+                                  </div>
+                                );
+                              })()}
                             </div>
 
                             {/* SKU */}
@@ -309,8 +437,8 @@ const AllCardsView = () => {
                               {variation.sku}
                             </div>
 
-                            {/* Add Inventory Button */}
-                            {variation.stock === 0 && (
+                            {/* Action Buttons */}
+                            {variation.stock === 0 ? (
                               <button
                                 onClick={() => {
                                   // TODO: Open add inventory modal
@@ -321,18 +449,70 @@ const AllCardsView = () => {
                                 <Plus className="w-4 h-4" />
                                 Add to Inventory
                               </button>
-                            )}
+                            ) : (
+                              <div className="space-y-2">
+                                {/* Quick Stock Adjustment */}
+                                <div className="flex items-center justify-between p-2 bg-slate-50 rounded border">
+                                  <span className="text-xs text-slate-600 font-medium">Quick Adjust:</span>
+                                  <div className="flex items-center gap-1">
+                                    {/* Quick decrement */}
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        // TODO: Implement quick stock adjustment
+                                        console.log('Decrease stock for', variation.sku);
+                                      }}
+                                      disabled={variation.stock === 0}
+                                      className="p-1 hover:bg-red-50 text-red-600 rounded disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                                      title="Decrease stock by 1"
+                                    >
+                                      <Minus className="w-3 h-3" />
+                                    </button>
 
-                            {variation.stock > 0 && (
-                              <button
-                                onClick={() => {
-                                  // TODO: Navigate to inventory management
-                                  console.log('Manage inventory for', variation.sku);
-                                }}
-                                className="w-full flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded border border-slate-200 transition-colors"
-                              >
-                                Manage Stock
-                              </button>
+                                    {/* Current value */}
+                                    <span className="font-medium text-slate-900 min-w-[40px] text-center text-sm">
+                                      {variation.stock}
+                                    </span>
+
+                                    {/* Quick increment */}
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        // TODO: Implement quick stock adjustment
+                                        console.log('Increase stock for', variation.sku);
+                                      }}
+                                      className="p-1 hover:bg-green-50 text-green-600 rounded transition-colors"
+                                      title="Increase stock by 1"
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </button>
+
+                                    {/* Full edit mode */}
+                                    <button
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        // TODO: Open full edit modal
+                                        console.log('Full edit for', variation.sku);
+                                      }}
+                                      className="p-1 hover:bg-blue-50 text-blue-600 rounded transition-colors ml-1"
+                                      title="Open full editor"
+                                    >
+                                      <Edit2 className="w-3 h-3" />
+                                    </button>
+                                  </div>
+                                </div>
+
+                                {/* Manage Stock Button */}
+                                <button
+                                  onClick={() => {
+                                    // TODO: Navigate to inventory management
+                                    console.log('Manage inventory for', variation.sku);
+                                  }}
+                                  className="w-full flex items-center justify-center gap-1 px-3 py-1.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded border border-slate-200 transition-colors"
+                                >
+                                  Full Management
+                                </button>
+                              </div>
                             )}
                           </div>
                         ))}
