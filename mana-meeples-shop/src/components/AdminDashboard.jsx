@@ -25,6 +25,8 @@ import {
 import CurrencySelector from './CurrencySelector';
 import AdminOrders from './AdminOrders';
 import AllCardsView from './AllCardsView';
+import ErrorBoundary from './ErrorBoundary';
+import { useToast } from './Toast';
 import { API_URL } from '../config/api';
 
 const getAdminHeaders = () => {
@@ -35,6 +37,7 @@ const getAdminHeaders = () => {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
   const [inventory, setInventory] = useState([]);
@@ -42,16 +45,37 @@ const AdminDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterGame, setFilterGame] = useState('all');
   const [filterSet, setFilterSet] = useState('all');
-  const [filters, setFilters] = useState({
-    quality: 'all',
-    foilType: 'all',
-    cardType: 'all',
-    stockLevel: 'all',
-    minPrice: '',
-    maxPrice: '',
-    sortBy: 'name',
-    priceSource: 'all',
-    viewMode: 'table'
+  const [filters, setFilters] = useState(() => {
+    try {
+      const saved = localStorage.getItem('admin_filters');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return {
+          quality: parsed.quality || 'all',
+          foilType: parsed.foilType || 'all',
+          cardType: parsed.cardType || 'all',
+          stockLevel: parsed.stockLevel || 'all',
+          minPrice: parsed.minPrice || '',
+          maxPrice: parsed.maxPrice || '',
+          sortBy: parsed.sortBy || 'name',
+          priceSource: parsed.priceSource || 'all',
+          viewMode: parsed.viewMode || 'table'
+        };
+      }
+    } catch (error) {
+      console.error('Error loading saved filters:', error);
+    }
+    return {
+      quality: 'all',
+      foilType: 'all',
+      cardType: 'all',
+      stockLevel: 'all',
+      minPrice: '',
+      maxPrice: '',
+      sortBy: 'name',
+      priceSource: 'all',
+      viewMode: 'table'
+    };
   });
   const [availableSets, setAvailableSets] = useState([]);
   const [filterOptions, setFilterOptions] = useState({
@@ -85,6 +109,11 @@ const AdminDashboard = () => {
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [bulkOperation, setBulkOperation] = useState(null);
   const [quickActionState, setQuickActionState] = useState('idle'); // idle, loading, success, error
+  const [analyticsLoading, setAnalyticsLoading] = useState(false);
+
+  // References for keyboard shortcuts
+  const searchInputRef = React.useRef(null);
+
 
   // ✅ FIXED: Authentication and inventory fetch in single useEffect
   useEffect(() => {
@@ -230,6 +259,55 @@ const AdminDashboard = () => {
     setFilterSet('all'); // Reset set filter when game changes
     setFilters(prev => ({ ...prev, cardType: 'all', foilType: 'all' })); // Reset type filters
   }, [filterGame]);
+
+  // Save filters to localStorage when they change
+  useEffect(() => {
+    try {
+      localStorage.setItem('admin_filters', JSON.stringify(filters));
+    } catch (error) {
+      console.error('Error saving filters:', error);
+    }
+  }, [filters]);
+
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      // Only handle shortcuts when not in an input field
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.contentEditable === 'true') {
+        return;
+      }
+
+      if (e.ctrlKey || e.metaKey) {
+        switch(e.key.toLowerCase()) {
+          case 'f': // Ctrl/Cmd + F: Focus search
+            e.preventDefault();
+            searchInputRef.current?.focus();
+            toast.info('Search focused');
+            break;
+          case 'e': // Ctrl/Cmd + E: Export
+            e.preventDefault();
+            exportFilteredResults();
+            break;
+          case 'r': // Ctrl/Cmd + R: Refresh
+            e.preventDefault();
+            window.location.reload();
+            break;
+          default:
+            break;
+        }
+      }
+
+      // ESC key to clear search
+      if (e.key === 'Escape' && searchTerm) {
+        e.preventDefault();
+        setSearchTerm('');
+        toast.info('Search cleared');
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [searchTerm, toast]);
 
   // Helper function to get game ID from name
   const getGameIdFromName = (gameName) => {

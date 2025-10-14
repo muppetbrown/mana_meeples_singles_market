@@ -1,6 +1,7 @@
 import React, { Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import ErrorBoundary from './components/ErrorBoundary';
+import { ToastProvider } from './components/Toast';
 
 // Lazy load components
 const TCGShop = React.lazy(() => import('./components/TCGShop'));
@@ -20,15 +21,17 @@ const LoadingSpinner = () => (
 function App() {
   return (
     <ErrorBoundary>
-      <BrowserRouter basename="/shop">
-        <Suspense fallback={<LoadingSpinner />}>
-          <Routes>
-            <Route path="/" element={<TCGShop />} />
-            <Route path="/admin/login" element={<AdminLogin />} />
-            <Route path="/admin" element={<AdminDashboard />} />
-          </Routes>
-        </Suspense>
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter basename="/shop">
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/" element={<TCGShop />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </ToastProvider>
     </ErrorBoundary>
   );
 }
