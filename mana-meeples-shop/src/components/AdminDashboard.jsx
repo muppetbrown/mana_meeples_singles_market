@@ -1694,7 +1694,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         </div>
-      </div>
 
         {/* Analytics Dashboard */}
         {Object.keys(analyticsData.gameBreakdown).length > 0 && (
