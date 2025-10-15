@@ -1767,9 +1767,8 @@ const AdminDashboard = () => {
               </div>
             </div>
           </div>
+        </div>
         )}
-      </div>
-    )}
 
         {/* Bulk Operation Modals */}
         {bulkOperation && (
