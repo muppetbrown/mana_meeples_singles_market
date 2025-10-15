@@ -108,14 +108,14 @@ const AdminOrders = () => {
   const updateOrderStatus = useCallback(async (orderId, newStatus) => {
     const order = orders.find(o => o.id === orderId);
     if (!order) {
-      alert('Order not found');
+      window.alert('Order not found');
       return;
     }
 
     // Validate the status transition
     const validation = validateStatusChange(order.status, newStatus);
     if (!validation.valid) {
-      alert(validation.message);
+      window.alert(validation.message);
       return;
     }
 
@@ -135,7 +135,7 @@ const AdminOrders = () => {
       fetchOrders();
     } catch (error) {
       logError(error, { operation: 'updateOrderStatus', orderId, newStatus });
-      alert('Failed to update order status');
+      window.alert('Failed to update order status');
     }
   }, [orders, fetchOrders]);
 
@@ -158,7 +158,7 @@ const AdminOrders = () => {
       if (process.env.NODE_ENV === 'development') {
         console.error('Error fetching order details:', error);
       }
-      alert('Failed to load order details');
+      window.alert('Failed to load order details');
     }
   }, []);
 

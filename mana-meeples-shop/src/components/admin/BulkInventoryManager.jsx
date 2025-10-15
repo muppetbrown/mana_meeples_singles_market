@@ -21,7 +21,7 @@ const BulkInventoryManager = ({ onInventoryUpdate, currentUser }) => {
     if (!file) return;
 
     if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
-      alert('Please upload a CSV file.');
+      window.alert('Please upload a CSV file.');
       return;
     }
 
@@ -35,7 +35,7 @@ const BulkInventoryManager = ({ onInventoryUpdate, currentUser }) => {
       setImportResults(null);
     } catch (error) {
       console.error('Failed to parse CSV:', error);
-      alert('Failed to parse CSV file. Please check the format.');
+      window.alert('Failed to parse CSV file. Please check the format.');
     }
 
     // Clear file input
@@ -79,7 +79,7 @@ const BulkInventoryManager = ({ onInventoryUpdate, currentUser }) => {
       }
     } catch (error) {
       console.error('Import error:', error);
-      alert(`Import failed: ${error.message}`);
+      window.alert(`Import failed: ${error.message}`);
     } finally {
       setImporting(false);
     }
@@ -104,7 +104,7 @@ const BulkInventoryManager = ({ onInventoryUpdate, currentUser }) => {
       downloadCSV(formattedData, filename);
     } catch (error) {
       console.error('Export error:', error);
-      alert(`Export failed: ${error.message}`);
+      window.alert(`Export failed: ${error.message}`);
     } finally {
       setExporting(false);
     }
