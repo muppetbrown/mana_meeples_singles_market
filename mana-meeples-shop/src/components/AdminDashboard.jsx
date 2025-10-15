@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
 
 import CurrencySelector from './CurrencySelector';
-import InventoryTab from './admin/InventoryTab';
-import AllCardsTab from './admin/AllCardsTab';
+import UnifiedCardsTab from './admin/UnifiedCardsTab';
 import OrdersTab from './admin/OrdersTab';
 import AnalyticsTab from './admin/AnalyticsTab';
 import { API_URL } from '../config/api';
@@ -157,8 +156,8 @@ const AdminDashboard = () => {
 
       {/* Tab Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'inventory' && <InventoryTab />}
-        {activeTab === 'all-cards' && <AllCardsTab />}
+        {activeTab === 'inventory' && <UnifiedCardsTab mode="inventory" />}
+        {activeTab === 'all-cards' && <UnifiedCardsTab mode="all" />}
         {activeTab === 'analytics' && <AnalyticsTab />}
         {activeTab === 'orders' && <OrdersTab />}
       </main>
