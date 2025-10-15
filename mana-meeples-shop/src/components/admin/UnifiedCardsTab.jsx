@@ -52,7 +52,6 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
       if (filterGame !== 'all') params.append('game_id', filterGame);
       if (filterSet !== 'all') params.append('set_id', filterSet);
       if (filterTreatment !== 'all') params.append('treatment', filterTreatment);
-      if (filterFinish !== 'all') params.append('finish', filterFinish);
       if (searchTerm) params.append('search', searchTerm);
 
       const response = await fetch(`${API_URL}/admin/all-cards?${params}`, {
