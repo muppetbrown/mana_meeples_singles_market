@@ -3049,7 +3049,6 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
-          </>
         )}
 
         {/* Orders Tab */}
