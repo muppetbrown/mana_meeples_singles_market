@@ -516,40 +516,7 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [searchTerm, toast, exportFilteredResults]);
 
-  // NEW: Fetch inventory in list format
-  const fetchInventoryList = useCallback(async () => {
-    setInventoryLoading(true);
-    try {
-      const params = new URLSearchParams({
-        game: filterGame || 'all',
-        set: filterSet || 'all',
-        search: searchTerm,
-        treatment: 'all',
-        finish: 'all',
-        sort: inventorySortOrder
-      });
-
-      const response = await fetch(`${API_URL}/admin/inventory-list?${params}`, {
-        credentials: 'include',
-        headers: getAdminHeaders()
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch inventory');
-      }
-
-      const data = await response.json();
-      setInventoryCards(data.cards);
-    } catch (error) {
-      console.error('Error fetching inventory list:', error);
-      window.alert('Failed to load inventory');
-    } finally {
-      setInventoryLoading(false);
-    }
-  }, [filterGame, filterSet, searchTerm, inventorySortOrder]);
-
-  // NEW: Fetch inventory list when filters change
-  useEffect(() => {
+ useEffect(() => {
     if (activeTab === 'inventory') {
       fetchInventoryList();
     }
