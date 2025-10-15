@@ -1695,7 +1695,6 @@ const AdminDashboard = () => {
           </div>
         </div>
       </div>
-    )}
 
         {/* Analytics Dashboard */}
         {Object.keys(analyticsData.gameBreakdown).length > 0 && (
@@ -1770,6 +1769,8 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
+      </div>
+    )}
 
         {/* Bulk Operation Modals */}
         {bulkOperation && (
