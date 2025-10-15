@@ -14,11 +14,9 @@ const AllCardsView = () => {
   const [filterSet, setFilterSet] = useState('all');
   const [expandedCards, setExpandedCards] = useState(new Set());
 
-  useEffect(() => {
-      fetchCards();
-    }, [fetchCards]);
+  // DEFINE ALL FUNCTIONS FIRST, BEFORE useEffect CALLS THEM
 
-  const fetchGames = async () => {
+  const fetchGames = useCallback(async () => {
     try {
       const response = await fetch(`${API_URL}/games`);
       if (!response.ok) throw new Error('Failed to fetch games');
@@ -27,45 +25,9 @@ const AllCardsView = () => {
     } catch (error) {
       console.error('Error fetching games:', error);
     }
-  };
+  }, []); // No dependencies - API_URL is constant
 
-  const fetchCards = useCallback(async () => {
-      setLoading(true);
-      try {
-        const params = new URLSearchParams({ limit: 1000 });
-        if (filterGame !== 'all') params.append('game_id', filterGame);
-        if (filterSet !== 'all') params.append('set_id', filterSet);
-        if (searchTerm) params.append('search', searchTerm);
-
-        const response = await fetch(`${API_URL}/admin/all-cards?${params}`, {
-          credentials: 'include'
-        });
-
-        if (!response.ok) {
-          throw new Error(`Failed to fetch cards: ${response.statusText}`);
-        }
-
-        const data = await response.json();
-        setCards(data.cards || []);
-        setError(null);
-      } catch (error) {
-        console.error('Error fetching cards:', error);
-        setError(error.message);
-      } finally {
-        setLoading(false);
-      }
-    }, [filterGame, filterSet, searchTerm]);
-
-  useEffect(() => {
-    if (filterGame !== 'all') {
-      fetchSets(filterGame);
-    } else {
-      setSets([]);
-      setFilterSet('all');
-    }
-  }, [filterGame]);
-
-  const fetchSets = async (gameId) => {
+  const fetchSets = useCallback(async (gameId) => {
     try {
       const response = await fetch(`${API_URL}/games/${gameId}/sets`);
       if (!response.ok) throw new Error('Failed to fetch sets');
@@ -74,12 +36,54 @@ const AllCardsView = () => {
     } catch (error) {
       console.error('Error fetching sets:', error);
     }
-  };
+  }, []); // No dependencies
 
+  const fetchCards = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ limit: 1000 });
+      if (filterGame !== 'all') params.append('game_id', filterGame);
+      if (filterSet !== 'all') params.append('set_id', filterSet);
+      if (searchTerm) params.append('search', searchTerm);
+
+      const response = await fetch(`${API_URL}/admin/all-cards?${params}`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch cards: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      setCards(data.cards || []);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching cards:', error);
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  }, [filterGame, filterSet, searchTerm]);
+
+  // NOW USE EFFECTS - AFTER ALL FUNCTIONS ARE DEFINED
+
+  // Initial load
   useEffect(() => {
+    fetchGames();
     fetchCards();
-  }, [filterGame, filterSet]);
+  }, [fetchGames, fetchCards]);
 
+  // Fetch sets when game changes
+  useEffect(() => {
+    if (filterGame !== 'all') {
+      fetchSets(filterGame);
+    } else {
+      setSets([]);
+      setFilterSet('all');
+    }
+  }, [filterGame, fetchSets]);
+
+  // Filter cards by search term
   const filteredCards = useMemo(() => {
     if (!searchTerm) return cards;
     const search = searchTerm.toLowerCase();
@@ -117,6 +121,8 @@ const AllCardsView = () => {
       ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-700 border border-amber-300'
       : 'bg-slate-50 text-slate-600 border border-slate-200';
   };
+
+  // ... rest of your component (the JSX return statement stays the same)
 
   if (loading) {
     return (
