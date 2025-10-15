@@ -474,7 +474,7 @@ const AdminDashboard = () => {
     window.URL.revokeObjectURL(url);
   }, [filteredInventory]);
 
-  // Keyboard shortcuts
+// Keyboard shortcuts
   useEffect(() => {
     const handleKeyPress = (e) => {
       // Only handle shortcuts when not in an input field
@@ -487,7 +487,6 @@ const AdminDashboard = () => {
           case 'f': // Ctrl/Cmd + F: Focus search
             e.preventDefault();
             searchInputRef.current?.focus();
-            toast.info('Search focused');
             break;
           case 'e': // Ctrl/Cmd + E: Export
             e.preventDefault();
@@ -506,14 +505,13 @@ const AdminDashboard = () => {
       if (e.key === 'Escape' && searchTerm) {
         e.preventDefault();
         setSearchTerm('');
-        toast.info('Search cleared');
       }
     };
 
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [searchTerm, toast, exportFilteredResults]);
-
+  }, [searchTerm, exportFilteredResults]); 
+  
  useEffect(() => {
     if (activeTab === 'inventory') {
       fetchInventoryList();
