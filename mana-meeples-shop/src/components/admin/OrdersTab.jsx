@@ -15,7 +15,8 @@ import {
   XCircle,
   Eye
 } from 'lucide-react';
-import { API_URL } from '../config/api';
+// Remove the import line and add:
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 import { logError } from '../services/errorHandler';
 
 const getAdminHeaders = () => ({
