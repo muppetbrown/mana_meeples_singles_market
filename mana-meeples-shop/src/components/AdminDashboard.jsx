@@ -105,10 +105,10 @@ const AdminDashboard = () => {
           <div className="flex gap-2 mt-4 overflow-x-auto">
             <button
               onClick={() => setActiveTab('inventory')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap border ${
                 activeTab === 'inventory'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
             >
               <Package className="w-5 h-5" />
@@ -117,10 +117,10 @@ const AdminDashboard = () => {
 
             <button
               onClick={() => setActiveTab('all-cards')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap border ${
                 activeTab === 'all-cards'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
             >
               <Package className="w-5 h-5" />
@@ -129,10 +129,10 @@ const AdminDashboard = () => {
 
             <button
               onClick={() => setActiveTab('analytics')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap border ${
                 activeTab === 'analytics'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
             >
               <DollarSign className="w-5 h-5" />
@@ -141,10 +141,10 @@ const AdminDashboard = () => {
 
             <button
               onClick={() => setActiveTab('orders')}
-              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap border ${
                 activeTab === 'orders'
-                  ? 'bg-blue-600 text-white'
-                  : 'text-slate-700 hover:bg-slate-100'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
             >
               <ShoppingCart className="w-5 h-5" />
