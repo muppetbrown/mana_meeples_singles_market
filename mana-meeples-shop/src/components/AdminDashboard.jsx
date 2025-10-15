@@ -942,7 +942,6 @@ const AdminDashboard = () => {
   const executeBulkOperation = async (operation, data = {}) => {
     if (selectedItems.size === 0) return;
 
-    setQuickActionState('loading');
     try {
       const selectedItemsArray = Array.from(selectedItems);
 
@@ -962,7 +961,6 @@ const AdminDashboard = () => {
       }
 
       const result = await response.json();
-      setQuickActionState('success');
 
       // Refresh inventory after bulk operation
       window.location.reload();
@@ -973,11 +971,8 @@ const AdminDashboard = () => {
 
       window.alert(`Bulk operation completed! Updated ${result.updated} items.`);
     } catch (error) {
-      setQuickActionState('error');
       console.error('Bulk operation error:', error);
       window.alert(`Bulk operation failed: ${error.message}`);
-    } finally {
-      setTimeout(() => setQuickActionState('idle'), 3000);
     }
   };
 
