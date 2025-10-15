@@ -597,6 +597,143 @@ router.get('/admin/inventory', adminAuth, async (req, res) => {
   }
 });
 
+// GET /api/admin/inventory-list - Get inventory in card-grouped format (like All Cards)
+router.get('/admin/inventory-list', adminAuth, async (req, res) => {
+  try {
+    const {
+      game,
+      set,
+      search,
+      treatment,
+      finish,
+      sort = 'name_asc'
+    } = req.query;
+
+    // Build WHERE conditions
+    const conditions = ['ci.stock_quantity > 0']; // Only in-stock items
+    const params = [];
+    let paramCount = 0;
+
+    if (game && game !== 'all') {
+      paramCount++;
+      conditions.push(`g.id = $${paramCount}`);
+      params.push(game);
+    }
+
+    if (set && set !== 'all') {
+      paramCount++;
+      conditions.push(`c.set_id = $${paramCount}`);
+      params.push(set);
+    }
+
+    if (treatment && treatment !== 'all') {
+      paramCount++;
+      conditions.push(`c.treatment = $${paramCount}`);
+      params.push(treatment);
+    }
+
+    if (finish && finish !== 'all') {
+      paramCount++;
+      conditions.push(`c.finish = $${paramCount}`);
+      params.push(finish);
+    }
+
+    if (search) {
+      paramCount++;
+      conditions.push(`(c.name ILIKE $${paramCount} OR c.card_number ILIKE $${paramCount})`);
+      params.push(`%${search}%`);
+    }
+
+    // Sorting
+    let orderBy = 'c.name ASC, c.card_number ASC';
+    switch (sort) {
+      case 'name_desc':
+        orderBy = 'c.name DESC, c.card_number ASC';
+        break;
+      case 'number_asc':
+        orderBy = 'CAST(c.card_number AS INTEGER) ASC, c.name ASC';
+        break;
+      case 'stock_desc':
+        orderBy = 'total_stock DESC, c.name ASC';
+        break;
+      case 'stock_asc':
+        orderBy = 'total_stock ASC, c.name ASC';
+        break;
+      case 'value_desc':
+        orderBy = 'total_value DESC, c.name ASC';
+        break;
+    }
+
+    const query = `
+      WITH inventory_cards AS (
+        SELECT
+          c.name,
+          c.card_number,
+          c.set_id,
+          c.image_url,
+          c.rarity,
+          cs.name as set_name,
+          cs.code as set_code,
+          g.name as game_name,
+          g.id as game_id,
+
+          -- Aggregate treatments that have inventory
+          ARRAY_AGG(DISTINCT c.treatment) FILTER (WHERE c.treatment IS NOT NULL) as treatments,
+          ARRAY_AGG(DISTINCT c.finish) FILTER (WHERE c.finish IS NOT NULL) as finishes,
+          ARRAY_AGG(DISTINCT c.promo_type) FILTER (WHERE c.promo_type IS NOT NULL) as promo_types,
+
+          -- Stock & value metrics
+          SUM(ci.stock_quantity) as total_stock,
+          SUM(ci.stock_quantity * ci.price) as total_value,
+          COUNT(DISTINCT ci.id) as inventory_count,
+
+          -- Check if any item is low stock
+          BOOL_OR(ci.stock_quantity > 0 AND ci.stock_quantity <= ci.low_stock_threshold) as has_low_stock,
+
+          -- Inventory items grouped by variation
+          jsonb_agg(
+            jsonb_build_object(
+              'inventory_id', ci.id,
+              'card_id', c.id,
+              'sku', ci.sku,
+              'treatment', c.treatment,
+              'finish', c.finish,
+              'promo_type', c.promo_type,
+              'border_color', c.border_color,
+              'quality', ci.quality,
+              'stock_quantity', ci.stock_quantity,
+              'price', ci.price,
+              'cost', ci.cost,
+              'price_source', ci.price_source,
+              'last_price_update', ci.last_price_update,
+              'low_stock_threshold', ci.low_stock_threshold
+            ) ORDER BY ci.quality ASC, c.finish ASC
+          ) as inventory_items
+
+        FROM cards c
+        JOIN card_sets cs ON cs.id = c.set_id
+        JOIN games g ON g.id = cs.game_id
+        INNER JOIN card_inventory ci ON ci.card_id = c.id
+        WHERE ${conditions.join(' AND ')}
+        GROUP BY c.name, c.card_number, c.set_id, c.image_url, c.rarity, cs.name, cs.code, g.name, g.id
+        ORDER BY ${orderBy}
+      )
+      SELECT * FROM inventory_cards
+    `;
+
+    const result = await db.query(query, params);
+
+    res.json({
+      cards: result.rows,
+      count: result.rows.length
+    });
+
+  } catch (error) {
+    console.error('Error fetching inventory list:', error);
+    res.status(500).json({ error: 'Failed to fetch inventory' });
+  }
+});
+
 // GET /api/cards/:id - Get single card with all details
 router.get('/cards/:id', async (req, res) => {
   try {
