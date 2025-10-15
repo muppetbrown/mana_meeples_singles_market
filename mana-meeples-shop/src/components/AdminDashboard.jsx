@@ -5,13 +5,11 @@ import {
   DollarSign,
   AlertCircle,
   Edit,
-  Edit2,
   Download,
   Upload,
   RefreshCw,
   Search,
   ChevronDown,
-  ChevronUp,
   ChevronRight,
   Save,
   X,
@@ -21,10 +19,7 @@ import {
   AlertTriangle,
   Loader2,
   Plus,
-  ShoppingCart,
-  Trash2,
-  Sparkles,
-  ImageIcon
+  ShoppingCart
 } from 'lucide-react';
 
 import CurrencySelector from './CurrencySelector';
@@ -112,7 +107,6 @@ const AdminDashboard = () => {
   const [activeTab, setActiveTab] = useState('inventory');
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [bulkOperation, setBulkOperation] = useState(null);
-  const [quickActionState, setQuickActionState] = useState('idle'); // idle, loading, success, error
   // TODO: Add analytics loading state when analytics feature is implemented
   // const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
@@ -500,7 +494,8 @@ const AdminDashboard = () => {
     filterSet,
     searchTerm,
     inventorySortOrder,
-    activeTab
+    activeTab,
+    fetchInventoryList
   ]);
 
   // Helper function to get game ID from name
@@ -514,21 +509,6 @@ const AdminDashboard = () => {
   };
 
 
-  const totalValue = useMemo(() => 
-    inventory.reduce((sum, item) => sum + (item.price * item.stock), 0),
-    [inventory]
-  );
-  
-  const lowStockCount = useMemo(() => 
-    inventory.filter(item => item.stock <= item.low_stock_threshold && item.stock > 0).length,
-    [inventory]
-  );
-  
-  const totalItems = inventory.length;
-  const inStockItems = useMemo(() => 
-    inventory.filter(item => item.stock > 0).length,
-    [inventory]
-  );
 
   const updateItem = useCallback(async (id, updates) => {
     try {
@@ -733,7 +713,7 @@ const AdminDashboard = () => {
   };
 
   // NEW: Fetch inventory in list format
-  const fetchInventoryList = async () => {
+  const fetchInventoryList = useCallback(async () => {
     setInventoryLoading(true);
     try {
       const params = new URLSearchParams({
@@ -762,7 +742,7 @@ const AdminDashboard = () => {
     } finally {
       setInventoryLoading(false);
     }
-  };
+  }, [filterGame, filterSet, searchTerm, inventorySortOrder]);
 
   // NEW: Toggle card expansion in inventory view
   const toggleInventoryCard = (cardKey) => {
