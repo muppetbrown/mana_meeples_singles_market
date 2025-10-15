@@ -1637,137 +1637,136 @@ const AdminDashboard = () => {
                 </div>
               </div>
             )}
-          </div>
-        )}
 
-        {/* Bulk Actions */}
-        {selectedItems.size > 0 && (
-          <div className="mb-6 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-sm font-medium text-slate-700">Bulk Actions:</span>
+            {/* Bulk Actions */}
+            {selectedItems.size > 0 && (
+              <div className="mb-6 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+                <div className="flex flex-wrap items-center gap-3">
+                  <span className="text-sm font-medium text-slate-700">Bulk Actions:</span>
 
-                    <button
-                      onClick={() => setBulkOperation('updatePrices')}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-green-500 focus:outline-none"
-                    >
-                      <DollarSign className="w-4 h-4" />
-                      Update Prices
-                    </button>
+                        <button
+                          onClick={() => setBulkOperation('updatePrices')}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-green-50 hover:bg-green-100 border border-green-200 text-green-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-green-500 focus:outline-none"
+                        >
+                          <DollarSign className="w-4 h-4" />
+                          Update Prices
+                        </button>
 
-                    <button
-                      onClick={() => setBulkOperation('updateStock')}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-                    >
-                      <Package className="w-4 h-4" />
-                      Update Stock
-                    </button>
+                        <button
+                          onClick={() => setBulkOperation('updateStock')}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200 text-yellow-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+                        >
+                          <Package className="w-4 h-4" />
+                          Update Stock
+                        </button>
 
-                    <button
-                      onClick={() => setBulkOperation('changeQuality')}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-purple-500 focus:outline-none"
-                    >
-                      <Edit className="w-4 h-4" />
-                      Change Quality
-                    </button>
+                        <button
+                          onClick={() => setBulkOperation('changeQuality')}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-purple-500 focus:outline-none"
+                        >
+                          <Edit className="w-4 h-4" />
+                          Change Quality
+                        </button>
 
-                    <button
-                      onClick={() => {
-                        if (window.confirm(`Delete ${selectedItems.size} selected items? This cannot be undone.`)) {
-                          executeBulkOperation('delete');
-                        }
-                      }}
-                      className="flex items-center gap-2 px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none"
-                    >
-                      <X className="w-4 h-4" />
-                      Delete Selected
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Inventory Summary */}
-        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-          <div className="text-right">
-            <div className="text-sm text-slate-600 space-y-1">
-              <div>Viewing: <span className="font-medium text-slate-800">{analyticsData.totalUniqueCards}</span> cards</div>
-              <div>Total Value: <span className="font-medium text-slate-800">{currency.symbol}{(analyticsData.totalValue * currency.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
-            </div>
-          </div>
-        </div>
-
-        {/* Analytics Dashboard */}
-        {Object.keys(analyticsData.gameBreakdown).length > 0 && (
-          <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 border border-slate-200 shadow-sm">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-800">Analytics Overview</h3>
-              <span className="text-sm text-slate-500">Based on current filters</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-              <div className="bg-slate-50 rounded-lg p-3">
-                <div className="text-sm text-slate-600">Total Cards</div>
-                <div className="text-2xl font-bold text-slate-900">{analyticsData.totalUniqueCards}</div>
-                <div className="text-xs text-slate-500">{analyticsData.totalVariations} variations</div>
-              </div>
-              <div className="bg-green-50 rounded-lg p-3">
-                <div className="text-sm text-green-700">Total Stock</div>
-                <div className="text-2xl font-bold text-green-900">{analyticsData.totalStock}</div>
-                <div className="text-xs text-green-600">units available</div>
-              </div>
-              <div className="bg-amber-50 rounded-lg p-3">
-                <div className="text-sm text-amber-700">Low Stock</div>
-                <div className="text-2xl font-bold text-amber-900">{analyticsData.lowStockItems}</div>
-                <div className="text-xs text-amber-600">items need restocking</div>
-              </div>
-              <div className="bg-red-50 rounded-lg p-3">
-                <div className="text-sm text-red-700">Out of Stock</div>
-                <div className="text-2xl font-bold text-red-900">{analyticsData.outOfStockItems}</div>
-                <div className="text-xs text-red-600">items unavailable</div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {/* Game Breakdown */}
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-2">By Game</h4>
-                <div className="space-y-2">
-                  {Object.entries(analyticsData.gameBreakdown).map(([game, count]) => (
-                    <div key={game} className="flex items-center justify-between text-sm">
-                      <span className="text-slate-600 truncate">{game}</span>
-                      <span className="font-medium text-slate-900">{count}</span>
-                    </div>
-                  ))}
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Delete ${selectedItems.size} selected items? This cannot be undone.`)) {
+                              executeBulkOperation('delete');
+                            }
+                          }}
+                          className="flex items-center gap-2 px-3 py-1.5 bg-red-50 hover:bg-red-100 border border-red-200 text-red-700 rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-red-500 focus:outline-none"
+                        >
+                          <X className="w-4 h-4" />
+                          Delete Selected
+                  </button>
                 </div>
               </div>
+            )}
 
-              {/* Quality Breakdown */}
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-2">By Quality</h4>
-                <div className="space-y-2">
-                  {Object.entries(analyticsData.qualityBreakdown).map(([quality, count]) => (
-                    <div key={quality} className="flex items-center justify-between text-sm">
-                      <span className="text-slate-600 truncate">{quality}</span>
-                      <span className="font-medium text-slate-900">{count}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Price Source Breakdown */}
-              <div>
-                <h4 className="text-sm font-medium text-slate-700 mb-2">By Price Source</h4>
-                <div className="space-y-2">
-                  {Object.entries(analyticsData.priceSourceBreakdown).map(([source, count]) => (
-                    <div key={source} className="flex items-center justify-between text-sm">
-                      <span className="text-slate-600 truncate">{source}</span>
-                      <span className="font-medium text-slate-900">{count}</span>
-                    </div>
-                  ))}
+            {/* Inventory Summary */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <div className="text-right">
+                <div className="text-sm text-slate-600 space-y-1">
+                  <div>Viewing: <span className="font-medium text-slate-800">{analyticsData.totalUniqueCards}</span> cards</div>
+                  <div>Total Value: <span className="font-medium text-slate-800">{currency.symbol}{(analyticsData.totalValue * currency.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
                 </div>
               </div>
             </div>
+
+            {/* Analytics Dashboard */}
+            {Object.keys(analyticsData.gameBreakdown).length > 0 && (
+              <div className="bg-white rounded-xl p-4 sm:p-6 mb-6 border border-slate-200 shadow-sm">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-lg font-semibold text-slate-800">Analytics Overview</h3>
+                  <span className="text-sm text-slate-500">Based on current filters</span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                  <div className="bg-slate-50 rounded-lg p-3">
+                    <div className="text-sm text-slate-600">Total Cards</div>
+                    <div className="text-2xl font-bold text-slate-900">{analyticsData.totalUniqueCards}</div>
+                    <div className="text-xs text-slate-500">{analyticsData.totalVariations} variations</div>
+                  </div>
+                  <div className="bg-green-50 rounded-lg p-3">
+                    <div className="text-sm text-green-700">Total Stock</div>
+                    <div className="text-2xl font-bold text-green-900">{analyticsData.totalStock}</div>
+                    <div className="text-xs text-green-600">units available</div>
+                  </div>
+                  <div className="bg-amber-50 rounded-lg p-3">
+                    <div className="text-sm text-amber-700">Low Stock</div>
+                    <div className="text-2xl font-bold text-amber-900">{analyticsData.lowStockItems}</div>
+                    <div className="text-xs text-amber-600">items need restocking</div>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-3">
+                    <div className="text-sm text-red-700">Out of Stock</div>
+                    <div className="text-2xl font-bold text-red-900">{analyticsData.outOfStockItems}</div>
+                    <div className="text-xs text-red-600">items unavailable</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* Game Breakdown */}
+                  <div>
+                    <h4 className="text-sm font-medium text-slate-700 mb-2">By Game</h4>
+                    <div className="space-y-2">
+                      {Object.entries(analyticsData.gameBreakdown).map(([game, count]) => (
+                        <div key={game} className="flex items-center justify-between text-sm">
+                          <span className="text-slate-600 truncate">{game}</span>
+                          <span className="font-medium text-slate-900">{count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Quality Breakdown */}
+                  <div>
+                    <h4 className="text-sm font-medium text-slate-700 mb-2">By Quality</h4>
+                    <div className="space-y-2">
+                      {Object.entries(analyticsData.qualityBreakdown).map(([quality, count]) => (
+                        <div key={quality} className="flex items-center justify-between text-sm">
+                          <span className="text-slate-600 truncate">{quality}</span>
+                          <span className="font-medium text-slate-900">{count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Price Source Breakdown */}
+                  <div>
+                    <h4 className="text-sm font-medium text-slate-700 mb-2">By Price Source</h4>
+                    <div className="space-y-2">
+                      {Object.entries(analyticsData.priceSourceBreakdown).map(([source, count]) => (
+                        <div key={source} className="flex items-center justify-between text-sm">
+                          <span className="text-slate-600 truncate">{source}</span>
+                          <span className="font-medium text-slate-900">{count}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
         )}
 
         {/* Bulk Operation Modals */}
