@@ -2069,10 +2069,10 @@ const AdminDashboard = () => {
                 className="w-full px-3 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-sm"
               >
                 <option value="all">All Stock Levels</option>
-                <option value="instock">In Stock (>0)</option>
+                <option value="instock">In Stock (&gt;0)</option>
                 <option value="lowstock">Low Stock (≤3)</option>
                 <option value="outofstock">Out of Stock (0)</option>
-                <option value="overstock">High Stock (>20)</option>
+                <option value="overstock">High Stock (&gt;20)</option>
               </select>
             </div>
           </div>
@@ -3049,7 +3049,7 @@ const AdminDashboard = () => {
             </div>
           </div>
         )}
-        )}
+
 
         {/* Orders Tab */}
         {activeTab === 'all-cards' && <AllCardsView />}
