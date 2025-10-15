@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { TrendingUp, Package, DollarSign, AlertTriangle, RefreshCw } from 'lucide-react';
+import { Package, DollarSign, AlertTriangle, RefreshCw } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 

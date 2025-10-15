@@ -16,7 +16,6 @@ const InventoryTab = () => {
   const [games, setGames] = useState([]);
   const [sets, setSets] = useState([]);
   const [editingItems, setEditingItems] = useState(new Map());
-  const [selectedItems, setSelectedItems] = useState(new Set());
 
   const fetchInventory = useCallback(async () => {
     setLoading(true);

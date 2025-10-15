@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 // Remove the import line and add:
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-import { logError } from '../services/errorHandler';
+const logError = (error, context) => console.error('Error:', error.message || error, context);
 
 const getAdminHeaders = () => ({
   'Content-Type': 'application/json'
