@@ -1639,7 +1639,12 @@ const AdminDashboard = () => {
             )}
           </div>
         )}
-                    <span className="text-sm font-medium text-slate-700">Bulk Actions:</span>
+
+        {/* Bulk Actions */}
+        {selectedItems.size > 0 && (
+          <div className="mb-6 p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex flex-wrap items-center gap-3">
+              <span className="text-sm font-medium text-slate-700">Bulk Actions:</span>
 
                     <button
                       onClick={() => setBulkOperation('updatePrices')}
@@ -1675,20 +1680,22 @@ const AdminDashboard = () => {
                     >
                       <X className="w-4 h-4" />
                       Delete Selected
-                    </button>
-                  </>
-                )}
-              </div>
+              </button>
             </div>
+          </div>
+        )}
 
-            <div className="text-right">
-              <div className="text-sm text-slate-600 space-y-1">
-                <div>Viewing: <span className="font-medium text-slate-800">{analyticsData.totalUniqueCards}</span> cards</div>
-                <div>Total Value: <span className="font-medium text-slate-800">{currency.symbol}{(analyticsData.totalValue * currency.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
-              </div>
+        {/* Inventory Summary */}
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+          <div className="text-right">
+            <div className="text-sm text-slate-600 space-y-1">
+              <div>Viewing: <span className="font-medium text-slate-800">{analyticsData.totalUniqueCards}</span> cards</div>
+              <div>Total Value: <span className="font-medium text-slate-800">{currency.symbol}{(analyticsData.totalValue * currency.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span></div>
             </div>
           </div>
         </div>
+      </div>
+    )}
 
         {/* Analytics Dashboard */}
         {Object.keys(analyticsData.gameBreakdown).length > 0 && (
