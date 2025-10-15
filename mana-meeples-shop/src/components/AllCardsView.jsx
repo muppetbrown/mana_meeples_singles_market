@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Package, Search, RefreshCw, Filter, Sparkles } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
@@ -15,9 +15,8 @@ const AllCardsView = () => {
   const [expandedCards, setExpandedCards] = useState(new Set());
 
   useEffect(() => {
-    fetchGames();
-    fetchCards();
-  }, []);
+      fetchCards();
+    }, [fetchCards]);
 
   const fetchGames = async () => {
     try {
@@ -30,32 +29,32 @@ const AllCardsView = () => {
     }
   };
 
-  const fetchCards = async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ limit: 1000 });
-      if (filterGame !== 'all') params.append('game_id', filterGame);
-      if (filterSet !== 'all') params.append('set_id', filterSet);
-      if (searchTerm) params.append('search', searchTerm);
+  const fetchCards = useCallback(async () => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({ limit: 1000 });
+        if (filterGame !== 'all') params.append('game_id', filterGame);
+        if (filterSet !== 'all') params.append('set_id', filterSet);
+        if (searchTerm) params.append('search', searchTerm);
 
-      const response = await fetch(`${API_URL}/admin/all-cards?${params}`, {
-        credentials: 'include'
-      });
+        const response = await fetch(`${API_URL}/admin/all-cards?${params}`, {
+          credentials: 'include'
+        });
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch cards: ${response.statusText}`);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch cards: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        setCards(data.cards || []);
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching cards:', error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
       }
-
-      const data = await response.json();
-      setCards(data.cards || []);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching cards:', error);
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
+    }, [filterGame, filterSet, searchTerm]);
 
   useEffect(() => {
     if (filterGame !== 'all') {
