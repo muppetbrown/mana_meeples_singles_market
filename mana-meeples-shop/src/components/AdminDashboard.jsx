@@ -25,7 +25,6 @@ import {
 import CurrencySelector from './CurrencySelector';
 import AdminOrders from './AdminOrders';
 import AllCardsView from './AllCardsView';
-import { useToast } from './Toast';
 import { API_URL } from '../config/api';
 
 const getAdminHeaders = () => {
@@ -36,7 +35,6 @@ const getAdminHeaders = () => {
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
   const [inventory, setInventory] = useState([]);
@@ -1144,13 +1142,13 @@ const AdminDashboard = () => {
             </button>
             <button
               onClick={() => setActiveTab('all-cards')}
-              className={`flex items-center gap-2 py-4 px-1 border-b-2 font-medium text-sm ${
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
                 activeTab === 'all-cards'
-                  ? 'border-blue-500 text-blue-600'
-                  : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'
-              } transition-colors`}
+                  ? 'bg-blue-600 text-white'
+                  : 'text-slate-700 hover:bg-slate-100'
+              }`}
             >
-              <Package className="w-4 h-4" />
+              <Package className="w-5 h-5" />
               All Cards
             </button>
           </nav>
@@ -3024,9 +3022,10 @@ const AdminDashboard = () => {
           </div>
         )}
 
-
-        {/* Orders Tab */}
+        {/* All Cards Tab */}
         {activeTab === 'all-cards' && <AllCardsView />}
+        
+        {/* Orders Tab */}
         {activeTab === 'orders' && (
           <AdminOrders />
         )}
