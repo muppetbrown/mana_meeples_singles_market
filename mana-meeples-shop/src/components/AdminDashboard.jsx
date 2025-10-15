@@ -5,11 +5,13 @@ import {
   DollarSign,
   AlertCircle,
   Edit,
+  Edit2,
   Download,
   Upload,
   RefreshCw,
   Search,
   ChevronDown,
+  ChevronUp,
   ChevronRight,
   Save,
   X,
@@ -19,7 +21,10 @@ import {
   AlertTriangle,
   Loader2,
   Plus,
-  ShoppingCart
+  ShoppingCart,
+  Trash2,
+  Sparkles,
+  ImageIcon
 } from 'lucide-react';
 
 import CurrencySelector from './CurrencySelector';
@@ -110,6 +115,12 @@ const AdminDashboard = () => {
   const [quickActionState, setQuickActionState] = useState('idle'); // idle, loading, success, error
   // TODO: Add analytics loading state when analytics feature is implemented
   // const [analyticsLoading, setAnalyticsLoading] = useState(false);
+
+  // NEW: Inventory list view state
+  const [inventoryCards, setInventoryCards] = useState([]);
+  const [inventoryLoading, setInventoryLoading] = useState(false);
+  const [expandedInventoryCards, setExpandedInventoryCards] = useState(new Set());
+  const [inventorySortOrder, setInventorySortOrder] = useState('name_asc');
 
   // References for keyboard shortcuts
   const searchInputRef = React.useRef(null);
@@ -479,6 +490,19 @@ const AdminDashboard = () => {
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [searchTerm, toast, exportFilteredResults]);
 
+  // NEW: Fetch inventory list when filters change
+  useEffect(() => {
+    if (activeTab === 'inventory') {
+      fetchInventoryList();
+    }
+  }, [
+    filterGame,
+    filterSet,
+    searchTerm,
+    inventorySortOrder,
+    activeTab
+  ]);
+
   // Helper function to get game ID from name
   const getGameIdFromName = (gameName) => {
     const gameMap = {
@@ -706,6 +730,51 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // NEW: Fetch inventory in list format
+  const fetchInventoryList = async () => {
+    setInventoryLoading(true);
+    try {
+      const params = new URLSearchParams({
+        game: filterGame || 'all',
+        set: filterSet || 'all',
+        search: searchTerm,
+        treatment: 'all',
+        finish: 'all',
+        sort: inventorySortOrder
+      });
+
+      const response = await fetch(`${API_URL}/admin/inventory-list?${params}`, {
+        credentials: 'include',
+        headers: getAdminHeaders()
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch inventory');
+      }
+
+      const data = await response.json();
+      setInventoryCards(data.cards);
+    } catch (error) {
+      console.error('Error fetching inventory list:', error);
+      alert('Failed to load inventory');
+    } finally {
+      setInventoryLoading(false);
+    }
+  };
+
+  // NEW: Toggle card expansion in inventory view
+  const toggleInventoryCard = (cardKey) => {
+    setExpandedInventoryCards(prev => {
+      const next = new Set(prev);
+      if (next.has(cardKey)) {
+        next.delete(cardKey);
+      } else {
+        next.add(cardKey);
+      }
+      return next;
+    });
   };
 
   const exportCSV = () => {
@@ -1117,105 +1186,459 @@ const AdminDashboard = () => {
       <main id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         {/* Tab Content */}
         {activeTab === 'inventory' && (
-          <>
-            {/* Stats Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-600 text-sm font-medium">Inventory Value</span>
-              <DollarSign className="w-5 h-5 text-blue-600" aria-hidden="true" />
-            </div>
-            <p className="text-3xl font-bold text-slate-900">
-              {currency.symbol}{(totalValue * currency.rate).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              {inStockItems} items in stock
-            </p>
-          </div>
+          <div className="space-y-6">
+            {/* Header with Sort */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <h2 className="text-2xl font-bold text-slate-900">Inventory</h2>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Managing {inventoryCards.length} cards in stock
+                  </p>
+                </div>
 
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-600 text-sm font-medium">Low Stock Alerts</span>
-              <AlertCircle className="w-5 h-5 text-amber-600" aria-hidden="true" />
-            </div>
-            <p className="text-3xl font-bold text-slate-900">
-              {lowStockCount}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              Items need restocking
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-600 text-sm font-medium">Unique Cards</span>
-              <Package className="w-5 h-5 text-purple-600" aria-hidden="true" />
-            </div>
-            <p className="text-3xl font-bold text-slate-900">
-              {groupedInventory.length}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              {totalItems} total variations
-            </p>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 border border-slate-200 shadow-sm hover:shadow-md transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-slate-600 text-sm font-medium">Filtered View</span>
-              <Package className="w-5 h-5 text-green-600" aria-hidden="true" />
-            </div>
-            <p className="text-3xl font-bold text-slate-900">
-              {filteredInventory.length}
-            </p>
-            <p className="text-xs text-slate-500 mt-1">
-              Matching filters
-            </p>
-          </div>
-        </div>
-
-        {/* Quick Actions Toolbar */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 mb-6 border border-blue-200">
-          <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center">
-            <div className="flex-1">
-              <div className="flex flex-wrap items-center gap-3">
-                <h3 className="text-lg font-semibold text-slate-800">Quick Actions</h3>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm text-slate-600">
-                    {selectedItems.size > 0 && `${selectedItems.size} items selected`}
-                  </span>
-                  {quickActionState === 'loading' && (
-                    <Loader2 className="w-4 h-4 animate-spin text-blue-600" />
-                  )}
-                  {quickActionState === 'success' && (
-                    <CheckCircle className="w-4 h-4 text-green-600" />
-                  )}
-                  {quickActionState === 'error' && (
-                    <XCircle className="w-4 h-4 text-red-600" />
-                  )}
+                {/* Sort Dropdown */}
+                <div className="flex items-center gap-3">
+                  <label className="text-sm font-medium text-slate-700">
+                    Sort by:
+                  </label>
+                  <select
+                    value={inventorySortOrder}
+                    onChange={(e) => setInventorySortOrder(e.target.value)}
+                    className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 bg-white"
+                  >
+                    <option value="name_asc">Name (A-Z)</option>
+                    <option value="name_desc">Name (Z-A)</option>
+                    <option value="number_asc">Card Number</option>
+                    <option value="stock_desc">Stock (High-Low)</option>
+                    <option value="stock_asc">Stock (Low-High)</option>
+                    <option value="value_desc">Value (High-Low)</option>
+                  </select>
                 </div>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2 mt-3">
-                <button
-                  onClick={exportFilteredResults}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-300 rounded-lg text-sm font-medium text-slate-700 transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              {/* Search & Filters Row */}
+              <div className="flex flex-col lg:flex-row gap-3">
+                {/* Search */}
+                <div className="relative flex-1">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                  <input
+                    type="text"
+                    placeholder="Search cards..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+
+                {/* Game Filter */}
+                <select
+                  value={filterGame || 'all'}
+                  onChange={(e) => setFilterGame(e.target.value)}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
                 >
-                  <Download className="w-4 h-4" />
-                  Export Filtered
-                </button>
+                  <option value="all">All Games</option>
+                  <option value="Magic: The Gathering">Magic: The Gathering</option>
+                  <option value="Pokemon">Pokemon</option>
+                  <option value="Yu-Gi-Oh!">Yu-Gi-Oh!</option>
+                </select>
+
+                {/* Set Filter */}
+                <select
+                  value={filterSet || 'all'}
+                  onChange={(e) => setFilterSet(e.target.value)}
+                  className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="all">All Sets</option>
+                  {availableSets.map(set => (
+                    <option key={set} value={set}>{set}</option>
+                  ))}
+                </select>
 
                 <button
-                  onClick={refreshPrices}
-                  disabled={loading}
-                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white rounded-lg text-sm font-medium transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setFilterGame('all');
+                    setFilterSet('all');
+                  }}
+                  className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-sm font-medium transition-colors whitespace-nowrap"
                 >
-                  <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                  Refresh Prices
+                  Clear Filters
                 </button>
+              </div>
+            </div>
 
-                {selectedItems.size > 0 && (
-                  <>
-                    <div className="w-px h-6 bg-slate-300"></div>
+            {/* Cards List */}
+            {inventoryLoading ? (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-center">
+                  <Package className="w-12 h-12 text-blue-600 animate-pulse mx-auto mb-4" />
+                  <p className="text-slate-600">Loading inventory...</p>
+                </div>
+              </div>
+            ) : inventoryCards.length === 0 ? (
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-12 text-center">
+                <Package className="w-12 h-12 text-slate-400 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                  No items in inventory
+                </h3>
+                <p className="text-slate-600 mb-4">
+                  {searchTerm ? 'No items match your search.' : 'Start by adding cards from the All Cards tab.'}
+                </p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="divide-y divide-slate-200">
+                  {inventoryCards.map((card) => {
+                    const cardKey = `${card.name}-${card.card_number}`;
+                    const isExpanded = expandedInventoryCards.has(cardKey);
+
+                    // Determine stock health
+                    const stockHealth = card.total_stock >= 10 ? 'healthy' :
+                                       card.total_stock >= 3 ? 'low' : 'critical';
+
+                    return (
+                      <div key={cardKey} className="hover:bg-slate-50 transition-colors">
+                        {/* Main Card Row */}
+                        <div className="p-4 flex items-center gap-4">
+                          {/* Card Image */}
+                          <div className="flex-shrink-0">
+                            {card.image_url ? (
+                              <img
+                                src={card.image_url}
+                                alt={card.name}
+                                className="w-16 h-22 rounded-lg object-cover border border-slate-200 shadow-sm"
+                                onError={(e) => {
+                                  e.target.style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-16 h-22 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200">
+                                <Package className="w-6 h-6 text-slate-400" />
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Card Info */}
+                          <div className="flex-grow min-w-0">
+                            <div className="flex items-start justify-between gap-4">
+                              <div className="flex-grow min-w-0">
+                                <h3 className="font-semibold text-slate-900 truncate">
+                                  {card.name}
+                                </h3>
+                                <div className="flex items-center gap-2 mt-1 text-sm text-slate-600">
+                                  <span className="font-mono">#{card.card_number}</span>
+                                  <span>•</span>
+                                  <span>{card.set_name}</span>
+                                  <span>•</span>
+                                  <span className="capitalize">{card.rarity}</span>
+                                </div>
+
+                                {/* Treatment Summary (same as All Cards) */}
+                                <div className="flex flex-wrap gap-1.5 mt-2 text-xs">
+                                  {card.treatments && card.treatments.some(t => t && t !== 'STANDARD') && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-purple-100 text-purple-800 border border-purple-300 font-medium">
+                                      <AlertCircle className="w-3 h-3" />
+                                      {card.treatments.filter(t => t && t !== 'STANDARD').length} special
+                                    </span>
+                                  )}
+                                  <span className="text-slate-600">
+                                    {card.inventory_count} variation{card.inventory_count !== 1 ? 's' : ''}
+                                  </span>
+                                </div>
+                              </div>
+
+                              {/* Stock & Value Summary */}
+                              <div className="flex items-center gap-3 flex-shrink-0">
+                                <div className="text-right">
+                                  {/* Stock with health indicator */}
+                                  <div className="flex items-center gap-2 justify-end mb-1">
+                                    {stockHealth === 'healthy' && (
+                                      <CheckCircle className="w-4 h-4 text-green-600" />
+                                    )}
+                                    {stockHealth === 'low' && (
+                                      <AlertTriangle className="w-4 h-4 text-amber-600" />
+                                    )}
+                                    {stockHealth === 'critical' && (
+                                      <AlertCircle className="w-4 h-4 text-red-600" />
+                                    )}
+                                    <span className={`text-sm font-medium ${
+                                      stockHealth === 'healthy' ? 'text-green-700' :
+                                      stockHealth === 'low' ? 'text-amber-700' :
+                                      'text-red-700'
+                                    }`}>
+                                      {card.total_stock} units
+                                    </span>
+                                  </div>
+
+                                  {/* Total Value */}
+                                  <div className="text-xs text-slate-600">
+                                    ${card.total_value?.toFixed(2) || '0.00'} total
+                                  </div>
+                                </div>
+
+                                <button
+                                  onClick={() => toggleInventoryCard(cardKey)}
+                                  className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <ChevronDown className="w-4 h-4 rotate-180" />
+                                      Hide
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ChevronDown className="w-4 h-4" />
+                                      Show
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Expanded Inventory Items */}
+                        {isExpanded && (
+                          <div className="bg-slate-50 border-t border-slate-200 p-4">
+                            <div className="space-y-2">
+                              {card.inventory_items?.map((item) => {
+                                const isEditing = editingItems.has(item.inventory_id);
+                                const isLowStock = item.stock_quantity <= item.low_stock_threshold;
+
+                                return (
+                                  <div
+                                    key={item.inventory_id}
+                                    className={`bg-white rounded-lg border p-3 hover:shadow-md transition-shadow ${
+                                      isLowStock ? 'border-amber-300 bg-amber-50' : 'border-slate-200'
+                                    }`}
+                                  >
+                                    <div className="flex items-center justify-between gap-4">
+                                      {/* Variation Info */}
+                                      <div className="flex-grow">
+                                        {/* Treatment & Quality Badges */}
+                                        <div className="flex items-center flex-wrap gap-2 mb-2">
+                                          {/* Treatment Badge */}
+                                          {item.treatment && item.treatment !== 'STANDARD' && (
+                                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${
+                                              item.treatment === 'BORDERLESS' || item.treatment === 'BORDERLESS_INVERTED' ? 'bg-purple-100 text-purple-800 border-purple-300' :
+                                              item.treatment === 'EXTENDED' ? 'bg-blue-100 text-blue-800 border-blue-300' :
+                                              'bg-indigo-100 text-indigo-800 border-indigo-300'
+                                            }`}>
+                                              {item.treatment.replace(/_/g, ' ')}
+                                            </span>
+                                          )}
+
+                                          {/* Finish Badge */}
+                                          {item.finish === 'foil' && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gradient-to-r from-yellow-100 to-amber-100 text-yellow-900 border border-yellow-300">
+                                              <AlertCircle className="w-3 h-3" />
+                                              Foil
+                                            </span>
+                                          )}
+
+                                          {/* Promo Type Badge */}
+                                          {item.promo_type && (
+                                            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium bg-gradient-to-r from-pink-100 to-purple-100 text-purple-900 border border-purple-300">
+                                              {item.promo_type.replace(/_/g, ' ')}
+                                            </span>
+                                          )}
+
+                                          {/* Quality Badge */}
+                                          <span className={`px-2 py-0.5 rounded text-xs font-medium ${
+                                            item.quality === 'Near Mint' ? 'bg-green-100 text-green-800' :
+                                            item.quality === 'Lightly Played' ? 'bg-blue-100 text-blue-800' :
+                                            item.quality === 'Moderately Played' ? 'bg-yellow-100 text-yellow-800' :
+                                            'bg-orange-100 text-orange-800'
+                                          }`}>
+                                            {item.quality}
+                                          </span>
+                                        </div>
+
+                                        {/* Price & Stock Info */}
+                                        {!isEditing ? (
+                                          <div className="flex items-center gap-4 text-sm">
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-slate-600">Stock:</span>
+                                              <span className="font-medium text-slate-900">{item.stock_quantity}</span>
+                                              {isLowStock && (
+                                                <AlertTriangle className="w-3 h-3 text-amber-600" />
+                                              )}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-slate-600">Price:</span>
+                                              <span className="font-medium text-slate-900">${item.price?.toFixed(2)}</span>
+                                              {/* Price Source Badge */}
+                                              {item.price_source === 'manual' && (
+                                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs bg-blue-100 text-blue-700">
+                                                  <Edit className="w-3 h-3" />
+                                                  Manual
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div>
+                                              <span className="text-slate-600">Value:</span>
+                                              <span className="ml-1 font-medium text-green-700">
+                                                ${(item.stock_quantity * (item.price || 0)).toFixed(2)}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <div className="flex items-center gap-3">
+                                            <div>
+                                              <label className="text-xs text-slate-600 block mb-1">Stock</label>
+                                              <input
+                                                type="number"
+                                                min="0"
+                                                value={editingItems.get(item.inventory_id)?.stock_quantity || 0}
+                                                onChange={(e) => {
+                                                  const current = editingItems.get(item.inventory_id) || item;
+                                                  setEditingItems(new Map(editingItems.set(item.inventory_id, {
+                                                    ...current,
+                                                    stock_quantity: parseInt(e.target.value) || 0
+                                                  })));
+                                                }}
+                                                className="w-20 px-2 py-1 border border-slate-300 rounded text-sm"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="text-xs text-slate-600 block mb-1">Price</label>
+                                              <input
+                                                type="number"
+                                                min="0"
+                                                step="0.01"
+                                                value={editingItems.get(item.inventory_id)?.price || 0}
+                                                onChange={(e) => {
+                                                  const current = editingItems.get(item.inventory_id) || item;
+                                                  setEditingItems(new Map(editingItems.set(item.inventory_id, {
+                                                    ...current,
+                                                    price: parseFloat(e.target.value) || 0
+                                                  })));
+                                                }}
+                                                className="w-24 px-2 py-1 border border-slate-300 rounded text-sm"
+                                              />
+                                            </div>
+                                            <div>
+                                              <label className="text-xs text-slate-600 block mb-1">Quality</label>
+                                              <select
+                                                value={editingItems.get(item.inventory_id)?.quality || item.quality}
+                                                onChange={(e) => {
+                                                  const current = editingItems.get(item.inventory_id) || item;
+                                                  setEditingItems(new Map(editingItems.set(item.inventory_id, {
+                                                    ...current,
+                                                    quality: e.target.value
+                                                  })));
+                                                }}
+                                                className="px-2 py-1 border border-slate-300 rounded text-sm"
+                                              >
+                                                <option>Near Mint</option>
+                                                <option>Lightly Played</option>
+                                                <option>Moderately Played</option>
+                                                <option>Heavily Played</option>
+                                                <option>Damaged</option>
+                                              </select>
+                                            </div>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Actions */}
+                                      <div className="flex items-center gap-2">
+                                        {!isEditing ? (
+                                          <>
+                                            <button
+                                              onClick={() => {
+                                                setEditingItems(new Map(editingItems.set(item.inventory_id, { ...item })));
+                                              }}
+                                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                              title="Edit item"
+                                            >
+                                              <Edit className="w-4 h-4" />
+                                            </button>
+                                            <button
+                                              onClick={async () => {
+                                                if (confirm(`Remove ${item.quality} from inventory?`)) {
+                                                  try {
+                                                    await fetch(`${API_URL}/admin/inventory/${item.inventory_id}`, {
+                                                      method: 'DELETE',
+                                                      credentials: 'include',
+                                                      headers: getAdminHeaders()
+                                                    });
+                                                    fetchInventoryList();
+                                                  } catch (error) {
+                                                    console.error('Error deleting:', error);
+                                                    alert('Failed to delete item');
+                                                  }
+                                                }
+                                              }}
+                                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                              title="Delete item"
+                                            >
+                                              <X className="w-4 h-4" />
+                                            </button>
+                                          </>
+                                        ) : (
+                                          <>
+                                            <button
+                                              onClick={async () => {
+                                                const editedData = editingItems.get(item.inventory_id);
+                                                try {
+                                                  await fetch(`${API_URL}/admin/inventory/${item.inventory_id}`, {
+                                                    method: 'PUT',
+                                                    credentials: 'include',
+                                                    headers: {
+                                                      ...getAdminHeaders(),
+                                                      'Content-Type': 'application/json'
+                                                    },
+                                                    body: JSON.stringify({
+                                                      stock_quantity: editedData.stock_quantity,
+                                                      price: editedData.price,
+                                                      quality: editedData.quality
+                                                    })
+                                                  });
+
+                                                  const newMap = new Map(editingItems);
+                                                  newMap.delete(item.inventory_id);
+                                                  setEditingItems(newMap);
+
+                                                  fetchInventoryList();
+                                                } catch (error) {
+                                                  console.error('Error updating:', error);
+                                                  alert('Failed to update item');
+                                                }
+                                              }}
+                                              className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
+                                            >
+                                              Save
+                                            </button>
+                                            <button
+                                              onClick={() => {
+                                                const newMap = new Map(editingItems);
+                                                newMap.delete(item.inventory_id);
+                                                setEditingItems(newMap);
+                                              }}
+                                              className="px-3 py-1 bg-slate-200 hover:bg-slate-300 text-slate-700 text-sm font-medium rounded-lg transition-colors"
+                                            >
+                                              Cancel
+                                            </button>
+                                          </>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
                     <span className="text-sm font-medium text-slate-700">Bulk Actions:</span>
 
                     <button
