@@ -589,7 +589,7 @@ const AdminDashboard = () => {
         throw new Error(error || 'Failed to create inventory variation');
       }
 
-      alert(`Success! Created ${foilFormData.quality} ${foilFormData.foilType} version of ${foilModalCard.card_name}`);
+      window.alert(`Success! Created ${foilFormData.quality} ${foilFormData.foilType} version of ${foilModalCard.card_name}`);
 
       setShowFoilModal(false);
       setFoilModalCard(null);
@@ -606,7 +606,7 @@ const AdminDashboard = () => {
       if (process.env.NODE_ENV === 'development') {
         console.error('Error creating inventory variation:', error);
       }
-      alert(`Error: ${error.message}`);
+      window.alert(`Error: ${error.message}`);
     } finally {
       setFoilModalLoading(false);
     }
@@ -657,7 +657,7 @@ const AdminDashboard = () => {
       if (success) {
         cancelEditing(id);
       } else {
-        alert('Failed to update item');
+        window.alert('Failed to update item');
       }
     } else {
       cancelEditing(id);
@@ -702,7 +702,7 @@ const AdminDashboard = () => {
           ? `\n\nErrors (${result.errors.length}):\n${result.errors.slice(0, 3).join('\n')}${result.errors.length > 3 ? '\n...' : ''}`
           : '\n\nNo errors occurred.';
 
-        alert(`Price refresh completed!\n\nUpdated: ${result.updated} items\nTotal processed: ${result.total} MTG cards${errorDetails}`);
+        window.alert(`Price refresh completed!\n\nUpdated: ${result.updated} items\nTotal processed: ${result.total} MTG cards${errorDetails}`);
         window.location.reload();
       } else {
         const error = await response.json().catch(() => ({ details: `HTTP ${response.status}: ${response.statusText}` }));
@@ -726,7 +726,7 @@ const AdminDashboard = () => {
         errorMessage += error.message || 'Unknown error occurred.';
       }
 
-      alert(errorMessage);
+      window.alert(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -758,7 +758,7 @@ const AdminDashboard = () => {
       setInventoryCards(data.cards);
     } catch (error) {
       console.error('Error fetching inventory list:', error);
-      alert('Failed to load inventory');
+      window.alert('Failed to load inventory');
     } finally {
       setInventoryLoading(false);
     }
@@ -818,7 +818,7 @@ const AdminDashboard = () => {
 
   const handleCSVUpload = (file) => {
     if (!file || file.type !== 'text/csv') {
-      alert('Please select a valid CSV file.');
+      window.alert('Please select a valid CSV file.');
       return;
     }
 
@@ -877,7 +877,7 @@ const AdminDashboard = () => {
 
   const importCSV = async () => {
     if (!csvMapping.sku || !csvMapping.card_name || !csvMapping.price || !csvMapping.stock_quantity) {
-      alert('Please map all required fields');
+      window.alert('Please map all required fields');
       return;
     }
 
@@ -911,7 +911,7 @@ const AdminDashboard = () => {
       if (process.env.NODE_ENV === 'development') {
         console.error('CSV import error:', error);
       }
-      alert(`CSV import failed: ${error.message}`);
+      window.alert(`CSV import failed: ${error.message}`);
     } finally {
       setCsvImporting(false);
     }
@@ -991,11 +991,11 @@ const AdminDashboard = () => {
       setSelectedItems(new Set());
       setBulkOperation(null);
 
-      alert(`Bulk operation completed! Updated ${result.updated} items.`);
+      window.alert(`Bulk operation completed! Updated ${result.updated} items.`);
     } catch (error) {
       setQuickActionState('error');
       console.error('Bulk operation error:', error);
-      alert(`Bulk operation failed: ${error.message}`);
+      window.alert(`Bulk operation failed: ${error.message}`);
     } finally {
       setTimeout(() => setQuickActionState('idle'), 3000);
     }
@@ -1557,7 +1557,7 @@ const AdminDashboard = () => {
                                             </button>
                                             <button
                                               onClick={async () => {
-                                                if (confirm(`Remove ${item.quality} from inventory?`)) {
+                                                if (window.confirm(`Remove ${item.quality} from inventory?`)) {
                                                   try {
                                                     await fetch(`${API_URL}/admin/inventory/${item.inventory_id}`, {
                                                       method: 'DELETE',
@@ -1567,7 +1567,7 @@ const AdminDashboard = () => {
                                                     fetchInventoryList();
                                                   } catch (error) {
                                                     console.error('Error deleting:', error);
-                                                    alert('Failed to delete item');
+                                                    window.alert('Failed to delete item');
                                                   }
                                                 }
                                               }}
@@ -1604,7 +1604,7 @@ const AdminDashboard = () => {
                                                   fetchInventoryList();
                                                 } catch (error) {
                                                   console.error('Error updating:', error);
-                                                  alert('Failed to update item');
+                                                  window.alert('Failed to update item');
                                                 }
                                               }}
                                               className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors"
