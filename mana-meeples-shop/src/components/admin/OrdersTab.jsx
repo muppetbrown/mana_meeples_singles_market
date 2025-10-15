@@ -22,7 +22,7 @@ const getAdminHeaders = () => ({
   'Content-Type': 'application/json'
 });
 
-const AdminOrders = () => {
+const OrdersTab = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -547,4 +547,4 @@ const AdminOrders = () => {
   );
 };
 
-export default AdminOrders;
+export default OrdersTab;

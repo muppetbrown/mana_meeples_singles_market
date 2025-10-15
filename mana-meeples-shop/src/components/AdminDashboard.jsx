@@ -23,8 +23,10 @@ import {
 } from 'lucide-react';
 
 import CurrencySelector from './CurrencySelector';
-import AdminOrders from './AdminOrders';
-import AllCardsView from './AllCardsView';
+import InventoryTab from './admin/InventoryTab';
+import AllCardsTab from './admin/AllCardsTab';
+import OrdersTab from './admin/OrdersTab';
+import AnalyticsTab from './admin/AnalyticsTab';
 import { API_URL } from '../config/api';
 
 const getAdminHeaders = () => {
@@ -102,7 +104,7 @@ const AdminDashboard = () => {
   const [csvResults, setCsvResults] = useState(null);
   const [csvStep, setCsvStep] = useState(1);
   const [dragActive, setDragActive] = useState(false);
-  const [activeTab, setActiveTab] = useState('inventory');
+  const [activeTab, setActiveTab] = useState('inventory'); // Default to inventory tab
   const [selectedItems, setSelectedItems] = useState(new Set());
   const [bulkOperation, setBulkOperation] = useState(null);
   // TODO: Add analytics loading state when analytics feature is implemented
@@ -511,7 +513,7 @@ const AdminDashboard = () => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [searchTerm, exportFilteredResults]); 
-  
+
  useEffect(() => {
     if (activeTab === 'inventory') {
       fetchInventoryList();
@@ -3020,13 +3022,17 @@ const AdminDashboard = () => {
           </div>
         )}
 
+        {/* Inventory Tab */}
+        {activeTab === 'inventory' && <InventoryTab />}
+
         {/* All Cards Tab */}
-        {activeTab === 'all-cards' && <AllCardsView />}
-        
+        {activeTab === 'all-cards' && <AllCardsTab />}
+
+        {/* Analytics Tab */}
+        {activeTab === 'analytics' && <AnalyticsTab />}
+
         {/* Orders Tab */}
-        {activeTab === 'orders' && (
-          <AdminOrders />
-        )}
+        {activeTab === 'orders' && <OrdersTab />}
       </main>
     </div>
   );

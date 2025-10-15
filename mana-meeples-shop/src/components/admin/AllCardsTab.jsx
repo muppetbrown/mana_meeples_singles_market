@@ -3,7 +3,7 @@ import { Package, Search, RefreshCw, Filter, Sparkles } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-const AllCardsView = () => {
+const AllCardsTab = () => {
   const [cards, setCards] = useState([]);
   const [games, setGames] = useState([]);
   const [sets, setSets] = useState([]);
@@ -322,4 +322,4 @@ const AllCardsView = () => {
   );
 };
 
-export default AllCardsView;
+export default AllCardsTab;
