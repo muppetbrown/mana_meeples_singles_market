@@ -17,7 +17,6 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
   const [filterGame, setFilterGame] = useState('all');
   const [filterSet, setFilterSet] = useState('all');
   const [filterTreatment, setFilterTreatment] = useState('all');
-  const [filterFinish, setFilterFinish] = useState('all');
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [editingVariations, setEditingVariations] = useState(new Map());
 
@@ -71,7 +70,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
     } finally {
       setLoading(false);
     }
-  }, [filterGame, filterSet, filterTreatment, filterFinish, searchTerm]);
+  }, [filterGame, filterSet, filterTreatment, searchTerm]);
 
   useEffect(() => {
     fetchGames();
