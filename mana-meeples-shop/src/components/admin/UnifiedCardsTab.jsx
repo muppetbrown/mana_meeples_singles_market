@@ -22,11 +22,12 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
   const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
   const [searchLoading, setSearchLoading] = useState(false);
 
-  // Get search term from URL
+  // Get search term from URL and initialize filter states from URL params - matching TCGshop
   const searchTerm = searchParams.get('search') || '';
-  const [filterGame, setFilterGame] = useState('all');
-  const [filterSet, setFilterSet] = useState('all');
+  const selectedGame = searchParams.get('game') || 'all';
+  const selectedSet = searchParams.get('set') || 'all';
   const [filterTreatment, setFilterTreatment] = useState('all');
+  const [availableSets, setAvailableSets] = useState([]);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [imageModalUrl, setImageModalUrl] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -130,23 +131,90 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
     }
   }, []);
 
-  const fetchSets = useCallback(async (gameId) => {
+  // Helper function to get game ID from name (matching TCGshop)
+  const getGameIdFromName = (gameName) => {
+    const gameMap = {
+      'Magic: The Gathering': 1,
+      'Pokemon': 2,
+      'Yu-Gi-Oh!': 3
+    };
+    return gameMap[gameName] || null;
+  };
+
+  // Enhanced fetchSets to match TCGshop pattern
+  const fetchSets = useCallback(async () => {
+    if (selectedGame === 'all') {
+      setAvailableSets([]);
+      return;
+    }
+
     try {
-      const response = await fetch(`${API_URL}/games/${gameId}/sets`);
-      if (!response.ok) throw new Error('Failed to fetch sets');
-      const data = await response.json();
-      setSets(data.sets || []);
+      const gameId = getGameIdFromName(selectedGame);
+      if (!gameId) return;
+
+      // Use the same endpoint pattern as TCGshop
+      const response = await fetch(`${API_URL}/sets?game_id=${gameId}`);
+
+      if (response.ok) {
+        const sets = await response.json();
+        setAvailableSets(sets);
+        setSets(sets); // Keep both for backward compatibility
+      } else {
+        console.error('Failed to fetch sets');
+        setAvailableSets([]);
+        setSets([]);
+      }
     } catch (error) {
       console.error('Error fetching sets:', error);
+      setAvailableSets([]);
+      setSets([]);
     }
-  }, []);
+  }, [selectedGame]);
+
+  // Filter change handlers (matching TCGshop pattern) - moved before fetchCards
+  const handleFilterChange = useCallback((key, value) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (value && value !== 'all' && value !== '') {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+      return newParams;
+    });
+  }, [setSearchParams]);
+
+  // Handle game selection (matching TCGshop pattern)
+  const handleGameChange = useCallback((game) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (game && game !== 'all') {
+        newParams.set('game', game);
+      } else {
+        newParams.delete('game');
+      }
+      return newParams;
+    });
+  }, [setSearchParams]);
 
   const fetchCards = useCallback(async () => {
     setLoading(true);
     try {
       const params = new URLSearchParams({ limit: 1000 });
-      if (filterGame !== 'all') params.append('game_id', filterGame);
-      if (filterSet !== 'all') params.append('set_id', filterSet);
+
+      // Use game name-based filtering like TCGshop
+      if (selectedGame !== 'all') {
+        const gameId = getGameIdFromName(selectedGame);
+        if (gameId) {
+          params.append('game_id', gameId);
+        }
+      }
+
+      // Use set name-based filtering like TCGshop
+      if (selectedSet !== 'all') {
+        params.append('set_name', selectedSet);
+      }
+
       if (filterTreatment !== 'all') params.append('treatment', filterTreatment);
       if (searchTerm) params.append('search', searchTerm);
 
@@ -165,21 +233,21 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
     } finally {
       setLoading(false);
     }
-  }, [filterGame, filterSet, filterTreatment, searchTerm]);
+  }, [selectedGame, selectedSet, filterTreatment, searchTerm]);
 
   useEffect(() => {
     fetchGames();
     fetchCards();
   }, [fetchGames, fetchCards]);
 
+  // Dynamic set fetching when game changes (matching TCGshop)
   useEffect(() => {
-    if (filterGame !== 'all') {
-      fetchSets(filterGame);
-    } else {
-      setSets([]);
-      setFilterSet('all');
+    fetchSets();
+    // Reset set filter when game changes (matching TCGshop pattern)
+    if (selectedSet !== 'all') {
+      handleFilterChange('set', 'all');
     }
-  }, [filterGame, fetchSets]);
+  }, [selectedGame, fetchSets]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Filter cards based on mode - search is handled server-side now
   const filteredCards = useMemo(() => {
@@ -507,27 +575,30 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
           </div>
 
           <select
-            value={filterGame}
-            onChange={(e) => setFilterGame(e.target.value)}
+            value={selectedGame}
+            onChange={(e) => handleGameChange(e.target.value)}
             className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           >
             <option value="all">All Games</option>
             {games.map(game => (
-              <option key={game.id} value={game.id}>{game.name}</option>
+              <option key={game.id} value={game.name}>{game.name}</option>
             ))}
           </select>
 
           <select
-            value={filterSet}
-            onChange={(e) => setFilterSet(e.target.value)}
-            disabled={filterGame === 'all'}
+            value={selectedSet}
+            onChange={(e) => handleFilterChange('set', e.target.value)}
+            disabled={selectedGame === 'all'}
             className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100"
           >
             <option value="all">All Sets</option>
-            {sets.map(set => (
-              <option key={set.id} value={set.id}>{set.name}</option>
+            {availableSets.map(set => (
+              <option key={set.id} value={set.name}>{set.name}</option>
             ))}
           </select>
+          {selectedGame === 'all' && (
+            <p className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
+          )}
 
           {!isInventoryMode && (
             <select
