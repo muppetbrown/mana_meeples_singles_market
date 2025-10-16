@@ -1597,41 +1597,7 @@ router.get('/cards/:id/current-price', async (req, res) => {
   }
 });
 
-// GET /api/analytics/trending - Get trending cards (most viewed/bought)
-router.get('/analytics/trending', async (req, res) => {
-  try {
-    const { days = 7, limit = 10 } = req.query;
-
-    // Sanitize and validate inputs to prevent SQL injection
-    const sanitizedDays = Math.max(1, Math.min(365, parseInt(days, 10))) || 7;
-    const sanitizedLimit = Math.max(1, Math.min(100, parseInt(limit, 10))) || 10;
-
-    // For now, we'll simulate trending by recent sales and stock turnover (Fixed SQL injection)
-    const trending = await db.query(`
-      SELECT
-        c.id,
-        c.name,
-        c.image_url,
-        cs.name as set_name,
-        AVG(ci.price) as avg_price,
-        SUM(CASE WHEN oi.created_at > NOW() - INTERVAL $1 || ' days' THEN oi.quantity ELSE 0 END) as recent_sales
-      FROM cards c
-      JOIN card_sets cs ON c.set_id = cs.id
-      JOIN card_inventory ci ON ci.card_id = c.id
-      LEFT JOIN order_items oi ON oi.inventory_id = ci.id
-      WHERE ci.stock_quantity > 0
-      GROUP BY c.id, c.name, c.image_url, cs.name
-      HAVING SUM(CASE WHEN oi.created_at > NOW() - INTERVAL $1 || ' days' THEN oi.quantity ELSE 0 END) > 0
-      ORDER BY recent_sales DESC, avg_price DESC
-      LIMIT $2
-    `, [sanitizedDays, sanitizedLimit]);
-
-    res.json({ trending: trending.rows });
-  } catch (error) {
-    console.error('Error fetching trending cards:', error);
-    res.status(500).json({ error: 'Failed to fetch trending cards' });
-  }
-});/**
+/**
  * GET /api/admin/all-cards
  * 
  * Returns ALL cards from the database with their variations
@@ -1827,6 +1793,75 @@ router.get('/admin/all-cards', adminAuth, async (req, res) => {
     res.status(500).json({
       error: 'Failed to fetch cards',
       details: error.message
+    });
+  }
+});
+
+/**
+ * POST /api/admin/inventory
+ * Add a new item to inventory
+ */
+router.post('/admin/inventory', adminAuthJWT, async (req, res) => {
+  try {
+    const {
+      card_id,
+      quality,
+      foil_type,
+      price,
+      stock_quantity,
+      language
+    } = req.body;
+
+    // Validation
+    if (!card_id) {
+      return res.status(400).json({ error: 'card_id is required' });
+    }
+
+    if (!quality) {
+      return res.status(400).json({ error: 'quality is required' });
+    }
+
+    // Default values
+    const finalQuality = quality || 'Near Mint';
+    const finalFoilType = foil_type || 'Regular';
+    const finalPrice = price || 0;
+    const finalStock = stock_quantity || 0;
+    const finalLanguage = language || 'English';
+
+    // Check if this exact inventory entry already exists
+    const existingCheck = await db.query(
+      `SELECT id FROM card_inventory 
+       WHERE card_id = $1 AND quality = $2 AND foil_type = $3 AND language = $4`,
+      [card_id, finalQuality, finalFoilType, finalLanguage]
+    );
+
+    if (existingCheck.rows.length > 0) {
+      return res.status(409).json({ 
+        error: 'This inventory entry already exists',
+        inventory_id: existingCheck.rows[0].id
+      });
+    }
+
+    // Insert new inventory entry
+    const result = await db.query(
+      `INSERT INTO card_inventory 
+       (card_id, quality, foil_type, language, stock_quantity, price, price_source, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, 'manual', NOW(), NOW())
+       RETURNING *`,
+      [card_id, finalQuality, finalFoilType, finalLanguage, finalStock, finalPrice]
+    );
+
+    res.status(201).json({
+      success: true,
+      message: 'Added to inventory successfully',
+      inventory: result.rows[0]
+    });
+
+  } catch (error) {
+    console.error('Error adding to inventory:', error);
+    res.status(500).json({ 
+      error: 'Failed to add to inventory',
+      details: error.message 
     });
   }
 });

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Package, Search, RefreshCw, Filter, Sparkles, Edit, Save, X, Download, Plus } from 'lucide-react';
+import { Package, Search, RefreshCw, Filter, Sparkles, Download, ZoomIn, X, Plus } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
 /**
- * Unified Cards Component - Works for both "All Cards" and "Inventory" modes
- * Mode prop determines filtering: 'all' shows everything, 'inventory' shows only stocked items
+ * Unified Cards Component - Clean version without dead code
+ * Mode: 'all' shows everything, 'inventory' shows only stocked items
  */
 const UnifiedCardsTab = ({ mode = 'all' }) => {
   const [cards, setCards] = useState([]);
@@ -18,7 +18,17 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
   const [filterSet, setFilterSet] = useState('all');
   const [filterTreatment, setFilterTreatment] = useState('all');
   const [expandedCards, setExpandedCards] = useState(new Set());
-  const [editingVariations, setEditingVariations] = useState(new Map());
+  const [imageModalUrl, setImageModalUrl] = useState(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [addModalData, setAddModalData] = useState(null);
+  const [addFormData, setAddFormData] = useState({
+    quality: 'Near Mint',
+    foil_type: 'Regular',
+    price: '',
+    stock_quantity: 1,
+    language: 'English'
+  });
+  const [saving, setSaving] = useState(false);
 
   const isInventoryMode = mode === 'inventory';
 
@@ -106,22 +116,15 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
     return filtered;
   }, [cards, searchTerm, isInventoryMode]);
 
-  // Get common treatments across all variations
-  const getCommonTreatments = (variations) => {
+  // Get unique treatments/finishes for a card
+  const getUniqueTreatments = (variations) => {
     if (!variations || variations.length === 0) return [];
-    
-    // Get unique treatments
-    const treatments = [...new Set(variations.map(v => v.treatment))];
-    return treatments;
+    return [...new Set(variations.map(v => v.treatment))];
   };
 
-  // Get common finishes across all variations
-  const getCommonFinishes = (variations) => {
+  const getUniqueFinishes = (variations) => {
     if (!variations || variations.length === 0) return [];
-    
-    // Get unique finishes
-    const finishes = [...new Set(variations.map(v => v.finish))];
-    return finishes;
+    return [...new Set(variations.map(v => v.finish))];
   };
 
   const toggleCard = (key) => {
@@ -155,43 +158,83 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
     return 'bg-slate-100 text-slate-600 border-slate-300';
   };
 
-  const startEditing = (cardId, variationIndex, variation) => {
-    const key = `${cardId}-${variationIndex}`;
-    setEditingVariations(prev => new Map(prev).set(key, {
-      stock: variation.stock,
-      price: 0 // Would need to fetch from inventory
-    }));
+  const openAddModal = (card, variation) => {
+    setAddModalData({ card, variation });
+    setAddFormData({
+      quality: 'Near Mint',
+      foil_type: variation.finish === 'foil' ? 'Foil' : 'Regular',
+      price: '',
+      stock_quantity: 1,
+      language: 'English'
+    });
+    setShowAddModal(true);
   };
 
-  const cancelEditing = (cardId, variationIndex) => {
-    const key = `${cardId}-${variationIndex}`;
-    setEditingVariations(prev => {
-      const newMap = new Map(prev);
-      newMap.delete(key);
-      return newMap;
+  const closeAddModal = () => {
+    setShowAddModal(false);
+    setAddModalData(null);
+    setAddFormData({
+      quality: 'Near Mint',
+      foil_type: 'Regular',
+      price: '',
+      stock_quantity: 1,
+      language: 'English'
     });
   };
 
-  const saveVariation = async (cardId, variationIndex) => {
-    const key = `${cardId}-${variationIndex}`;
-    const editData = editingVariations.get(key);
-    if (!editData) return;
+  const handleAddToInventory = async () => {
+    if (!addModalData) return;
 
-    // TODO: Implement save to inventory API
-    console.log('Save variation:', cardId, editData);
-    cancelEditing(cardId, variationIndex);
+    setSaving(true);
+    try {
+      const response = await fetch(`${API_URL}/admin/inventory`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          card_id: addModalData.variation.card_id,
+          quality: addFormData.quality,
+          foil_type: addFormData.foil_type,
+          price: parseFloat(addFormData.price) || 0,
+          stock_quantity: parseInt(addFormData.stock_quantity) || 0,
+          language: addFormData.language
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to add to inventory');
+      }
+
+      const result = await response.json();
+      
+      // Success - refresh cards to show updated inventory
+      await fetchCards();
+      closeAddModal();
+      
+      // Show success message (you could use a toast here)
+      alert(`✅ ${addModalData.card.name} added to inventory successfully!`);
+      
+    } catch (error) {
+      console.error('Error adding to inventory:', error);
+      alert(`❌ Error: ${error.message}`);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const exportData = () => {
     const csv = [
-      ['Card Name', 'Number', 'Set', 'Rarity', 'Treatment', 'Finish', 'Stock', 'Variations'].join(','),
+      ['Card Name', 'Number', 'Set', 'Rarity', 'Treatments', 'Finishes', 'Stock', 'Variations'].join(','),
       ...filteredCards.map(card => [
         `"${card.name}"`,
         card.card_number,
         card.set_name,
         card.rarity || '',
-        getCommonTreatments(card.variations).join(';'),
-        getCommonFinishes(card.variations).join(';'),
+        getUniqueTreatments(card.variations).join(';'),
+        getUniqueFinishes(card.variations).join(';'),
         card.total_stock,
         card.variation_count
       ].join(','))
@@ -329,8 +372,8 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
         {filteredCards.map((card) => {
           const cardKey = `${card.name}-${card.card_number}`;
           const isExpanded = expandedCards.has(cardKey);
-          const commonTreatments = getCommonTreatments(card.variations);
-          const commonFinishes = getCommonFinishes(card.variations);
+          const uniqueTreatments = getUniqueTreatments(card.variations);
+          const uniqueFinishes = getUniqueFinishes(card.variations);
 
           return (
             <div key={cardKey} className="bg-white rounded-lg border border-slate-200 overflow-hidden">
@@ -339,10 +382,21 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                 onClick={() => toggleCard(cardKey)}
                 className="w-full px-4 py-3 flex items-center gap-4 hover:bg-slate-50 transition-colors text-left"
               >
-                {/* Card Image */}
-                <div className="w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0">
+                {/* Card Image with Zoom */}
+                <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-slate-100 flex-shrink-0 group">
                   {card.image_url ? (
-                    <img src={card.image_url} alt={card.name} className="w-full h-full object-cover" />
+                    <>
+                      <img src={card.image_url} alt={card.name} className="w-full h-full object-cover" />
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setImageModalUrl(card.image_url);
+                        }}
+                        className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <ZoomIn className="w-6 h-6 text-white" />
+                      </button>
+                    </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <Package className="w-6 h-6 text-slate-400" />
@@ -367,9 +421,9 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                         )}
                       </div>
                       
-                      {/* Common Variation Badges */}
+                      {/* Unique Variation Badges */}
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
-                        {commonTreatments.map(treatment => (
+                        {uniqueTreatments.map(treatment => (
                           <span 
                             key={treatment}
                             className={`px-2 py-0.5 rounded text-xs font-medium border ${getTreatmentColor(treatment)}`}
@@ -377,7 +431,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                             {treatment}
                           </span>
                         ))}
-                        {commonFinishes.map(finish => (
+                        {uniqueFinishes.map(finish => (
                           <span 
                             key={finish}
                             className={`px-2 py-0.5 rounded text-xs font-medium border ${getFinishBadge(finish)}`}
@@ -410,97 +464,52 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
               {isExpanded && (
                 <div className="border-t border-slate-200 bg-slate-50 p-4">
                   <div className="space-y-2">
-                    {card.variations.map((variation, idx) => {
-                      const editKey = `${card.name}-${idx}`;
-                      const isEditing = editingVariations.has(editKey);
-                      const editData = editingVariations.get(editKey);
-
-                      return (
-                        <div
-                          key={idx}
-                          className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200"
-                        >
-                          <div className="flex items-center gap-3 flex-1">
-                            <div className="font-medium text-slate-900">
-                              {variation.variation_label}
-                            </div>
-
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-1 rounded text-xs font-medium border ${getTreatmentColor(variation.treatment)}`}>
-                                {variation.treatment}
-                              </span>
-                              <span className={`px-2 py-1 rounded text-xs font-medium border ${getFinishBadge(variation.finish)}`}>
-                                {variation.finish}
-                              </span>
-                            </div>
+                    {card.variations.map((variation, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3 bg-white rounded-lg border border-slate-200"
+                      >
+                        <div className="flex items-center gap-3 flex-1">
+                          <div className="font-medium text-slate-900 min-w-[150px]">
+                            {variation.variation_label}
                           </div>
 
-                          <div className="flex items-center gap-4">
-                            {variation.inventory_count > 0 ? (
-                              <div className="text-sm">
-                                {isEditing ? (
-                                  <input
-                                    type="number"
-                                    value={editData.stock}
-                                    onChange={(e) => {
-                                      const newMap = new Map(editingVariations);
-                                      newMap.set(editKey, { ...editData, stock: parseInt(e.target.value) || 0 });
-                                      setEditingVariations(newMap);
-                                    }}
-                                    className="w-20 px-2 py-1 border rounded text-right"
-                                  />
-                                ) : (
-                                  <>
-                                    <span className="text-green-600 font-medium">{variation.stock} in stock</span>
-                                    <span className="text-slate-500 ml-2">({variation.inventory_count} entries)</span>
-                                  </>
-                                )}
-                              </div>
-                            ) : (
-                              <span className="text-sm text-slate-500">Not in inventory</span>
-                            )}
-
-                            <div className="flex items-center gap-2">
-                              {isEditing ? (
-                                <>
-                                  <button
-                                    onClick={() => saveVariation(card.name, idx)}
-                                    className="p-1.5 text-green-600 hover:bg-green-50 rounded"
-                                  >
-                                    <Save className="w-4 h-4" />
-                                  </button>
-                                  <button
-                                    onClick={() => cancelEditing(card.name, idx)}
-                                    className="p-1.5 text-red-600 hover:bg-red-50 rounded"
-                                  >
-                                    <X className="w-4 h-4" />
-                                  </button>
-                                </>
-                              ) : (
-                                <>
-                                  {variation.inventory_count > 0 && (
-                                    <button
-                                      onClick={() => startEditing(card.name, idx, variation)}
-                                      className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
-                                    >
-                                      <Edit className="w-4 h-4" />
-                                    </button>
-                                  )}
-                                  {variation.inventory_count === 0 && (
-                                    <button
-                                      className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                                    >
-                                      <Plus className="w-4 h-4" />
-                                      Add to Inventory
-                                    </button>
-                                  )}
-                                </>
-                              )}
-                            </div>
+                          <div className="flex items-center gap-2">
+                            <span className={`px-2 py-1 rounded text-xs font-medium border ${getTreatmentColor(variation.treatment)}`}>
+                              {variation.treatment}
+                            </span>
+                            <span className={`px-2 py-1 rounded text-xs font-medium border ${getFinishBadge(variation.finish)}`}>
+                              {variation.finish}
+                            </span>
                           </div>
                         </div>
-                      );
-                    })}
+
+                        <div className="flex items-center gap-4">
+                          {variation.inventory_count > 0 ? (
+                            <div className="text-sm">
+                              <span className="text-green-600 font-medium">{variation.stock} in stock</span>
+                              <span className="text-slate-500 ml-2">({variation.inventory_count} entries)</span>
+                            </div>
+                          ) : (
+                            <>
+                              <span className="text-sm text-slate-500">Not in inventory</span>
+                              {!isInventoryMode && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openAddModal(card, variation);
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                                >
+                                  <Plus className="w-4 h-4" />
+                                  Add to Inventory
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
@@ -523,6 +532,172 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
           </p>
         </div>
       )}
+
+      {/* Add to Inventory Modal */}
+      {showAddModal && addModalData && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-lg font-bold text-slate-900">Add to Inventory</h2>
+              <button
+                onClick={closeAddModal}
+                className="text-slate-400 hover:text-slate-600"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Card Info */}
+            <div className="mb-4 p-3 bg-slate-50 rounded-lg">
+              <div className="font-medium text-slate-900">{addModalData.card.name}</div>
+              <div className="text-sm text-slate-600 mt-1">
+                {addModalData.variation.variation_label}
+              </div>
+              <div className="flex items-center gap-2 mt-2">
+                <span className={`px-2 py-0.5 rounded text-xs font-medium border ${getTreatmentColor(addModalData.variation.treatment)}`}>
+                  {addModalData.variation.treatment}
+                </span>
+                <span className={`px-2 py-0.5 rounded text-xs font-medium border ${getFinishBadge(addModalData.variation.finish)}`}>
+                  {addModalData.variation.finish}
+                </span>
+              </div>
+            </div>
+
+            {/* Form */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Quality/Condition
+                </label>
+                <select
+                  value={addFormData.quality}
+                  onChange={(e) => setAddFormData(prev => ({ ...prev, quality: e.target.value }))}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="Near Mint">Near Mint</option>
+                  <option value="Lightly Played">Lightly Played</option>
+                  <option value="Moderately Played">Moderately Played</option>
+                  <option value="Heavily Played">Heavily Played</option>
+                  <option value="Damaged">Damaged</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Foil Type
+                </label>
+                <select
+                  value={addFormData.foil_type}
+                  onChange={(e) => setAddFormData(prev => ({ ...prev, foil_type: e.target.value }))}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="Regular">Regular (Non-foil)</option>
+                  <option value="Foil">Foil</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Price (NZD)
+                </label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={addFormData.price}
+                  onChange={(e) => setAddFormData(prev => ({ ...prev, price: e.target.value }))}
+                  placeholder="0.00"
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Initial Stock Quantity
+                </label>
+                <input
+                  type="number"
+                  min="0"
+                  value={addFormData.stock_quantity}
+                  onChange={(e) => setAddFormData(prev => ({ ...prev, stock_quantity: e.target.value }))}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">
+                  Language
+                </label>
+                <select
+                  value={addFormData.language}
+                  onChange={(e) => setAddFormData(prev => ({ ...prev, language: e.target.value }))}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="English">English</option>
+                  <option value="Japanese">Japanese</option>
+                  <option value="Spanish">Spanish</option>
+                  <option value="French">French</option>
+                  <option value="German">German</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={closeAddModal}
+                disabled={saving}
+                className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleAddToInventory}
+                disabled={saving}
+                className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Adding...
+                  </>
+                ) : (
+                  <>
+                    <Plus className="w-4 h-4" />
+                    Add to Inventory
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Image Preview Modal */}
+      {imageModalUrl && (
+        <div 
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
+          onClick={() => setImageModalUrl(null)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              onClick={() => setImageModalUrl(null)}
+              className="absolute -top-12 right-0 text-white hover:text-slate-300 flex items-center gap-2 px-4 py-2 bg-black/50 rounded-lg"
+            >
+              <X className="w-5 h-5" />
+              Close
+            </button>
+            <img 
+              src={imageModalUrl} 
+              alt="Card preview" 
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
+
+      
     </div>
   );
 };

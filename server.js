@@ -277,39 +277,6 @@ app.get('/health', async (req, res) => {
   });
 });
 
-// Database stats endpoint (useful for debugging)
-app.get('/api/db-stats', async (req, res) => {
-  try {
-    const stats = {
-      totalConnections: pool.totalCount,
-      idleConnections: pool.idleCount,
-      waitingClients: pool.waitingCount,
-    };
-    res.json(stats);
-  } catch (err) {
-    res.status(500).json({ error: 'Failed to get database stats' });
-  }
-});
-
-// CORS debug endpoint (useful for debugging) - Secured for production
-app.get('/api/cors-debug', require('./middleware/auth').adminAuthJWT, (req, res) => {
-  // Don't expose debug info in production
-  if (process.env.NODE_ENV === 'production') {
-    return res.status(404).json({ error: 'Not found' });
-  }
-
-  res.json({
-    allowedOrigins,
-    environmentVariables: {
-      ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
-      ADDITIONAL_CORS_ORIGINS: process.env.ADDITIONAL_CORS_ORIGINS,
-      NODE_ENV: process.env.NODE_ENV
-    },
-    requestOrigin: req.get('Origin'),
-    requestHost: req.get('Host')
-  });
-});
-
 // ============================================
 // STATIC FILE SERVING (React Frontend)
 // ============================================
