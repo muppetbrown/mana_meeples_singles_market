@@ -12,7 +12,7 @@ const db = global.db;
 // ============================================
 // AUTHENTICATION MIDDLEWARE
 // ============================================
-const { adminAuthJWT: adminAuth, adminAuthWithCSRF, generateCSRFToken, validateCSRFToken } = require('../middleware/auth');
+const { adminAuthJWT, adminAuthWithCSRF, generateCSRFToken, validateCSRFToken } = require('../middleware/auth')
 const { sanitizeCustomerData } = require('../utils/sanitization');
 
 // ============================================
