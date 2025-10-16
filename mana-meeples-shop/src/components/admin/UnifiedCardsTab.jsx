@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Package, Search, RefreshCw, Filter, Sparkles, Download, ZoomIn, X, Plus } from 'lucide-react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Package, Search, RefreshCw, Filter, Sparkles, Download, ZoomIn, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
@@ -8,12 +9,21 @@ const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
  * Mode: 'all' shows everything, 'inventory' shows only stocked items
  */
 const UnifiedCardsTab = ({ mode = 'all' }) => {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [cards, setCards] = useState([]);
   const [games, setGames] = useState([]);
   const [sets, setSets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [searchTerm, setSearchTerm] = useState('');
+
+  // Enhanced search states
+  const [searchSuggestions, setSearchSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  // Get search term from URL
+  const searchTerm = searchParams.get('search') || '';
   const [filterGame, setFilterGame] = useState('all');
   const [filterSet, setFilterSet] = useState('all');
   const [filterTreatment, setFilterTreatment] = useState('all');
@@ -30,7 +40,83 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
   });
   const [saving, setSaving] = useState(false);
 
+  // Refs for debouncing and request cancellation
+  const abortController = useRef(null);
+  const searchTimeoutRef = useRef(null);
+
   const isInventoryMode = mode === 'inventory';
+
+  // Enhanced search with debouncing and autocomplete - similar to TCGshop.jsx
+  const handleSearchChange = useCallback(async (value) => {
+    // Update URL immediately for responsiveness
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (value) {
+        newParams.set('search', value);
+      } else {
+        newParams.delete('search');
+      }
+      return newParams;
+    });
+
+    // Cancel previous timeout
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    // Cancel previous request
+    if (abortController.current) {
+      abortController.current.abort();
+    }
+
+    if (value.length >= 2) {
+      setSearchLoading(true);
+      searchTimeoutRef.current = setTimeout(async () => {
+        try {
+          // Create new AbortController for this request
+          abortController.current = new AbortController();
+
+          const res = await fetch(
+            `${API_URL}/search/autocomplete?q=${encodeURIComponent(value)}`,
+            {
+              signal: abortController.current.signal,
+              credentials: 'include'
+            }
+          );
+
+          if (res.ok) {
+            const data = await res.json();
+            setSearchSuggestions(data.suggestions || []);
+            setShowSuggestions(true);
+            setSelectedSuggestionIndex(-1);
+          }
+        } catch (err) {
+          if (err.name !== 'AbortError') {
+            console.error('Autocomplete error:', err);
+          }
+        } finally {
+          setSearchLoading(false);
+        }
+      }, 300); // 300ms debounce for better UX
+    } else {
+      setSearchSuggestions([]);
+      setShowSuggestions(false);
+      setSelectedSuggestionIndex(-1);
+      setSearchLoading(false);
+    }
+  }, [setSearchParams]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+      if (abortController.current) {
+        abortController.current.abort();
+      }
+    };
+  }, []);
 
   // Fetch functions
   const fetchGames = useCallback(async () => {
@@ -95,26 +181,17 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
     }
   }, [filterGame, fetchSets]);
 
-  // Filter cards based on mode
+  // Filter cards based on mode - search is handled server-side now
   const filteredCards = useMemo(() => {
     let filtered = cards;
 
-    // Apply search
-    if (searchTerm) {
-      const search = searchTerm.toLowerCase();
-      filtered = filtered.filter(card =>
-        card.name.toLowerCase().includes(search) ||
-        card.card_number?.toLowerCase().includes(search)
-      );
-    }
-
-    // Apply inventory mode filter
+    // Apply inventory mode filter (client-side)
     if (isInventoryMode) {
       filtered = filtered.filter(card => card.has_inventory && card.total_stock > 0);
     }
 
     return filtered;
-  }, [cards, searchTerm, isInventoryMode]);
+  }, [cards, isInventoryMode]);
 
   // Get unique treatments/finishes for a card
   const getUniqueTreatments = (variations) => {
@@ -315,13 +392,118 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            {searchLoading && (
+              <RefreshCw className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-blue-500 animate-spin" />
+            )}
             <input
-              type="text"
+              type="search"
               placeholder="Search cards..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              onFocus={() => setShowSuggestions(searchSuggestions.length > 0)}
+              onBlur={(e) => {
+                // Don't hide suggestions if clicking on them
+                if (!e.relatedTarget?.closest('#search-suggestions')) {
+                  setTimeout(() => setShowSuggestions(false), 200);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (!showSuggestions) return;
+
+                switch (e.key) {
+                  case 'ArrowDown':
+                    e.preventDefault();
+                    setSelectedSuggestionIndex(prev =>
+                      prev < searchSuggestions.length - 1 ? prev + 1 : 0
+                    );
+                    break;
+                  case 'ArrowUp':
+                    e.preventDefault();
+                    setSelectedSuggestionIndex(prev =>
+                      prev > 0 ? prev - 1 : searchSuggestions.length - 1
+                    );
+                    break;
+                  case 'Enter':
+                    if (selectedSuggestionIndex >= 0 && searchSuggestions[selectedSuggestionIndex]) {
+                      e.preventDefault();
+                      const suggestion = searchSuggestions[selectedSuggestionIndex];
+                      handleSearchChange(suggestion.name);
+                      setShowSuggestions(false);
+                      setSelectedSuggestionIndex(-1);
+                    }
+                    break;
+                  case 'Escape':
+                    setShowSuggestions(false);
+                    setSelectedSuggestionIndex(-1);
+                    break;
+                  default:
+                    break;
+                }
+              }}
               className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              aria-label="Search for cards by name, set, or number"
+              aria-expanded={showSuggestions}
+              aria-haspopup="listbox"
+              role="combobox"
+              autoComplete="off"
             />
+
+            {/* Autocomplete Suggestions */}
+            {showSuggestions && (
+              <div
+                id="search-suggestions"
+                className="absolute z-50 w-full bg-white border border-slate-300 rounded-lg shadow-lg mt-1 max-h-64 overflow-y-auto"
+                role="listbox"
+              >
+                {searchLoading ? (
+                  <div className="px-3 py-2 text-slate-500 text-sm flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    Searching...
+                  </div>
+                ) : searchSuggestions.length > 0 ? (
+                  searchSuggestions.map((suggestion, idx) => (
+                    <button
+                    key={idx}
+                    type="button"
+                    className={`w-full px-3 py-2 text-left hover:bg-slate-100 focus:bg-slate-100 focus:ring-2 focus:ring-blue-500 focus:outline-none flex items-center gap-2 border-b last:border-b-0 ${
+                      selectedSuggestionIndex === idx ? 'bg-slate-100' : ''
+                    }`}
+                    onMouseDown={() => {
+                      // Use onMouseDown instead of onClick to prevent blur issues
+                      handleSearchChange(suggestion.name);
+                      setShowSuggestions(false);
+                      setSelectedSuggestionIndex(-1);
+                    }}
+                    onMouseEnter={() => setSelectedSuggestionIndex(idx)}
+                    role="option"
+                    aria-selected={selectedSuggestionIndex === idx}
+                    aria-label={`Select ${suggestion.name} from ${suggestion.set_name}`}
+                  >
+                    {suggestion.image_url && (
+                      <img
+                        src={suggestion.image_url}
+                        alt={suggestion.name}
+                        className="w-8 h-8 rounded object-cover flex-shrink-0"
+                        loading="lazy"
+                      />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="font-medium text-slate-900 truncate">
+                        {suggestion.name}
+                      </div>
+                      <div className="text-xs text-slate-500 truncate">
+                        {suggestion.set_name} • #{suggestion.card_number}
+                      </div>
+                    </div>
+                    </button>
+                  ))
+                ) : (
+                  <div className="px-3 py-2 text-slate-500 text-sm">
+                    No cards found matching "{searchTerm}"
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <select
