@@ -26,7 +26,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
   const searchTerm = searchParams.get('search') || '';
   const selectedGame = searchParams.get('game') || 'all';
   const selectedSet = searchParams.get('set') || 'all';
-  const [filterTreatment, setFilterTreatment] = useState('all');
+  const filterTreatment = searchParams.get('treatment') || 'all';
   const [availableSets, setAvailableSets] = useState([]);
   const [expandedCards, setExpandedCards] = useState(new Set());
   const [imageModalUrl, setImageModalUrl] = useState(null);
@@ -585,25 +585,27 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
             ))}
           </select>
 
-          <select
-            value={selectedSet}
-            onChange={(e) => handleFilterChange('set', e.target.value)}
-            disabled={selectedGame === 'all'}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100"
-          >
-            <option value="all">All Sets</option>
-            {availableSets.map(set => (
-              <option key={set.id} value={set.name}>{set.name}</option>
-            ))}
-          </select>
-          {selectedGame === 'all' && (
-            <p className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
-          )}
+          <div className="relative">
+            <select
+              value={selectedSet}
+              onChange={(e) => handleFilterChange('set', e.target.value)}
+              disabled={selectedGame === 'all'}
+              className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100"
+            >
+              <option value="all">All Sets</option>
+              {availableSets.map(set => (
+                <option key={set.id} value={set.name}>{set.name}</option>
+              ))}
+            </select>
+            {selectedGame === 'all' && (
+              <p className="text-xs text-slate-500 mt-1">Select a game to filter by set</p>
+            )}
+          </div>
 
           {!isInventoryMode && (
             <select
               value={filterTreatment}
-              onChange={(e) => setFilterTreatment(e.target.value)}
+              onChange={(e) => handleFilterChange('treatment', e.target.value)}
               className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Treatments</option>
