@@ -207,9 +207,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to add to inventory');
       }
-
-      const result = await response.json();
-      
+   
       // Success - refresh cards to show updated inventory
       await fetchCards();
       closeAddModal();
