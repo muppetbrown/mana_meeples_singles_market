@@ -12,7 +12,15 @@ const db = global.db;
 // ============================================
 // AUTHENTICATION MIDDLEWARE
 // ============================================
-const { adminAuthJWT, adminAuthWithCSRF, generateCSRFToken, validateCSRFToken } = require('../middleware/auth')
+const { 
+  adminAuthJWT,
+  adminAuthWithCSRF, 
+  generateCSRFToken, 
+  validateCSRFToken 
+} = require('../middleware/auth');
+
+// Create alias after import
+const adminAuth = adminAuthJWT;
 const { sanitizeCustomerData } = require('../utils/sanitization');
 
 // ============================================
@@ -1801,7 +1809,7 @@ router.get('/admin/all-cards', adminAuth, async (req, res) => {
  * POST /api/admin/inventory
  * Add a new item to inventory
  */
-router.post('/admin/inventory', adminAuthJWT, async (req, res) => {
+router.post('/admin/inventory', adminAuth, async (req, res) => {
   try {
     const {
       card_id,
