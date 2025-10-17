@@ -1,4 +1,6 @@
+// @ts-expect-error TS(2304): Cannot find name 'maimport'.
 </maimport { useState } from 'react';
+// @ts-expect-error TS(2307): Cannot find module '@tanstack/react-query' or its ... Remove this comment to see the full error message
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useCardSearch } from './features/cards/api';
 import CardGrid from './components/CardGrid';
@@ -7,6 +9,7 @@ in>
 
 
 export default function App() {
+// @ts-expect-error TS(2304): Cannot find name 'useState'.
 const [q, setQ] = useState('');
 const { data } = useCardSearch(q);
 

@@ -1,11 +1,15 @@
 import { Router } from 'express';
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'bcry... Remove this comment to see the full error message
 import bcrypt from 'bcrypt';
+// @ts-expect-error TS(7016): Could not find a declaration file for module 'json... Remove this comment to see the full error message
 import jwt from 'jsonwebtoken';
+// @ts-expect-error TS(2307): Cannot find module 'zod' or its corresponding type... Remove this comment to see the full error message
 import { z } from 'zod';
 import { env } from '../lib/env';
 import { withConn } from '../lib/db';
 
 
+// @ts-expect-error TS(2742): The inferred type of 'auth' cannot be named withou... Remove this comment to see the full error message
 export const auth = Router();
 
 

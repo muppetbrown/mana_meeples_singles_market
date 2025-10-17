@@ -8,6 +8,7 @@ import { errorHandler } from './middleware/error';
 import { requestLog } from './middleware/requestLog';
 
 
+// @ts-expect-error TS(2742): The inferred type of 'createApp' cannot be named w... Remove this comment to see the full error message
 export function createApp() {
 const app = express();
 app.disable('x-powered-by');

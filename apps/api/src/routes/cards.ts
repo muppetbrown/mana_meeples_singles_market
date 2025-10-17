@@ -1,57 +1,45 @@
-import { Router } from 'express';
-import { z } from 'zod';
-import { withConn } from '../lib/db';
-import { searchCards } from '../services/search';
-import { getLatestPrice } from '../services/pricing';
+import { Router } from "express";
+// @ts-expect-error TS(2307): Cannot find module 'zod' or its corresponding type... Remove this comment to see the full error message
+import { z } from "zod";
+import { query } from "../db";
 
 
-export const cards = Router();
+// @ts-expect-error TS(2742): The inferred type of 'router' cannot be named with... Remove this comment to see the full error message
+const router = Router();
 
 
-const QuerySchema = z.object({ q: z.string().min(1).max(100), limit: z.string().optional(), offset: z.string().optional() });
-
-
-cards.get('/', async (req, res, next) => {
-try {
-const parsed = QuerySchema.safeParse(req.query);
-if (!parsed.success) return res.status(400).json({ error: { code: 'BAD_QUERY', message: parsed.error.issues[0].message } });
-const { q } = parsed.data;
-const limit = Number(parsed.data.limit ?? '24');
-const offset = Number(parsed.data.offset ?? '0');
-
-
-const result = await withConn(async (c) => {
-const rows = await searchCards(c, q, { limit, offset });
-const priced = await Promise.all(
-rows.map(async (r) => ({ ...r, latest_price_cents: await getLatestPrice(c, r.id) }))
-);
-return priced;
+const listParams = z.object({
+q: z.string().trim().max(64).optional(),
+set_id: z.string().trim().optional(),
+finish: z.enum(["NONFOIL","FOIL","ETCHED"]).optional(),
+treatment: z.string().trim().optional(),
+limit: z.coerce.number().int().min(1).max(50).default(24),
+offset: z.coerce.number().int().min(0).default(0)
 });
 
 
-res.json({ data: result });
-} catch (e) { next(e); }
+router.get("/", async (req, res) => {
+const p = listParams.parse(req.query);
+const values: any[] = [];
+const where: string[] = [];
+
+
+if (p.q) { values.push(p.q); where.push(`search_tsv @@ plainto_tsquery('simple', $${values.length})`); }
+if (p.set_id) { values.push(p.set_id); where.push(`set_id = $${values.length}`); }
+if (p.finish) { values.push(p.finish); where.push(`finish = $${values.length}`); }
+if (p.treatment) { values.push(p.treatment.toUpperCase()); where.push(`treatment = $${values.length}`); }
+
+
+const sql = `
+SELECT id, name, set_id, card_number, finish, treatment, border_color, frame_effect, sku
+FROM cards
+${where.length ? `WHERE ${where.join(" AND ")}` : ""}
+ORDER BY set_id, card_number
+LIMIT $${values.push(p.limit)} OFFSET $${values.push(p.offset)};
+`;
+const rows = await query(sql, values);
+res.json({ items: rows, nextOffset: p.offset + p.limit });
 });
 
 
-const SkuParams = z.object({ sku: z.string().min(3).max(64) });
-
-
-cards.get('/:sku', async (req, res, next) => {
-try {
-const { sku } = SkuParams.parse(req.params);
-const data = await withConn(async (c) => {
-const { rows } = await c.query(
-`SELECT c.id, c.name, c.set_id, c.card_number, c.finish, c.sku,
-ci.quality, ci.foil_type, ci.language, ci.quantity, ci.price_cents
-FROM cards c
-LEFT JOIN card_inventory ci ON ci.card_id = c.id
-WHERE c.sku = $1`,
-[sku]
-);
-return rows;
-});
-if (!data.length) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Card not found' } });
-res.json({ data });
-} catch (e) { next(e); }
-});
+export { router as cardsRouter };
