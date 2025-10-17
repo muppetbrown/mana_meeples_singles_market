@@ -208,7 +208,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
     setLoading(true);
     try {
 
-      const params = new URLSearchParams({ limit: 1000 });
+      const params = new URLSearchParams({ limit: String(1000) });
 
       // Use game name-based filtering like TCGshop
       if (selectedGame !== 'all') {
@@ -357,7 +357,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
           foil_type: addFormData.foil_type,
           price: parseFloat(addFormData.price) || 0,
 
-          stock_quantity: parseInt(addFormData.stock_quantity) || 0,
+          stock_quantity: parseInt(String(addFormData.stock_quantity), 10) || 0,
           language: addFormData.language
         })
       });
@@ -935,7 +935,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                   min="0"
                   value={addFormData.stock_quantity}
 
-                  onChange={(e) => setAddFormData(prev => ({ ...prev, stock_quantity: e.target.value }))}
+                  onChange={(e) => setAddFormData(prev => ({ ...prev, stock_quantity: parseInt(e.target.value, 10) || 0 }))}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>

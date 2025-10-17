@@ -183,11 +183,11 @@ const AnalyticsTab = () => {
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span className="text-slate-700">{game}</span>
                   // @ts-expect-error TS(2571): Object is of type 'unknown'.
-                  <span className="font-medium text-slate-900">{data.count} items</span>
+                  <span className="font-medium text-slate-900">{count} items</span>
                 </div>
                 <div className="text-xs text-slate-500">
                   // @ts-expect-error TS(2571): Object is of type 'unknown'.
-                  NZ${data.value.toFixed(2)} • {data.stock} units
+                  NZ${value.toFixed(2)} • {stock} units
                 </div>
               </div>
             ))}
@@ -204,9 +204,9 @@ const AnalyticsTab = () => {
                 <span className="text-slate-700">{quality}</span>
                 <div className="text-right">
                   // @ts-expect-error TS(2571): Object is of type 'unknown'.
-                  <div className="font-medium text-slate-900">{data.count} items</div>
+                  <div className="font-medium text-slate-900">{count} items</div>
                   // @ts-expect-error TS(2571): Object is of type 'unknown'.
-                  <div className="text-xs text-slate-500">NZ${data.value.toFixed(2)}</div>
+                  <div className="text-xs text-slate-500">NZ${value.toFixed(2)}</div>
                 </div>
               </div>
             ))}

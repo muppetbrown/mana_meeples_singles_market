@@ -1,4 +1,5 @@
 import React from 'react';
+import { CardItemProps } from './types';
 
 import PropTypes from 'prop-types';
 import OptimizedImage from '../OptimizedImage';
@@ -21,7 +22,8 @@ const CardItem = React.memo(({
   onVariationChange,
 
   onAddToCart
-}) => {
+}: CardItemProps) => {
+
   return (
     <div className="card-mm flex flex-row lg:flex-col h-full">
       {/* Card Image - Left on mobile, top on desktop */}
