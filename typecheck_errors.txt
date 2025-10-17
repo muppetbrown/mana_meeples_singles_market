@@ -1,0 +1,1193 @@
+C:\Git_Repos\mana_meeples_singles_market>pnpm -F web run typecheck
+
+> web@0.1.0 typecheck C:\Git_Repos\mana_meeples_singles_market\apps\web
+> tsc -p tsconfig.json --noEmit
+
+src/App.test.tsx:5:1 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+5 test('renders learn react link', () => {
+  ~~~~
+
+src/App.test.tsx:10:3 - error TS2304: Cannot find name 'expect'.
+
+10   expect(linkElement).toBeInTheDocument();
+     ~~~~~~
+
+src/components/admin/AnalyticsTab.tsx:186:70 - error TS2339: Property 'count' does not exist on type 'unknown'.
+
+186                   <span className="font-medium text-slate-900">{data.count} items</span>
+                                                                         ~~~~~
+
+src/components/admin/AnalyticsTab.tsx:190:28 - error TS2339: Property 'value' does not exist on type 'unknown'.
+
+190                   NZ${data.value.toFixed(2)} • {data.stock} units
+                               ~~~~~
+
+src/components/admin/AnalyticsTab.tsx:190:54 - error TS2339: Property 'stock' does not exist on type 'unknown'.
+
+190                   NZ${data.value.toFixed(2)} • {data.stock} units
+                                                         ~~~~~
+
+src/components/admin/AnalyticsTab.tsx:207:69 - error TS2339: Property 'count' does not exist on type 'unknown'.
+
+207                   <div className="font-medium text-slate-900">{data.count} items</div>
+                                                                        ~~~~~
+
+src/components/admin/AnalyticsTab.tsx:209:68 - error TS2339: Property 'value' does not exist on type 'unknown'.
+
+209                   <div className="text-xs text-slate-500">NZ${data.value.toFixed(2)}</div>
+                                                                       ~~~~~
+
+src/components/admin/AnalyticsTab.tsx:225:62 - error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+
+225                 <span className="font-medium text-slate-900">{count} items</span>
+                                                                 ~~~~~~~
+
+src/components/admin/UnifiedCardsTab.tsx:211:42 - error TS2345: Argument of type '{ limit: number; }' is not assignable to parameter of type 'string | URLSearchParams | string[][] | Record<string, string>'.
+  Types of property 'limit' are incompatible.
+    Type 'number' is not assignable to type 'string'.
+
+211       const params = new URLSearchParams({ limit: 1000 });
+                                             ~~~~~~~~~~~~~~~
+
+src/components/admin/UnifiedCardsTab.tsx:360:36 - error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
+
+360           stock_quantity: parseInt(addFormData.stock_quantity) || 0,
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/admin/UnifiedCardsTab.tsx:729:29 - error TS2322: Type 'unknown' is not assignable to type 'Key'.
+
+729                             key={treatment}
+                                ~~~
+
+  ../../node_modules/.pnpm/@types+react@18.3.26/node_modules/@types/react/index.d.ts:262:9
+    262         key?: Key | null | undefined;
+                ~~~
+    The expected type comes from property 'key' which is declared here on type 'DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>'
+
+src/components/admin/UnifiedCardsTab.tsx:733:29 - error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+
+733                             {treatment}
+                                ~~~~~~~~~~~
+
+src/components/admin/UnifiedCardsTab.tsx:739:29 - error TS2322: Type 'unknown' is not assignable to type 'Key'.
+
+739                             key={finish}
+                                ~~~
+
+  ../../node_modules/.pnpm/@types+react@18.3.26/node_modules/@types/react/index.d.ts:262:9
+    262         key?: Key | null | undefined;
+                ~~~
+    The expected type comes from property 'key' which is declared here on type 'DetailedHTMLProps<HTMLAttributes<HTMLSpanElement>, HTMLSpanElement>'
+
+src/components/admin/UnifiedCardsTab.tsx:743:29 - error TS2322: Type 'unknown' is not assignable to type 'ReactNode'.
+
+743                             {finish}
+                                ~~~~~~~~
+
+src/components/admin/UnifiedCardsTab.tsx:938:51 - error TS2345: Argument of type '(prev: { quality: string; foil_type: string; price: string; stock_quantity: number; language: string; }) => { stock_quantity: string; quality: string; foil_type: string; price: string; language: string; }' is not assignable to parameter of type 'SetStateAction<{ quality: string; foil_type: string; price: string; stock_quantity: number; language: string; }>'.
+  Type '(prev: { quality: string; foil_type: string; price: string; stock_quantity: number; language: string; }) => { stock_quantity: string; quality: string; foil_type: string; price: string; language: string; }' is not assignable to type '(prevState: { quality: string; foil_type: string; price: string; stock_quantity: number; language: string; }) => { quality: string; foil_type: string; price: string; stock_quantity: number; language: string; }'.
+    Call signature return types '{ stock_quantity: string; quality: string; foil_type: string; price: string; language: string; }' and '{ quality: string; foil_type: string; price: string; stock_quantity: number; language: string; }' are incompatible.
+      The types of 'stock_quantity' are incompatible between these types.
+        Type 'string' is not assignable to type 'number'.
+
+938                   onChange={(e) => setAddFormData(prev => ({ ...prev, stock_quantity: e.target.value }))}
+                                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/CardGrid.tsx:2:32 - error TS2307: Cannot find module '@tanstack/react-virtual' or its corresponding type declarations.
+
+2 import { useVirtualizer } from '@tanstack/react-virtual';
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/cards/CardItem.tsx:13:3 - error TS2339: Property 'card' does not exist on type '{}'.
+
+13   card,
+     ~~~~
+
+src/components/cards/CardItem.tsx:15:3 - error TS2339: Property 'selectedVariationKey' does not exist on type '{}'.
+
+15   selectedVariationKey,
+     ~~~~~~~~~~~~~~~~~~~~
+
+src/components/cards/CardItem.tsx:17:3 - error TS2339: Property 'selectedVariation' does not exist on type '{}'.
+
+17   selectedVariation,
+     ~~~~~~~~~~~~~~~~~
+
+src/components/cards/CardItem.tsx:19:3 - error TS2339: Property 'currency' does not exist on type '{}'.
+
+19   currency,
+     ~~~~~~~~
+
+src/components/cards/CardItem.tsx:21:3 - error TS2339: Property 'onVariationChange' does not exist on type '{}'.
+
+21   onVariationChange,
+     ~~~~~~~~~~~~~~~~~
+
+src/components/cards/CardItem.tsx:23:3 - error TS2339: Property 'onAddToCart' does not exist on type '{}'.
+
+23   onAddToCart
+     ~~~~~~~~~~~
+
+src/components/cards/CardItem.tsx:134:29 - error TS2339: Property 'selectedVariation' does not exist on type 'object'.
+
+134   const prevVar = prevProps.selectedVariation;
+                                ~~~~~~~~~~~~~~~~~
+
+src/components/cards/CardItem.tsx:136:29 - error TS2339: Property 'selectedVariation' does not exist on type 'object'.
+
+136   const nextVar = nextProps.selectedVariation;
+                                ~~~~~~~~~~~~~~~~~
+
+src/components/cards/CardItem.tsx:140:15 - error TS2339: Property 'card' does not exist on type 'object'.
+
+140     prevProps.card.id === nextProps.card.id &&
+                  ~~~~
+
+src/components/cards/CardItem.tsx:140:37 - error TS2339: Property 'card' does not exist on type 'object'.
+
+140     prevProps.card.id === nextProps.card.id &&
+                                        ~~~~
+
+src/components/cards/CardItem.tsx:142:15 - error TS2339: Property 'selectedVariationKey' does not exist on type 'object'.
+
+142     prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
+                  ~~~~~~~~~~~~~~~~~~~~
+
+src/components/cards/CardItem.tsx:142:50 - error TS2339: Property 'selectedVariationKey' does not exist on type 'object'.
+
+142     prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
+                                                     ~~~~~~~~~~~~~~~~~~~~
+
+src/components/cards/CardItem.tsx:144:15 - error TS2339: Property 'currency' does not exist on type 'object'.
+
+144     prevProps.currency.symbol === nextProps.currency.symbol &&
+                  ~~~~~~~~
+
+src/components/cards/CardItem.tsx:144:45 - error TS2339: Property 'currency' does not exist on type 'object'.
+
+144     prevProps.currency.symbol === nextProps.currency.symbol &&
+                                                ~~~~~~~~
+
+src/components/cards/CardItem.tsx:146:15 - error TS2339: Property 'currency' does not exist on type 'object'.
+
+146     prevProps.currency.rate === nextProps.currency.rate &&
+                  ~~~~~~~~
+
+src/components/cards/CardItem.tsx:146:43 - error TS2339: Property 'currency' does not exist on type 'object'.
+
+146     prevProps.currency.rate === nextProps.currency.rate &&
+                                              ~~~~~~~~
+
+src/components/cards/CardItem.tsx:160:10 - error TS2339: Property 'propTypes' does not exist on type 'NamedExoticComponent<object>'.
+
+160 CardItem.propTypes = {
+             ~~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:12:3 - error TS2339: Property 'card' does not exist on type '{}'.
+
+12   card,
+     ~~~~
+
+src/components/cards/ListCardItem.tsx:14:3 - error TS2339: Property 'selectedVariationKey' does not exist on type '{}'.
+
+14   selectedVariationKey,
+     ~~~~~~~~~~~~~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:16:3 - error TS2339: Property 'selectedVariation' does not exist on type '{}'.
+
+16   selectedVariation,
+     ~~~~~~~~~~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:18:3 - error TS2339: Property 'currency' does not exist on type '{}'.
+
+18   currency,
+     ~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:20:3 - error TS2339: Property 'onVariationChange' does not exist on type '{}'.
+
+20   onVariationChange,
+     ~~~~~~~~~~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:22:3 - error TS2339: Property 'onAddToCart' does not exist on type '{}'.
+
+22   onAddToCart
+     ~~~~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:155:29 - error TS2339: Property 'selectedVariation' does not exist on type 'object'.
+
+155   const prevVar = prevProps.selectedVariation;
+                                ~~~~~~~~~~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:157:29 - error TS2339: Property 'selectedVariation' does not exist on type 'object'.
+
+157   const nextVar = nextProps.selectedVariation;
+                                ~~~~~~~~~~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:161:15 - error TS2339: Property 'card' does not exist on type 'object'.
+
+161     prevProps.card.id === nextProps.card.id &&
+                  ~~~~
+
+src/components/cards/ListCardItem.tsx:161:37 - error TS2339: Property 'card' does not exist on type 'object'.
+
+161     prevProps.card.id === nextProps.card.id &&
+                                        ~~~~
+
+src/components/cards/ListCardItem.tsx:163:15 - error TS2339: Property 'selectedVariationKey' does not exist on type 'object'.
+
+163     prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
+                  ~~~~~~~~~~~~~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:163:50 - error TS2339: Property 'selectedVariationKey' does not exist on type 'object'.
+
+163     prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
+                                                     ~~~~~~~~~~~~~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:165:15 - error TS2339: Property 'currency' does not exist on type 'object'.
+
+165     prevProps.currency.symbol === nextProps.currency.symbol &&
+                  ~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:165:45 - error TS2339: Property 'currency' does not exist on type 'object'.
+
+165     prevProps.currency.symbol === nextProps.currency.symbol &&
+                                                ~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:167:15 - error TS2339: Property 'currency' does not exist on type 'object'.
+
+167     prevProps.currency.rate === nextProps.currency.rate &&
+                  ~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:167:43 - error TS2339: Property 'currency' does not exist on type 'object'.
+
+167     prevProps.currency.rate === nextProps.currency.rate &&
+                                              ~~~~~~~~
+
+src/components/cards/ListCardItem.tsx:181:14 - error TS2339: Property 'propTypes' does not exist on type 'NamedExoticComponent<object>'.
+
+181 ListCardItem.propTypes = {
+                 ~~~~~~~~~
+
+src/components/CardSearchBar.tsx:330:29 - error TS2339: Property 'value' does not exist on type 'unknown'.
+
+330               value={filter.value}
+                                ~~~~~
+
+src/components/CardSearchBar.tsx:332:39 - error TS2339: Property 'onChange' does not exist on type 'unknown'.
+
+332               onChange={(e) => filter.onChange(e.target.value)}
+                                          ~~~~~~~~
+
+src/components/CardSearchBar.tsx:334:32 - error TS2339: Property 'disabled' does not exist on type 'unknown'.
+
+334               disabled={filter.disabled}
+                                   ~~~~~~~~
+
+src/components/CardSearchBar.tsx:338:43 - error TS2339: Property 'label' does not exist on type 'unknown'.
+
+338               <option value="all">{filter.label || key}</option>
+                                              ~~~~~
+
+src/components/CardSearchBar.tsx:340:23 - error TS2339: Property 'options' does not exist on type 'unknown'.
+
+340               {filter.options?.map((option: any) => <option key={option.value} value={option.value}>
+                          ~~~~~~~
+
+src/components/Checkout.tsx:69:17 - error TS2339: Property 'firstName' does not exist on type '{}'.
+
+69       newErrors.firstName = 'First name is required';
+                   ~~~~~~~~~
+
+src/components/Checkout.tsx:72:17 - error TS2339: Property 'firstName' does not exist on type '{}'.
+
+72       newErrors.firstName = 'First name is too long (max 50 characters)';
+                   ~~~~~~~~~
+
+src/components/Checkout.tsx:75:17 - error TS2339: Property 'firstName' does not exist on type '{}'.
+
+75       newErrors.firstName = 'First name contains invalid characters';
+                   ~~~~~~~~~
+
+src/components/Checkout.tsx:80:17 - error TS2339: Property 'lastName' does not exist on type '{}'.
+
+80       newErrors.lastName = 'Last name is required';
+                   ~~~~~~~~
+
+src/components/Checkout.tsx:83:17 - error TS2339: Property 'lastName' does not exist on type '{}'.
+
+83       newErrors.lastName = 'Last name is too long (max 50 characters)';
+                   ~~~~~~~~
+
+src/components/Checkout.tsx:86:17 - error TS2339: Property 'lastName' does not exist on type '{}'.
+
+86       newErrors.lastName = 'Last name contains invalid characters';
+                   ~~~~~~~~
+
+src/components/Checkout.tsx:93:17 - error TS2339: Property 'email' does not exist on type '{}'.
+
+93       newErrors.email = 'Email is required';
+                   ~~~~~
+
+src/components/Checkout.tsx:96:17 - error TS2339: Property 'email' does not exist on type '{}'.
+
+96       newErrors.email = 'Email address is too long';
+                   ~~~~~
+
+src/components/Checkout.tsx:99:17 - error TS2339: Property 'email' does not exist on type '{}'.
+
+99       newErrors.email = 'Please enter a valid email address';
+                   ~~~~~
+
+src/components/Checkout.tsx:106:17 - error TS2339: Property 'phone' does not exist on type '{}'.
+
+106       newErrors.phone = 'Please enter a valid phone number';
+                    ~~~~~
+
+src/components/Checkout.tsx:113:17 - error TS2339: Property 'address' does not exist on type '{}'.
+
+113       newErrors.address = 'Address is required';
+                    ~~~~~~~
+
+src/components/Checkout.tsx:116:17 - error TS2339: Property 'address' does not exist on type '{}'.
+
+116       newErrors.address = 'Address is too long (max 200 characters)';
+                    ~~~~~~~
+
+src/components/Checkout.tsx:123:17 - error TS2339: Property 'city' does not exist on type '{}'.
+
+123       newErrors.city = 'City is required';
+                    ~~~~
+
+src/components/Checkout.tsx:126:17 - error TS2339: Property 'city' does not exist on type '{}'.
+
+126       newErrors.city = 'City name is too long (max 100 characters)';
+                    ~~~~
+
+src/components/Checkout.tsx:133:17 - error TS2339: Property 'postalCode' does not exist on type '{}'.
+
+133       newErrors.postalCode = 'Postal code is required';
+                    ~~~~~~~~~~
+
+src/components/Checkout.tsx:136:17 - error TS2339: Property 'postalCode' does not exist on type '{}'.
+
+136       newErrors.postalCode = 'Please enter a valid postal code';
+                    ~~~~~~~~~~
+
+src/components/Checkout.tsx:143:17 - error TS2339: Property 'notes' does not exist on type '{}'.
+
+143       newErrors.notes = 'Notes are too long (max 500 characters)';
+                    ~~~~~
+
+src/components/Checkout.tsx:300:32 - error TS2339: Property 'firstName' does not exist on type '{}'.
+
+300                         errors.firstName ? 'border-red-500' : 'border-slate-300'
+                                   ~~~~~~~~~
+
+src/components/Checkout.tsx:305:29 - error TS2339: Property 'firstName' does not exist on type '{}'.
+
+305                     {errors.firstName && (
+                                ~~~~~~~~~
+
+src/components/Checkout.tsx:309:33 - error TS2339: Property 'firstName' does not exist on type '{}'.
+
+309                         {errors.firstName}
+                                    ~~~~~~~~~
+
+src/components/Checkout.tsx:325:32 - error TS2339: Property 'lastName' does not exist on type '{}'.
+
+325                         errors.lastName ? 'border-red-500' : 'border-slate-300'
+                                   ~~~~~~~~
+
+src/components/Checkout.tsx:330:29 - error TS2339: Property 'lastName' does not exist on type '{}'.
+
+330                     {errors.lastName && (
+                                ~~~~~~~~
+
+src/components/Checkout.tsx:334:33 - error TS2339: Property 'lastName' does not exist on type '{}'.
+
+334                         {errors.lastName}
+                                    ~~~~~~~~
+
+src/components/Checkout.tsx:354:34 - error TS2339: Property 'email' does not exist on type '{}'.
+
+354                           errors.email ? 'border-red-500' : 'border-slate-300'
+                                     ~~~~~
+
+src/components/Checkout.tsx:360:29 - error TS2339: Property 'email' does not exist on type '{}'.
+
+360                     {errors.email && (
+                                ~~~~~
+
+src/components/Checkout.tsx:364:33 - error TS2339: Property 'email' does not exist on type '{}'.
+
+364                         {errors.email}
+                                    ~~~~~
+
+src/components/Checkout.tsx:382:34 - error TS2339: Property 'phone' does not exist on type '{}'.
+
+382                           errors.phone ? 'border-red-500' : 'border-slate-300'
+                                     ~~~~~
+
+src/components/Checkout.tsx:388:29 - error TS2339: Property 'phone' does not exist on type '{}'.
+
+388                     {errors.phone && (
+                                ~~~~~
+
+src/components/Checkout.tsx:392:33 - error TS2339: Property 'phone' does not exist on type '{}'.
+
+392                         {errors.phone}
+                                    ~~~~~
+
+src/components/Checkout.tsx:418:32 - error TS2339: Property 'address' does not exist on type '{}'.
+
+418                         errors.address ? 'border-red-500' : 'border-slate-300'
+                                   ~~~~~~~
+
+src/components/Checkout.tsx:423:29 - error TS2339: Property 'address' does not exist on type '{}'.
+
+423                     {errors.address && (
+                                ~~~~~~~
+
+src/components/Checkout.tsx:427:33 - error TS2339: Property 'address' does not exist on type '{}'.
+
+427                         {errors.address}
+                                    ~~~~~~~
+
+src/components/Checkout.tsx:474:34 - error TS2339: Property 'city' does not exist on type '{}'.
+
+474                           errors.city ? 'border-red-500' : 'border-slate-300'
+                                     ~~~~
+
+src/components/Checkout.tsx:479:31 - error TS2339: Property 'city' does not exist on type '{}'.
+
+479                       {errors.city && (
+                                  ~~~~
+
+src/components/Checkout.tsx:483:35 - error TS2339: Property 'city' does not exist on type '{}'.
+
+483                           {errors.city}
+                                      ~~~~
+
+src/components/Checkout.tsx:499:34 - error TS2339: Property 'postalCode' does not exist on type '{}'.
+
+499                           errors.postalCode ? 'border-red-500' : 'border-slate-300'
+                                     ~~~~~~~~~~
+
+src/components/Checkout.tsx:504:31 - error TS2339: Property 'postalCode' does not exist on type '{}'.
+
+504                       {errors.postalCode && (
+                                  ~~~~~~~~~~
+
+src/components/Checkout.tsx:508:35 - error TS2339: Property 'postalCode' does not exist on type '{}'.
+
+508                           {errors.postalCode}
+                                      ~~~~~~~~~~
+
+src/components/Checkout.tsx:584:46 - error TS2339: Property 'style' does not exist on type 'EventTarget'.
+
+584                   onError={(e) => { e.target.style.display = 'none'; }}
+                                                 ~~~~~
+
+src/components/CurrencySelector.tsx:105:13 - error TS2322: Type '{ className: string; "aria-label": string; title: string; }' is not assignable to type 'IntrinsicAttributes & Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>'.
+  Property 'title' does not exist on type 'IntrinsicAttributes & Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>'.
+
+105             title="Exchange rates are approximate"
+                ~~~~~
+
+src/components/FiltersPanel.tsx:9:25 - error TS2304: Cannot find name 'useState'.
+
+9 const [data, setData] = useState<FilterRow[]>([]);
+                          ~~~~~~~~
+
+src/components/OptimizedImage.tsx:170:11 - error TS2339: Property 'quality' does not exist on type '{}'.
+
+170   const { quality = 85, format = 'auto' } = options;
+              ~~~~~~~
+
+src/components/OptimizedImage.tsx:170:25 - error TS2339: Property 'format' does not exist on type '{}'.
+
+170   const { quality = 85, format = 'auto' } = options;
+                            ~~~~~~
+
+src/components/TCGShop.tsx:5:34 - error TS2307: Cannot find module '../hooks/useSearchFilters' or its corresponding type declarations.
+
+5 import { useSearchFilters } from '../hooks/useSearchFilters';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/components/TCGShop.tsx:261:25 - error TS2339: Property 'focus' does not exist on type 'Element'.
+
+261             searchInput.focus();
+                            ~~~~~
+
+src/components/TCGShop.tsx:364:19 - error TS2339: Property 'status' does not exist on type 'Error'.
+
+364             error.status = 429;
+                      ~~~~~~
+
+src/components/TCGShop.tsx:432:11 - error TS2304: Cannot find name 'searchTimeoutRef'.
+
+432       if (searchTimeoutRef.current) {
+              ~~~~~~~~~~~~~~~~
+
+src/components/TCGShop.tsx:434:22 - error TS2304: Cannot find name 'searchTimeoutRef'.
+
+434         clearTimeout(searchTimeoutRef.current);
+                         ~~~~~~~~~~~~~~~~
+
+src/components/TCGShop.tsx:439:11 - error TS2552: Cannot find name 'abortController'. Did you mean 'AbortController'?
+
+439       if (abortController.current) {
+              ~~~~~~~~~~~~~~~
+
+  ../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.dom.d.ts:2732:13
+    2732 declare var AbortController: {
+                     ~~~~~~~~~~~~~~~
+    'AbortController' is declared here.
+
+src/components/TCGShop.tsx:441:9 - error TS2552: Cannot find name 'abortController'. Did you mean 'AbortController'?
+
+441         abortController.current.abort();
+            ~~~~~~~~~~~~~~~
+
+  ../../node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/lib/lib.dom.d.ts:2732:13
+    2732 declare var AbortController: {
+                     ~~~~~~~~~~~~~~~
+    'AbortController' is declared here.
+
+src/components/TCGShop.tsx:1003:31 - error TS2322: Type '{ card: any; selectedVariationKey: any; selectedVariation: any; currency: { symbol: string; rate: number; code: string; }; onVariationChange: (e: any) => void; onAddToCart: () => void; }' is not assignable to type 'IntrinsicAttributes & object'.
+  Property 'card' does not exist on type 'IntrinsicAttributes & object'.
+
+1003                               card={card}
+                                   ~~~~
+
+src/components/TCGShop.tsx:1037:33 - error TS2322: Type '{ key: any; card: any; selectedVariationKey: any; selectedVariation: any; currency: { symbol: string; rate: number; code: string; }; onVariationChange: (e: any) => void; onAddToCart: () => void; }' is not assignable to type 'IntrinsicAttributes & object'.
+  Property 'card' does not exist on type 'IntrinsicAttributes & object'.
+
+1037                                 card={card}
+                                     ~~~~
+
+src/components/TCGShop.tsx:1070:31 - error TS2322: Type '{ key: any; card: any; selectedVariationKey: any; selectedVariation: any; currency: { symbol: string; rate: number; code: string; }; onVariationChange: (e: any) => void; onAddToCart: () => void; }' is not assignable to type 'IntrinsicAttributes & object'.
+  Property 'card' does not exist on type 'IntrinsicAttributes & object'.
+
+1070                               card={card}
+                                   ~~~~
+
+src/components/TCGShop.tsx:1087:37 - error TS2304: Cannot find name 'loading'.
+
+1087             {cards.length === 0 && !loading && (
+                                         ~~~~~~~
+
+src/components/TCGShop.tsx:1240:30 - error TS2339: Property 'style' does not exist on type 'EventTarget'.
+
+1240                     e.target.style.display = 'none';
+                                  ~~~~~
+
+src/components/TCGShop.tsx:1334:36 - error TS2339: Property 'onerror' does not exist on type 'EventTarget'.
+
+1334                           e.target.onerror = null;
+                                        ~~~~~~~
+
+src/components/TCGShop.tsx:1336:36 - error TS2339: Property 'src' does not exist on type 'EventTarget'.
+
+1336                           e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="112"%3E%3Crect fill="%231e293b" width="80" height="112"/%3E%3C/svg%3E';
+                                        ~~~
+
+src/components/TCGShop.tsx:1474:25 - error TS2304: Cannot find name 'loading'.
+
+1474         {searchTerm && !loading && (
+                             ~~~~~~~
+
+src/components/Toast.tsx:6:22 - error TS2554: Expected 1 arguments, but got 0.
+
+6 const ToastContext = createContext();
+                       ~~~~~~~~~~~~~
+
+  ../../node_modules/.pnpm/@types+react@18.3.26/node_modules/@types/react/index.d.ts:785:9
+    785         defaultValue: T,
+                ~~~~~~~~~~~~~~~
+    An argument for 'defaultValue' was not provided.
+
+src/hooks/__tests__/useEnhancedCart.test.ts:7:12 - error TS2708: Cannot use namespace 'jest' as a value.
+
+7   getItem: jest.fn(),
+             ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:9:12 - error TS2708: Cannot use namespace 'jest' as a value.
+
+9   setItem: jest.fn(),
+             ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:11:15 - error TS2708: Cannot use namespace 'jest' as a value.
+
+11   removeItem: jest.fn(),
+                 ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:13:10 - error TS2708: Cannot use namespace 'jest' as a value.
+
+13   clear: jest.fn(),
+            ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:16:1 - error TS2739: Type '{ getItem: any; setItem: any; removeItem: any; clear: any; }' is missing the following properties from type 'Storage': length, key
+
+16 global.localStorage = localStorageMock;
+   ~~~~~~~~~~~~~~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:22:1 - error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+22 describe('useEnhancedCart', () => {
+   ~~~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:24:3 - error TS2304: Cannot find name 'beforeEach'.
+
+24   beforeEach(() => {
+     ~~~~~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:26:5 - error TS2708: Cannot use namespace 'jest' as a value.
+
+26     jest.clearAllMocks();
+       ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:31:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+31   test('should initialize with empty cart', () => {
+     ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:35:5 - error TS2304: Cannot find name 'expect'.
+
+35     expect(result.current.cart).toEqual([]);
+       ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:37:5 - error TS2304: Cannot find name 'expect'.
+
+37     expect(result.current.cartNotifications).toEqual([]);
+       ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:41:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+41   test('should add item to cart', () => {
+     ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:65:5 - error TS2304: Cannot find name 'expect'.
+
+65     expect(result.current.cart).toHaveLength(1);
+       ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:67:5 - error TS2304: Cannot find name 'expect'.
+
+67     expect(result.current.cart[0]).toEqual(expect.objectContaining({
+       ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:67:44 - error TS2304: Cannot find name 'expect'.
+
+67     expect(result.current.cart[0]).toEqual(expect.objectContaining({
+                                              ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:76:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+76   test('should update quantity when adding same item', () => {
+     ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:94:5 - error TS2304: Cannot find name 'expect'.
+
+94     expect(result.current.cart).toHaveLength(1);
+       ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:96:5 - error TS2304: Cannot find name 'expect'.
+
+96     expect(result.current.cart[0].quantity).toBe(2);
+       ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:100:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+100   test('should not exceed stock limit', () => {
+      ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:119:5 - error TS2304: Cannot find name 'expect'.
+
+119     expect(result.current.cart[0].quantity).toBe(2);
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:121:5 - error TS2304: Cannot find name 'expect'.
+
+121     expect(result.current.cartNotifications).toHaveLength(1);
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:123:5 - error TS2304: Cannot find name 'expect'.
+
+123     expect(result.current.cartNotifications[0].type).toBe('warning');
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:127:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+127   test('should update item quantity', () => {
+      ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:145:5 - error TS2304: Cannot find name 'expect'.
+
+145     expect(result.current.cart[0].quantity).toBe(3);
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:149:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+149   test('should remove item when quantity is 0', () => {
+      ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:167:5 - error TS2304: Cannot find name 'expect'.
+
+167     expect(result.current.cart).toHaveLength(0);
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:171:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+171   test('should remove item from cart', () => {
+      ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:189:5 - error TS2304: Cannot find name 'expect'.
+
+189     expect(result.current.cart).toHaveLength(0);
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:193:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+193   test('should clear entire cart', () => {
+      ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:207:5 - error TS2304: Cannot find name 'expect'.
+
+207     expect(result.current.cart).toHaveLength(0);
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:211:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+211   test('should handle different card conditions as separate items', () => {
+      ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:238:5 - error TS2304: Cannot find name 'expect'.
+
+238     expect(result.current.cart).toHaveLength(2);
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:240:5 - error TS2304: Cannot find name 'expect'.
+
+240     expect(result.current.cart[0].quality).toBe('NM');
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:242:5 - error TS2304: Cannot find name 'expect'.
+
+242     expect(result.current.cart[1].quality).toBe('LP');
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:246:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+246   test('should persist cart to localStorage', () => {
+      ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:250:5 - error TS2304: Cannot find name 'expect'.
+
+250     expect(localStorageMock.setItem).toHaveBeenCalledWith(
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:257:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+257   test('should load cart from localStorage on initialization', () => {
+      ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:271:5 - error TS2304: Cannot find name 'expect'.
+
+271     expect(result.current.cart).toEqual(savedCart);
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:275:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+275   test('should add notification when adding item to cart', () => {
+      ~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:290:5 - error TS2304: Cannot find name 'expect'.
+
+290     expect(result.current.cartNotifications).toHaveLength(1);
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:292:5 - error TS2304: Cannot find name 'expect'.
+
+292     expect(result.current.cartNotifications[0]).toEqual(expect.objectContaining({
+        ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:292:57 - error TS2304: Cannot find name 'expect'.
+
+292     expect(result.current.cartNotifications[0]).toEqual(expect.objectContaining({
+                                                            ~~~~~~
+
+src/hooks/__tests__/useEnhancedCart.test.ts:295:16 - error TS2304: Cannot find name 'expect'.
+
+295       message: expect.stringContaining('Test Card added to cart')
+                   ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:7:12 - error TS2708: Cannot use namespace 'jest' as a value.
+
+7   getItem: jest.fn(),
+             ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:9:12 - error TS2708: Cannot use namespace 'jest' as a value.
+
+9   setItem: jest.fn(),
+             ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:11:15 - error TS2708: Cannot use namespace 'jest' as a value.
+
+11   removeItem: jest.fn(),
+                 ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:13:10 - error TS2708: Cannot use namespace 'jest' as a value.
+
+13   clear: jest.fn(),
+            ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:16:1 - error TS2739: Type '{ getItem: any; setItem: any; removeItem: any; clear: any; }' is missing the following properties from type 'Storage': length, key
+
+16 global.sessionStorage = sessionStorageMock;
+   ~~~~~~~~~~~~~~~~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:19:1 - error TS2593: Cannot find name 'describe'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+19 describe('useRecentlyViewed', () => {
+   ~~~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:21:3 - error TS2304: Cannot find name 'beforeEach'.
+
+21   beforeEach(() => {
+     ~~~~~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:23:5 - error TS2708: Cannot use namespace 'jest' as a value.
+
+23     jest.clearAllMocks();
+       ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:28:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+28   test('should initialize with empty list', () => {
+     ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:32:5 - error TS2304: Cannot find name 'expect'.
+
+32     expect(result.current.recentlyViewed).toEqual([]);
+       ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:36:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+36   test('should add card to recently viewed', () => {
+     ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:53:5 - error TS2304: Cannot find name 'expect'.
+
+53     expect(result.current.recentlyViewed).toHaveLength(1);
+       ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:55:5 - error TS2304: Cannot find name 'expect'.
+
+55     expect(result.current.recentlyViewed[0]).toEqual(expect.objectContaining({
+       ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:55:54 - error TS2304: Cannot find name 'expect'.
+
+55     expect(result.current.recentlyViewed[0]).toEqual(expect.objectContaining({
+                                                        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:62:5 - error TS2304: Cannot find name 'expect'.
+
+62     expect(result.current.recentlyViewed[0].viewedAt).toBeDefined();
+       ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:66:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+66   test('should move existing card to front when viewed again', () => {
+     ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:79:5 - error TS2304: Cannot find name 'expect'.
+
+79     expect(result.current.recentlyViewed).toHaveLength(2);
+       ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:81:5 - error TS2304: Cannot find name 'expect'.
+
+81     expect(result.current.recentlyViewed[0].id).toBe('card-1');
+       ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:83:5 - error TS2304: Cannot find name 'expect'.
+
+83     expect(result.current.recentlyViewed[1].id).toBe('card-2');
+       ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:87:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+87   test('should limit to maximum 10 items', () => {
+     ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:103:5 - error TS2304: Cannot find name 'expect'.
+
+103     expect(result.current.recentlyViewed).toHaveLength(10);
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:106:5 - error TS2304: Cannot find name 'expect'.
+
+106     expect(result.current.recentlyViewed[0].id).toBe('card-11');
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:108:5 - error TS2304: Cannot find name 'expect'.
+
+108     expect(result.current.recentlyViewed[9].id).toBe('card-2');
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:112:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+112   test('should remove specific card from recently viewed', () => {
+      ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:126:5 - error TS2304: Cannot find name 'expect'.
+
+126     expect(result.current.recentlyViewed).toHaveLength(1);
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:128:5 - error TS2304: Cannot find name 'expect'.
+
+128     expect(result.current.recentlyViewed[0].id).toBe('card-2');
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:132:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+132   test('should clear all recently viewed cards', () => {
+      ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:146:5 - error TS2304: Cannot find name 'expect'.
+
+146     expect(result.current.recentlyViewed).toHaveLength(0);
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:150:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+150   test('should save to sessionStorage when adding cards', () => {
+      ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:165:5 - error TS2304: Cannot find name 'expect'.
+
+165     expect(sessionStorageMock.setItem).toHaveBeenCalledWith(
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:168:7 - error TS2304: Cannot find name 'expect'.
+
+168       expect.stringContaining('card-1')
+          ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:173:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+173   test('should load from sessionStorage on initialization', () => {
+      ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:187:5 - error TS2304: Cannot find name 'expect'.
+
+187     expect(result.current.recentlyViewed).toEqual(savedData);
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:191:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+191   test('should handle corrupted sessionStorage data gracefully', () => {
+      ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:197:5 - error TS2304: Cannot find name 'expect'.
+
+197     expect(result.current.recentlyViewed).toEqual([]);
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:199:5 - error TS2304: Cannot find name 'expect'.
+
+199     expect(sessionStorageMock.removeItem).toHaveBeenCalledWith('tcg_recently_viewed');
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:203:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+203   test('should handle invalid card data gracefully', () => {
+      ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:214:5 - error TS2304: Cannot find name 'expect'.
+
+214     expect(result.current.recentlyViewed).toHaveLength(0);
+        ~~~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:218:3 - error TS2593: Cannot find name 'test'. Do you need to install type definitions for a test runner? Try `npm i --save-dev @types/jest` or `npm i --save-dev @types/mocha` and then add 'jest' or 'mocha' to the types field in your tsconfig.
+
+218   test('should handle non-array data in sessionStorage', () => {
+      ~~~~
+
+src/hooks/__tests__/useRecentlyViewed.test.ts:224:5 - error TS2304: Cannot find name 'expect'.
+
+224     expect(result.current.recentlyViewed).toEqual([]);
+        ~~~~~~
+
+src/hooks/useEnhancedCart.ts:155:3 - error TS2322: Type '(message: any, type?: string, duration?: number) => void' is not assignable to type 'undefined'.
+
+155   addNotificationRef.current = addNotification;
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/hooks/useEnhancedCart.ts:230:30 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+230           addNotificationRef.current(
+                                 ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:273:30 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+273           addNotificationRef.current(
+                                 ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:305:28 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+305         addNotificationRef.current('Please wait - cart operation in progress', 'info', 2000);
+                               ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:317:30 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+317           addNotificationRef.current('Invalid item - cannot add to cart', 'error');
+                                 ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:326:30 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+326           addNotificationRef.current(`${item.name} is out of stock`, 'error');
+                                 ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:354:36 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+354                 addNotificationRef.current(`Cannot add more - only ${item.stock} in stock`, 'warning');
+                                       ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:375:34 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+375               addNotificationRef.current('Cart updated by another action - please try again', 'warning');
+                                     ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:395:28 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+395         addNotificationRef.current(`Added ${item.name} to cart`, 'success', 3000);
+                               ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:403:28 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+403         addNotificationRef.current('Failed to add item to cart. Please try again.', 'error');
+                               ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:423:28 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+423         addNotificationRef.current('Item removed from cart', 'info', 2000);
+                               ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:441:28 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+441         addNotificationRef.current('Please wait - cart operation in progress', 'info', 2000);
+                               ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:463:36 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+463                 addNotificationRef.current('Item was updated elsewhere - please refresh', 'warning');
+                                       ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:491:26 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+491       addNotificationRef.current('Cart cleared', 'info', 2000);
+                             ~~~~~~~
+
+src/hooks/useEnhancedCart.ts:510:28 - error TS2349: This expression is not callable.
+  Type 'never' has no call signatures.
+
+510         addNotificationRef.current(
+                               ~~~~~~~
+
+src/hooks/useFilterCounts.ts:74:35 - error TS2345: Argument of type 'unknown' is not assignable to parameter of type 'string'.
+
+74           queryParams.append(key, value);
+                                     ~~~~~
+
+src/index.tsx:19:1 - error TS2554: Expected 1 arguments, but got 0.
+
+19 reportWebVitals();
+   ~~~~~~~~~~~~~~~
+
+  src/reportWebVitals.ts:1:26
+    1 const reportWebVitals = (onPerfEntry: any) => {
+                               ~~~~~~~~~~~~~~~~
+    An argument for 'onPerfEntry' was not provided.
+
+src/services/errorHandler.ts:128:15 - error TS2339: Property 'message' does not exist on type '{ status: any; statusText: any; }'.
+
+128     errorData.message = response.statusText || `HTTP ${response.status}`;
+                  ~~~~~~~
+
+src/services/errorHandler.ts:132:37 - error TS2339: Property 'message' does not exist on type '{ status: any; statusText: any; }'.
+
+132   const error = new Error(errorData.message || errorData.error || `HTTP ${response.status}`);
+                                        ~~~~~~~
+
+src/services/errorHandler.ts:132:58 - error TS2339: Property 'error' does not exist on type '{ status: any; statusText: any; }'.
+
+132   const error = new Error(errorData.message || errorData.error || `HTTP ${response.status}`);
+                                                             ~~~~~
+
+src/services/errorHandler.ts:134:9 - error TS2339: Property 'status' does not exist on type 'Error'.
+
+134   error.status = response.status;
+            ~~~~~~
+
+src/services/errorHandler.ts:136:9 - error TS2339: Property 'response' does not exist on type 'Error'.
+
+136   error.response = response;
+            ~~~~~~~~
+
+src/utils/csvUtils.ts:47:11 - error TS2339: Property 'delimiter' does not exist on type '{}'.
+
+47   const { delimiter = ',', hasHeader = true } = options;
+             ~~~~~~~~~
+
+src/utils/csvUtils.ts:47:28 - error TS2339: Property 'hasHeader' does not exist on type '{}'.
+
+47   const { delimiter = ',', hasHeader = true } = options;
+                              ~~~~~~~~~
+
+
+Found 221 errors in 20 files.
+
+Errors  Files
+     2  src/App.test.tsx:5
+     6  src/components/admin/AnalyticsTab.tsx:186
+     7  src/components/admin/UnifiedCardsTab.tsx:211
+     1  src/components/CardGrid.tsx:2
+    17  src/components/cards/CardItem.tsx:13
+    17  src/components/cards/ListCardItem.tsx:12
+     5  src/components/CardSearchBar.tsx:330
+    39  src/components/Checkout.tsx:69
+     1  src/components/CurrencySelector.tsx:105
+     1  src/components/FiltersPanel.tsx:9
+     2  src/components/OptimizedImage.tsx:170
+    15  src/components/TCGShop.tsx:5
+     1  src/components/Toast.tsx:6
+    43  src/hooks/__tests__/useEnhancedCart.test.ts:7
+    40  src/hooks/__tests__/useRecentlyViewed.test.ts:7
+    15  src/hooks/useEnhancedCart.ts:155
+     1  src/hooks/useFilterCounts.ts:74
+     1  src/index.tsx:19
+     5  src/services/errorHandler.ts:128
+     2  src/utils/csvUtils.ts:47
+C:\Git_Repos\mana_meeples_singles_market\apps\web:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  web@0.1.0 typecheck: `tsc -p tsconfig.json --noEmit`
+Exit status 2
+
+C:\Git_Repos\mana_meeples_singles_market>

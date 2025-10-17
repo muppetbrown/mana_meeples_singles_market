@@ -65,81 +65,81 @@ const Checkout = ({
     const sanitizedLastName = sanitizeInput(formData.lastName, 'name');
 
     if (!sanitizedFirstName) {
-      // @ts-expect-error TS(2339): Property 'firstName' does not exist on type '{}'.
+
       newErrors.firstName = 'First name is required';
     } else if (sanitizedFirstName.length > 50) {
-      // @ts-expect-error TS(2339): Property 'firstName' does not exist on type '{}'.
+
       newErrors.firstName = 'First name is too long (max 50 characters)';
     } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'.]+$/.test(sanitizedFirstName)) {
-      // @ts-expect-error TS(2339): Property 'firstName' does not exist on type '{}'.
+
       newErrors.firstName = 'First name contains invalid characters';
     }
 
     if (!sanitizedLastName) {
-      // @ts-expect-error TS(2339): Property 'lastName' does not exist on type '{}'.
+
       newErrors.lastName = 'Last name is required';
     } else if (sanitizedLastName.length > 50) {
-      // @ts-expect-error TS(2339): Property 'lastName' does not exist on type '{}'.
+
       newErrors.lastName = 'Last name is too long (max 50 characters)';
     } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'.]+$/.test(sanitizedLastName)) {
-      // @ts-expect-error TS(2339): Property 'lastName' does not exist on type '{}'.
+
       newErrors.lastName = 'Last name contains invalid characters';
     }
 
     // Email validation with sanitization
     const sanitizedEmail = sanitizeInput(formData.email, 'email');
     if (!sanitizedEmail) {
-      // @ts-expect-error TS(2339): Property 'email' does not exist on type '{}'.
+
       newErrors.email = 'Email is required';
     } else if (sanitizedEmail.length > 254) {
-      // @ts-expect-error TS(2339): Property 'email' does not exist on type '{}'.
+
       newErrors.email = 'Email address is too long';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(sanitizedEmail)) {
-      // @ts-expect-error TS(2339): Property 'email' does not exist on type '{}'.
+
       newErrors.email = 'Please enter a valid email address';
     }
 
     // Phone validation (optional but validated if provided)
     const sanitizedPhone = sanitizeInput(formData.phone, 'phone');
     if (sanitizedPhone && !/^[+]?[\d\s\-()]{7,20}$/.test(sanitizedPhone)) {
-      // @ts-expect-error TS(2339): Property 'phone' does not exist on type '{}'.
+
       newErrors.phone = 'Please enter a valid phone number';
     }
 
     // Address validation
     const sanitizedAddress = sanitizeInput(formData.address, 'address');
     if (!sanitizedAddress) {
-      // @ts-expect-error TS(2339): Property 'address' does not exist on type '{}'.
+
       newErrors.address = 'Address is required';
     } else if (sanitizedAddress.length > 200) {
-      // @ts-expect-error TS(2339): Property 'address' does not exist on type '{}'.
+
       newErrors.address = 'Address is too long (max 200 characters)';
     }
 
     // City validation
     const sanitizedCity = sanitizeInput(formData.city, 'name');
     if (!sanitizedCity) {
-      // @ts-expect-error TS(2339): Property 'city' does not exist on type '{}'.
+
       newErrors.city = 'City is required';
     } else if (sanitizedCity.length > 100) {
-      // @ts-expect-error TS(2339): Property 'city' does not exist on type '{}'.
+
       newErrors.city = 'City name is too long (max 100 characters)';
     }
 
     // Postal code validation
     const sanitizedPostalCode = sanitizeInput(formData.postalCode);
     if (!sanitizedPostalCode) {
-      // @ts-expect-error TS(2339): Property 'postalCode' does not exist on type '{}'.
+
       newErrors.postalCode = 'Postal code is required';
     } else if (!/^[A-Z0-9\s-]{3,10}$/i.test(sanitizedPostalCode)) {
-      // @ts-expect-error TS(2339): Property 'postalCode' does not exist on type '{}'.
+
       newErrors.postalCode = 'Please enter a valid postal code';
     }
 
     // Notes validation (optional)
     const sanitizedNotes = sanitizeInput(formData.notes, 'notes');
     if (sanitizedNotes.length > 500) {
-      // @ts-expect-error TS(2339): Property 'notes' does not exist on type '{}'.
+
       newErrors.notes = 'Notes are too long (max 500 characters)';
     }
 
@@ -160,16 +160,16 @@ const Checkout = ({
       notes: 'notes'
     };
 
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     if (sanitizationType[field]) {
-      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
       sanitizedValue = sanitizeInput(value, sanitizationType[field]);
     }
 
     setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
 
     // Clear error when user starts typing
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     if (errors[field]) {
       setErrors(prev => ({ ...prev, [field]: '' }));
     }
@@ -296,7 +296,7 @@ const Checkout = ({
                       value={formData.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                        // @ts-expect-error TS(2339): Property 'firstName' does not exist on type '{}'.
+
                         errors.firstName ? 'border-red-500' : 'border-slate-300'
                       }`}
                       placeholder="John"
@@ -321,7 +321,7 @@ const Checkout = ({
                       value={formData.lastName}
                       onChange={(e) => handleInputChange('lastName', e.target.value)}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                        // @ts-expect-error TS(2339): Property 'lastName' does not exist on type '{}'.
+
                         errors.lastName ? 'border-red-500' : 'border-slate-300'
                       }`}
                       placeholder="Smith"
@@ -350,7 +350,7 @@ const Checkout = ({
                         value={formData.email}
                         onChange={(e) => handleInputChange('email', e.target.value)}
                         className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                          // @ts-expect-error TS(2339): Property 'email' does not exist on type '{}'.
+
                           errors.email ? 'border-red-500' : 'border-slate-300'
                         }`}
                         placeholder="john@example.com"
@@ -378,7 +378,7 @@ const Checkout = ({
                         value={formData.phone}
                         onChange={(e) => handleInputChange('phone', e.target.value)}
                         className={`w-full pl-10 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                          // @ts-expect-error TS(2339): Property 'phone' does not exist on type '{}'.
+
                           errors.phone ? 'border-red-500' : 'border-slate-300'
                         }`}
                         placeholder="+64 21 123 4567"
@@ -414,7 +414,7 @@ const Checkout = ({
                       value={formData.address}
                       onChange={(e) => handleInputChange('address', e.target.value)}
                       className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                        // @ts-expect-error TS(2339): Property 'address' does not exist on type '{}'.
+
                         errors.address ? 'border-red-500' : 'border-slate-300'
                       }`}
                       placeholder="123 Main Street"
@@ -470,7 +470,7 @@ const Checkout = ({
                         value={formData.city}
                         onChange={(e) => handleInputChange('city', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                          // @ts-expect-error TS(2339): Property 'city' does not exist on type '{}'.
+
                           errors.city ? 'border-red-500' : 'border-slate-300'
                         }`}
                         placeholder="Auckland"
@@ -495,7 +495,7 @@ const Checkout = ({
                         value={formData.postalCode}
                         onChange={(e) => handleInputChange('postalCode', e.target.value)}
                         className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                          // @ts-expect-error TS(2339): Property 'postalCode' does not exist on type '{}'.
+
                           errors.postalCode ? 'border-red-500' : 'border-slate-300'
                         }`}
                         placeholder="1010"
@@ -580,7 +580,7 @@ const Checkout = ({
                   src={item.image_url}
                   alt={item.name}
                   className="w-16 h-20 object-contain rounded bg-slate-100"
-                  // @ts-expect-error TS(2339): Property 'style' does not exist on type 'EventTarg... Remove this comment to see the full error message
+
                   onError={(e) => { e.target.style.display = 'none'; }}
                 />
                 <div className="flex-1 min-w-0">

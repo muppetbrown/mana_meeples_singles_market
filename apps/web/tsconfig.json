@@ -1,8 +1,19 @@
 {
   "extends": "../../tsconfig.base.json",
-  "compilerOptions": {
-    "outDir": "dist",
-    "types": ["vite/client"]
-  },
-  "include": ["src"]
-}
+   "compilerOptions": {
+     "target": "ES2021",
+     "lib": ["ES2021", "DOM", "DOM.Iterable"],
+     "jsx": "react-jsx",
+     "module": "ESNext",
+     "moduleResolution": "Bundler",
+     "types": ["jest", "@testing-library/jest-dom"],
+     "strict": true,
+     "skipLibCheck": true,
+     "esModuleInterop": true,
+     "forceConsistentCasingInFileNames": true,
+     "resolveJsonModule": true,
+     "isolatedModules": true,
+     "noEmit": true
+   },
+   "include": ["src"]
+ }

@@ -43,7 +43,7 @@ export const arrayToCSV = (data: any, headers = null) => {
  * @returns {Array} Array of objects
  */
 export const csvToArray = (csvString: any, options = {}) => {
-  // @ts-expect-error TS(2339): Property 'delimiter' does not exist on type '{}'.
+
   const { delimiter = ',', hasHeader = true } = options;
 
   if (!csvString || typeof csvString !== 'string') {
@@ -102,14 +102,14 @@ export const csvToArray = (csvString: any, options = {}) => {
   // Parse data rows
   const data = [];
   for (let i = startIndex; i < lines.length; i++) {
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
     const line = lines[i].trim();
     if (line) {
       const values = parseLine(line);
       const row = {};
 
       headers.forEach((header, index) => {
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         row[header] = values[index] || '';
       });
 
@@ -146,7 +146,7 @@ export const downloadCSV = (data: any, filename = 'export.csv', headers = null) 
     // Clean up
     URL.revokeObjectURL(url);
   } catch (error) {
-    // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
     throw new Error(`Failed to download CSV: ${error.message}`);
   }
 };

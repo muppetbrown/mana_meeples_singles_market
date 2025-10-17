@@ -1,5 +1,5 @@
 import React from 'react';
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'prop... Remove this comment to see the full error message
+
 import PropTypes from 'prop-types';
 import { LayoutGrid } from 'lucide-react';
 

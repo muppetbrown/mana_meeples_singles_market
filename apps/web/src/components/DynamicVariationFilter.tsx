@@ -93,22 +93,22 @@ const DynamicVariationFilter = ({
       const lower = treatment.toLowerCase();
       
       if (lower === 'standard') {
-        // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
+
         groups.standard.push(treatment);
       } else if (lower.includes('borderless')) {
-        // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
+
         groups.borderless.push(treatment);
       } else if (lower.includes('showcase')) {
-        // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
+
         groups.showcase.push(treatment);
       } else if (lower.includes('extended')) {
-        // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
+
         groups.extended.push(treatment);
       } else if (lower.includes('fullart')) {
-        // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
+
         groups.fullart.push(treatment);
       } else {
-        // @ts-expect-error TS(2345): Argument of type 'any' is not assignable to parame... Remove this comment to see the full error message
+
         groups.special.push(treatment);
       }
     });

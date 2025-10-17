@@ -5,7 +5,7 @@ type FilterRow = { treatment?: string; border_color?: string; finish?: string; p
 
 
 export default function FiltersPanel() {
-// @ts-expect-error TS(2304): Cannot find name 'useState'.
+
 const [data, setData] = useState<FilterRow[]>([]);
 const announceRef = useRef<HTMLDivElement>(null);
 

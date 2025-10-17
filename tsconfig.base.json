@@ -6,7 +6,6 @@
     "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
-      "@utils/*": ["utils/*/src/*"],
       "@shared/*": ["utils/shared/src/*"]
     },
     "allowJs": true,           

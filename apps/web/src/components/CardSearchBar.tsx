@@ -58,7 +58,7 @@ const CardSearchBar = ({
         clearTimeout(searchTimeoutRef.current);
       }
       if (abortController.current) {
-        // @ts-expect-error TS(2339): Property 'abort' does not exist on type 'never'.
+
         abortController.current.abort();
       }
     };
@@ -76,7 +76,7 @@ const CardSearchBar = ({
 
     // Cancel previous request
     if (abortController.current) {
-      // @ts-expect-error TS(2339): Property 'abort' does not exist on type 'never'.
+
       abortController.current.abort();
     }
 
@@ -87,7 +87,7 @@ const CardSearchBar = ({
     if (value.length >= minSearchLength) {
       setSearchLoading(true);
       
-      // @ts-expect-error TS(2322): Type 'Timeout' is not assignable to type 'null'.
+
       searchTimeoutRef.current = setTimeout(async () => {
         // Now update parent component (triggers API call)
         onSearchChange(value);
@@ -95,13 +95,13 @@ const CardSearchBar = ({
         // Fetch autocomplete suggestions if enabled
         if (showAutocomplete && apiUrl) {
           try {
-            // @ts-expect-error TS(2322): Type 'AbortController' is not assignable to type '... Remove this comment to see the full error message
+
             abortController.current = new AbortController();
 
             const res = await fetch(
               `${apiUrl}/search/autocomplete?q=${encodeURIComponent(value)}`,
               {
-                // @ts-expect-error TS(2531): Object is possibly 'null'.
+
                 signal: abortController.current.signal,
                 credentials: 'include'
               }
@@ -114,7 +114,7 @@ const CardSearchBar = ({
               setSelectedSuggestionIndex(-1);
             }
           } catch (err) {
-            // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
             if (err.name !== 'AbortError') {
               console.error('Autocomplete error:', err);
             }
@@ -186,9 +186,9 @@ const CardSearchBar = ({
     setSearchSuggestions([]);
     setShowSuggestions(false);
     if (inputRef.current) {
-      // @ts-expect-error TS(2339): Property 'value' does not exist on type 'never'.
+
       inputRef.current.value = '';
-      // @ts-expect-error TS(2339): Property 'focus' does not exist on type 'never'.
+
       inputRef.current.focus();
     }
   }, [onSearchChange]);
@@ -235,7 +235,7 @@ const CardSearchBar = ({
           >
             {searchSuggestions.map((suggestion, index) => (
               <button
-                // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                 key={`${suggestion.id}-${index}`}
                 onClick={() => handleSuggestionClick(suggestion)}
                 className={`w-full text-left px-4 py-2 hover:bg-blue-50 border-b border-slate-100 last:border-b-0 ${
@@ -264,9 +264,9 @@ const CardSearchBar = ({
                   // @ts-expect-error TS(2339): Property 'image_url' does not exist on type 'never... Remove this comment to see the full error message
                   {suggestion.image_url && (
                     <img
-                      // @ts-expect-error TS(2339): Property 'image_url' does not exist on type 'never... Remove this comment to see the full error message
+
                       src={suggestion.image_url}
-                      // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
                       alt={suggestion.name}
                       className="w-12 h-16 object-cover rounded ml-2 flex-shrink-0"
                     />
@@ -326,11 +326,11 @@ const CardSearchBar = ({
           {Object.entries(additionalFilters).map(([key, filter]) => (
             <select
               key={key}
-              // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
               value={filter.value}
-              // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
               onChange={(e) => filter.onChange(e.target.value)}
-              // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
               disabled={filter.disabled}
               className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
             >

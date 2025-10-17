@@ -51,7 +51,7 @@ const OrdersTab = () => {
       setError(null);
     } catch (err) {
       logError(err, { operation: 'fetchOrders', context: 'AdminOrders' });
-      // @ts-expect-error TS(2345): Argument of type '"Failed to load orders"' is not ... Remove this comment to see the full error message
+
       setError('Failed to load orders');
     } finally {
       setLoading(false);
@@ -65,14 +65,14 @@ const OrdersTab = () => {
   // Filter orders
   const filteredOrders = orders.filter(order => {
     const matchesSearch = searchTerm === '' ||
-      // @ts-expect-error TS(2339): Property 'customer_email' does not exist on type '... Remove this comment to see the full error message
+
       order.customer_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      // @ts-expect-error TS(2339): Property 'customer_name' does not exist on type 'n... Remove this comment to see the full error message
+
       order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
       order.id.toString().includes(searchTerm);
 
-    // @ts-expect-error TS(2339): Property 'status' does not exist on type 'never'.
+
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
 
     return matchesSearch && matchesStatus;
@@ -100,7 +100,7 @@ const OrdersTab = () => {
       'cancelled': [] // No transitions from cancelled
     };
 
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
       return {
         valid: false,
@@ -113,7 +113,7 @@ const OrdersTab = () => {
 
   // Update order status with validation
   const updateOrderStatus = useCallback(async (orderId: any, newStatus: any) => {
-    // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
     const order = orders.find(o => o.id === orderId);
     if (!order) {
       window.alert('Order not found');
@@ -121,7 +121,7 @@ const OrdersTab = () => {
     }
 
     // Validate the status transition
-    // @ts-expect-error TS(2339): Property 'status' does not exist on type 'never'.
+
     const validation = validateStatusChange(order.status, newStatus);
     if (!validation.valid) {
       window.alert(validation.message);
@@ -182,7 +182,7 @@ const OrdersTab = () => {
       cancelled: { color: 'bg-red-50 text-red-900 border border-red-200', icon: XCircle }
     };
 
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     const config = statusConfig[status] || statusConfig.pending;
     const StatusIcon = config.icon;
 
@@ -295,17 +295,17 @@ const OrdersTab = () => {
         ) : (
           <div className="divide-y divide-slate-200">
             {filteredOrders.map(order => {
-              // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
               const isExpanded = expandedOrders.has(order.id);
-              // @ts-expect-error TS(2339): Property 'payment_intent_id' does not exist on typ... Remove this comment to see the full error message
+
               const customerData = parseCustomerData(order.payment_intent_id);
 
               return (
-                // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                 <div key={order.id} className="p-4 hover:bg-slate-50 transition-colors">
                   <div
                     className="flex items-center justify-between cursor-pointer"
-                    // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                     onClick={() => toggleOrderExpansion(order.id)}
                   >
                     <div className="flex items-center gap-4">
@@ -410,7 +410,7 @@ const OrdersTab = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                             showOrderDetails(order.id);
                           }}
                           className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
@@ -424,7 +424,7 @@ const OrdersTab = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                               updateOrderStatus(order.id, 'confirmed');
                             }}
                             className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors"
@@ -439,7 +439,7 @@ const OrdersTab = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                               updateOrderStatus(order.id, 'completed');
                             }}
                             className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors"
@@ -455,7 +455,7 @@ const OrdersTab = () => {
                             onClick={(e) => {
                               e.stopPropagation();
                               if (window.confirm('Are you sure you want to cancel this order? This will restore inventory.')) {
-                                // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                                 updateOrderStatus(order.id, 'cancelled');
                               }
                             }}
@@ -469,7 +469,7 @@ const OrdersTab = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            // @ts-expect-error TS(2339): Property 'customer_email' does not exist on type '... Remove this comment to see the full error message
+
                             window.open(`mailto:${order.customer_email}?subject=Order Update #${order.id}`);
                           }}
                           className="flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-colors"

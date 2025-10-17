@@ -63,7 +63,7 @@ export const categorizeError = (error: any) => {
   }
 
   // API errors
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
   if (error.status >= ERROR_CONFIG.HTTP_STATUS.INTERNAL_SERVER_ERROR || (error.status >= ERROR_CONFIG.CLIENT_ERROR_RANGE[0] && error.status < ERROR_CONFIG.SERVER_ERROR_RANGE[0])) {
     return ERROR_TYPES.API;
   }
@@ -80,11 +80,11 @@ export const formatError = (error: any, customMessage = null) => {
 
   return {
     type: category,
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
     title: template.title,
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
     message: customMessage || error.message || template.message,
-    // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
     action: template.action,
     originalError: error,
     timestamp: new Date().toISOString()
@@ -124,15 +124,15 @@ export const handleApiError = async (response: any, context = {}) => {
     errorData = { ...errorData, ...jsonError };
   } catch (parseError) {
     // Response isn't JSON, use status text
-    // @ts-expect-error TS(2339): Property 'message' does not exist on type '{ statu... Remove this comment to see the full error message
+
     errorData.message = response.statusText || `HTTP ${response.status}`;
   }
 
-  // @ts-expect-error TS(2339): Property 'message' does not exist on type '{ statu... Remove this comment to see the full error message
+
   const error = new Error(errorData.message || errorData.error || `HTTP ${response.status}`);
-  // @ts-expect-error TS(2339): Property 'status' does not exist on type 'Error'.
+
   error.status = response.status;
-  // @ts-expect-error TS(2339): Property 'response' does not exist on type 'Error'... Remove this comment to see the full error message
+
   error.response = response;
 
   return logError(error, context);
@@ -214,7 +214,7 @@ export const withRetry = async (operation: any, maxRetries = ERROR_CONFIG.DEFAUL
       lastError = error;
 
       // Enhanced 429 handling: Don't retry, fail immediately to prevent cascading
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       if (error.status === 429) {
         throw logError(error, {
           attempts: attempt,
@@ -249,9 +249,9 @@ export const throttledFetch = async (url: any, options = {}) => {
     return await requestThrottler.fetch(url, options);
   } catch (error) {
     // Enhance error with status if it's a response error
-    // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
     if (error.response) {
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       error.status = error.response.status;
     }
     throw error;

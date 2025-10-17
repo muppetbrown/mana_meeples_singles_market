@@ -1,4 +1,4 @@
-// @ts-expect-error TS(2307): Cannot find module '@tanstack/react-query' or its ... Remove this comment to see the full error message
+
 import { useQuery } from '@tanstack/react-query';
 
 

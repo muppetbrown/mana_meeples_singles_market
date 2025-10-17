@@ -31,7 +31,7 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
       'Pokemon': 2,
       'Yu-Gi-Oh!': 3
     };
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     return gameMap[gameName] || null;
   }, []);
 
@@ -70,11 +70,11 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
         })
       );
       
-      // @ts-expect-error TS(2345): Argument of type 'any[]' is not assignable to para... Remove this comment to see the full error message
+
       setGames(gamesWithCounts);
     } catch (err) {
       console.error('Error fetching games:', err);
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       setError(err.message);
     }
   }, [apiUrl]);
@@ -126,11 +126,11 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
         })
       );
       
-      // @ts-expect-error TS(2345): Argument of type 'any[]' is not assignable to para... Remove this comment to see the full error message
+
       setSets(setsWithCounts);
     } catch (err) {
       console.error('Error fetching sets:', err);
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       setError(err.message);
       setSets([]);
     }
@@ -223,7 +223,7 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
         await fetchFilterOptions();
       } catch (err) {
         console.error('Error loading initial data:', err);
-        // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
         setError(err.message);
       } finally {
         setLoading(false);
@@ -262,7 +262,7 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
       ]);
     } catch (err) {
       console.error('Error refreshing data:', err);
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       setError(err.message);
     } finally {
       setLoading(false);

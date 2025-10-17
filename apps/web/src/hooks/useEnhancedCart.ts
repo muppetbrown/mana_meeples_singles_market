@@ -139,18 +139,18 @@ export const useEnhancedCart = (API_URL: any) => {
       timestamp: Date.now()
     };
 
-    // @ts-expect-error TS(2345): Argument of type '(prev: never[]) => { id: number;... Remove this comment to see the full error message
+
     setCartNotifications(prev => [...prev, notification]);
 
     // Auto-remove after duration
     setTimeout(() => {
-      // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
       setCartNotifications(prev => prev.filter(n => n.id !== notification.id));
     }, duration);
   }, []);
 
   // Stable reference for addNotification to prevent recreations
-  // @ts-expect-error TS(2554): Expected 1 arguments, but got 0.
+
   const addNotificationRef = useRef();
   addNotificationRef.current = addNotification;
 
@@ -226,14 +226,14 @@ export const useEnhancedCart = (API_URL: any) => {
 
       if (priceChangedItems.length > 0) {
         if (addNotificationRef.current) {
-          // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
           addNotificationRef.current(
             `Price changes detected for ${priceChangedItems.length} item(s). Please review your cart.`,
             'warning',
             10000
           );
         }
-        // @ts-expect-error TS(2345): Argument of type 'any[]' is not assignable to para... Remove this comment to see the full error message
+
         setCart(validatedItems);
       }
     } catch (error) {
@@ -250,16 +250,16 @@ export const useEnhancedCart = (API_URL: any) => {
     try {
       const stockChecks = await Promise.all(
         cart.map(async (item) => {
-          // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
           const response = await fetch(`${API_URL}/cards/${item.id}/stock`);
           if (!response.ok) return item;
 
           const { stock } = await response.json();
           return {
-            // @ts-expect-error TS(2698): Spread types may only be created from object types... Remove this comment to see the full error message
+
             ...item,
             currentStock: stock,
-            // @ts-expect-error TS(2339): Property 'quantity' does not exist on type 'never'... Remove this comment to see the full error message
+
             outOfStock: stock < item.quantity
           };
         })
@@ -269,14 +269,14 @@ export const useEnhancedCart = (API_URL: any) => {
 
       if (outOfStockItems.length > 0) {
         if (addNotificationRef.current) {
-          // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
           addNotificationRef.current(
             `${outOfStockItems.length} item(s) in your cart are now out of stock.`,
             'error',
             10000
           );
         }
-        // @ts-expect-error TS(2345): Argument of type 'any[]' is not assignable to para... Remove this comment to see the full error message
+
         setCart(stockChecks);
       }
     } catch (error) {
@@ -301,7 +301,7 @@ export const useEnhancedCart = (API_URL: any) => {
     // Prevent concurrent operations that could cause race conditions
     if (operationInProgress.current) {
       if (addNotificationRef.current) {
-        // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
         addNotificationRef.current('Please wait - cart operation in progress', 'info', 2000);
       }
       return;
@@ -313,7 +313,7 @@ export const useEnhancedCart = (API_URL: any) => {
       // Validate item before adding
       if (!item || !item.id || !item.name || !item.price) {
         if (addNotificationRef.current) {
-          // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
           addNotificationRef.current('Invalid item - cannot add to cart', 'error');
         }
         return;
@@ -322,20 +322,20 @@ export const useEnhancedCart = (API_URL: any) => {
       // Check if item is still in stock
       if (item.stock <= 0) {
         if (addNotificationRef.current) {
-          // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
           addNotificationRef.current(`${item.name} is out of stock`, 'error');
         }
         return;
       }
 
-      // @ts-expect-error TS(2345): Argument of type '(prevCart: never[]) => any[]' is... Remove this comment to see the full error message
+
       setCart(prevCart => {
         // Increment version for this operation
         cartVersionRef.current += 1;
         const currentVersion = cartVersionRef.current;
 
         const existingIndex = prevCart.findIndex(
-          // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
           cartItem => cartItem.id === item.id && cartItem.quality === item.quality
         );
 
@@ -345,12 +345,12 @@ export const useEnhancedCart = (API_URL: any) => {
           const existingItem = prevCart[existingIndex];
 
           // Version check to prevent conflicts
-          // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
           if (existingItem.version > currentVersion - 2) {
-            // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
             if (existingItem.quantity >= item.stock) {
               if (addNotificationRef.current) {
-                // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
                 addNotificationRef.current(`Cannot add more - only ${item.stock} in stock`, 'warning');
               }
               return prevCart;
@@ -359,19 +359,19 @@ export const useEnhancedCart = (API_URL: any) => {
             // Update quantity
             updatedCart = [...prevCart];
             updatedCart[existingIndex] = {
-              // @ts-expect-error TS(2698): Spread types may only be created from object types... Remove this comment to see the full error message
+
               ...updatedCart[existingIndex],
-              // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
+
               quantity: Math.min(existingItem.quantity + 1, item.stock),
-              // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
+
               version: currentVersion,
-              // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'never'.
+
               lastModified: Date.now()
             };
           } else {
             // Version conflict - reload and retry
             if (addNotificationRef.current) {
-              // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
               addNotificationRef.current('Cart updated by another action - please try again', 'warning');
             }
             return prevCart;
@@ -391,7 +391,7 @@ export const useEnhancedCart = (API_URL: any) => {
       });
 
       if (addNotificationRef.current) {
-        // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
         addNotificationRef.current(`Added ${item.name} to cart`, 'success', 3000);
       }
     } catch (error) {
@@ -399,7 +399,7 @@ export const useEnhancedCart = (API_URL: any) => {
         console.error('Error adding item to cart:', error);
       }
       if (addNotificationRef.current) {
-        // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
         addNotificationRef.current('Failed to add item to cart. Please try again.', 'error');
       }
     } finally {
@@ -414,12 +414,12 @@ export const useEnhancedCart = (API_URL: any) => {
   const removeFromCart = useCallback((itemId: any, quality: any) => {
     setCart(prevCart => {
       const filtered = prevCart.filter(
-        // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
         item => !(item.id === itemId && item.quality === quality)
       );
 
       if (filtered.length !== prevCart.length && addNotificationRef.current) {
-        // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
         addNotificationRef.current('Item removed from cart', 'info', 2000);
       }
 
@@ -437,7 +437,7 @@ export const useEnhancedCart = (API_URL: any) => {
     // Prevent concurrent operations
     if (operationInProgress.current) {
       if (addNotificationRef.current) {
-        // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
         addNotificationRef.current('Please wait - cart operation in progress', 'info', 2000);
       }
       return;
@@ -446,27 +446,27 @@ export const useEnhancedCart = (API_URL: any) => {
     operationInProgress.current = true;
 
     try {
-      // @ts-expect-error TS(2345): Argument of type '(prevCart: never[]) => any[]' is... Remove this comment to see the full error message
+
       setCart(prevCart => {
         // Increment version for this operation
         cartVersionRef.current += 1;
         const currentVersion = cartVersionRef.current;
 
         return prevCart.map(item => {
-          // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
           if (item.id === itemId && item.quality === quality) {
             // Version check to prevent conflicts
-            // @ts-expect-error TS(2339): Property 'version' does not exist on type 'never'.
+
             if (item.version && item.version < currentVersion - 2) {
               if (addNotificationRef.current) {
-                // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
                 addNotificationRef.current('Item was updated elsewhere - please refresh', 'warning');
               }
               return item; // Don't update if version is too old
             }
 
             return {
-              // @ts-expect-error TS(2698): Spread types may only be created from object types... Remove this comment to see the full error message
+
               ...item,
               quantity: newQuantity,
               version: currentVersion,
@@ -487,7 +487,7 @@ export const useEnhancedCart = (API_URL: any) => {
   const clearCart = useCallback(() => {
     setCart([]);
     if (addNotificationRef.current) {
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       addNotificationRef.current('Cart cleared', 'info', 2000);
     }
   }, []);
@@ -499,14 +499,14 @@ export const useEnhancedCart = (API_URL: any) => {
 
     setCart(prevCart => {
       const filtered = prevCart.filter(item => {
-        // @ts-expect-error TS(2339): Property 'addedAt' does not exist on type 'never'.
+
         const age = now - (item.addedAt || now);
         return age < expiredThreshold;
       });
 
       if (filtered.length !== prevCart.length && addNotificationRef.current) {
         const removedCount = prevCart.length - filtered.length;
-        // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
         addNotificationRef.current(
           `Removed ${removedCount} expired item(s) from cart`,
           'info',
@@ -521,18 +521,18 @@ export const useEnhancedCart = (API_URL: any) => {
   // Get cart statistics
   const getCartStats = useCallback(() => {
     const total = cart.reduce((sum, item) => {
-      // @ts-expect-error TS(2339): Property 'priceChanged' does not exist on type 'ne... Remove this comment to see the full error message
+
       const price = item.priceChanged ? item.currentPrice : item.price;
-      // @ts-expect-error TS(2339): Property 'quantity' does not exist on type 'never'... Remove this comment to see the full error message
+
       return sum + (price * item.quantity);
     }, 0);
 
-    // @ts-expect-error TS(2339): Property 'quantity' does not exist on type 'never'... Remove this comment to see the full error message
+
     const itemCount = cart.reduce((sum, item) => sum + item.quantity, 0);
     const uniqueItems = cart.length;
-    // @ts-expect-error TS(2339): Property 'priceChanged' does not exist on type 'ne... Remove this comment to see the full error message
+
     const priceChangedItems = cart.filter(item => item.priceChanged).length;
-    // @ts-expect-error TS(2339): Property 'outOfStock' does not exist on type 'neve... Remove this comment to see the full error message
+
     const outOfStockItems = cart.filter(item => item.outOfStock).length;
 
     return {

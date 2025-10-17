@@ -1,5 +1,5 @@
 import React from 'react';
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'prop... Remove this comment to see the full error message
+
 import PropTypes from 'prop-types';
 import OptimizedImage from '../OptimizedImage';
 
@@ -8,17 +8,17 @@ import OptimizedImage from '../OptimizedImage';
  * Responsive component optimized for compact list display with mobile-first design
  */
 const ListCardItem = React.memo(({
-  // @ts-expect-error TS(2339): Property 'card' does not exist on type '{}'.
+
   card,
-  // @ts-expect-error TS(2339): Property 'selectedVariationKey' does not exist on ... Remove this comment to see the full error message
+
   selectedVariationKey,
-  // @ts-expect-error TS(2339): Property 'selectedVariation' does not exist on typ... Remove this comment to see the full error message
+
   selectedVariation,
-  // @ts-expect-error TS(2339): Property 'currency' does not exist on type '{}'.
+
   currency,
-  // @ts-expect-error TS(2339): Property 'onVariationChange' does not exist on typ... Remove this comment to see the full error message
+
   onVariationChange,
-  // @ts-expect-error TS(2339): Property 'onAddToCart' does not exist on type '{}'... Remove this comment to see the full error message
+
   onAddToCart
 }) => {
   return (
@@ -151,19 +151,19 @@ const ListCardItem = React.memo(({
 }, (prevProps, nextProps) => {
   // Custom comparison function to prevent unnecessary re-renders
   // Same optimized comparison as CardItem
-  // @ts-expect-error TS(2339): Property 'selectedVariation' does not exist on typ... Remove this comment to see the full error message
+
   const prevVar = prevProps.selectedVariation;
-  // @ts-expect-error TS(2339): Property 'selectedVariation' does not exist on typ... Remove this comment to see the full error message
+
   const nextVar = nextProps.selectedVariation;
 
   return (
-    // @ts-expect-error TS(2339): Property 'card' does not exist on type 'object'.
+
     prevProps.card.id === nextProps.card.id &&
-    // @ts-expect-error TS(2339): Property 'selectedVariationKey' does not exist on ... Remove this comment to see the full error message
+
     prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
-    // @ts-expect-error TS(2339): Property 'currency' does not exist on type 'object... Remove this comment to see the full error message
+
     prevProps.currency.symbol === nextProps.currency.symbol &&
-    // @ts-expect-error TS(2339): Property 'currency' does not exist on type 'object... Remove this comment to see the full error message
+
     prevProps.currency.rate === nextProps.currency.rate &&
     // Compare selectedVariation properties individually
     prevVar?.id === nextVar?.id &&
@@ -177,7 +177,7 @@ const ListCardItem = React.memo(({
 
 ListCardItem.displayName = 'ListCardItem';
 
-// @ts-expect-error TS(2339): Property 'propTypes' does not exist on type 'Named... Remove this comment to see the full error message
+
 ListCardItem.propTypes = {
   card: PropTypes.shape({
     id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,

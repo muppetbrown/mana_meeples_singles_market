@@ -34,14 +34,14 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
     // Optimized filters comparison - avoid expensive JSON.stringify
     const cachedFilters = globalCache.filters || {};
     const filtersMatch = Object.keys(currentFilters).length === Object.keys(cachedFilters).length &&
-      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
       Object.entries(currentFilters).every(([key, value]) => cachedFilters[key] === value);
 
     return cacheAge < CACHE_DURATION && filtersMatch;
   }, [currentFilters]);
 
   // Fetch filter counts with retry logic
-  // @ts-expect-error TS(7024): Function implicitly has return type 'any' because ... Remove this comment to see the full error message
+
   const fetchFilterCounts = useCallback(async (filters = {}, retryCount = 0) => {
     // Rate limiting: prevent requests within 1 second of last request
     const now = Date.now();
@@ -55,11 +55,11 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
 
     // Abort previous request if still pending
     if (abortControllerRef.current) {
-      // @ts-expect-error TS(2339): Property 'abort' does not exist on type 'never'.
+
       abortControllerRef.current.abort();
     }
 
-    // @ts-expect-error TS(2322): Type 'AbortController' is not assignable to type '... Remove this comment to see the full error message
+
     abortControllerRef.current = new AbortController();
     setIsLoading(true);
     setError(null);
@@ -70,7 +70,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
       // Add current filters
       Object.entries(filters).forEach(([key, value]) => {
         if (value && value !== 'all') {
-          // @ts-expect-error TS(2345): Argument of type 'unknown' is not assignable to pa... Remove this comment to see the full error message
+
           queryParams.append(key, value);
         }
       });
@@ -80,7 +80,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
         headers: {
           'Content-Type': 'application/json'
         },
-        // @ts-expect-error TS(2531): Object is possibly 'null'.
+
         signal: abortControllerRef.current.signal
       });
 
@@ -105,15 +105,15 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
       
       // Update global cache
       globalCache.data = data;
-      // @ts-expect-error TS(2322): Type 'number' is not assignable to type 'null'.
+
       globalCache.timestamp = Date.now();
-      // @ts-expect-error TS(2322): Type '{}' is not assignable to type 'null'.
+
       globalCache.filters = filters;
       
       setFilterCounts(data);
       setError(null);
     } catch (error) {
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       if (error.name === 'AbortError') {
         if (process.env.NODE_ENV === 'development') {
           console.log('Request aborted');
@@ -122,10 +122,10 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
       }
 
       if (process.env.NODE_ENV === 'development') {
-        // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
         console.error('Filter counts error:', error.message);
       }
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       setError(error.message);
       
       // Use cached data if available, don't fall back to fetching all cards
@@ -156,7 +156,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
       if (process.env.NODE_ENV === 'development') {
         console.log('Using valid cached filter counts');
       }
-      // @ts-expect-error TS(2345): Argument of type 'null' is not assignable to param... Remove this comment to see the full error message
+
       setFilterCounts(globalCache.data);
       return;
     }
@@ -167,7 +167,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
     }
 
     // Debounce the API call
-    // @ts-expect-error TS(2322): Type 'Timeout' is not assignable to type 'null'.
+
     debounceTimerRef.current = setTimeout(() => {
       fetchFilterCounts(currentFilters);
     }, DEBOUNCE_DELAY);
@@ -177,7 +177,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
         clearTimeout(debounceTimerRef.current);
       }
       if (abortControllerRef.current) {
-        // @ts-expect-error TS(2339): Property 'abort' does not exist on type 'never'.
+
         abortControllerRef.current.abort();
       }
     };
@@ -193,7 +193,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
 
   // Get count for specific filter option
   const getCount = (category: any, value: any) => {
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     const categoryData = filterCounts[category];
     if (!categoryData) return '';
     return formatCount(categoryData[value] || 0);
@@ -201,7 +201,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
 
   // Get all options with counts for a category
   const getOptionsWithCounts = (category: any, options: any) => {
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     const categoryData = filterCounts[category] || {};
 
     return options.map((option: any) => ({

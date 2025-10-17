@@ -2,7 +2,7 @@ import React, { useState, useEffect, createContext, useContext } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, X } from 'lucide-react';
 
 // Toast Context
-// @ts-expect-error TS(2554): Expected 1 arguments, but got 0.
+
 const ToastContext = createContext();
 
 export const useToast = () => {
@@ -23,7 +23,7 @@ export const ToastProvider = ({
     const id = Date.now() + Math.random();
     const toast = { id, message, type, duration };
 
-    // @ts-expect-error TS(2345): Argument of type '(prev: never[]) => { id: number;... Remove this comment to see the full error message
+
     setToasts(prev => [...prev, toast]);
 
     if (duration > 0) {
@@ -36,7 +36,7 @@ export const ToastProvider = ({
   };
 
   const removeToast = (id: any) => {
-    // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
     setToasts(prev => prev.filter(toast => toast.id !== id));
   };
 
@@ -99,7 +99,7 @@ const ToastItem = ({
       info: "bg-blue-50 border-blue-200 text-blue-800"
     };
 
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     return `${baseStyles} ${visibilityStyles} ${typeStyles[toast.type] || typeStyles.info}`;
   };
 

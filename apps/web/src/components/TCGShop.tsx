@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CardSearchBar from './CardSearchBar';
-// @ts-expect-error TS(2307): Cannot find module '../hooks/useSearchFilters' or ... Remove this comment to see the full error message
+
 import { useSearchFilters } from '../hooks/useSearchFilters';
 import { ShoppingCart, X, Plus, Minus, Filter, ChevronDown, LayoutGrid, List } from 'lucide-react';
 import CurrencySelector from './CurrencySelector';
@@ -198,14 +198,14 @@ const TCGShop = () => {
   useEffect(() => {
     setSelectedVariations(prev => {
       // Get current card IDs from cards array
-      // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
       const currentCardIds = new Set(cards.map(card => card.id));
 
       // Keep only selections for cards that still exist
       const filteredSelections = {};
       Object.keys(prev).forEach(cardId => {
         if (currentCardIds.has(cardId)) {
-          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
           filteredSelections[cardId] = prev[cardId];
         }
       });
@@ -257,7 +257,7 @@ const TCGShop = () => {
           // Focus search input
           const searchInput = document.querySelector('input[type="search"]');
           if (searchInput) {
-            // @ts-expect-error TS(2339): Property 'focus' does not exist on type 'Element'.
+
             searchInput.focus();
             e.preventDefault();
           }
@@ -283,7 +283,7 @@ const TCGShop = () => {
   useEffect(() => {
     if (showMobileFilters && mobileFiltersRef.current) {
       // Focus the first focusable element when modal opens
-      // @ts-expect-error TS(2339): Property 'querySelectorAll' does not exist on type... Remove this comment to see the full error message
+
       const focusableElements = mobileFiltersRef.current.querySelectorAll(
         'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
       );
@@ -360,7 +360,7 @@ const TCGShop = () => {
           // Handle 429 errors specifically
           if (cardsRes.status === 429) {
             const error = new Error('Rate limit exceeded');
-            // @ts-expect-error TS(2339): Property 'status' does not exist on type 'Error'.
+
             error.status = 429;
             throw error;
           }
@@ -374,9 +374,9 @@ const TCGShop = () => {
       cardsData.cards.forEach((item: any) => {
         const key = `${item.game_name}-${item.set_name}-${item.card_number}`;
 
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         if (!groupedCards[key]) {
-          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
           groupedCards[key] = {
             id: key, // Use stable key as ID instead of inventory-specific item.id
             name: item.name,
@@ -392,7 +392,7 @@ const TCGShop = () => {
           };
         }
 
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         groupedCards[key].variations.push({
           inventory_id: item.inventory_id,
           quality: item.quality,
@@ -409,7 +409,7 @@ const TCGShop = () => {
       setCards(Object.values(groupedCards));
     } catch (err) {
       const formattedError = handleError(err, { operation: 'fetchCards' });
-      // @ts-expect-error TS(2345): Argument of type 'string' is not assignable to par... Remove this comment to see the full error message
+
       setCardsError(`${formattedError.title}: ${formattedError.message} Try adjusting your filters or refreshing the page.`);
     } finally {
       // Always set loading to false when card fetch completes (success or error)
@@ -428,16 +428,16 @@ const TCGShop = () => {
   useEffect(() => {
     return () => {
       // Clear any pending timeouts
-      // @ts-expect-error TS(2304): Cannot find name 'searchTimeoutRef'.
+
       if (searchTimeoutRef.current) {
-        // @ts-expect-error TS(2304): Cannot find name 'searchTimeoutRef'.
+
         clearTimeout(searchTimeoutRef.current);
       }
 
       // Cancel any ongoing requests
-      // @ts-expect-error TS(2552): Cannot find name 'abortController'. Did you mean '... Remove this comment to see the full error message
+
       if (abortController.current) {
-        // @ts-expect-error TS(2552): Cannot find name 'abortController'. Did you mean '... Remove this comment to see the full error message
+
         abortController.current.abort();
       }
     };
@@ -501,7 +501,7 @@ const TCGShop = () => {
       'Pokemon': 2,
       'Yu-Gi-Oh!': 3
     };
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     return gameMap[gameName] || null;
   };
 
@@ -519,19 +519,19 @@ const TCGShop = () => {
 
   // Update cart quantity function (wrapper for useEnhancedCart)
   const updateCartQuantity = useCallback((id: any, quality: any, delta: any) => {
-    // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
     const existingItem = cart.find(item => item.id === id && item.quality === quality);
     if (existingItem) {
-      // @ts-expect-error TS(2339): Property 'quantity' does not exist on type 'never'... Remove this comment to see the full error message
+
       const newQuantity = existingItem.quantity + delta;
       updateQuantity(id, quality, newQuantity);
     }
   }, [cart, updateQuantity]);
 
   // Memoized expensive calculations
-  // @ts-expect-error TS(2339): Property 'price' does not exist on type 'never'.
+
   const cartTotal = useMemo(() => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), [cart]);
-  // @ts-expect-error TS(2339): Property 'quantity' does not exist on type 'never'... Remove this comment to see the full error message
+
   const cartCount = useMemo(() => cart.reduce((sum, item) => sum + item.quantity, 0), [cart]);
 
   // Group cards by sections for sorting
@@ -552,24 +552,24 @@ const TCGShop = () => {
       let sectionTitle;
 
       if (sortBy === 'name') {
-        // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
         const firstLetter = card.name.charAt(0).toUpperCase();
         sectionKey = firstLetter;
         sectionTitle = firstLetter;
       } else if (sortBy === 'set') {
-        // @ts-expect-error TS(2339): Property 'set_name' does not exist on type 'never'... Remove this comment to see the full error message
+
         sectionKey = card.set_name;
-        // @ts-expect-error TS(2339): Property 'set_name' does not exist on type 'never'... Remove this comment to see the full error message
+
         sectionTitle = card.set_name;
       } else if (sortBy === 'rarity') {
         // Group by rarity type
-        // @ts-expect-error TS(2339): Property 'rarity' does not exist on type 'never'.
+
         const rarity = card.rarity || 'Unknown';
         sectionKey = rarity;
         sectionTitle = rarity;
       } else if (['price', 'price_low', 'price_high'].includes(sortBy)) {
         // Group by price ranges
-        // @ts-expect-error TS(2339): Property 'variations' does not exist on type 'neve... Remove this comment to see the full error message
+
         const price = card.variations?.[0]?.price || 0;
         let priceRange;
 
@@ -615,7 +615,7 @@ const TCGShop = () => {
           'Common': 1, 'Uncommon': 2, 'Rare': 3, 'Mythic': 4, 'Mythic Rare': 4,
           'Special': 5, 'Legendary': 5, 'Basic': 0, 'Unknown': 6
         };
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         return (rarityOrder[a.section] || 6) - (rarityOrder[b.section] || 6);
       } else if (['price', 'price_low', 'price_high'].includes(sortBy)) {
         // Sort price ranges numerically
@@ -623,9 +623,9 @@ const TCGShop = () => {
           'Under $1': 1, '$1 - $4.99': 2, '$5 - $9.99': 3, '$10 - $24.99': 4,
           '$25 - $49.99': 5, '$50 - $99.99': 6, '$100+': 7
         };
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         const aOrder = priceOrder[a.section] || 8;
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         const bOrder = priceOrder[b.section] || 8;
 
         // Reverse order for price_high
@@ -993,13 +993,13 @@ const TCGShop = () => {
                         CardComponent={({
                           card
                         }: any) => {
-                          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
                           const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
                           const selectedVariation = card.variations.find((v: any) => v.variation_key === selectedVariationKey) || card.variations[0];
 
                           return (
                             <CardItem
-                              // @ts-expect-error TS(2322): Type '{ card: any; selectedVariationKey: any; sele... Remove this comment to see the full error message
+
                               card={card}
                               selectedVariationKey={selectedVariationKey}
                               selectedVariation={selectedVariation}
@@ -1026,14 +1026,14 @@ const TCGShop = () => {
                         )}
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                           {group.cards.map((card: any) => {
-                            // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
                             const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
                             const selectedVariation = card.variations.find((v: any) => v.variation_key === selectedVariationKey) || card.variations[0];
 
                             return (
                               <CardItem
                                 key={card.id}
-                                // @ts-expect-error TS(2322): Type '{ key: any; card: any; selectedVariationKey:... Remove this comment to see the full error message
+
                                 card={card}
                                 selectedVariationKey={selectedVariationKey}
                                 selectedVariation={selectedVariation}
@@ -1059,14 +1059,14 @@ const TCGShop = () => {
                       )}
                       <div className="space-y-2">
                         {group.cards.map((card: any) => {
-                          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
                           const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
                           const selectedVariation = card.variations.find((v: any) => v.variation_key === selectedVariationKey) || card.variations[0];
 
                           return (
                             <ListCardItem
                               key={card.id}
-                              // @ts-expect-error TS(2322): Type '{ key: any; card: any; selectedVariationKey:... Remove this comment to see the full error message
+
                               card={card}
                               selectedVariationKey={selectedVariationKey}
                               selectedVariation={selectedVariation}
@@ -1227,16 +1227,16 @@ const TCGShop = () => {
 
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {cart.slice(0, 3).map((item, idx) => (
-              // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
               <div key={`${item.id}-${item.quality}`} className="flex items-center gap-2 text-sm">
                 <img
-                  // @ts-expect-error TS(2339): Property 'image_url' does not exist on type 'never... Remove this comment to see the full error message
+
                   src={item.image_url}
-                  // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
                   alt={item.name}
                   className="w-8 h-10 object-contain rounded"
                   onError={(e) => {
-                    // @ts-expect-error TS(2339): Property 'style' does not exist on type 'EventTarg... Remove this comment to see the full error message
+
                     e.target.style.display = 'none';
                   }}
                 />
@@ -1250,12 +1250,12 @@ const TCGShop = () => {
                     <div>{item.quality} × {item.quantity}</div>
                     // @ts-expect-error TS(2339): Property 'foil_type' does not exist on type 'never... Remove this comment to see the full error message
                     {item.foil_type && item.foil_type !== 'Regular' && (
-                      // @ts-expect-error TS(2339): Property 'foil_type' does not exist on type 'never... Remove this comment to see the full error message
+
                       <div className="text-yellow-600">✨ {item.foil_type}</div>
                     )}
                     // @ts-expect-error TS(2339): Property 'language' does not exist on type 'never'... Remove this comment to see the full error message
                     {item.language && item.language !== 'English' && (
-                      // @ts-expect-error TS(2339): Property 'language' does not exist on type 'never'... Remove this comment to see the full error message
+
                       <div>{item.language}</div>
                     )}
                   </div>
@@ -1321,18 +1321,18 @@ const TCGShop = () => {
               ) : (
                 <div className="space-y-4">
                   {cart.map(item => (
-                    // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                     <div key={`${item.id}-${item.quality}`} className="flex gap-4 p-4 bg-mm-tealLight rounded-lg border border-mm-warmAccent">
                       <img
-                        // @ts-expect-error TS(2339): Property 'image_url' does not exist on type 'never... Remove this comment to see the full error message
+
                         src={item.image_url}
-                        // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
                         alt={item.name}
                         className="w-20 h-28 object-contain rounded bg-white"
                         onError={(e) => {
-                          // @ts-expect-error TS(2339): Property 'onerror' does not exist on type 'EventTa... Remove this comment to see the full error message
+
                           e.target.onerror = null;
-                          // @ts-expect-error TS(2339): Property 'src' does not exist on type 'EventTarget... Remove this comment to see the full error message
+
                           e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="112"%3E%3Crect fill="%231e293b" width="80" height="112"/%3E%3C/svg%3E';
                         }}
                       />
@@ -1356,7 +1356,7 @@ const TCGShop = () => {
                           )}
                           // @ts-expect-error TS(2339): Property 'language' does not exist on type 'never'... Remove this comment to see the full error message
                           {item.language && item.language !== 'English' && (
-                            // @ts-expect-error TS(2339): Property 'language' does not exist on type 'never'... Remove this comment to see the full error message
+
                             <div className="font-medium text-mm-forest">{item.language}</div>
                           )}
                         </div>
@@ -1365,10 +1365,10 @@ const TCGShop = () => {
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-2">
                             <button
-                              // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                               onClick={() => updateCartQuantity(item.id, item.quality, -1)}
                               className="p-1.5 bg-white border rounded hover:bg-mm-tealLight focus:ring-2 focus:ring-mm-forest focus:outline-none"
-                              // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
                               aria-label={`Decrease quantity of ${item.name}`}
                             >
                               <Minus className="w-4 h-4" />
@@ -1376,22 +1376,22 @@ const TCGShop = () => {
                             // @ts-expect-error TS(2339): Property 'quantity' does not exist on type 'never'... Remove this comment to see the full error message
                             <span className="w-8 text-center font-medium">{item.quantity}</span>
                             <button
-                              // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                               onClick={() => updateCartQuantity(item.id, item.quality, 1)}
-                              // @ts-expect-error TS(2339): Property 'quantity' does not exist on type 'never'... Remove this comment to see the full error message
+
                               disabled={item.quantity >= item.stock}
                               className="p-1.5 bg-white border rounded hover:bg-mm-tealLight disabled:opacity-50 disabled:cursor-not-allowed focus:ring-2 focus:ring-mm-forest focus:outline-none"
-                              // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
                               aria-label={`Increase quantity of ${item.name}`}
                             >
                               <Plus className="w-4 h-4" />
                             </button>
                           </div>
                           <button
-                            // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                             onClick={() => removeFromCart(item.id, item.quality)}
                             className="ml-auto text-red-600 hover:text-red-700 text-sm font-medium focus:ring-2 focus:ring-red-500 focus:outline-none rounded px-2 py-1"
-                            // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
                             aria-label={`Remove ${item.name} from cart`}
                           >
                             Remove
@@ -1427,20 +1427,20 @@ const TCGShop = () => {
         <div className="fixed bottom-4 right-4 z-50 space-y-2">
           {cartNotifications.map(notification => (
             <div
-              // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
               key={notification.id}
               className={`px-4 py-3 rounded-lg shadow-lg ${
-                // @ts-expect-error TS(2339): Property 'type' does not exist on type 'never'.
+
                 notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-                // @ts-expect-error TS(2339): Property 'type' does not exist on type 'never'.
+
                 notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-                // @ts-expect-error TS(2339): Property 'type' does not exist on type 'never'.
+
                 notification.type === 'warning' ? 'bg-orange-50 border-orange-200 text-orange-800' :
                 'bg-mm-tealLight border-mm-tealBright text-mm-tealBright'
               } border`}
-              // @ts-expect-error TS(2339): Property 'type' does not exist on type 'never'.
+
               role={notification.type === 'error' ? 'alert' : 'status'}
-              // @ts-expect-error TS(2339): Property 'type' does not exist on type 'never'.
+
               aria-live={notification.type === 'error' ? 'assertive' : 'polite'}
               aria-atomic="true"
             >

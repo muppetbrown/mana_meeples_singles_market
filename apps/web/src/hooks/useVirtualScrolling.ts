@@ -32,7 +32,7 @@ export const useVirtualScrolling = ({
         clearTimeout(scrollTimeoutRef.current);
       }
 
-      // @ts-expect-error TS(2322): Type 'Timeout' is not assignable to type 'null'.
+
       scrollTimeoutRef.current = setTimeout(() => {
         setScrollTop(0); // Reset scroll to top on filter change
         setIsLoading(false);
@@ -95,7 +95,7 @@ export const useVirtualScrolling = ({
 
     // Clean up previous observer
     if (resizeObserverRef.current) {
-      // @ts-expect-error TS(2339): Property 'disconnect' does not exist on type 'neve... Remove this comment to see the full error message
+
       resizeObserverRef.current.disconnect();
     }
 
@@ -111,7 +111,7 @@ export const useVirtualScrolling = ({
     });
 
     resizeObserver.observe(element);
-    // @ts-expect-error TS(2322): Type 'ResizeObserver' is not assignable to type 'n... Remove this comment to see the full error message
+
     resizeObserverRef.current = resizeObserver;
 
     return () => {
@@ -147,7 +147,7 @@ export const useVirtualScrolling = ({
         clearTimeout(scrollTimeoutRef.current);
       }
       if (resizeObserverRef.current) {
-        // @ts-expect-error TS(2339): Property 'disconnect' does not exist on type 'neve... Remove this comment to see the full error message
+
         resizeObserverRef.current.disconnect();
       }
     };

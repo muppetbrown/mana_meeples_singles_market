@@ -1,4 +1,4 @@
-// @ts-expect-error TS(2307): Cannot find module '@tanstack/react-virtual' or it... Remove this comment to see the full error message
+
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef } from 'react';
 
@@ -22,7 +22,7 @@ return (
   const c = cards[v.index];
   return (
   <div
-  // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
   key={c.id}
   role="row"
   aria-rowindex={v.index + 1}

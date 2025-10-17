@@ -62,7 +62,7 @@ const VirtualCardGrid = ({
   // Update container height based on actual container
   useEffect(() => {
     if (containerRef.current) {
-      // @ts-expect-error TS(2339): Property 'getBoundingClientRect' does not exist on... Remove this comment to see the full error message
+
       const rect = containerRef.current.getBoundingClientRect();
       setContainerDimensions({ height: Math.max(rect.height, containerHeight) });
     }
@@ -150,7 +150,7 @@ const VirtualCardGrid = ({
                 const actualIndex = visibleRange.startIndex + index;
                 return (
                   <div
-                    // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                     key={card.id || actualIndex}
                     style={{
                       minHeight: `${cardHeight - 24}px` // Account for margins

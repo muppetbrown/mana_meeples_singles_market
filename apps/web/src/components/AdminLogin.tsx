@@ -39,7 +39,7 @@ const AdminLogin = () => {
       if (process.env.NODE_ENV === 'development') {
         console.error('Login error:', err);
       }
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);

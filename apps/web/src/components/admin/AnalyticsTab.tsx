@@ -35,45 +35,45 @@ const AnalyticsTab = () => {
 
       // Group by game
       inventory.forEach((item: any) => {
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         if (!stats.byGame[item.game_name]) {
-          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
           stats.byGame[item.game_name] = { count: 0, value: 0, stock: 0 };
         }
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         stats.byGame[item.game_name].count++;
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         stats.byGame[item.game_name].value += item.stock_quantity * item.price;
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         stats.byGame[item.game_name].stock += item.stock_quantity;
       });
 
       // Group by quality
       inventory.forEach((item: any) => {
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         if (!stats.byQuality[item.quality]) {
-          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
           stats.byQuality[item.quality] = { count: 0, value: 0 };
         }
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         stats.byQuality[item.quality].count++;
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         stats.byQuality[item.quality].value += item.stock_quantity * item.price;
       });
 
       // Group by price source
       inventory.forEach((item: any) => {
         const source = item.price_source || 'manual';
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         if (!stats.byPriceSource[source]) {
-          // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
           stats.byPriceSource[source] = 0;
         }
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
         stats.byPriceSource[source]++;
       });
 
-      // @ts-expect-error TS(2345): Argument of type '{ totalCards: any; totalValue: a... Remove this comment to see the full error message
+
       setAnalytics(stats);
     } catch (error) {
       console.error('Error fetching analytics:', error);

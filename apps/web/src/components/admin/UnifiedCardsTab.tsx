@@ -67,23 +67,23 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
 
     // Cancel previous request
     if (abortController.current) {
-      // @ts-expect-error TS(2339): Property 'abort' does not exist on type 'never'.
+
       abortController.current.abort();
     }
 
     if (value.length >= 2) {
       setSearchLoading(true);
-      // @ts-expect-error TS(2322): Type 'Timeout' is not assignable to type 'null'.
+
       searchTimeoutRef.current = setTimeout(async () => {
         try {
           // Create new AbortController for this request
-          // @ts-expect-error TS(2322): Type 'AbortController' is not assignable to type '... Remove this comment to see the full error message
+
           abortController.current = new AbortController();
 
           const res = await fetch(
             `${API_URL}/search/autocomplete?q=${encodeURIComponent(value)}`,
             {
-              // @ts-expect-error TS(2531): Object is possibly 'null'.
+
               signal: abortController.current.signal,
               credentials: 'include'
             }
@@ -96,7 +96,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
             setSelectedSuggestionIndex(-1);
           }
         } catch (err) {
-          // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
           if (err.name !== 'AbortError') {
             console.error('Autocomplete error:', err);
           }
@@ -119,7 +119,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
         clearTimeout(searchTimeoutRef.current);
       }
       if (abortController.current) {
-        // @ts-expect-error TS(2339): Property 'abort' does not exist on type 'never'.
+
         abortController.current.abort();
       }
     };
@@ -144,7 +144,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
       'Pokemon': 2,
       'Yu-Gi-Oh!': 3
     };
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     return gameMap[gameName] || null;
   };
 
@@ -207,7 +207,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
   const fetchCards = useCallback(async () => {
     setLoading(true);
     try {
-      // @ts-expect-error TS(2345): Argument of type '{ limit: number; }' is not assig... Remove this comment to see the full error message
+
       const params = new URLSearchParams({ limit: 1000 });
 
       // Use game name-based filtering like TCGshop
@@ -237,7 +237,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
       setError(null);
     } catch (error) {
       console.error('Error fetching cards:', error);
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       setError(error.message);
     } finally {
       setLoading(false);
@@ -264,7 +264,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
 
     // Apply inventory mode filter (client-side)
     if (isInventoryMode) {
-      // @ts-expect-error TS(2339): Property 'has_inventory' does not exist on type 'n... Remove this comment to see the full error message
+
       filtered = filtered.filter(card => card.has_inventory && card.total_stock > 0);
     }
 
@@ -303,7 +303,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
       'PROMO': 'bg-amber-100 text-amber-700 border-amber-300',
       'EXTENDED': 'bg-indigo-100 text-indigo-700 border-indigo-300'
     };
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+
     return colors[treatment] || 'bg-gray-100 text-gray-700 border-gray-300';
   };
 
@@ -315,7 +315,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
   };
 
   const openAddModal = (card: any, variation: any) => {
-    // @ts-expect-error TS(2345): Argument of type '{ card: any; variation: any; }' ... Remove this comment to see the full error message
+
     setAddModalData({ card, variation });
     setAddFormData({
       quality: 'Near Mint',
@@ -351,12 +351,12 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          // @ts-expect-error TS(2339): Property 'variation' does not exist on type 'never... Remove this comment to see the full error message
+
           card_id: addModalData.variation.card_id,
           quality: addFormData.quality,
           foil_type: addFormData.foil_type,
           price: parseFloat(addFormData.price) || 0,
-          // @ts-expect-error TS(2345): Argument of type 'number' is not assignable to par... Remove this comment to see the full error message
+
           stock_quantity: parseInt(addFormData.stock_quantity) || 0,
           language: addFormData.language
         })
@@ -372,12 +372,12 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
       closeAddModal();
       
       // Show success message (you could use a toast here)
-      // @ts-expect-error TS(2339): Property 'card' does not exist on type 'never'.
+
       alert(`✅ ${addModalData.card.name} added to inventory successfully!`);
       
     } catch (error) {
       console.error('Error adding to inventory:', error);
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       alert(`❌ Error: ${error.message}`);
     } finally {
       setSaving(false);
@@ -388,21 +388,21 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
     const csv = [
       ['Card Name', 'Number', 'Set', 'Rarity', 'Treatments', 'Finishes', 'Stock', 'Variations'].join(','),
       ...filteredCards.map(card => [
-        // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
         `"${card.name}"`,
-        // @ts-expect-error TS(2339): Property 'card_number' does not exist on type 'nev... Remove this comment to see the full error message
+
         card.card_number,
-        // @ts-expect-error TS(2339): Property 'set_name' does not exist on type 'never'... Remove this comment to see the full error message
+
         card.set_name,
-        // @ts-expect-error TS(2339): Property 'rarity' does not exist on type 'never'.
+
         card.rarity || '',
-        // @ts-expect-error TS(2339): Property 'variations' does not exist on type 'neve... Remove this comment to see the full error message
+
         getUniqueTreatments(card.variations).join(';'),
-        // @ts-expect-error TS(2339): Property 'variations' does not exist on type 'neve... Remove this comment to see the full error message
+
         getUniqueFinishes(card.variations).join(';'),
-        // @ts-expect-error TS(2339): Property 'total_stock' does not exist on type 'nev... Remove this comment to see the full error message
+
         card.total_stock,
-        // @ts-expect-error TS(2339): Property 'variation_count' does not exist on type ... Remove this comment to see the full error message
+
         card.variation_count
       ].join(','))
     ].join('\n');
@@ -440,9 +440,9 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
     );
   }
 
-  // @ts-expect-error TS(2339): Property 'total_stock' does not exist on type 'nev... Remove this comment to see the full error message
+
   const totalStock = filteredCards.reduce((sum, card) => sum + card.total_stock, 0);
-  // @ts-expect-error TS(2339): Property 'variation_count' does not exist on type ... Remove this comment to see the full error message
+
   const totalVariations = filteredCards.reduce((sum, card) => sum + card.variation_count, 0);
 
   return (
@@ -521,7 +521,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                     if (selectedSuggestionIndex >= 0 && searchSuggestions[selectedSuggestionIndex]) {
                       e.preventDefault();
                       const suggestion = searchSuggestions[selectedSuggestionIndex];
-                      // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
                       handleSearchChange(suggestion.name);
                       setShowSuggestions(false);
                       setSelectedSuggestionIndex(-1);
@@ -565,7 +565,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                     }`}
                     onMouseDown={() => {
                       // Use onMouseDown instead of onClick to prevent blur issues
-                      // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
                       handleSearchChange(suggestion.name);
                       setShowSuggestions(false);
                       setSelectedSuggestionIndex(-1);
@@ -573,15 +573,15 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                     onMouseEnter={() => setSelectedSuggestionIndex(idx)}
                     role="option"
                     aria-selected={selectedSuggestionIndex === idx}
-                    // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
                     aria-label={`Select ${suggestion.name} from ${suggestion.set_name}`}
                   >
                     // @ts-expect-error TS(2339): Property 'image_url' does not exist on type 'never... Remove this comment to see the full error message
                     {suggestion.image_url && (
                       <img
-                        // @ts-expect-error TS(2339): Property 'image_url' does not exist on type 'never... Remove this comment to see the full error message
+
                         src={suggestion.image_url}
-                        // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
                         alt={suggestion.name}
                         className="w-8 h-8 rounded object-cover flex-shrink-0"
                         loading="lazy"
@@ -615,7 +615,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
           >
             <option value="all">All Games</option>
             {games.map(game => (
-              // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
               <option key={game.id} value={game.name}>{game.name}</option>
             ))}
           </select>
@@ -629,7 +629,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
             >
               <option value="all">All Sets</option>
               {availableSets.map(set => (
-                // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
                 <option key={set.id} value={set.name}>{set.name}</option>
               ))}
             </select>
@@ -659,12 +659,12 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
       {/* Cards List */}
       <div className="space-y-3">
         {filteredCards.map((card) => {
-          // @ts-expect-error TS(2339): Property 'name' does not exist on type 'never'.
+
           const cardKey = `${card.name}-${card.card_number}`;
           const isExpanded = expandedCards.has(cardKey);
-          // @ts-expect-error TS(2339): Property 'variations' does not exist on type 'neve... Remove this comment to see the full error message
+
           const uniqueTreatments = getUniqueTreatments(card.variations);
-          // @ts-expect-error TS(2339): Property 'variations' does not exist on type 'neve... Remove this comment to see the full error message
+
           const uniqueFinishes = getUniqueFinishes(card.variations);
 
           return (
@@ -684,7 +684,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
-                          // @ts-expect-error TS(2339): Property 'image_url' does not exist on type 'never... Remove this comment to see the full error message
+
                           setImageModalUrl(card.image_url);
                         }}
                         className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
@@ -725,7 +725,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                       <div className="flex items-center gap-2 mt-2 flex-wrap">
                         {uniqueTreatments.map(treatment => (
                           <span 
-                            // @ts-expect-error TS(2322): Type 'unknown' is not assignable to type 'Key | nu... Remove this comment to see the full error message
+
                             key={treatment}
                             className={`px-2 py-0.5 rounded text-xs font-medium border ${getTreatmentColor(treatment)}`}
                           >
@@ -735,7 +735,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                         ))}
                         {uniqueFinishes.map(finish => (
                           <span 
-                            // @ts-expect-error TS(2322): Type 'unknown' is not assignable to type 'Key | nu... Remove this comment to see the full error message
+
                             key={finish}
                             className={`px-2 py-0.5 rounded text-xs font-medium border ${getFinishBadge(finish)}`}
                           >
@@ -755,7 +755,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                         </div>
                         // @ts-expect-error TS(2339): Property 'has_inventory' does not exist on type 'n... Remove this comment to see the full error message
                         {card.has_inventory && (
-                          // @ts-expect-error TS(2339): Property 'total_stock' does not exist on type 'nev... Remove this comment to see the full error message
+
                           <div className={`text-xs font-medium ${card.total_stock <= 3 ? 'text-orange-600' : 'text-green-600'}`}>
                             // @ts-expect-error TS(2339): Property 'total_stock' does not exist on type 'nev... Remove this comment to see the full error message
                             {card.total_stock} in stock
@@ -934,7 +934,7 @@ const UnifiedCardsTab = ({ mode = 'all' }) => {
                   type="number"
                   min="0"
                   value={addFormData.stock_quantity}
-                  // @ts-expect-error TS(2345): Argument of type '(prev: { quality: string; foil_t... Remove this comment to see the full error message
+
                   onChange={(e) => setAddFormData(prev => ({ ...prev, stock_quantity: e.target.value }))}
                   className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />

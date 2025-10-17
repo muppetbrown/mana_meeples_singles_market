@@ -49,14 +49,14 @@ const OptimizedImage = ({
   useEffect(() => {
     if (!imgRef.current || priority) return;
 
-    // @ts-expect-error TS(2322): Type 'IntersectionObserver' is not assignable to t... Remove this comment to see the full error message
+
     observerRef.current = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        // @ts-expect-error TS(2532): Object is possibly 'undefined'.
+
         if (entry.isIntersecting) {
           setCurrentSrc(src);
-          // @ts-expect-error TS(2339): Property 'disconnect' does not exist on type 'neve... Remove this comment to see the full error message
+
           observerRef.current?.disconnect();
         }
       },
@@ -66,11 +66,11 @@ const OptimizedImage = ({
       }
     );
 
-    // @ts-expect-error TS(2531): Object is possibly 'null'.
+
     observerRef.current.observe(imgRef.current);
 
     return () => {
-      // @ts-expect-error TS(2339): Property 'disconnect' does not exist on type 'neve... Remove this comment to see the full error message
+
       observerRef.current?.disconnect();
     };
   }, [src, priority]);
@@ -166,7 +166,7 @@ const OptimizedImage = ({
  * Useful for integration with CDN services
  */
 export const useResponsiveImage = (baseSrc: any, options = {}) => {
-  // @ts-expect-error TS(2339): Property 'quality' does not exist on type '{}'.
+
   const { quality = 85, format = 'auto' } = options;
 
   return useMemo(() => {

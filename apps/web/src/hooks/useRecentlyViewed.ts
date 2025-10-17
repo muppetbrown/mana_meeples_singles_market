@@ -18,7 +18,7 @@ export const useRecentlyViewed = () => {
         const parsed = JSON.parse(stored);
         // Validate that it's an array
         if (Array.isArray(parsed)) {
-          // @ts-expect-error TS(2345): Argument of type 'any[]' is not assignable to para... Remove this comment to see the full error message
+
           setRecentlyViewed(parsed);
         }
       }
@@ -33,10 +33,10 @@ export const useRecentlyViewed = () => {
   const addToRecentlyViewed = useCallback((card: any) => {
     if (!card || !card.id) return;
 
-    // @ts-expect-error TS(2345): Argument of type '(prev: never[]) => { id: any; na... Remove this comment to see the full error message
+
     setRecentlyViewed(prev => {
       // Remove the card if it already exists (to avoid duplicates)
-      // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
       const filtered = prev.filter(item => item.id !== card.id);
 
       // Create new array with the card at the beginning
@@ -77,7 +77,7 @@ export const useRecentlyViewed = () => {
   // Remove a specific card from recently viewed
   const removeFromRecentlyViewed = useCallback((cardId: any) => {
     setRecentlyViewed(prev => {
-      // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
+
       const updated = prev.filter(item => item.id !== cardId);
 
       // Update session storage

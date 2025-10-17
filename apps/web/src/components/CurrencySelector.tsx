@@ -31,7 +31,7 @@ const CurrencySelector = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: any) => {
-      // @ts-expect-error TS(2339): Property 'contains' does not exist on type 'never'... Remove this comment to see the full error message
+
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
       }
@@ -101,7 +101,7 @@ const CurrencySelector = ({
           <Info
             className="w-3 h-3 text-yellow-400"
             aria-label="Exchange rates are approximate and may not reflect current market values"
-            // @ts-expect-error TS(2322): Type '{ className: string; "aria-label": string; t... Remove this comment to see the full error message
+
             title="Exchange rates are approximate"
           />
         )}

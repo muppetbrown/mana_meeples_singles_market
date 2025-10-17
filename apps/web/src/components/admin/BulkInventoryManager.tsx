@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'prop... Remove this comment to see the full error message
+
 import PropTypes from 'prop-types';
 import { Upload, Download, FileText, AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react';
 import { downloadCSV, csvToArray, validateInventoryCSV, formatInventoryForExport, generateInventoryTemplate } from '../../utils/csvUtils';
@@ -34,9 +34,9 @@ const BulkInventoryManager = ({
       const data = csvToArray(text, { hasHeader: true });
       const validation = validateInventoryCSV(data);
 
-      // @ts-expect-error TS(2345): Argument of type '{}[]' is not assignable to param... Remove this comment to see the full error message
+
       setUploadedData(data);
-      // @ts-expect-error TS(2345): Argument of type '{ valid: boolean; errors: string... Remove this comment to see the full error message
+
       setValidationResults(validation);
       setImportResults(null);
     } catch (error) {
@@ -50,7 +50,7 @@ const BulkInventoryManager = ({
 
   // Import validated data to the system
   const handleImportData = async () => {
-    // @ts-expect-error TS(2339): Property 'valid' does not exist on type 'never'.
+
     if (!uploadedData || !validationResults?.valid) {
       return;
     }
@@ -86,7 +86,7 @@ const BulkInventoryManager = ({
       }
     } catch (error) {
       console.error('Import error:', error);
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       window.alert(`Import failed: ${error.message}`);
     } finally {
       setImporting(false);
@@ -112,7 +112,7 @@ const BulkInventoryManager = ({
       downloadCSV(formattedData, filename);
     } catch (error) {
       console.error('Export error:', error);
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
+
       window.alert(`Export failed: ${error.message}`);
     } finally {
       setExporting(false);
@@ -207,7 +207,7 @@ const BulkInventoryManager = ({
       {validationResults && (
         <div className="mb-6">
           <div className={`rounded-lg p-4 border ${
-            // @ts-expect-error TS(2339): Property 'valid' does not exist on type 'never'.
+
             validationResults.valid
               ? 'bg-green-50 border-green-200'
               : 'bg-red-50 border-red-200'
@@ -221,7 +221,7 @@ const BulkInventoryManager = ({
               )}
               <div className="flex-1">
                 <h4 className={`font-medium mb-2 ${
-                  // @ts-expect-error TS(2339): Property 'valid' does not exist on type 'never'.
+
                   validationResults.valid ? 'text-green-900' : 'text-red-900'
                 }`}>
                   // @ts-expect-error TS(2339): Property 'valid' does not exist on type 'never'.
@@ -233,7 +233,7 @@ const BulkInventoryManager = ({
                   <p>Total rows: {validationResults.totalRows}</p>
                   // @ts-expect-error TS(2339): Property 'valid' does not exist on type 'never'.
                   {!validationResults.valid && (
-                    // @ts-expect-error TS(2339): Property 'validRows' does not exist on type 'never... Remove this comment to see the full error message
+
                     <p>Valid rows: {validationResults.validRows}</p>
                   )}
                 </div>
@@ -304,7 +304,7 @@ const BulkInventoryManager = ({
                   <p>Skipped: {importResults.skipped || 0} items</p>
                   // @ts-expect-error TS(2339): Property 'errors' does not exist on type 'never'.
                   {importResults.errors > 0 && (
-                    // @ts-expect-error TS(2339): Property 'errors' does not exist on type 'never'.
+
                     <p className="text-red-600">Errors: {importResults.errors}</p>
                   )}
                 </div>
