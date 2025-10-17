@@ -26,7 +26,11 @@ const Checkout = ({
     notes: '',
   });
 
-  const [errors, setErrors] = useState({});
+ type CheckoutErrors = {
+   firstName?: string; lastName?: string; email?: string; phone?: string;
+   address?: string; city?: string; postalCode?: string; notes?: string;
+ };
+ const [errors, setErrors] = useState<CheckoutErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
@@ -58,7 +62,7 @@ const Checkout = ({
   };
 
   const validateForm = () => {
-    const newErrors = {};
+    const newErrors: CheckoutErrors = {};
 
     // Sanitize and validate names
     const sanitizedFirstName = sanitizeInput(formData.firstName, 'name');
@@ -581,7 +585,7 @@ const Checkout = ({
                   alt={item.name}
                   className="w-16 h-20 object-contain rounded bg-slate-100"
 
-                  onError={(e) => { e.target.style.display = 'none'; }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-sm text-slate-900 line-clamp-2">

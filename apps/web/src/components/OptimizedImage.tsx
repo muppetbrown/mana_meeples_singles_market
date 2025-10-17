@@ -167,7 +167,8 @@ const OptimizedImage = ({
  */
 export const useResponsiveImage = (baseSrc: any, options = {}) => {
 
-  const { quality = 85, format = 'auto' } = options;
+  type ImgOptions = { quality?: number; format?: 'auto' | 'webp' | 'avif' };
+  const { quality = 85, format = 'auto' } = (options ?? {}) as ImgOptions;
 
   return useMemo(() => {
     if (!baseSrc) return { src: '', srcSet: '' };

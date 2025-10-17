@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 
 type FilterRow = { treatment?: string; border_color?: string; finish?: string; promo_type?: string; frame_effect?: string };

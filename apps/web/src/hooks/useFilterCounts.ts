@@ -71,7 +71,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
       Object.entries(filters).forEach(([key, value]) => {
         if (value && value !== 'all') {
 
-          queryParams.append(key, value);
+          queryParams.append(key, String(value));
         }
       });
 

@@ -323,21 +323,25 @@ const CardSearchBar = ({
       {/* Additional Filters Slot */}
       {Object.keys(additionalFilters).length > 0 && (
         <>
-          {Object.entries(additionalFilters).map(([key, filter]) => (
+          type FilterDef = {
+            value: string;
+            onChange: (v: string) => void;
+            disabled?: boolean;
+            label?: string;
+            options?: { value: string; label: string }[];
+          };
+          {Object.entries(filters as Record<string, FilterDef>).map(([key, filter]) => (
             <select
               key={key}
-
               value={filter.value}
-
               onChange={(e) => filter.onChange(e.target.value)}
-
-              disabled={filter.disabled}
+              disabled={!!filter.disabled}
               className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
             >
               // @ts-expect-error TS(2571): Object is of type 'unknown'.
-              <option value="all">{filter.label || key}</option>
+              <option value="all">{filter.label ?? key}</option>
               // @ts-expect-error TS(2571): Object is of type 'unknown'.
-              {filter.options?.map((option: any) => <option key={option.value} value={option.value}>
+              {filter.options?.map((option) => <option key={option.value} value={option.value}>
                 {option.label}
                 {option.count > 0 && ` (${option.count})`}
               </option>)}

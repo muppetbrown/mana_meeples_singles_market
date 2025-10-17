@@ -44,7 +44,8 @@ export const arrayToCSV = (data: any, headers = null) => {
  */
 export const csvToArray = (csvString: any, options = {}) => {
 
-  const { delimiter = ',', hasHeader = true } = options;
+  type CsvOptions = { delimiter?: string; hasHeader?: boolean };
+  const { delimiter = ',', hasHeader = true } = (options ?? {}) as CsvOptions;
 
   if (!csvString || typeof csvString !== 'string') {
     throw new Error('Invalid CSV string provided');

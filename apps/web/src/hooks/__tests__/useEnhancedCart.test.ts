@@ -1,4 +1,4 @@
-import { renderHook, act } from '@testing-library/react';
+import { makeStorage } from '../testUtils/storageMocks';
 import { useEnhancedCart } from '../useEnhancedCart';
 
 // Mock localStorage
@@ -13,7 +13,8 @@ const localStorageMock = {
   clear: jest.fn(),
 };
 
-global.localStorage = localStorageMock;
+global.localStorage = makeStorage();
+global.sessionStorage = makeStorage();
 
 // Mock API URL
 const mockApiUrl = 'http://localhost:3001/api';

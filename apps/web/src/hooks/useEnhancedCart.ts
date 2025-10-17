@@ -151,7 +151,8 @@ export const useEnhancedCart = (API_URL: any) => {
 
   // Stable reference for addNotification to prevent recreations
 
-  const addNotificationRef = useRef();
+  type AddNotification = (message: string, type?: string, duration?: number) => void;
+  const addNotificationRef = useRef<AddNotification | null>(null);
   addNotificationRef.current = addNotification;
 
   // Initialize cart from storage on mount
@@ -227,7 +228,7 @@ export const useEnhancedCart = (API_URL: any) => {
       if (priceChangedItems.length > 0) {
         if (addNotificationRef.current) {
 
-          addNotificationRef.current(
+          addNotificationRef.current?.(
             `Price changes detected for ${priceChangedItems.length} item(s). Please review your cart.`,
             'warning',
             10000
@@ -270,7 +271,7 @@ export const useEnhancedCart = (API_URL: any) => {
       if (outOfStockItems.length > 0) {
         if (addNotificationRef.current) {
 
-          addNotificationRef.current(
+          addNotificationRef.current?.(
             `${outOfStockItems.length} item(s) in your cart are now out of stock.`,
             'error',
             10000
@@ -302,7 +303,7 @@ export const useEnhancedCart = (API_URL: any) => {
     if (operationInProgress.current) {
       if (addNotificationRef.current) {
 
-        addNotificationRef.current('Please wait - cart operation in progress', 'info', 2000);
+        addNotificationRef.current?.('Please wait - cart operation in progress', 'info', 2000);
       }
       return;
     }
@@ -314,7 +315,7 @@ export const useEnhancedCart = (API_URL: any) => {
       if (!item || !item.id || !item.name || !item.price) {
         if (addNotificationRef.current) {
 
-          addNotificationRef.current('Invalid item - cannot add to cart', 'error');
+          addNotificationRef.current?.('Invalid item - cannot add to cart', 'error');
         }
         return;
       }
@@ -323,7 +324,7 @@ export const useEnhancedCart = (API_URL: any) => {
       if (item.stock <= 0) {
         if (addNotificationRef.current) {
 
-          addNotificationRef.current(`${item.name} is out of stock`, 'error');
+          addNotificationRef.current?.(`${item.name} is out of stock`, 'error');
         }
         return;
       }
@@ -351,7 +352,7 @@ export const useEnhancedCart = (API_URL: any) => {
             if (existingItem.quantity >= item.stock) {
               if (addNotificationRef.current) {
 
-                addNotificationRef.current(`Cannot add more - only ${item.stock} in stock`, 'warning');
+                addNotificationRef.current?.(`Cannot add more - only ${item.stock} in stock`, 'warning');
               }
               return prevCart;
             }
@@ -372,7 +373,7 @@ export const useEnhancedCart = (API_URL: any) => {
             // Version conflict - reload and retry
             if (addNotificationRef.current) {
 
-              addNotificationRef.current('Cart updated by another action - please try again', 'warning');
+              addNotificationRef.current?.('Cart updated by another action - please try again', 'warning');
             }
             return prevCart;
           }
@@ -392,7 +393,7 @@ export const useEnhancedCart = (API_URL: any) => {
 
       if (addNotificationRef.current) {
 
-        addNotificationRef.current(`Added ${item.name} to cart`, 'success', 3000);
+        addNotificationRef.current?.(`Added ${item.name} to cart`, 'success', 3000);
       }
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
@@ -400,7 +401,7 @@ export const useEnhancedCart = (API_URL: any) => {
       }
       if (addNotificationRef.current) {
 
-        addNotificationRef.current('Failed to add item to cart. Please try again.', 'error');
+        addNotificationRef.current?.('Failed to add item to cart. Please try again.', 'error');
       }
     } finally {
       // Use timeout to prevent rapid clicking
@@ -420,7 +421,7 @@ export const useEnhancedCart = (API_URL: any) => {
 
       if (filtered.length !== prevCart.length && addNotificationRef.current) {
 
-        addNotificationRef.current('Item removed from cart', 'info', 2000);
+        addNotificationRef.current?.('Item removed from cart', 'info', 2000);
       }
 
       return filtered;
@@ -438,7 +439,7 @@ export const useEnhancedCart = (API_URL: any) => {
     if (operationInProgress.current) {
       if (addNotificationRef.current) {
 
-        addNotificationRef.current('Please wait - cart operation in progress', 'info', 2000);
+        addNotificationRef.current?.('Please wait - cart operation in progress', 'info', 2000);
       }
       return;
     }
@@ -460,7 +461,7 @@ export const useEnhancedCart = (API_URL: any) => {
             if (item.version && item.version < currentVersion - 2) {
               if (addNotificationRef.current) {
 
-                addNotificationRef.current('Item was updated elsewhere - please refresh', 'warning');
+                addNotificationRef.current?.('Item was updated elsewhere - please refresh', 'warning');
               }
               return item; // Don't update if version is too old
             }
@@ -488,7 +489,7 @@ export const useEnhancedCart = (API_URL: any) => {
     setCart([]);
     if (addNotificationRef.current) {
 
-      addNotificationRef.current('Cart cleared', 'info', 2000);
+      addNotificationRef.current?.('Cart cleared', 'info', 2000);
     }
   }, []);
 
@@ -507,7 +508,7 @@ export const useEnhancedCart = (API_URL: any) => {
       if (filtered.length !== prevCart.length && addNotificationRef.current) {
         const removedCount = prevCart.length - filtered.length;
 
-        addNotificationRef.current(
+        addNotificationRef.current?.(
           `Removed ${removedCount} expired item(s) from cart`,
           'info',
           5000

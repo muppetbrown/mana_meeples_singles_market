@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Info } from 'lucide-react';
+import { ChevronDown, Info, InfoIcon } from 'lucide-react';
 
 const CurrencySelector = ({
   currency,
@@ -98,13 +98,12 @@ const CurrencySelector = ({
 
         {/* Approximate indicator for non-NZD currencies */}
         {currency.code !== 'NZD' && (
-          <Info
+          <InfoIcon
             className="w-3 h-3 text-yellow-400"
             aria-label="Exchange rates are approximate and may not reflect current market values"
-
-            title="Exchange rates are approximate"
           />
         )}
+        <span className="sr-only">Exchange rates are approximate</span>
 
         {/* Chevron */}
         <ChevronDown className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />

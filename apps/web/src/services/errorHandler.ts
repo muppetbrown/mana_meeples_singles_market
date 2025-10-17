@@ -125,15 +125,14 @@ export const handleApiError = async (response: any, context = {}) => {
   } catch (parseError) {
     // Response isn't JSON, use status text
 
-    errorData.message = response.statusText || `HTTP ${response.status}`;
+    (errorData as any).message = response.statusText || `HTTP ${response.status}`;
   }
 
 
-  const error = new Error(errorData.message || errorData.error || `HTTP ${response.status}`);
+  const error = new Error((errorData as any).message || (errorData as any).error || `HTTP ${response.status}`);
 
-  error.status = response.status;
-
-  error.response = response;
+ (error as any).status = response.status;
+ (error as any).response = response;
 
   return logError(error, context);
 };

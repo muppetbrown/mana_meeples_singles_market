@@ -258,7 +258,7 @@ const TCGShop = () => {
           const searchInput = document.querySelector('input[type="search"]');
           if (searchInput) {
 
-            searchInput.focus();
+            (searchInput as HTMLInputElement).focus();
             e.preventDefault();
           }
           break;
@@ -361,7 +361,7 @@ const TCGShop = () => {
           if (cardsRes.status === 429) {
             const error = new Error('Rate limit exceeded');
 
-            error.status = 429;
+            (error as any).status = 429;
             throw error;
           }
           throw new Error('API request failed');
@@ -428,6 +428,7 @@ const TCGShop = () => {
   useEffect(() => {
     return () => {
       // Clear any pending timeouts
+      const searchTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
       if (searchTimeoutRef.current) {
 
@@ -435,10 +436,10 @@ const TCGShop = () => {
       }
 
       // Cancel any ongoing requests
+      const abortControllerRef = useRef<AbortController | null>(null);
+      if (abortControllerRef.current) {
 
-      if (abortController.current) {
-
-        abortController.current.abort();
+        abortControllerRef.current.abort();
       }
     };
   }, []); // Empty dependency array means this runs only on unmount
@@ -1083,7 +1084,7 @@ const TCGShop = () => {
               )}
             </div>
 
-            // @ts-expect-error TS(2304): Cannot find name 'loading'.
+            const [loading, setLoading] = useState(false);
             {cards.length === 0 && !loading && (
               <div className="text-center py-12 bg-white rounded-xl shadow-sm">
                 <p className="text-mm-forest text-lg">No cards found matching your search</p>
@@ -1237,7 +1238,7 @@ const TCGShop = () => {
                   className="w-8 h-10 object-contain rounded"
                   onError={(e) => {
 
-                    e.target.style.display = 'none';
+                    (e.target as HTMLImageElement).style.display = 'none';
                   }}
                 />
                 <div className="flex-1 min-w-0">
@@ -1331,9 +1332,9 @@ const TCGShop = () => {
                         className="w-20 h-28 object-contain rounded bg-white"
                         onError={(e) => {
 
-                          e.target.onerror = null;
+                          (e.target as HTMLImageElement).onerror = null;
 
-                          e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="112"%3E%3Crect fill="%231e293b" width="80" height="112"/%3E%3C/svg%3E';
+                          (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="80" height="112"%3E%3Crect fill="%231e293b" width="80" height="112"/%3E%3C/svg%3E';
                         }}
                       />
                       <div className="flex-1 min-w-0">
