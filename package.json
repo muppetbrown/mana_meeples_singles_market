@@ -4,17 +4,10 @@
   "description": "TCG Singles Marketplace API",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
-    "build": "cd mana-meeples-shop && npm install && npm run build",
-    "postinstall": "npm run build",
-    "dev:frontend": "cd mana-meeples-shop && npm start",
-    "clean": "rm -rf mana-meeples-shop/build mana-meeples-shop/node_modules node_modules",
-    "build:production": "NODE_ENV=production npm run build",
-    "schema:export": "node scripts/export-database-schema.js",
-    "schema:export:prod": "NODE_ENV=production node scripts/export-database-schema.js",
-    "schema:export:dev": "NODE_ENV=development node scripts/export-database-schema.js",
-    "docs:update": "npm run schema:export && git add docs/DATABASE_SCHEMA.md docs/database-stats.json"
+    "dev": "cross-env NODE_OPTIONS=--enable-source-maps tsx watch src/server.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "tsc -p tsconfig.json",
+    "start": "cross-env NODE_OPTIONS=--enable-source-maps node dist/server.js"
   },
   "keywords": [
     "tcg",
@@ -24,7 +17,6 @@
   "author": "Your Name",
   "license": "ISC",
   "dependencies": {
-    "postcss": ">=8.4.31",
     "bcrypt": "^6.0.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -37,11 +29,29 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.14",
     "pg": "^8.16.3",
+    "postcss": ">=8.4.31",
     "stripe": "^19.1.0"
   },
   "devDependencies": {
+    "@babel/parser": "^7.28.4",
+    "@babel/traverse": "^7.28.4",
+    "@babel/types": "^7.28.4",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/express-rate-limit": "^6.0.2",
+    "@types/node": "^24.8.1",
+    "@types/node-cron": "^3.0.11",
+    "@types/nodemailer": "^7.0.2",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "chalk": "^5.6.2",
+    "cross-env": "^7.0.3",
+    "fast-glob": "^3.3.3",
     "nodemon": "^3.0.2",
-    "tailwindcss": "^3.4.18"
+    "tailwindcss": "^3.4.18",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": ">=18.0.0"

@@ -1,0 +1,113 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* M&M Global Styles */
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply bg-mm-cream text-mm-darkForest;
+    font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply text-mm-forest;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+  }
+}
+
+@layer components {
+  /* M&M Button Styles */
+  .btn-mm-primary {
+    @apply bg-mm-gold text-white border-2 border-mm-gold rounded-mm-sm px-6 py-3 font-bold transition-all duration-300;
+  }
+
+  .btn-mm-primary:hover,
+  .btn-mm-primary:focus {
+    @apply bg-mm-goldDark border-mm-goldDark;
+    outline: 3px solid theme('colors.mm.forest');
+    outline-offset: 2px;
+  }
+
+  .btn-mm-secondary {
+    @apply bg-transparent text-mm-forest border-2 border-mm-forest rounded-mm-md px-4 py-2 font-semibold transition-all duration-300;
+  }
+
+  .btn-mm-secondary:hover,
+  .btn-mm-secondary:focus {
+    @apply bg-mm-tealLight;
+    outline: 3px solid theme('colors.mm.forest');
+    outline-offset: 2px;
+  }
+
+  /* M&M Card Styles */
+  .card-mm {
+    @apply bg-white border-2 border-mm-warmAccent rounded-mm-md p-6 transition-all duration-300 shadow-mm-card;
+  }
+
+  .card-mm:hover,
+  .card-mm:focus-within {
+    @apply border-mm-tealBright shadow-mm-card-hover;
+    transform: translateY(-2px);
+  }
+
+  /* M&M Input Styles */
+  .input-mm {
+    @apply border-2 border-mm-warmAccent rounded-mm-sm px-3 py-2 bg-white text-mm-darkForest transition-all duration-300;
+  }
+
+  .input-mm:focus {
+    @apply border-mm-tealBright bg-white;
+    outline: 3px solid theme('colors.mm.forest');
+    outline-offset: 2px;
+  }
+
+  /* M&M Section Container */
+  .section-mm {
+    @apply bg-white rounded-mm-xl p-6 shadow-mm-section;
+  }
+
+  .section-mm-gradient {
+    background: linear-gradient(135deg, #e8f4f1 0%, #f0f8f5 100%);
+    @apply rounded-mm-2xl p-8 shadow-mm-section;
+    border-left: 5px solid theme('colors.mm.tealBright');
+  }
+}
+
+/* Accessibility - Enhanced Focus States */
+@layer utilities {
+  *:focus {
+    outline: 3px solid theme('colors.mm.forest');
+    outline-offset: 2px;
+  }
+
+  /* Reduced Motion Support */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Screen Reader Only utility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
