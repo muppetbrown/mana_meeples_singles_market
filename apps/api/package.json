@@ -3,7 +3,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server.js",
-    "dev": "ts-node src/server.ts"
+    "dev": "ts-node src/server.ts",
+    "migrate": "node --loader tsx prisma migrate deploy"
   },
   "dependencies": {
     "compression": "^1.8.1",
