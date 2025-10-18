@@ -1,10 +1,8 @@
 import { Router } from "express";
-// @ts-expect-error TS(2307): Cannot find module 'zod' or its corresponding type... Remove this comment to see the full error message
 import { z } from "zod";
 import { query } from "../db";
 
 
-// @ts-expect-error TS(2742): The inferred type of 'router' cannot be named with... Remove this comment to see the full error message
 const router = Router();
 
 

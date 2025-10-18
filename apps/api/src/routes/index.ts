@@ -1,12 +1,26 @@
-import { Router } from 'express';
-// @ts-expect-error TS(2305): Module '"./cards"' has no exported member 'cards'.
-import { cards } from './cards';
-import { filters } from './filters';
-import { auth } from './auth';
+// apps/api/src/routes/index.ts
+import express from "express";
 
+import apiRoutes from "./api";
+import authRoutes from "./auth";
+import filtersRoutes from "./filters";
+import variationsRoutes from "./variations";
 
-// @ts-expect-error TS(2742): The inferred type of 'routes' cannot be named with... Remove this comment to see the full error message
-export const routes = Router();
-routes.use('/cards', cards);
-routes.use('/filters', filters);
-routes.use('/auth', auth);
+const router = express.Router();
+
+// --- Route grouping ---
+// These prefixes ensure consistent, predictable API paths.
+
+router.use("/auth", authRoutes);
+router.use("/filters", filtersRoutes);
+router.use("/variations", variationsRoutes);
+
+// The main catalog API routes (cards, inventory, etc.)
+router.use("/", apiRoutes);
+
+// Healthcheck shortcut (optional convenience)
+router.get("/health", (_req, res) => {
+  res.json({ ok: true, service: "Mana & Meeples API", version: "1.0.0" });
+});
+
+export default router;
