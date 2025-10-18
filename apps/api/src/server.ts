@@ -7,6 +7,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 // If you still have CORS middleware around, you can remove it for same-origin.
 import routes from './routes/index.js'; // keep your existing API router
+import { pool, db, healthcheck } from './db.js';
 
 // __dirname for NodeNext
 const __filename = fileURLToPath(import.meta.url);
@@ -52,6 +53,39 @@ app.get('/api/health', (_req: Request, res: Response) => {
     version: process.env.APP_VERSION ?? '1.0.0',
     time: new Date().toISOString(),
   });
+});
+
+app.get('/api/health/db', async (_req, res) => {
+  try {
+    const ok = await healthcheck();
+    if (!ok) return res.status(500).json({ db: false, error: 'probe returned false' });
+    res.status(200).json({ db: true });
+  } catch (err: any) {
+    res.status(500).json({
+      db: false,
+      error: err?.message ?? 'unknown',
+      code: err?.code,
+    });
+  }
+});
+
+app.get('/api/health/db/deep', async (_req, res) => {
+  try {
+    // Existence & perms check
+    await pool.query(`SELECT 1 FROM cards LIMIT 1`);
+    // Sample data (cheap)
+    const rows = await db.query<{ id: number; name: string }>(
+      `SELECT id, name FROM cards ORDER BY id DESC LIMIT 1`
+    );
+    res.status(200).json({ db: true, cardsTable: true, sample: rows[0] ?? null });
+  } catch (err: any) {
+    res.status(500).json({
+      db: false,
+      cardsTable: false,
+      error: err?.message ?? 'unknown',
+      code: err?.code,
+    });
+  }
 });
 
 // Mount your actual API routes under /api
