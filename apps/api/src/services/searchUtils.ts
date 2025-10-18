@@ -8,7 +8,6 @@
  * @param {string} searchInput - Raw search input
  * @returns {string[]} Array of non-empty search terms
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'normalizeS... Remove this comment to see the full error message
 function normalizeSearchTerms(searchInput: any) {
   if (!searchInput || typeof searchInput !== 'string') {
     return [];
@@ -24,7 +23,6 @@ function normalizeSearchTerms(searchInput: any) {
  * @param {number} startParamCount - Starting parameter count for SQL placeholders
  * @returns {object} { condition: string, params: any[], paramCount: number }
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'buildSearc... Remove this comment to see the full error message
 function buildSearchConditions(searchTerms: any, searchFields: any, startParamCount = 1) {
   if (!searchTerms || searchTerms.length === 0) {
     return { condition: '', params: [], paramCount: startParamCount };
@@ -60,7 +58,6 @@ function buildSearchConditions(searchTerms: any, searchFields: any, startParamCo
 /**
  * Standard search fields for card queries
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'CARD_SEARC... Remove this comment to see the full error message
 const CARD_SEARCH_FIELDS = [
   'c.name',
   'c.card_number',
@@ -70,7 +67,6 @@ const CARD_SEARCH_FIELDS = [
   'cs.code'
 ];
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'CARD_SEARC... Remove this comment to see the full error message
 const CARD_SEARCH_FIELDS_BASIC = [
   'c.name',
   'c.card_number',

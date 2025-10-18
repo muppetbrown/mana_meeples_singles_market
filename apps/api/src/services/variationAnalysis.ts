@@ -5,28 +5,23 @@
  * for dynamic filtering based on what actually exists in each set.
  */
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'db'.
 const db = require('../config/database');
 
 // Constants from MTG spec
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'IGNORE_FRA... Remove this comment to see the full error message
 const IGNORE_FRAME_EFFECTS = [
   'legendary', 'enchantment', 'snow', 'miracle', 'boosterfun'
 ];
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'VISUAL_TRE... Remove this comment to see the full error message
 const VISUAL_TREATMENTS = [
   'extendedart', 'inverted', 'showcase', 'fullart', 'tombstone', 'wanted'
 ];
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'SPECIAL_FO... Remove this comment to see the full error message
 const SPECIAL_FOILS = [
   'surgefoil', 'galaxyfoil', 'fracturefoil', 'singularityfoil',
   'chocobotrackfoil', 'cosmicfoil', 'halofoil', 'textured',
   'firstplacefoil', 'rainbowfoil', 'dragonscalefoil', 'raisedfoil', 'neonink'
 ];
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'BORDER_COL... Remove this comment to see the full error message
 const BORDER_COLORS = ['black', 'borderless', 'white', 'yellow'];
 
 /**
