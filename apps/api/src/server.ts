@@ -1,106 +1,105 @@
 // apps/api/src/server.ts
-import express, { RequestHandler } from "express";
-import helmet from "helmet";
-import cors from "cors";
-import cookieParser from "cookie-parser";
-import { rateLimit } from "express-rate-limit";
+import express, { Request, Response, NextFunction } from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import compression from 'compression';
+import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
+// If you still have CORS middleware around, you can remove it for same-origin.
+import routes from './routes/index.js'; // keep your existing API router
 
-// ⚠️ NodeNext ESM: include .js extension for local imports
-import routes from "./routes/index.js";
+// __dirname for NodeNext
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Behind Render/NGINX → trust proxy for correct IPs
-app.set("trust proxy", 1);
+// Behind Render’s proxy -> ensures correct client IP for rate limiting/logging
+app.set('trust proxy', 1);
 
-// Security headers (loosen CORP to allow cross-origin if you host web elsewhere)
+// Basic hardening (same-origin policy)
 app.use(
   helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
-  })
-);
-
-// Parsers
-app.use(cookieParser());
-app.use(express.json({ limit: 10 * 1024 * 1024 })); // 10MB
-app.use(express.urlencoded({ extended: true, limit: 10 * 1024 * 1024 }));
-
-// CORS allowlist (comma-separated)
-const allowlist =
-  (process.env.CORS_ORIGINS || "")
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean) || [];
-
-app.use(
-  cors({
-    origin(origin, cb) {
-      if (!origin || allowlist.includes(origin)) return cb(null, true);
-      return cb(new Error(`CORS blocked for origin: ${origin}`));
+    contentSecurityPolicy: {
+      useDefaults: true,
+      directives: {
+        "default-src": ["'self'"],
+        "script-src": ["'self'"],
+        "style-src": ["'self'", "'unsafe-inline'"], // Vite inlines some styles
+        "img-src": ["'self'", "data:"],
+        "font-src": ["'self'", "data:"],
+        "connect-src": ["'self'"], // same-origin API + HMR in dev (not used in prod)
+        "frame-ancestors": ["'none'"],
+      },
     },
-    credentials: true,
+    crossOriginEmbedderPolicy: false, // avoids COEP issues for some assets
   })
 );
-app.options(/.*/, cors());
 
-// ---------- RATE LIMITS (v7) ----------
-// Type as RequestHandler so Express picks the right overload
-const apiLimiter: RequestHandler = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 100,
-  standardHeaders: "draft-8",
-  legacyHeaders: false,
+app.use(cookieParser());
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: false }));
+
+// Gzip/deflate compression for static + API JSON
+app.use(compression());
+
+// --- API FIRST ---
+// Health (nice for smoke tests and uptime checks)
+app.get('/api/health', (_req: Request, res: Response) => {
+  res.json({
+    ok: true,
+    service: 'Mana & Meeples API',
+    version: process.env.APP_VERSION ?? '1.0.0',
+    time: new Date().toISOString(),
+  });
 });
 
-const adminLimiter: RequestHandler = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 50,
-  standardHeaders: "draft-8",
-  legacyHeaders: false,
+// Mount your actual API routes under /api
+app.use('/api', routes);
+
+// 404s for API only (so SPA routes don’t get caught)
+app.use('/api', (_req: Request, res: Response) => {
+  res.status(404).json({ error: 'Not found' });
 });
 
-const loginLimiter: RequestHandler = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 5,
-  standardHeaders: "draft-8",
-  legacyHeaders: false,
-});
+// --- STATIC + SPA FALLBACK ---
+// We copy the Vite build into this directory at build-time (see Render build step)
+const publicDir = path.join(__dirname, 'public');
 
-// Mount limiters to the actual prefixes you use
-app.use("/api", apiLimiter);
-app.use("/api/auth/admin", adminLimiter);
-app.use("/api/auth/admin/login", loginLimiter);
-
-// Health
-app.get("/health", (_req, res) => res.json({ ok: true }));
-
-// All API routes
-app.use("/api", routes);
-
-// Errors (keep last)
+// Cache-busted assets get long cache, HTML gets short cache
 app.use(
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  (err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    if (err?.message?.startsWith("CORS blocked")) {
-      return res.status(403).json({ error: err.message });
-    }
-    console.error("❌ API error:", err);
-    res.status(500).json({ error: "Internal server error" });
-  }
+  express.static(publicDir, {
+    etag: true,
+    lastModified: true,
+    maxAge: '1h',
+    index: 'index.html',
+  })
 );
 
-// 404
-app.use((_req, res) => res.status(404).json({ error: "Not found" }));
-
-// Start
-const PORT = Number(process.env.PORT) || 8080;
-const server = app.listen(PORT, "0.0.0.0", () => {
-  console.log(`✅ API listening on http://0.0.0.0:${PORT}`);
+// SPA fallback (must come AFTER API and static)
+app.get('*', (_req: Request, res: Response, next: NextFunction) => {
+  // If request accepts HTML, serve index.html to let the client router handle it
+  const accept = _req.headers.accept || '';
+  if (accept.includes('text/html')) {
+    res.sendFile(path.join(publicDir, 'index.html'));
+  } else {
+    next();
+  }
 });
 
-// Graceful shutdown
-["SIGINT", "SIGTERM"].forEach((sig) => {
+// --- START SERVER ---
+const PORT = Number(process.env.PORT) || 10000;
+const HOST = '0.0.0.0';
+
+const server = app.listen(PORT, HOST, () => {
+  console.log(`✅ API+Web listening on http://${HOST}:${PORT}`);
+});
+
+// Graceful shutdown on Render
+['SIGINT', 'SIGTERM'].forEach((sig) => {
   process.on(sig, () => {
     server.close(() => process.exit(0));
   });
 });
+
+export default app;

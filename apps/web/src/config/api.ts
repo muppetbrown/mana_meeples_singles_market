@@ -1,46 +1,115 @@
 // apps/web/src/config/api.ts
 import { z } from "zod";
 
-const Runtime = (globalThis as any)?.window?.__ENV__ ?? {};
+const isBrowser = typeof window !== "undefined";
+const Runtime = (isBrowser ? (window as any).__ENV__ : undefined) ?? {};
+
 const EnvSchema = z.object({
   API_URL: z.string().url().optional(),
 });
 
-const parsed = EnvSchema.safeParse(Runtime);
-const runtimeApiUrl = parsed.success ? parsed.data.API_URL : undefined;
+const runtimeApiUrl = EnvSchema.safeParse(Runtime).success
+  ? (Runtime as z.infer<typeof EnvSchema>).API_URL
+  : undefined;
 
-// Vite build-time fallback
-const buildTimeApiUrl = import.meta?.env?.VITE_API_URL as string | undefined;
+// Vite build-time value (optional)
+const buildTimeApiUrl = (import.meta as any)?.env?.VITE_API_URL as
+  | string
+  | undefined;
 
-// Final resolution (runtime > build-time > relative)
-export const API_URL =
+// Final base (runtime > build-time > relative '/api')
+export const API_URL: string =
   runtimeApiUrl ||
   buildTimeApiUrl ||
-  (window?.location?.origin
+  (isBrowser && window.location?.origin
     ? `${window.location.origin}/api`
     : "/api");
 
-// Unified fetch with sane defaults
-export async function apiFetch<T>(
-  path: string,
-  init: RequestInit = {}
-): Promise<T> {
-  const res = await fetch(`${API_URL}${path}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", ...(init.headers || {}) },
-    ...init,
-  });
-
-  if (!res.ok) {
-    let info: any = null;
-    try {
-      info = await res.json();
-    } catch {
-      // ignore JSON errors
-    }
-    const message = info?.message || `HTTP ${res.status} on ${path}`;
-    throw new Error(message);
-  }
-  // typed JSON
-  return (await res.json()) as T;
+// Normalize join so callers can pass "health" or "/health"
+function join(base: string, path: string) {
+  const b = base.endsWith("/") ? base.slice(0, -1) : base;
+  const p = path.startsWith("/") ? path : `/${path}`;
+  return `${b}${p}`;
 }
+
+type ApiInit = RequestInit & { timeoutMs?: number };
+
+async function parseBody<T>(res: Response): Promise<T> {
+  // 204 or empty body → return undefined as any
+  if (res.status === 204) return undefined as unknown as T;
+  const text = await res.text();
+  if (!text) return undefined as unknown as T;
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    // If server ever returns text, surface it as an error payload-like object
+    return { raw: text } as unknown as T;
+  }
+}
+
+// Unified fetch with sane defaults + timeout + better errors
+export async function apiFetch<T>(path: string, init: ApiInit = {}): Promise<T> {
+  const { timeoutMs = 15000, headers, ...rest } = init;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const res = await fetch(join(API_URL, path), {
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+        ...(headers || {}),
+      },
+      signal: controller.signal,
+      ...rest,
+    });
+
+    if (!res.ok) {
+      // Try to extract structured error
+      let info: any = null;
+      try {
+        info = await res.clone().json();
+      } catch {
+        // ignore
+      }
+      const message =
+        info?.message ||
+        info?.error ||
+        `HTTP ${res.status} ${res.statusText} on ${path}`;
+      const err = new Error(message) as Error & { status?: number; info?: any };
+      err.status = res.status;
+      err.info = info;
+      throw err;
+    }
+
+    return await parseBody<T>(res);
+  } catch (err: any) {
+    if (err?.name === "AbortError") {
+      throw new Error(`Request timed out after ${timeoutMs}ms: ${path}`);
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Small helpers (optional)
+export const api = {
+  get: <T>(path: string, init?: ApiInit) =>
+    apiFetch<T>(path, { method: "GET", ...(init || {}) }),
+  post: <T, B = unknown>(path: string, body?: B, init?: ApiInit) =>
+    apiFetch<T>(path, {
+      method: "POST",
+      body: body ? JSON.stringify(body) : undefined,
+      ...(init || {}),
+    }),
+  put: <T, B = unknown>(path: string, body?: B, init?: ApiInit) =>
+    apiFetch<T>(path, {
+      method: "PUT",
+      body: body ? JSON.stringify(body) : undefined,
+      ...(init || {}),
+    }),
+  del: <T>(path: string, init?: ApiInit) =>
+    apiFetch<T>(path, { method: "DELETE", ...(init || {}) }),
+};

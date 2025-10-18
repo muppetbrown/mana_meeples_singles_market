@@ -3,7 +3,7 @@
   "private": true,
   "packageManager": "pnpm@9.11.0",
   "engines": {
-    "node": "22.x",
+    "node": "20.x",
     "pnpm": "9.x"
   },
   "scripts": {
@@ -14,7 +14,8 @@
     "test": "pnpm -r run test",
     "format": "pnpm -r run format",
     "clean": "pnpm -r run clean && rimraf node_modules .turbo",
-    "ci": "pnpm typecheck && pnpm lint && pnpm test && pnpm build"
+    "ci": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
+    "build:render": "pnpm --filter ./apps/web run build && pnpm --filter ./apps/api run build && node scripts/copy-dist-to-api.js"
   },
   "devDependencies": {
     "@babel/parser": "^7.28.4",
@@ -39,5 +40,8 @@
   "dependencies": {
     "bcrypt": "^6.0.0",
     "jsonwebtoken": "^9.0.2"
+  },
+  "overrides": {
+    "dev": "npm:@empty@0.0.0"
   }
 }
