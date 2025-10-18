@@ -64,8 +64,10 @@ export async function withConn<T>(
  */
 export async function healthcheck(): Promise<boolean> {
   try {
-    const { rows } = await pool.query("SELECT 1 AS ok");
-    return rows[0]?.ok === 1;
+    // Cast to int so the intent is explicit.
+    const { rows } = await pool.query<{ ok: number | string }>('SELECT 1::int AS ok');
+    const v = rows[0]?.ok;
+    return v === 1 || v === '1';
   } catch {
     return false;
   }
