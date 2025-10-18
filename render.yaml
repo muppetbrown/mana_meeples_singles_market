@@ -16,7 +16,7 @@ services:
         value: 10000
 
   # Frontend Web Service
-  - type: static
+  - type: web
     name: mana-meeples-web
     env: static
     buildCommand: corepack enable && pnpm install && pnpm --filter ./apps/web run build
