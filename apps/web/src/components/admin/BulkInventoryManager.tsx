@@ -1,79 +1,99 @@
 import React, { useState } from 'react';
-
-import PropTypes from 'prop-types';
 import { Upload, Download, FileText, AlertCircle, CheckCircle, AlertTriangle } from 'lucide-react';
-import { downloadCSV, csvToArray, validateInventoryCSV, formatInventoryForExport, generateInventoryTemplate } from '../../utils/csvUtils';
+import {
+  downloadCSV,
+  csvToArray,
+  validateInventoryCSV,
+  formatInventoryForExport,
+  generateInventoryTemplate,
+} from '../../utils/csvUtils';
 import { API_URL } from '../../config/api';
+
+// -------------------- Types --------------------
+export type InventoryCSVRow = Record<string, string | number | null | undefined>;
+
+export interface ValidationResults {
+  valid: boolean;
+  totalRows: number;
+  validRows: number;
+  errors: string[];
+  warnings: string[];
+}
+
+export interface ImportResults {
+  imported: number;
+  updated: number;
+  skipped: number;
+  errors: number;
+}
+
+export interface BulkInventoryManagerProps {
+  onInventoryUpdate?: () => void;
+  currentUser?: { id?: string | number; name?: string } | null;
+}
 
 /**
  * Bulk Inventory Manager Component
  * Provides CSV import/export functionality for inventory management
  */
-const BulkInventoryManager = ({
-  onInventoryUpdate,
-  currentUser
-}: any) => {
+const BulkInventoryManager: React.FC<BulkInventoryManagerProps> = ({ onInventoryUpdate, currentUser }) => {
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
-  const [importResults, setImportResults] = useState(null);
-  const [validationResults, setValidationResults] = useState(null);
-  const [uploadedData, setUploadedData] = useState(null);
+  const [importResults, setImportResults] = useState<ImportResults | null>(null);
+  const [validationResults, setValidationResults] = useState<ValidationResults | null>(null);
+  const [uploadedData, setUploadedData] = useState<InventoryCSVRow[] | null>(null);
 
   // Handle file upload and validation
-  const handleFileUpload = async (event: any) => {
-    const file = event.target.files[0];
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.currentTarget;
+    const file = input.files && input.files[0];
     if (!file) return;
 
-    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+    if (file.type !== 'text/csv' && !file.name.toLowerCase().endsWith('.csv')) {
       window.alert('Please upload a CSV file.');
+      input.value = '';
       return;
     }
 
     try {
       const text = await file.text();
-      const data = csvToArray(text, { hasHeader: true });
-      const validation = validateInventoryCSV(data);
-
+      const data = csvToArray(text, { hasHeader: true }) as InventoryCSVRow[];
+      const validation = validateInventoryCSV(data) as ValidationResults;
 
       setUploadedData(data);
-
       setValidationResults(validation);
       setImportResults(null);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Failed to parse CSV:', error);
       window.alert('Failed to parse CSV file. Please check the format.');
     }
 
-    // Clear file input
-    event.target.value = '';
+    // Clear file input (allows uploading same file twice)
+    input.value = '';
   };
 
   // Import validated data to the system
   const handleImportData = async () => {
-
-    if (!uploadedData || !validationResults?.valid) {
-      return;
-    }
+    if (!uploadedData || !validationResults?.valid) return;
 
     setImporting(true);
     try {
       const response = await fetch(`${API_URL}/admin/inventory/bulk-import`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
           data: uploadedData,
-          user_id: currentUser?.id
-        })
+          user_id: currentUser?.id,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error(`Import failed: ${response.statusText}`);
+        throw new Error(`Import failed: ${response.status} ${response.statusText}`);
       }
 
-      const results = await response.json();
+      const results = (await response.json()) as ImportResults;
       setImportResults(results);
 
       // Clear upload data after successful import
@@ -81,13 +101,12 @@ const BulkInventoryManager = ({
       setValidationResults(null);
 
       // Notify parent component
-      if (onInventoryUpdate) {
-        onInventoryUpdate();
-      }
+      onInventoryUpdate?.();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Import error:', error);
-
-      window.alert(`Import failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      window.alert(`Import failed: ${message}`);
     } finally {
       setImporting(false);
     }
@@ -97,23 +116,21 @@ const BulkInventoryManager = ({
   const handleExportInventory = async () => {
     setExporting(true);
     try {
-      const response = await fetch(`${API_URL}/admin/inventory/export`, {
-        credentials: 'include'
-      });
-
+      const response = await fetch(`${API_URL}/admin/inventory/export`, { credentials: 'include' });
       if (!response.ok) {
-        throw new Error(`Export failed: ${response.statusText}`);
+        throw new Error(`Export failed: ${response.status} ${response.statusText}`);
       }
 
-      const inventoryData = await response.json();
+      const inventoryData = (await response.json()) as { inventory?: InventoryCSVRow[] };
       const formattedData = formatInventoryForExport(inventoryData.inventory || []);
 
       const filename = `inventory-export-${new Date().toISOString().split('T')[0]}.csv`;
       downloadCSV(formattedData, filename);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Export error:', error);
-
-      window.alert(`Export failed: ${error.message}`);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      window.alert(`Export failed: ${message}`);
     } finally {
       setExporting(false);
     }
@@ -137,9 +154,7 @@ const BulkInventoryManager = ({
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
       <div className="mb-6">
         <h3 className="text-lg font-semibold text-slate-900 mb-2">Bulk Inventory Management</h3>
-        <p className="text-sm text-slate-600">
-          Import and export inventory data in CSV format for bulk operations.
-        </p>
+        <p className="text-sm text-slate-600">Import and export inventory data in CSV format for bulk operations.</p>
       </div>
 
       {/* Action Buttons */}
@@ -147,22 +162,18 @@ const BulkInventoryManager = ({
         {/* Import Section */}
         <div className="border border-slate-200 rounded-lg p-4">
           <h4 className="font-medium text-slate-900 mb-2 flex items-center gap-2">
-            <Upload className="w-4 h-4" />
+            <Upload className="w-4 h-4" aria-hidden="true" />
             Import Inventory
           </h4>
-          <p className="text-xs text-slate-600 mb-3">
-            Upload a CSV file to add or update inventory items.
-          </p>
+          <p className="text-xs text-slate-600 mb-3">Upload a CSV file to add or update inventory items.</p>
           <input
             type="file"
             accept=".csv"
             onChange={handleFileUpload}
             className="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 mb-2"
+            aria-label="Upload inventory CSV"
           />
-          <button
-            onClick={handleDownloadTemplate}
-            className="text-xs text-blue-600 hover:text-blue-800 underline"
-          >
+          <button onClick={handleDownloadTemplate} className="text-xs text-blue-600 hover:text-blue-800 underline">
             Download CSV template
           </button>
         </div>
@@ -170,30 +181,26 @@ const BulkInventoryManager = ({
         {/* Export Section */}
         <div className="border border-slate-200 rounded-lg p-4">
           <h4 className="font-medium text-slate-900 mb-2 flex items-center gap-2">
-            <Download className="w-4 h-4" />
+            <Download className="w-4 h-4" aria-hidden="true" />
             Export Inventory
           </h4>
-          <p className="text-xs text-slate-600 mb-3">
-            Download current inventory as CSV file.
-          </p>
+          <p className="text-xs text-slate-600 mb-3">Download current inventory as CSV file.</p>
           <button
             onClick={handleExportInventory}
             disabled={exporting}
             className="w-full px-3 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white text-sm font-medium rounded-md transition-colors"
           >
-            {exporting ? 'Exporting...' : 'Export CSV'}
+            {exporting ? 'Exporting…' : 'Export CSV'}
           </button>
         </div>
 
         {/* Template Section */}
         <div className="border border-slate-200 rounded-lg p-4">
           <h4 className="font-medium text-slate-900 mb-2 flex items-center gap-2">
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4" aria-hidden="true" />
             Template & Help
           </h4>
-          <p className="text-xs text-slate-600 mb-3">
-            Download a template with example data and column headers.
-          </p>
+          <p className="text-xs text-slate-600 mb-3">Download a template with example data and column headers.</p>
           <button
             onClick={handleDownloadTemplate}
             className="w-full px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm font-medium rounded-md transition-colors"
@@ -206,79 +213,62 @@ const BulkInventoryManager = ({
       {/* Validation Results */}
       {validationResults && (
         <div className="mb-6">
-          <div className={`rounded-lg p-4 border ${
-
-            validationResults.valid
-              ? 'bg-green-50 border-green-200'
-              : 'bg-red-50 border-red-200'
-          }`}>
+          <div
+            className={`rounded-lg p-4 border ${validationResults.valid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}
+            role="status"
+            aria-live="polite"
+          >
             <div className="flex items-start gap-3">
-              // @ts-expect-error TS(2339): Property 'valid' does not exist on type 'never'.
               {validationResults.valid ? (
-                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" aria-hidden="true" />
               ) : (
-                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" />
+                <AlertCircle className="w-5 h-5 text-red-600 mt-0.5" aria-hidden="true" />
               )}
               <div className="flex-1">
-                <h4 className={`font-medium mb-2 ${
-
-                  validationResults.valid ? 'text-green-900' : 'text-red-900'
-                }`}>
-                  // @ts-expect-error TS(2339): Property 'valid' does not exist on type 'never'.
+                <h4 className={`font-medium mb-2 ${validationResults.valid ? 'text-green-900' : 'text-red-900'}`}>
                   Validation {validationResults.valid ? 'Passed' : 'Failed'}
                 </h4>
 
                 <div className="text-sm mb-3">
-                  // @ts-expect-error TS(2339): Property 'totalRows' does not exist on type 'never... Remove this comment to see the full error message
                   <p>Total rows: {validationResults.totalRows}</p>
-                  // @ts-expect-error TS(2339): Property 'valid' does not exist on type 'never'.
-                  {!validationResults.valid && (
-
-                    <p>Valid rows: {validationResults.validRows}</p>
-                  )}
+                  {!validationResults.valid && <p>Valid rows: {validationResults.validRows}</p>}
                 </div>
 
                 {/* Errors */}
-                // @ts-expect-error TS(2339): Property 'errors' does not exist on type 'never'.
                 {validationResults.errors.length > 0 && (
                   <div className="mb-3">
                     <h5 className="font-medium text-red-900 mb-1">Errors:</h5>
                     <ul className="text-sm text-red-800 list-disc list-inside space-y-1 max-h-32 overflow-y-auto">
-                      // @ts-expect-error TS(2339): Property 'errors' does not exist on type 'never'.
-                      {validationResults.errors.map((error: any, index: any) => (
-                        <li key={index}>{error}</li>
+                      {validationResults.errors.map((error, index) => (
+                        <li key={`${error}-${index}`}>{error}</li>
                       ))}
                     </ul>
                   </div>
                 )}
 
                 {/* Warnings */}
-                // @ts-expect-error TS(2339): Property 'warnings' does not exist on type 'never'... Remove this comment to see the full error message
                 {validationResults.warnings.length > 0 && (
                   <div className="mb-3">
                     <h5 className="font-medium text-yellow-900 mb-1 flex items-center gap-1">
-                      <AlertTriangle className="w-4 h-4" />
+                      <AlertTriangle className="w-4 h-4" aria-hidden="true" />
                       Warnings:
                     </h5>
                     <ul className="text-sm text-yellow-800 list-disc list-inside space-y-1 max-h-32 overflow-y-auto">
-                      // @ts-expect-error TS(2339): Property 'warnings' does not exist on type 'never'... Remove this comment to see the full error message
-                      {validationResults.warnings.map((warning: any, index: any) => (
-                        <li key={index}>{warning}</li>
+                      {validationResults.warnings.map((warning, index) => (
+                        <li key={`${warning}-${index}`}>{warning}</li>
                       ))}
                     </ul>
                   </div>
                 )}
 
                 {/* Import Button */}
-                // @ts-expect-error TS(2339): Property 'valid' does not exist on type 'never'.
                 {validationResults.valid && (
                   <button
                     onClick={handleImportData}
                     disabled={importing}
                     className="px-4 py-2 bg-green-600 hover:bg-green-700 disabled:bg-slate-400 text-white font-medium rounded-md transition-colors"
                   >
-                    // @ts-expect-error TS(2339): Property 'totalRows' does not exist on type 'never... Remove this comment to see the full error message
-                    {importing ? 'Importing...' : `Import ${validationResults.totalRows} Items`}
+                    {importing ? 'Importing…' : `Import ${validationResults.totalRows} Items`}
                   </button>
                 )}
               </div>
@@ -290,23 +280,16 @@ const BulkInventoryManager = ({
       {/* Import Results */}
       {importResults && (
         <div className="mb-6">
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4" role="status" aria-live="polite">
             <div className="flex items-start gap-3">
-              <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" />
+              <CheckCircle className="w-5 h-5 text-blue-600 mt-0.5" aria-hidden="true" />
               <div>
                 <h4 className="font-medium text-blue-900 mb-2">Import Completed</h4>
                 <div className="text-sm text-blue-800">
-                  // @ts-expect-error TS(2339): Property 'imported' does not exist on type 'never'... Remove this comment to see the full error message
                   <p>Successfully imported: {importResults.imported || 0} items</p>
-                  // @ts-expect-error TS(2339): Property 'updated' does not exist on type 'never'.
                   <p>Updated: {importResults.updated || 0} items</p>
-                  // @ts-expect-error TS(2339): Property 'skipped' does not exist on type 'never'.
                   <p>Skipped: {importResults.skipped || 0} items</p>
-                  // @ts-expect-error TS(2339): Property 'errors' does not exist on type 'never'.
-                  {importResults.errors > 0 && (
-
-                    <p className="text-red-600">Errors: {importResults.errors}</p>
-                  )}
+                  {importResults.errors > 0 && <p className="text-red-600">Errors: {importResults.errors}</p>}
                 </div>
               </div>
             </div>
@@ -318,22 +301,22 @@ const BulkInventoryManager = ({
       <div className="border-t border-slate-200 pt-4">
         <h4 className="font-medium text-slate-900 mb-2">CSV Format Requirements</h4>
         <div className="text-xs text-slate-600 space-y-1">
-          <p><strong>Required columns:</strong> name, set_name, quality, price, stock_quantity</p>
-          <p><strong>Optional columns:</strong> card_number, rarity, foil_type, language, game_name</p>
-          <p><strong>Quality values:</strong> NM, LP, MP, HP, DMG</p>
-          <p><strong>Foil types:</strong> Regular, Foil, Etched, Showcase</p>
+          <p>
+            <strong>Required columns:</strong> name, set_name, quality, price, stock_quantity
+          </p>
+          <p>
+            <strong>Optional columns:</strong> card_number, rarity, foil_type, language, game_name
+          </p>
+          <p>
+            <strong>Quality values:</strong> NM, LP, MP, HP, DMG
+          </p>
+          <p>
+            <strong>Foil types:</strong> Regular, Foil, Etched, Showcase
+          </p>
         </div>
       </div>
     </div>
   );
-};
-
-BulkInventoryManager.propTypes = {
-  onInventoryUpdate: PropTypes.func,
-  currentUser: PropTypes.shape({
-    id: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-    name: PropTypes.string,
-  }),
 };
 
 export default BulkInventoryManager;
