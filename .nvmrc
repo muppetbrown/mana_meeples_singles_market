@@ -1,4 +1,0 @@
-corepack enable
-corepack prepare pnpm@9.11.0 --activate
-node -v   # v20.11.x
-pnpm -v   # 9.11.0
