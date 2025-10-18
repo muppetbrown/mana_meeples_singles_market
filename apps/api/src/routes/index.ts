@@ -1,10 +1,10 @@
 // apps/api/src/routes/index.ts
 import express from "express";
 
-import apiRoutes from "./api";
-import authRoutes from "./auth";
-import filtersRoutes from "./filters";
-import variationsRoutes from "./variations";
+import apiRoutes from "./api.js";
+import authRoutes from "./auth.js";
+import filtersRoutes from "./filters.js";
+import variationsRoutes from "./variations.js";
 
 const router = express.Router();
 
