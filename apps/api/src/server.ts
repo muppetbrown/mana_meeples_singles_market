@@ -76,8 +76,7 @@ app.use(
   })
 );
 
-app.get('(.*)', (_req: Request, res: Response, next: NextFunction) => {
-  // If request accepts HTML, serve index.html to let the client router handle it
+app.get(/.*/, (_req: Request, res: Response, next: NextFunction) => {
   const accept = _req.headers.accept || '';
   if (accept.includes('text/html')) {
     res.sendFile(path.join(publicDir, 'index.html'));
@@ -85,7 +84,6 @@ app.get('(.*)', (_req: Request, res: Response, next: NextFunction) => {
     next();
   }
 });
-
 
 // --- START SERVER ---
 const PORT = Number(process.env.PORT) || 10000;
