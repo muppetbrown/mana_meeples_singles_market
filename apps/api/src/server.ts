@@ -76,8 +76,7 @@ app.use(
   })
 );
 
-// SPA fallback (must come AFTER API and static)
-app.get('/*', (_req: Request, res: Response, next: NextFunction) => {
+app.get('(.*)', (_req: Request, res: Response, next: NextFunction) => {
   // If request accepts HTML, serve index.html to let the client router handle it
   const accept = _req.headers.accept || '';
   if (accept.includes('text/html')) {
@@ -86,6 +85,7 @@ app.get('/*', (_req: Request, res: Response, next: NextFunction) => {
     next();
   }
 });
+
 
 // --- START SERVER ---
 const PORT = Number(process.env.PORT) || 10000;
