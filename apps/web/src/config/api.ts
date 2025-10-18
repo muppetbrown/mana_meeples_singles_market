@@ -1,112 +1,46 @@
-import { z } from 'zod';
+// apps/web/src/config/api.ts
+import { z } from "zod";
 
-// -------------------- Types --------------------
-export type ApiResponse<T> = {
-  success: boolean;
-  data?: T;
-  error?: string;
-};
-
-export interface FetchOptions extends RequestInit {
-  json?: boolean;
-}
-
-/// <reference types="vite/client" />
-
-declare global {
-  interface ImportMetaEnv {
-    VITE_API_URL?: string;
-  }
-  interface ImportMeta {
-    readonly env: ImportMetaEnv;
-  }
-}
-
-export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
-
-
-
-// -------------------- Core Fetch Helper --------------------
-export async function apiFetch<T = unknown>(
-  endpoint: string,
-  options: FetchOptions = {}
-): Promise<ApiResponse<T>> {
-  const url = endpoint.startsWith('http') ? endpoint : `${API_URL}${endpoint}`;
-
-  const fetchOptions: RequestInit = {
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers ?? {}),
-    },
-    credentials: 'include',
-    ...options,
-  };
-
-  try {
-    const response = await fetch(url, fetchOptions);
-
-    if (!response.ok) {
-      let message = `${response.status} ${response.statusText}`;
-      try {
-        const body = await response.json();
-        message = body.error || body.message || message;
-      } catch {
-        // ignore JSON parse failure
-      }
-      return { success: false, error: message };
-    }
-
-    const data = options.json === false ? (await response.text()) : await response.json();
-    return { success: true, data } as ApiResponse<T>;
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    return { success: false, error: message };
-  }
-}
-
-// -------------------- Validation Schemas --------------------
-export const PaginatedQuerySchema = z.object({
-  limit: z.number().min(1).max(100).optional(),
-  offset: z.number().min(0).optional(),
-  search: z.string().trim().optional(),
-  sort: z.string().trim().optional(),
-  order: z.enum(['asc', 'desc']).optional(),
+const Runtime = (globalThis as any)?.window?.__ENV__ ?? {};
+const EnvSchema = z.object({
+  API_URL: z.string().url().optional(),
 });
 
-export type PaginatedQuery = z.infer<typeof PaginatedQuerySchema>;
+const parsed = EnvSchema.safeParse(Runtime);
+const runtimeApiUrl = parsed.success ? parsed.data.API_URL : undefined;
 
-// -------------------- Example API Calls --------------------
-export async function getInventory(params?: PaginatedQuery) {
-  const searchParams = new URLSearchParams();
-  if (params) {
-    Object.entries(params).forEach(([key, val]) => {
-      if (val !== undefined && val !== null) searchParams.append(key, String(val));
-    });
+// Vite build-time fallback
+const buildTimeApiUrl = import.meta?.env?.VITE_API_URL as string | undefined;
+
+// Final resolution (runtime > build-time > relative)
+export const API_URL =
+  runtimeApiUrl ||
+  buildTimeApiUrl ||
+  (window?.location?.origin
+    ? `${window.location.origin}/api`
+    : "/api");
+
+// Unified fetch with sane defaults
+export async function apiFetch<T>(
+  path: string,
+  init: RequestInit = {}
+): Promise<T> {
+  const res = await fetch(`${API_URL}${path}`, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json", ...(init.headers || {}) },
+    ...init,
+  });
+
+  if (!res.ok) {
+    let info: any = null;
+    try {
+      info = await res.json();
+    } catch {
+      // ignore JSON errors
+    }
+    const message = info?.message || `HTTP ${res.status} on ${path}`;
+    throw new Error(message);
   }
-  const query = searchParams.toString() ? `?${searchParams.toString()}` : '';
-  return apiFetch(`${API_URL}/inventory${query}`);
-}
-
-export async function getCardById(cardId: string | number) {
-  return apiFetch(`${API_URL}/cards/${cardId}`);
-}
-
-export async function updateInventoryItem(id: string | number, payload: Record<string, unknown>) {
-  return apiFetch(`${API_URL}/inventory/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify(payload),
-  });
-}
-
-export async function deleteInventoryItem(id: string | number) {
-  return apiFetch(`${API_URL}/inventory/${id}`, {
-    method: 'DELETE',
-  });
-}
-
-export async function createInventoryItem(payload: Record<string, unknown>) {
-  return apiFetch(`${API_URL}/inventory`, {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
+  // typed JSON
+  return (await res.json()) as T;
 }

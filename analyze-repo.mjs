@@ -7,67 +7,108 @@ import traverseModule from '@babel/traverse';
 import * as t from '@babel/types';
 import chalk from 'chalk';
 
+
 const traverse = traverseModule.default || traverseModule; // CJS/ESM interop
 const parseErrors = [];
 
-// -------------------- CLI ARGS --------------------
+
+const toPosix = (p) => p.replace(/\\/g, '/');
+const isWinAbs = (p) => /^[A-Za-z]:\\/.test(p);
+const isLocalPath = (p) => p.startsWith('/') || isWinAbs(p);
+const isInNodeModules = (p) => toPosix(p).includes('/node_modules/');
+
+
 function parseArgs() {
-  const argv = process.argv.slice(2);
-  const getFlag = (name, def) => {
-    const i = argv.findIndex(a => a === `--${name}`);
-    if (i !== -1) return argv[i + 1];
-    const eq = argv.find(a => a.startsWith(`--${name}=`));
-    if (eq) return eq.split('=')[1];
-    return def;
-  };
-  const getBool = (name) => argv.includes(`--${name}`);
+const argv = process.argv.slice(2);
+const getFlag = (name, def) => {
+const i = argv.findIndex(a => a === `--${name}`);
+if (i !== -1) return argv[i + 1];
+const eq = argv.find(a => a.startsWith(`--${name}=`));
+if (eq) return eq.split('=')[1];
+return def;
+};
+const getBool = (name) => argv.includes(`--${name}`);
 
-  const root = path.resolve(getFlag('root', '.'));
-  const out = path.resolve(getFlag('out', './repo-report'));
-  const extensions = (getFlag('extensions', '.js,.jsx,.ts,.tsx,.mjs,.cjs')).split(',').map(s => s.trim()).filter(Boolean);
-  const includeDefault = 'routes,services,utils,middleware,config,mana-meeples-shop,.';
-  const include = (getFlag('include', includeDefault)).split(',').map(s => s.trim()).filter(Boolean);
-  const excludeDefault = '**/{node_modules,dist,build,.next,.vercel,.turbo,coverage}/**';
-  const exclude = (getFlag('exclude', excludeDefault)).split(',').map(s => s.trim()).filter(Boolean);
-  const entryDefault = 'server.js';
-  const entry = (getFlag('entry', entryDefault) || entryDefault).split(',').map(s => s.trim()).filter(Boolean).map(p => path.resolve(root, p));
 
-  const json = getBool('json');
-  const md = getBool('md');
-  const dot = getBool('dot');
+const root = path.resolve(getFlag('root', '.'));
+const out = path.resolve(getFlag('out', './repo-report'));
+const extensions = (getFlag('extensions', '.js,.jsx,.ts,.tsx,.mjs,.cjs')).split(',').map(s => s.trim()).filter(Boolean);
+const includeDefault = 'routes,services,utils,middleware,config,mana-meeples-shop,.';
+const include = (getFlag('include', includeDefault)).split(',').map(s => s.trim()).filter(Boolean);
+const excludeDefault = '**/{dist,build,.next,.vercel,.turbo,coverage}/**';
+const exclude = (getFlag('exclude', excludeDefault)).split(',').map(s => s.trim()).filter(Boolean);
+const entryDefault = 'server.js';
+const entry = (getFlag('entry', entryDefault) || entryDefault)
+.split(',')
+.map(s => s.trim())
+.filter(Boolean)
+.map(p => path.resolve(root, p));
 
-  return { root, out, extensions, include, exclude, entry, json, md, dot };
+
+const json = getBool('json');
+const md = getBool('md');
+const dot = getBool('dot');
+const tree = getBool('tree');
+const treeDepthRaw = getFlag('tree-depth', '0');
+const treeDepth = Number.isFinite(Number(treeDepthRaw)) ? parseInt(treeDepthRaw, 10) : 0;
+
+
+return { root, out, extensions, include, exclude, entry, json, md, dot, tree, treeDepth };
 }
+
 
 const args = parseArgs();
 fs.mkdirSync(args.out, { recursive: true });
 
-// -------------------- PATH/EXT HELPERS --------------------
-const toPosix = (p) => p.replace(/\\/g, '/');
-const isWinAbs = (p) => /^[A-Za-z]:\\/.test(p);
-const isLocalPath = (p) => p.startsWith('/') || isWinAbs(p);
 
-// Build extension regex from CLI
 const EXT_RE = new RegExp(
-  `\\.(${(args.extensions || ['.js'])
-    .map(e => e.replace(/^\./, ''))
-    .map(e => e.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
-    .join('|')})$`,
-  'i'
+`\\.(${(args.extensions || ['.js'])
+.map(e => e.replace(/^\./, ''))
+.map(e => e.replace(/[.*+?^${}()|[\\]\\]/g, '\\$&'))
+.join('|')})$`,
+'i'
 );
 
 
-// -------------------- FILE LIST --------------------
+function loadGitignorePatterns(rootDir) {
+const gitignorePath = path.join(rootDir, '.gitignore');
+if (!fs.existsSync(gitignorePath)) return [];
+const lines = fs.readFileSync(gitignorePath, 'utf8').split(/\r?\n/);
+const patterns = lines
+.map(l => l.trim())
+.filter(l => l && !l.startsWith('#') && !l.startsWith('!'))
+.map(p => {
+let cleaned = p.startsWith('./') ? p.slice(2) : p;
+if (cleaned.endsWith('/')) cleaned = `${cleaned}**`;
+return toPosix(cleaned);
+});
+return patterns;
+}
+
+
+const gitignorePatterns = loadGitignorePatterns(args.root);
+const ignoreOutRel = toPosix(path.relative(args.root, args.out));
+
+
+const finalExcludes = [
+...args.exclude.map(toPosix),
+...gitignorePatterns,
+ignoreOutRel && ignoreOutRel !== '' ? `${ignoreOutRel}/**` : null,
+].filter(Boolean);
+
+
 function listProjectFiles() {
-  const patterns = args.include.map(inc => `${toPosix(inc)}/**/*`);
-  const files = fg.sync(patterns, {
-    cwd: args.root,
-    ignore: args.exclude.map(toPosix),
-    onlyFiles: true,
-    absolute: true,
-    dot: false,
-  });
-  return files.filter(f => EXT_RE.test(f));
+const patterns = args.include.map(inc => `${toPosix(inc)}/**/*`);
+const files = fg.sync(patterns, {
+cwd: args.root,
+ignore: finalExcludes,
+onlyFiles: true,
+absolute: true,
+dot: false,
+});
+return files
+.filter(f => EXT_RE.test(f))
+.filter(f => !isInNodeModules(f));
 }
 
 const files = listProjectFiles();
@@ -126,26 +167,26 @@ function parseFile(file) {
   n.sizeBytes = Buffer.byteLength(code, 'utf8');
   n.lines = code.split(/\r?\n/).length;
 
-    let ast;
-    try {
+  let ast;
+  try {
     ast = parser.parse(code, {
-        sourceType: 'unambiguous',
-        plugins: [
+      sourceType: 'unambiguous',
+      plugins: [
         'jsx',
         'typescript',
         'classProperties',
         'dynamicImport',
         'exportDefaultFrom',
         'exportNamespaceFrom',
-        ],
+      ],
     });
-    } catch (err) {
+  } catch (err) {
     parseErrors.push({
-        file,
-        message: err && err.message ? err.message : String(err),
+      file,
+      message: err && err.message ? err.message : String(err),
     });
     return; // skip this file, keep going
-    }
+  }
 
   traverse(ast, {
     ImportDeclaration(p) {
@@ -319,8 +360,20 @@ const rel = (p) => {
 const jsonOut = {
   generatedAt: new Date().toISOString(),
   root: args.root,
-  files: [...nodes.values()].map(n => ({ id: rel(n.id), isExternal: n.isExternal, lines: n.lines, sizeBytes: n.sizeBytes, onlyReExports: n.onlyReExports, exports: n.exports, isTest: n.isTest })),
-  edges: edges.map(e => ({ from: rel(e.from), to: rel(e.to), kind: e.kind })),
+  files: [...nodes.values()]
+  .filter(n => !isInNodeModules(n.id))
+  .map(n => ({
+    id: rel(n.id),
+    isExternal: n.isExternal,
+    lines: n.lines,
+    sizeBytes: n.sizeBytes,
+    onlyReExports: n.onlyReExports,
+    exports: n.exports,
+    isTest: n.isTest
+  })),
+  edges: edges
+  .filter(e => !isInNodeModules(e.from) && !isInNodeModules(e.to))
+  .map(e => ({ from: rel(e.from), to: rel(e.to), kind: e.kind })),
   metrics: {
     cycles: cycles.map(c => c.map(rel)),
     orphans: orphans.map(rel),
@@ -356,7 +409,7 @@ function writeDOT() {
     lines.push(`  ${a} -> ${b};`);
   }
   lines.push('}');
-  fs.writeFileSync(p, lines.join('/n'));
+  fs.writeFileSync(p, lines.join('\n'));
   console.log(chalk.green(`✔ DOT graph:`), p);
 }
 
@@ -372,7 +425,7 @@ function writeMarkdown() {
   md.push(`- Edges: ${edges.length}`);
   md.push('');
 
-  const list = (arr, empty = 'None') => arr.length ? arr.map(a => `- ${a}`).join('/n') : `- ${empty}`;
+  const list = (arr, empty = 'None') => arr.length ? arr.map(a => `- ${a}`).join('\n') : `- ${empty}`;
 
   const hotspotsLocal = [...hotspots];
   md.push('## Hotspots (fan-in × lines)');
@@ -406,28 +459,118 @@ function writeMarkdown() {
   else md.push('- None');
   md.push('');
 
-    md.push('## Parse Errors (skipped files)');
-    if (parseErrors.length) {
+  md.push('## Parse Errors (skipped files)');
+  if (parseErrors.length) {
     parseErrors.forEach(pe => md.push(`- ${rel(pe.file)} — ${pe.message}`));
-    } else {
+  } else {
     md.push('- None');
-    }
-    md.push('');
-
-  md.push('## Suggested Actions');
-  md.push('- Break cycles by introducing interfaces or dependency inversion at one edge.');
-  md.push('- Split hotspots into smaller modules; decouple shared utilities used by many callers.');
-  md.push('- Collapse long barrel chains: export from the source or a single top-level index.');
-  md.push('- Remove or move orphans; ensure entrypoints are declared via `--entry`.');
-  md.push('- Trim large files (>400 lines) into cohesive components/hooks.');
-  md.push('- Delete or inline exports that are never imported.');
+  }
   md.push('');
 
-  fs.writeFileSync(p, md.join('/n'));
+  fs.writeFileSync(p, md.join('\n'));
   console.log(chalk.green(`✔ Markdown report:`), p);
 }
 
+// -------------------- TREE OUTPUT --------------------
+// Build a directory tree of the repository, ignoring excluded globs, node_modules, .git, .github, etc.
+function buildTreeEntries() {
+const entries = fg.sync(['**/*', '**/.*'], {
+cwd: args.root,
+onlyFiles: false,
+dot: false, // hide dot-dirs like .git, .github
+ignore: [...finalExcludes, '**/node_modules/**'], // exclude contents of ANY node_modules
+absolute: false,
+markDirectories: false,
+followSymbolicLinks: false,
+});
+
+
+const set = new Set(['']);
+for (const e of entries) set.add(toPosix(e));
+return [...set];
+}
+
+
+function buildTreeStructure(pathsRel) {
+const rootNode = { name: path.basename(args.root) || '.', children: new Map(), isDir: true };
+for (const relPath of pathsRel) {
+const parts = relPath === '' ? [] : relPath.split('/');
+let cur = rootNode;
+let acc = '';
+for (let i = 0; i < parts.length; i++) {
+const part = parts[i];
+if (part === '') continue;
+
+
+// Build accumulated relative path for fs checks
+acc = acc ? `${acc}/${part}` : part;
+
+
+// If we hit a node_modules segment at ANY depth, add just the folder and stop
+if (part === 'node_modules') {
+if (!cur.children.has(part)) cur.children.set(part, { name: part, children: new Map(), isDir: true });
+break; // do not descend into node_modules
+}
+
+
+const full = path.join(args.root, acc);
+const isDir = fs.existsSync(full) && fs.statSync(full).isDirectory();
+if (!cur.children.has(part)) cur.children.set(part, { name: part, children: new Map(), isDir });
+cur = cur.children.get(part);
+}
+}
+return rootNode;
+}
+
+
+function renderAsciiTree(node, opts = {}, prefix = '', depth = 0) {
+const { maxDepth = 0 } = opts;
+const lines = [];
+const isRoot = depth === 0;
+if (isRoot) lines.push(node.name);
+
+
+const entries = [...node.children.values()].sort((a, b) => {
+if (a.isDir && !b.isDir) return -1;
+if (!a.isDir && b.isDir) return 1;
+return a.name.localeCompare(b.name);
+});
+
+
+entries.forEach((child, idx) => {
+const last = idx === entries.length - 1;
+const connector = last ? '└── ' : '├── ';
+lines.push(prefix + connector + child.name + (child.isDir ? '/' : ''));
+const nextPrefix = prefix + (last ? ' ' : '│ ');
+if (child.isDir && (maxDepth === 0 || depth + 1 < maxDepth)) {
+lines.push(...renderAsciiTree(child, opts, nextPrefix, depth + 1));
+}
+});
+return lines;
+}
+
+
+function writeTree() {
+const relPaths = buildTreeEntries();
+const structure = buildTreeStructure(relPaths);
+const lines = renderAsciiTree(structure, { maxDepth: Math.max(0, args.treeDepth) });
+
+
+const txtPath = path.join(args.out, 'TREE.txt');
+fs.writeFileSync(txtPath, lines.join('\n'));
+console.log(chalk.green('✔ Tree (text):'), txtPath);
+
+
+const mdPath = path.join(args.out, 'TREE.md');
+const md = ['```', ...lines, '```'].join('\n');
+fs.writeFileSync(mdPath, md);
+console.log(chalk.green('✔ Tree (markdown):'), mdPath);
+}
+
+// Run outputs
+// -------------------- RUN --------------------
 if (args.json) writeJSON();
 if (args.dot) writeDOT();
 if (args.md) writeMarkdown();
-if (!args.json && !args.dot && !args.md) console.log(chalk.yellow('No output format selected. Use --json, --md, or --dot.'));
+if (args.tree) writeTree();
+if (!args.json && !args.dot && !args.md && !args.tree) console.log(chalk.yellow('No output format selected. Use --json, --md, --dot, or --tree.'));

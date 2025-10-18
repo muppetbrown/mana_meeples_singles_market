@@ -1,20 +1,37 @@
-import { useState } from "react";
+import React, { Suspense } from "react";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import ErrorBoundary from "./components/ErrorBoundary";
+import { ToastProvider } from "./components/Toast";
+
+// Lazy load components
+const TCGShop = React.lazy(() => import("./components/TCGShop"));
+const AdminLogin = React.lazy(() => import("./components/AdminLogin"));
+const AdminDashboard = React.lazy(() => import("./components/AdminDashboard"));
+
+// Accessible loading spinner
+const LoadingSpinner: React.FC = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+    <div className="text-center">
+      <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+      <p className="text-slate-600 font-medium">Loading...</p>
+    </div>
+  </div>
+);
 
 export default function App() {
-  const [count, setCount] = useState(0);
-
   return (
-    <main className="p-4 max-w-5xl mx-auto">
-      <h1>Mana & Meeples — Singles Market</h1>
-      <p>React + TypeScript baseline is up.</p>
-
-      <button
-        type="button"
-        onClick={() => setCount((c) => c + 1)}
-        aria-live="polite"
-      >
-        Count: {count}
-      </button>
-    </main>
+    <ErrorBoundary>
+      <ToastProvider>
+        <BrowserRouter basename="/shop">
+          <Suspense fallback={<LoadingSpinner />}>
+            <Routes>
+              <Route path="/" element={<TCGShop />} />
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+            </Routes>
+          </Suspense>
+        </BrowserRouter>
+      </ToastProvider>
+    </ErrorBoundary>
   );
 }

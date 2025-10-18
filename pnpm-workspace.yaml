@@ -2,7 +2,9 @@ onlyBuiltDependencies:
   - bcrypt
   - esbuild
 packages:
-  - "apps/*"
+  - "apps/api"
+  - "apps/web"
   - "utils/*"
   - "scripts/*"
+  - "config"
   - "database"

@@ -12,23 +12,45 @@ Thumbs.db
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
-/mana-meeples-shop/node_modules
-/mana-meeples-shop/.pnp
-/mana-meeples-shop/.pnp.js
+/apps/api/node_modules
+/apps/api/.pnp
+/apps/api/.pnp.js
 
 # testing
-/mana-meeples-shop/coverage
+/apps/api/coverage
 
 # production
-/mana-meeples-shop/build
+/apps/api/build
 
 # misc
-/mana-meeples-shop/.DS_Store
-/mana-meeples-shop/.env.local
-/mana-meeples-shop/.env.development.local
-/mana-meeples-shop/.env.test.local
-/mana-meeples-shop/.env.production.local
+/apps/api/.DS_Store
+/apps/api/.env.local
+/apps/api/.env.development.local
+/apps/api/.env.test.local
+/apps/api/.env.production.local
 
-/mana-meeples-shop/npm-debug.log*
-/mana-meeples-shop/yarn-debug.log*
-/mana-meeples-shop/yarn-error.log*
+/apps/api/npm-debug.log*
+/apps/api/yarn-debug.log*
+/apps/api/yarn-error.log*
+
+# dependencies
+/apps/web/node_modules
+/apps/web/.pnp
+/apps/web/.pnp.js
+
+# testing
+/apps/web/coverage
+
+# production
+/apps/web/build
+
+# misc
+/apps/web/.DS_Store
+/apps/web/.env.local
+/apps/web/.env.development.local
+/apps/web/.env.test.local
+/apps/web/.env.production.local
+
+/apps/web/npm-debug.log*
+/apps/web/yarn-debug.log*
+/apps/web/yarn-error.log*

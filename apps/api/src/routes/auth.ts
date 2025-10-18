@@ -1,32 +1,114 @@
-import { Router } from 'express';
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'bcry... Remove this comment to see the full error message
-import bcrypt from 'bcrypt';
-// @ts-expect-error TS(7016): Could not find a declaration file for module 'json... Remove this comment to see the full error message
-import jwt from 'jsonwebtoken';
-// @ts-expect-error TS(2307): Cannot find module 'zod' or its corresponding type... Remove this comment to see the full error message
-import { z } from 'zod';
-import { env } from '../lib/env';
-import { withConn } from '../lib/db';
+import express, { Request, Response } from "express";
+import bcrypt from "bcrypt";
+import jwt, { Secret, SignOptions } from "jsonwebtoken";
 
+const router = express.Router();
 
-// @ts-expect-error TS(2742): The inferred type of 'auth' cannot be named withou... Remove this comment to see the full error message
-export const auth = Router();
+/**
+ * POST /api/auth/admin/login
+ * Authenticates admin and issues JWT cookie
+ */
+router.post("/admin/login", async (req: Request, res: Response) => {
+  try {
+    const { username, password } = req.body;
 
+    if (!username || !password) {
+      res.status(400).json({ error: "Username and password are required" });
+      return;
+    }
 
-const LoginSchema = z.object({ username: z.string().min(3).max(64), password: z.string().min(8).max(128) });
+    const validUsername = process.env.ADMIN_USERNAME;
+    const validPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
+    if (!validUsername || !validPasswordHash) {
+      res.status(500).json({ error: "Server configuration error" });
+      return;
+    }
 
-auth.post('/login', async (req, res) => {
-const parsed = LoginSchema.safeParse(req.body);
-if (!parsed.success) return res.status(400).json({ error: { code: 'BAD_BODY', message: parsed.error.issues[0].message } });
-const { username, password } = parsed.data;
-const row = await withConn(async (c) => {
-const { rows } = await c.query(`SELECT id, username, password_hash, role FROM users WHERE username = $1`, [username]);
-return rows[0];
+    if (username !== validUsername) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      res.status(401).json({ error: "Invalid credentials" });
+      return;
+    }
+
+    const isValidPassword = await bcrypt.compare(password, validPasswordHash);
+    if (!isValidPassword) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      res.status(401).json({ error: "Invalid credentials" });
+      return;
+    }
+
+    // ---- At this point, credentials are valid ----
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) {
+      res.status(500).json({ error: "Server misconfiguration: missing JWT_SECRET" });
+      return;
+    }
+
+    // 👇 Fix 1: define a strongly typed SignOptions manually
+    const signOptions: SignOptions = {
+      expiresIn: (process.env.JWT_EXPIRES_IN as unknown as number | undefined) ?? "24h",
+    };
+
+    // 👇 Fix 2: cast JWT_SECRET as Secret when calling jwt.sign
+    const token = jwt.sign(
+      { username, role: "admin" },
+      JWT_SECRET as Secret,
+      signOptions
+    );
+
+    res.cookie("adminToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+
+    res.json({
+      success: true,
+      message: "Login successful",
+      expiresIn: signOptions.expiresIn,
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Login failed" });
+  }
 });
-if (!row) return res.status(401).json({ error: { code: 'AUTH', message: 'Invalid credentials' } });
-const ok = await bcrypt.compare(password, row.password_hash);
-if (!ok) return res.status(401).json({ error: { code: 'AUTH', message: 'Invalid credentials' } });
-const token = jwt.sign({ sub: String(row.id), role: row.role ?? 'admin' }, env.JWT_SECRET, { expiresIn: '1h' });
-res.json({ token });
+
+/**
+ * POST /api/auth/admin/logout
+ */
+router.post("/admin/logout", (_req: Request, res: Response) => {
+  res.clearCookie("adminToken");
+  res.json({ success: true, message: "Logged out successfully" });
 });
+
+/**
+ * GET /api/auth/admin/check
+ */
+router.get("/admin/auth/check", (req: Request, res: Response) => {
+  try {
+    const token = req.cookies?.adminToken;
+    if (!token) {
+      res.status(401).json({ authenticated: false });
+      return;
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+      username: string;
+      role: string;
+      exp: number;
+    };
+
+    res.json({
+      authenticated: true,
+      user: { username: decoded.username, role: decoded.role },
+      expiresAt: decoded.exp * 1000,
+    });
+  } catch {
+    res.status(401).json({ authenticated: false });
+  }
+});
+
+export default router;
