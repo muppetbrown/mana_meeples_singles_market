@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { cardsRouter } from "./routes/cards";
+import { cardsRouter } from "./routes/cards.js";
 
 
 const app = express();

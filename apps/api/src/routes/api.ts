@@ -1,7 +1,7 @@
 // apps/api/src/routes/api.ts
 import express, { Request, Response } from "express";
 import { z } from "zod";
-import { db } from "../lib/db";
+import { db } from "../lib/db.js";
 
 // ---------- Types (aligned to your DB) ----------
 type CardRow = {

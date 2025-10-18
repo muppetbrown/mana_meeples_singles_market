@@ -1,5 +1,5 @@
 import type { RequestHandler } from 'express';
-import { logger } from '../lib/logger';
+import { logger } from '../lib/logger.js';
 
 
 export const requestLog: RequestHandler = (req, _res, next) => {

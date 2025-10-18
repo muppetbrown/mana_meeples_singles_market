@@ -1,5 +1,5 @@
 import { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
-import { env } from "./env"; // adjust if your env file is elsewhere
+import { env } from "./env.js"; // adjust if your env file is elsewhere
 
 // Initialize connection pool
 export const pool = new Pool({
