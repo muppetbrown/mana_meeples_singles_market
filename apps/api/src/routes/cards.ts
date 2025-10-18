@@ -63,8 +63,8 @@ router.get('/cards', async (req: Request, res: Response) => {
       limit,
     });
   } catch (err: any) {
-    console.error('cards query failed:', { code: err?.code, message: err?.message });
-    res.status(500).json({ error: 'Failed to fetch cards' });
+      console.error('cards query failed', { code: err?.code, message: err?.message });
+      return res.status(500).json({ error: 'Failed to fetch cards' });
   }
 });
 

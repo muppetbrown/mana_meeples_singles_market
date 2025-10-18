@@ -64,7 +64,7 @@ export async function withConn<T>(
  */
 export async function healthcheck(): Promise<boolean> {
   try {
-    // Cast to int so the intent is explicit.
+    // Cast to int, then accept '1' or 1 (pg often returns text)
     const { rows } = await pool.query<{ ok: number | string }>('SELECT 1::int AS ok');
     const v = rows[0]?.ok;
     return v === 1 || v === '1';
