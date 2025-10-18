@@ -1,43 +1,27 @@
 import React from 'react';
-
-import PropTypes from 'prop-types';
 import { LayoutGrid } from 'lucide-react';
 
-/**
- * Section Header Component
- * Displays section title with optional count and grid indicator
- * @param {string} title - The section title
- * @param {number} count - Number of items in the section
- * @param {boolean} isGrid - Whether this is for a grid layout
- */
-const SectionHeader = ({
-  title,
-  count,
-  isGrid = false
-}: any) => {
+type Props = {
+  title: string;
+  count?: number;
+  isGrid?: boolean;
+  className?: string;
+};
+
+const SectionHeader: React.FC<Props> = ({ title, count, isGrid = false, className }) => {
   return (
-    <div className="section-mm-gradient mb-6">
+    <div className={`section-mm-gradient mb-6 ${className ?? ''}`}>
       <div className="flex items-center gap-3">
-        {isGrid && <LayoutGrid className="w-5 h-5 text-mm-teal" />}
+        {isGrid && <LayoutGrid className="w-5 h-5 text-mm-teal" aria-hidden="true" />}
         <h2 className="text-xl font-bold text-mm-forest">{title}</h2>
-        {count !== undefined && (
-          <span className="px-3 py-1 bg-mm-tealLight text-mm-teal text-sm font-medium rounded-full">
+        {typeof count === 'number' && (
+          <span className="px-3 py-1 bg-mm-tealLight text-mm-teal text-sm font-medium rounded-full" aria-live="polite">
             {count} {count === 1 ? 'card' : 'cards'}
           </span>
         )}
       </div>
     </div>
   );
-};
-
-SectionHeader.propTypes = {
-  title: PropTypes.string.isRequired,
-  count: PropTypes.number,
-  isGrid: PropTypes.bool,
-};
-
-SectionHeader.defaultProps = {
-  isGrid: false,
 };
 
 export default SectionHeader;
