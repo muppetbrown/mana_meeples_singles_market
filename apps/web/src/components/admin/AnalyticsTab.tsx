@@ -1,82 +1,91 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Package, DollarSign, AlertTriangle, RefreshCw } from 'lucide-react';
+import { API_URL } from '../../config/api';
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+// -------------------- Types --------------------
+export type InventoryItem = {
+  game_name: string;
+  quality: string;
+  stock_quantity: number;
+  price: number;
+  price_source?: string | null;
+};
 
-const AnalyticsTab = () => {
-  const [analytics, setAnalytics] = useState(null);
+export type AnalyticsByGame = Record<string, { count: number; value: number; stock: number }>;
+export type AnalyticsByQuality = Record<string, { count: number; value: number }>;
+export type AnalyticsByPriceSource = Record<string, number>;
+
+export type AnalyticsStats = {
+  totalCards: number; // unique inventory rows
+  totalValue: number; // NZD
+  totalStock: number; // total units
+  lowStock: number; // 1..3
+  outOfStock: number; // 0
+  byGame: AnalyticsByGame;
+  byQuality: AnalyticsByQuality;
+  byPriceSource: AnalyticsByPriceSource;
+};
+
+const nzd = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'NZD' });
+
+const AnalyticsTab: React.FC = () => {
+  const [analytics, setAnalytics] = useState<AnalyticsStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/admin/inventory`, {
-        credentials: 'include'
-      });
-
+      const response = await fetch(`${API_URL}/admin/inventory`, { credentials: 'include' });
       if (!response.ok) throw new Error('Failed to fetch data');
 
-      const data = await response.json();
-      const inventory = data.inventory || [];
+      const data = (await response.json()) as { inventory?: InventoryItem[] };
+      const inventory: InventoryItem[] = data.inventory ?? [];
 
-      // Calculate analytics
-      const stats = {
+      const base: AnalyticsStats = {
         totalCards: inventory.length,
-        totalValue: inventory.reduce((sum: any, item: any) => sum + (item.stock_quantity * item.price), 0),
-        totalStock: inventory.reduce((sum: any, item: any) => sum + item.stock_quantity, 0),
-        lowStock: inventory.filter((item: any) => item.stock_quantity > 0 && item.stock_quantity <= 3).length,
-        outOfStock: inventory.filter((item: any) => item.stock_quantity === 0).length,
-        
-        // Breakdowns
+        totalValue: 0,
+        totalStock: 0,
+        lowStock: 0,
+        outOfStock: 0,
         byGame: {},
         byQuality: {},
-        byPriceSource: {}
+        byPriceSource: {},
       };
 
-      // Group by game
-      inventory.forEach((item: any) => {
+      const stats = inventory.reduce<AnalyticsStats>((acc, item) => {
+        const value = item.stock_quantity * item.price;
 
-        if (!stats.byGame[item.game_name]) {
+        acc.totalValue += value;
+        acc.totalStock += item.stock_quantity;
 
-          stats.byGame[item.game_name] = { count: 0, value: 0, stock: 0 };
-        }
+        if (item.stock_quantity === 0) acc.outOfStock += 1;
+        else if (item.stock_quantity <= 3) acc.lowStock += 1;
 
-        stats.byGame[item.game_name].count++;
+        // byGame
+        const g = acc.byGame[item.game_name] ?? { count: 0, value: 0, stock: 0 };
+        g.count += 1;
+        g.value += value;
+        g.stock += item.stock_quantity;
+        acc.byGame[item.game_name] = g;
 
-        stats.byGame[item.game_name].value += item.stock_quantity * item.price;
+        // byQuality
+        const q = acc.byQuality[item.quality] ?? { count: 0, value: 0 };
+        q.count += 1;
+        q.value += value;
+        acc.byQuality[item.quality] = q;
 
-        stats.byGame[item.game_name].stock += item.stock_quantity;
-      });
+        // byPriceSource
+        const src = (item.price_source ?? 'manual').toLowerCase();
+        acc.byPriceSource[src] = (acc.byPriceSource[src] ?? 0) + 1;
 
-      // Group by quality
-      inventory.forEach((item: any) => {
-
-        if (!stats.byQuality[item.quality]) {
-
-          stats.byQuality[item.quality] = { count: 0, value: 0 };
-        }
-
-        stats.byQuality[item.quality].count++;
-
-        stats.byQuality[item.quality].value += item.stock_quantity * item.price;
-      });
-
-      // Group by price source
-      inventory.forEach((item: any) => {
-        const source = item.price_source || 'manual';
-
-        if (!stats.byPriceSource[source]) {
-
-          stats.byPriceSource[source] = 0;
-        }
-
-        stats.byPriceSource[source]++;
-      });
-
+        return acc;
+      }, base);
 
       setAnalytics(stats);
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error fetching analytics:', error);
+      setAnalytics(null);
     } finally {
       setLoading(false);
     }
@@ -88,17 +97,24 @@ const AnalyticsTab = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <RefreshCw className="w-8 h-8 animate-spin text-blue-600" />
-        <span className="ml-3">Loading analytics...</span>
+      <div className="flex items-center justify-center h-64" role="status" aria-live="polite">
+        <RefreshCw className="w-8 h-8 animate-spin text-blue-600" aria-hidden="true" />
+        <span className="ml-3">Loading analytics…</span>
       </div>
     );
   }
 
   if (!analytics) {
     return (
-      <div className="text-center py-12">
+      <div className="text-center py-12" role="status" aria-live="polite">
         <p className="text-slate-500">Failed to load analytics</p>
+        <button
+          onClick={fetchAnalytics}
+          className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
+        >
+          <RefreshCw className="w-4 h-4" aria-hidden="true" />
+          Retry
+        </button>
       </div>
     );
   }
@@ -113,9 +129,10 @@ const AnalyticsTab = () => {
         </div>
         <button
           onClick={fetchAnalytics}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
+          aria-label="Refresh analytics"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-4 h-4" aria-hidden="true" />
           Refresh
         </button>
       </div>
@@ -125,48 +142,35 @@ const AnalyticsTab = () => {
         <div className="bg-white rounded-lg border p-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-slate-600 text-sm">Total Value</span>
-            <DollarSign className="w-5 h-5 text-green-600" />
+            <DollarSign className="w-5 h-5 text-green-600" aria-hidden="true" />
           </div>
-          <div className="text-3xl font-bold text-slate-900">
-            // @ts-expect-error TS(2339): Property 'totalValue' does not exist on type 'neve... Remove this comment to see the full error message
-            NZ${analytics.totalValue.toFixed(2)}
-          </div>
+          <div className="text-3xl font-bold text-slate-900">{nzd.format(analytics.totalValue)}</div>
         </div>
 
         <div className="bg-white rounded-lg border p-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-slate-600 text-sm">Total Stock</span>
-            <Package className="w-5 h-5 text-blue-600" />
+            <Package className="w-5 h-5 text-blue-600" aria-hidden="true" />
           </div>
-          <div className="text-3xl font-bold text-slate-900">
-            // @ts-expect-error TS(2339): Property 'totalStock' does not exist on type 'neve... Remove this comment to see the full error message
-            {analytics.totalStock}
-          </div>
-          // @ts-expect-error TS(2339): Property 'totalCards' does not exist on type 'neve... Remove this comment to see the full error message
+          <div className="text-3xl font-bold text-slate-900">{analytics.totalStock}</div>
           <p className="text-xs text-slate-500 mt-1">{analytics.totalCards} unique items</p>
         </div>
 
         <div className="bg-white rounded-lg border p-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-slate-600 text-sm">Low Stock</span>
-            <AlertTriangle className="w-5 h-5 text-amber-600" />
+            <AlertTriangle className="w-5 h-5 text-amber-600" aria-hidden="true" />
           </div>
-          <div className="text-3xl font-bold text-amber-600">
-            // @ts-expect-error TS(2339): Property 'lowStock' does not exist on type 'never'... Remove this comment to see the full error message
-            {analytics.lowStock}
-          </div>
+          <div className="text-3xl font-bold text-amber-600">{analytics.lowStock}</div>
           <p className="text-xs text-slate-500 mt-1">Items need restocking</p>
         </div>
 
         <div className="bg-white rounded-lg border p-6">
           <div className="flex items-center justify-between mb-2">
             <span className="text-slate-600 text-sm">Out of Stock</span>
-            <Package className="w-5 h-5 text-red-600" />
+            <Package className="w-5 h-5 text-red-600" aria-hidden="true" />
           </div>
-          <div className="text-3xl font-bold text-red-600">
-            // @ts-expect-error TS(2339): Property 'outOfStock' does not exist on type 'neve... Remove this comment to see the full error message
-            {analytics.outOfStock}
-          </div>
+          <div className="text-3xl font-bold text-red-600">{analytics.outOfStock}</div>
           <p className="text-xs text-slate-500 mt-1">Items unavailable</p>
         </div>
       </div>
@@ -177,18 +181,13 @@ const AnalyticsTab = () => {
         <div className="bg-white rounded-lg border p-6">
           <h3 className="font-semibold text-slate-900 mb-4">By Game</h3>
           <div className="space-y-3">
-            // @ts-expect-error TS(2339): Property 'byGame' does not exist on type 'never'.
             {Object.entries(analytics.byGame).map(([game, data]) => (
               <div key={game}>
                 <div className="flex items-center justify-between text-sm mb-1">
                   <span className="text-slate-700">{game}</span>
-                  // @ts-expect-error TS(2571): Object is of type 'unknown'.
-                  <span className="font-medium text-slate-900">{count} items</span>
+                  <span className="font-medium text-slate-900">{data.count} items</span>
                 </div>
-                <div className="text-xs text-slate-500">
-                  // @ts-expect-error TS(2571): Object is of type 'unknown'.
-                  NZ${value.toFixed(2)} • {stock} units
-                </div>
+                <div className="text-xs text-slate-500">{nzd.format(data.value)} • {data.stock} units</div>
               </div>
             ))}
           </div>
@@ -198,15 +197,12 @@ const AnalyticsTab = () => {
         <div className="bg-white rounded-lg border p-6">
           <h3 className="font-semibold text-slate-900 mb-4">By Quality</h3>
           <div className="space-y-3">
-            // @ts-expect-error TS(2339): Property 'byQuality' does not exist on type 'never... Remove this comment to see the full error message
             {Object.entries(analytics.byQuality).map(([quality, data]) => (
               <div key={quality} className="flex items-center justify-between text-sm">
                 <span className="text-slate-700">{quality}</span>
                 <div className="text-right">
-                  // @ts-expect-error TS(2571): Object is of type 'unknown'.
-                  <div className="font-medium text-slate-900">{count} items</div>
-                  // @ts-expect-error TS(2571): Object is of type 'unknown'.
-                  <div className="text-xs text-slate-500">NZ${value.toFixed(2)}</div>
+                  <div className="font-medium text-slate-900">{data.count} items</div>
+                  <div className="text-xs text-slate-500">{nzd.format(data.value)}</div>
                 </div>
               </div>
             ))}
@@ -217,11 +213,9 @@ const AnalyticsTab = () => {
         <div className="bg-white rounded-lg border p-6">
           <h3 className="font-semibold text-slate-900 mb-4">Price Sources</h3>
           <div className="space-y-3">
-            // @ts-expect-error TS(2339): Property 'byPriceSource' does not exist on type 'n... Remove this comment to see the full error message
             {Object.entries(analytics.byPriceSource).map(([source, count]) => (
               <div key={source} className="flex items-center justify-between text-sm">
                 <span className="text-slate-700 capitalize">{source}</span>
-                // @ts-expect-error TS(2746): This JSX tag's 'children' prop expects a single ch... Remove this comment to see the full error message
                 <span className="font-medium text-slate-900">{count} items</span>
               </div>
             ))}
