@@ -3,7 +3,8 @@
   "private": true,
   "packageManager": "pnpm@9.11.0",
   "engines": {
-    "node": ">=20.11.0"
+    "node": "22.x",
+    "pnpm": "9.x"
   },
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
