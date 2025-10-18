@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import apiRoutes from "./routes/api.js";
 import authRoutes from "./routes/auth.js";
 import filtersRoutes from "./routes/filters.js";
+import path from "path";
 
 export function createApp() {
   const app = express();
@@ -45,6 +46,14 @@ export function createApp() {
     if (err?.message?.includes("CORS")) return res.status(403).json({ error: "CORS policy violation" });
     console.error("❌ API error:", err);
     res.status(500).json({ error: "Internal server error" });
+  });
+
+  const __dirname = path.resolve();
+  const frontendDist = path.join(__dirname, "../web/dist");
+
+  app.use(express.static(frontendDist));
+  app.get("*", (_req, res) => {
+    res.sendFile(path.join(frontendDist, "index.html"));
   });
 
   app.use((_req, res) => res.status(404).json({ error: "Not found" }));
