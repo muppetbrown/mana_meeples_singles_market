@@ -10,17 +10,14 @@ mana_meeples_singles_market
 │ │ │ │ ├── env.ts
 │ │ │ │ └── logger.ts
 │ │ │ ├── middleware/
-│ │ │ │ ├── auth.js
 │ │ │ │ ├── auth.ts
 │ │ │ │ ├── error.ts
 │ │ │ │ ├── rateLimit.ts
 │ │ │ │ └── requestLog.ts
 │ │ │ ├── routes/
 │ │ │ │ ├── api.ts
-│ │ │ │ ├── auth.js
 │ │ │ │ ├── auth.ts
 │ │ │ │ ├── cards.ts
-│ │ │ │ ├── filters.js
 │ │ │ │ ├── filters.ts
 │ │ │ │ ├── index.ts
 │ │ │ │ └── variations.ts
@@ -31,25 +28,20 @@ mana_meeples_singles_market
 │ │ │ │ ├── search.ts
 │ │ │ │ ├── searchUtils.ts
 │ │ │ │ └── variationAnalysis.ts
-│ │ │ ├── App.js
+│ │ │ ├── tests/
+│ │ │ │ └── testEmail.js
 │ │ │ ├── app.ts
 │ │ │ ├── db.ts
 │ │ │ ├── index.ts
-│ │ │ ├── server.js
 │ │ │ └── server.ts
 │ │ ├── tests/
 │ │ │ ├── a11y/
 │ │ │ └── integration/
+│ │ ├── .env
+│ │ ├── package-lock.json
 │ │ ├── package.json
 │ │ └── tsconfig.json
 │ └── web/
-│  ├── build/
-│  │ ├── favicon.ico
-│  │ ├── logo192.png
-│  │ ├── logo512.png
-│  │ ├── mana_meeples_logo.ico
-│  │ ├── manifest.json
-│  │ └── robots.txt
 │  ├── public/
 │  │ ├── favicon.ico
 │  │ ├── logo192.png
@@ -73,8 +65,6 @@ mana_meeples_singles_market
 │  │ │ ├── common/
 │  │ │ │ ├── RecentlyViewedCards.tsx
 │  │ │ │ └── SectionHeader.tsx
-│  │ │ ├── hooks/
-│  │ │ │ └── useSearchFilters.ts
 │  │ │ ├── skeletons/
 │  │ │ │ └── CardSkeleton.tsx
 │  │ │ ├── utils/
@@ -108,6 +98,7 @@ mana_meeples_singles_market
 │  │ │ ├── useEnhancedCart.ts
 │  │ │ ├── useFilterCounts.ts
 │  │ │ ├── useRecentlyViewed.ts
+│  │ │ ├── useSearchFilters.ts
 │  │ │ └── useVirtualScrolling.ts
 │  │ ├── services/
 │  │ │ ├── errorHandler.ts
@@ -119,17 +110,15 @@ mana_meeples_singles_market
 │  │ ├── utils/
 │  │ │ └── csvUtils.ts
 │  │ ├── App.css
-│  │ ├── App.test.tsx
-│  │ ├── App.tsx
-│  │ ├── index.tsx
+│  │ ├── app.tsx
 │  │ ├── logo.svg
+│  │ ├── main.tsx
 │  │ ├── reportWebVitals.ts
 │  │ └── setupTests.ts
 │  ├── .env
 │  ├── index.html
-│  ├── package-lock.json
 │  ├── package.json
-│  ├── postcss.config.ts
+│  ├── postcss.config.cjs
 │  ├── README.md
 │  ├── tailwind.config.ts
 │  ├── tsconfig.json
@@ -150,16 +139,13 @@ mana_meeples_singles_market
 │ │ ├── onepiece_card_variations_sample.json
 │ │ └── sv_card_variations_sample.json
 │ ├── CARD_VARIATIONS_GUIDE.md
-│ ├── claude.md
 │ ├── DATABASE_SCHEMA.md
 │ ├── database-stats.json
-│ ├── EMBED_GUIDE.md
-│ ├── IMPLEMENTATION_GUIDE.md
 │ ├── openapi.yaml
-│ ├── QUICK_START_VARIATIONS.md
-│ └── SCHEMA_EXPORT_GUIDE.md
+│ └── QUICK_START_VARIATIONS.md
 ├── scripts/
 │ ├── analyze-variations.ts
+│ ├── copy-dist-to-api.js
 │ ├── create-bulk-foils.ts
 │ ├── export-database-schema.ts
 │ ├── generate-admin-hash.ts
@@ -177,7 +163,6 @@ mana_meeples_singles_market
 ├── .env.example
 ├── .eslintrc.cjs
 ├── .gitignore
-├── .nvmrc
 ├── analyze-repo.mjs
 ├── api.effective.tsconfig.json
 ├── generate_tree.py
@@ -185,6 +170,7 @@ mana_meeples_singles_market
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
 ├── prettier.config.cjs
+├── render.yaml
 ├── test-cors-fix.sh
 ├── tsconfig.base.json
 ├── tsconfig.json
