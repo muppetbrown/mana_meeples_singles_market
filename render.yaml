@@ -3,21 +3,23 @@ services:
   - type: web
     name: mana-meeples-api
     env: node
-    buildCommand: cd apps/api && npm install && npm run build
-    startCommand: cd apps/api && npm start
+    buildCommand: corepack enable && pnpm install && pnpm --filter ./apps/api run build
+    startCommand: cd apps/api && node dist/server.js
     envVars:
       - key: NODE_VERSION
-        value: 20
+        value: 20.x
+      - key: PNPM_VERSION
+        value: 9.x
       - key: CORS_ORIGINS
-        value: https://mana-meeples-singles-market.onrender.com/
+        value: https://mana-meeples-singles-market.onrender.com
       - key: PORT
         value: 10000
-    
-  # Frontend Web Service  
+
+  # Frontend Web Service
   - type: static
     name: mana-meeples-web
     env: static
-    buildCommand: cd apps/web && npm install && npm run build
+    buildCommand: corepack enable && pnpm install && pnpm --filter ./apps/web run build
     staticPublishPath: ./apps/web/dist
     routes:
       - type: rewrite
