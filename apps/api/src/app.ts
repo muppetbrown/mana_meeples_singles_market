@@ -1,63 +1,52 @@
-// apps/api/src/app.ts
 import express from "express";
 import helmet from "helmet";
-import cors from "cors";
+import cors, { CorsOptionsDelegate, CorsRequest } from "cors";
 import cookieParser from "cookie-parser";
-import apiRoutes from "./routes/api";
-import authRoutes from "./routes/auth";
-import filtersRoutes from "./routes/filters";
+import apiRoutes from "./routes/api.js";
+import authRoutes from "./routes/auth.js";
+import filtersRoutes from "./routes/filters.js";
 
 export function createApp() {
   const app = express();
 
   app.set("trust proxy", 1);
-
-  app.use(
-    helmet({
-      crossOriginResourcePolicy: { policy: "cross-origin" },
-    })
-  );
-
+  app.use(helmet({ crossOriginResourcePolicy: { policy: "cross-origin" } }));
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
 
-  const allowed = (process.env.CORS_ORIGINS || "")
-    .split(",")
-    .map((o) => o.trim())
-    .filter(Boolean);
+  const allowedOrigins = process.env.ALLOWED_ORIGIN
+    ? process.env.ALLOWED_ORIGIN.split(",").map((s) => s.trim())
+    : [];
 
-  app.use(
-    cors({
-      origin(origin, cb) {
-        if (!origin || allowed.includes(origin)) return cb(null, true);
-        return cb(new Error("Not allowed by CORS"));
-      },
-      credentials: true,
-    })
-  );
+  const corsDelegate: CorsOptionsDelegate<CorsRequest> = (
+    req,
+    cb: (err: Error | null, options?: cors.CorsOptions) => void
+  ) => {
+    const origin = req.headers.origin; // ✅ correct for CorsRequest type
 
-  app.options("*", cors());
+    if (!origin || allowedOrigins.includes(origin)) {
+      cb(null, { origin: true, credentials: true });
+    } else {
+      cb(new Error(`Not allowed by CORS: ${origin}`));
+    }
+  };
 
-  // Health
-  app.get("/health", (_req, res) => res.json({ ok: true }));
+  app.use(cors(corsDelegate));
+  app.options(/.*/, cors(corsDelegate));
 
-  // Routes
+  app.get("/health", (_req, res) => res.json({ ok: true, service: "Mana & Meeples API", version: "1.0.0" }));
+
   app.use("/api/auth", authRoutes);
   app.use("/api/filters", filtersRoutes);
   app.use("/api", apiRoutes);
 
-  // Errors
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  // error handler
   app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    if (err?.message === "Not allowed by CORS") {
-      return res.status(403).json({ error: "CORS policy violation" });
-    }
+    if (err?.message?.includes("CORS")) return res.status(403).json({ error: "CORS policy violation" });
     console.error("❌ API error:", err);
     res.status(500).json({ error: "Internal server error" });
   });
 
-  // 404
   app.use((_req, res) => res.status(404).json({ error: "Not found" }));
-
   return app;
 }
