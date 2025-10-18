@@ -1,5 +1,6 @@
 // apps/api/src/server.ts
-import express, { Request, Response, NextFunction } from 'express';
+import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import compression from 'compression';
@@ -7,7 +8,7 @@ import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
 // If you still have CORS middleware around, you can remove it for same-origin.
 import routes from './routes/index.js'; // keep your existing API router
-import { pool, db, healthcheck } from './db.js';
+import { pool, db, healthcheck, withConn } from './db.js';
 
 // __dirname for NodeNext
 const __filename = fileURLToPath(import.meta.url);

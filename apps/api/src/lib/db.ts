@@ -1,4 +1,5 @@
-import { Pool, PoolClient, QueryResult, QueryResultRow } from "pg";
+import { Pool } from "pg";
+import type { PoolClient, QueryResultRow } from "pg";
 import { env } from "./env.js"; // adjust if your env file is elsewhere
 
 // Initialize connection pool

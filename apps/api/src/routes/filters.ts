@@ -1,4 +1,5 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import { db } from "../lib/db.js"; // adjust import if your pool lives elsewhere
 
 const router = express.Router();

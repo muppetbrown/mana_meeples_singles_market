@@ -1,43 +1,71 @@
-import { Router } from "express";
-import { z } from "zod";
-import { query } from "../db.js";
+// apps/api/src/routes/cards.ts
+import express from 'express';
+import type { Request, Response } from 'express';
+import { db } from '../db.js';
+import { z } from 'zod';
 
+const router = express.Router();
 
-const router = Router();
+// Shape of rows returned from the DB.
+// Adjust columns to match exactly what you SELECT below.
+const CardRowSchema = z.object({
+  id: z.number(),
+  name: z.string(),
+  set_id: z.number(),
+  card_number: z.string().nullable(),
+  finish: z.string().nullable(),
+});
+type CardRow = z.infer<typeof CardRowSchema>;
 
-
-const listParams = z.object({
-q: z.string().trim().max(64).optional(),
-set_id: z.string().trim().optional(),
-finish: z.enum(["NONFOIL","FOIL","ETCHED"]).optional(),
-treatment: z.string().trim().optional(),
-limit: z.coerce.number().int().min(1).max(50).default(24),
-offset: z.coerce.number().int().min(0).default(0)
+const QuerySchema = z.object({
+  limit: z.coerce.number().int().min(1).max(50).default(20),
+  page: z.coerce.number().int().min(1).default(1),
+  search: z.string().trim().max(100).optional(),
 });
 
+router.get('/cards', async (req: Request, res: Response) => {
+  const parsed = QuerySchema.safeParse(req.query);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid query', issues: parsed.error.issues });
+  }
+  const { limit, page, search } = parsed.data;
+  const offset = (page - 1) * limit;
 
-router.get("/", async (req, res) => {
-const p = listParams.parse(req.query);
-const values: any[] = [];
-const where: string[] = [];
+  // Build SQL + params safely (no string interpolation for values)
+  const params: unknown[] = [];
+  let where = '';
+  if (search) {
+    params.push(`%${search}%`);
+    where = `WHERE name ILIKE $${params.length}`;
+  }
 
+  // Push limit and offset after any search param
+  params.push(limit, offset);
 
-if (p.q) { values.push(p.q); where.push(`search_tsv @@ plainto_tsquery('simple', $${values.length})`); }
-if (p.set_id) { values.push(p.set_id); where.push(`set_id = $${values.length}`); }
-if (p.finish) { values.push(p.finish); where.push(`finish = $${values.length}`); }
-if (p.treatment) { values.push(p.treatment.toUpperCase()); where.push(`treatment = $${values.length}`); }
+  const SQL = `
+    SELECT id, name, set_id, card_number, finish
+    FROM cards
+    ${where}
+    ORDER BY id DESC
+    LIMIT $${params.length - 1} OFFSET $${params.length}
+  `;
 
-
-const sql = `
-SELECT id, name, set_id, card_number, finish, treatment, border_color, frame_effect, sku
-FROM cards
-${where.length ? `WHERE ${where.join(" AND ")}` : ""}
-ORDER BY set_id, card_number
-LIMIT $${values.push(p.limit)} OFFSET $${values.push(p.offset)};
-`;
-const rows = await query(sql, values);
-res.json({ items: rows, nextOffset: p.offset + p.limit });
+  try {
+    const rows = await db.query<CardRow>(SQL, params);
+    const safe = z.array(CardRowSchema).safeParse(rows);
+    if (!safe.success) {
+      return res.status(500).json({ error: 'Invalid data shape from DB' });
+    }
+    res.json({
+      items: safe.data,
+      count: safe.data.length,
+      page,
+      limit,
+    });
+  } catch (err: any) {
+    console.error('cards query failed:', { code: err?.code, message: err?.message });
+    res.status(500).json({ error: 'Failed to fetch cards' });
+  }
 });
 
-
-export { router as cardsRouter };
+export default router;

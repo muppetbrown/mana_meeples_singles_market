@@ -4,17 +4,24 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
+
+    "rootDir": "src",
+    "outDir": "dist",
+
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": false,
+
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "verbatimModuleSyntax": true,
+
     "baseUrl": ".",
     "paths": {
       "@shared/*": ["../../utils/shared/src/*"]
     },
-    "outDir": "dist",
-    "strict": true,
-    "skipLibCheck": true,
-    "noEmit": false,
-    "resolveJsonModule": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+
     "types": ["node"]
   },
   "include": ["src"]

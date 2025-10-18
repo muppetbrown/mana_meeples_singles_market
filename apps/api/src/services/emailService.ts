@@ -1,5 +1,6 @@
 // apps/api/src/services/emailService.ts
-import nodemailer, { Transporter, SendMailOptions } from "nodemailer";
+import nodemailer from "nodemailer";
+import type { Transporter, SendMailOptions } from "nodemailer";
 import * as dotenv from "dotenv";
 dotenv.config(); // loads .env in current directory automatically
 

@@ -1,6 +1,8 @@
-import express, { Request, Response } from "express";
+import express from "express";
+import type { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import jwt, { Secret, SignOptions } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
+import type { Secret, SignOptions } from "jsonwebtoken";
 
 const router = express.Router();
 

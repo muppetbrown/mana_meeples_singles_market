@@ -1,6 +1,7 @@
 import express from "express";
 import helmet from "helmet";
-import cors, { CorsOptionsDelegate, CorsRequest } from "cors";
+import cors from "cors";
+import type { CorsOptionsDelegate, CorsRequest } from "cors";
 import cookieParser from "cookie-parser";
 import apiRoutes from "./routes/api.js";
 import authRoutes from "./routes/auth.js";
