@@ -2,19 +2,12 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
-
-    // ✅ Node ESM for the backend
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-
-    // ✅ Make resolution relative to apps/api, not repo root
     "baseUrl": ".",
-
-    // ✅ Point @shared/* to the actual shared source
     "paths": {
       "@shared/*": ["../../utils/shared/src/*"]
     },
-
     "outDir": "dist",
     "strict": true,
     "skipLibCheck": true,

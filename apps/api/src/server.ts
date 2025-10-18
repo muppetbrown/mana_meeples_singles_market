@@ -1,153 +1,106 @@
-import express from "express";
-import cors from "cors";
+// apps/api/src/server.ts
+import express, { RequestHandler } from "express";
 import helmet from "helmet";
-import rateLimit from "express-rate-limit";
+import cors from "cors";
 import cookieParser from "cookie-parser";
-import path from "path";
-import { Pool } from "pg";
-import dotenv from "dotenv";
+import { rateLimit } from "express-rate-limit";
 
-dotenv.config();
+// ⚠️ NodeNext ESM: include .js extension for local imports
+import routes from "./routes/index.js";
 
 const app = express();
+
+// Behind Render/NGINX → trust proxy for correct IPs
 app.set("trust proxy", 1);
 
-// ---------- DATABASE ----------
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false, require: true }
-      : { rejectUnauthorized: false },
-  max: Number(process.env.DB_POOL_MAX) || 10,
-  min: Number(process.env.DB_POOL_MIN) || 2,
-  idleTimeoutMillis: Number(process.env.DB_IDLE_TIMEOUT_MS) || 30000,
-  connectionTimeoutMillis: Number(process.env.DB_CONNECTION_TIMEOUT_MS) || 10000,
-});
-
-pool.on("error", (err) => console.error("⚠️ DB pool error:", err.message));
-
-export const db = {
-  async query<T>(text: string, params?: any[]): Promise<T[]> {
-    const client = await pool.connect();
-    try {
-      const res = await client.query(text, params);
-      return res.rows as T[];
-    } finally {
-      client.release();
-    }
-  },
-};
-
-// ---------- ENV CHECK ----------
-function validateEnv() {
-  const required = ["DATABASE_URL"];
-  const missing = required.filter((k) => !process.env[k]);
-  if (missing.length) {
-    console.error("❌ Missing env vars:", missing.join(", "));
-  } else {
-    console.log("✅ Env validated");
-  }
-}
-validateEnv();
-
-// ---------- SECURITY ----------
+// Security headers (loosen CORP to allow cross-origin if you host web elsewhere)
 app.use(
   helmet({
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: ["'self'"],
-        styleSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
-        scriptSrc: ["'self'", "'unsafe-inline'", "https://cdn.tailwindcss.com"],
-        imgSrc: ["'self'", "data:", "https:", "http:"],
-        connectSrc: ["'self'", process.env.CSP_CONNECT_SRC || "*"],
-      },
-    },
+    crossOriginResourcePolicy: { policy: "cross-origin" },
   })
 );
 
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
-  .split(",")
-  .map((o) => o.trim())
-  .filter(Boolean);
+// Parsers
+app.use(cookieParser());
+app.use(express.json({ limit: 10 * 1024 * 1024 })); // 10MB
+app.use(express.urlencoded({ extended: true, limit: 10 * 1024 * 1024 }));
+
+// CORS allowlist (comma-separated)
+const allowlist =
+  (process.env.CORS_ORIGINS || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean) || [];
 
 app.use(
   cors({
     origin(origin, cb) {
-      if (!origin || allowedOrigins.includes(origin)) return cb(null, true);
-      return cb(new Error("Not allowed by CORS"));
+      if (!origin || allowlist.includes(origin)) return cb(null, true);
+      return cb(new Error(`CORS blocked for origin: ${origin}`));
     },
     credentials: true,
   })
 );
+app.options(/.*/, cors());
 
-app.use(cookieParser());
-app.use(express.json({ limit: "10mb" }));
-app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-
-// ---------- RATE LIMITS ----------
-const apiLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 100 });
-const adminLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 50 });
-const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, max: 5 });
-app.use("/api/", apiLimiter);
-app.use("/api/admin/", adminLimiter);
-app.use("/api/auth/admin/login", loginLimiter);
-
-// ---------- ROUTES ----------
-import authRoutes from "./routes/auth";
-import apiRoutes from "./routes/api";
-app.use("/api/auth", authRoutes);
-app.use("/api", apiRoutes);
-
-// ---------- HEALTH ----------
-app.get("/health", async (_req, res) => {
-  let dbStatus = "unknown";
-  try {
-    await db.query("SELECT 1");
-    dbStatus = "connected";
-  } catch {
-    dbStatus = "disconnected";
-  }
-  res.json({
-    status: "healthy",
-    timestamp: new Date().toISOString(),
-    uptime: process.uptime(),
-    environment: process.env.NODE_ENV || "development",
-    database: dbStatus,
-  });
+// ---------- RATE LIMITS (v7) ----------
+// Type as RequestHandler so Express picks the right overload
+const apiLimiter: RequestHandler = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
 });
 
-// ---------- STATIC ----------
-if (process.env.NODE_ENV === "production") {
-  const buildPath = path.join(__dirname, "mana-meeples-shop/build");
-  app.use("/shop", express.static(buildPath, { maxAge: "1d" }));
-  app.get("/shop/*", (_req, res) => res.sendFile(path.join(buildPath, "index.html")));
-  app.get("/", (_req, res) => res.redirect("/shop"));
-}
+const adminLimiter: RequestHandler = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 50,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+});
 
-// ---------- ERRORS ----------
+const loginLimiter: RequestHandler = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 5,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+});
+
+// Mount limiters to the actual prefixes you use
+app.use("/api", apiLimiter);
+app.use("/api/auth/admin", adminLimiter);
+app.use("/api/auth/admin/login", loginLimiter);
+
+// Health
+app.get("/health", (_req, res) => res.json({ ok: true }));
+
+// All API routes
+app.use("/api", routes);
+
+// Errors (keep last)
 app.use(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   (err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    console.error("❌ Error:", err.message);
-    if (err.message === "Not allowed by CORS") {
-      return res.status(403).json({ error: "CORS policy violation" });
+    if (err?.message?.startsWith("CORS blocked")) {
+      return res.status(403).json({ error: err.message });
     }
+    console.error("❌ API error:", err);
     res.status(500).json({ error: "Internal server error" });
   }
 );
 
+// 404
 app.use((_req, res) => res.status(404).json({ error: "Not found" }));
 
-// ---------- START ----------
-const PORT = process.env.PORT || 10000;
-const server = app.listen(PORT, () => {
-  console.log(`🚀 Server running on ${PORT}`);
+// Start
+const PORT = Number(process.env.PORT) || 8080;
+const server = app.listen(PORT, "0.0.0.0", () => {
+  console.log(`✅ API listening on http://0.0.0.0:${PORT}`);
 });
 
-["SIGINT", "SIGTERM"].forEach((sig) =>
-  process.on(sig, async () => {
-    console.log(`🛑 ${sig} received`);
-    await pool.end();
+// Graceful shutdown
+["SIGINT", "SIGTERM"].forEach((sig) => {
+  process.on(sig, () => {
     server.close(() => process.exit(0));
-  })
-);
+  });
+});
