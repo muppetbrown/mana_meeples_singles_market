@@ -14,7 +14,7 @@ const router = express.Router();
 
 /**
  * Simple request logging - NO response interception
- * CRITICAL: Do not override res.json or any response methods
+ * CRITICAL: Do NOT override res.json or any response methods
  */
 router.use((req: Request, _res: Response, next: express.NextFunction) => {
   console.log(`🔐 AUTH ${req.method} ${req.originalUrl || req.url} - ${new Date().toISOString()}`);
@@ -33,7 +33,6 @@ router.post("/admin/login", async (req: Request, res: Response): Promise<void> =
     console.log("📋 Credentials received:", {
       username: username || "MISSING",
       hasPassword: !!password,
-      bodyType: typeof req.body,
     });
 
     // Validate request body structure
@@ -69,7 +68,12 @@ router.post("/admin/login", async (req: Request, res: Response): Promise<void> =
 
     // Set cookie
     const cookieConfig = getAuthCookieConfig();
-    console.log("🍪 Setting cookie with config:", cookieConfig);
+    console.log("🍪 Setting cookie with config:", {
+      httpOnly: cookieConfig.httpOnly,
+      secure: cookieConfig.secure,
+      sameSite: cookieConfig.sameSite,
+      domain: cookieConfig.domain || "(current domain)",
+    });
     res.cookie("adminToken", token, cookieConfig);
 
     // Prepare response
