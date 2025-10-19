@@ -6,43 +6,137 @@ import type { Secret, SignOptions } from "jsonwebtoken";
 
 const router = express.Router();
 
-// Response debugging middleware
+// Enhanced response debugging middleware
 const debugResponse = (req: Request, res: Response, next: express.NextFunction) => {
-  console.log(`\n=== RESPONSE DEBUG MIDDLEWARE FOR ${req.method} ${req.url} ===`);
+  console.log(`\n=== ENHANCED RESPONSE DEBUG MIDDLEWARE FOR ${req.method} ${req.url} ===`);
+  console.log(`Timestamp: ${new Date().toISOString()}`);
+  console.log(`Request headers:`, JSON.stringify(req.headers, null, 2));
+  console.log(`Request body:`, JSON.stringify(req.body, null, 2));
+
+  // Track response state changes
+  const logResponseState = (phase: string) => {
+    console.log(`--- Response state during ${phase} ---`);
+    console.log(`Status: ${res.statusCode}`);
+    console.log(`Finished: ${res.finished}`);
+    console.log(`Headers sent: ${res.headersSent}`);
+    console.log(`Writable: ${res.writable}`);
+    console.log(`Headers:`, JSON.stringify(res.getHeaders(), null, 2));
+  };
+
+  // Log initial state
+  logResponseState("middleware setup");
+
+  // Override res.status to track status changes
+  const originalStatus = res.status.bind(res);
+  res.status = function(code: number) {
+    console.log(`🔍 STATUS: Setting status code to ${code}`);
+    const result = originalStatus(code);
+    logResponseState("after status()");
+    return result;
+  };
+
+  // Override res.setHeader to track header changes
+  const originalSetHeader = res.setHeader.bind(res);
+  res.setHeader = function(name: string, value: string | string[] | number) {
+    console.log(`🔍 HEADER: Setting ${name} = ${value}`);
+    const result = originalSetHeader(name, value);
+    logResponseState("after setHeader()");
+    return result;
+  };
 
   // Override res.json to add debugging
   const originalJson = res.json.bind(res);
   res.json = function(body?: any) {
-    console.log("res.json called with body:", JSON.stringify(body, null, 2));
-    console.log("Current response headers:", JSON.stringify(res.getHeaders(), null, 2));
-    console.log("Response status code:", res.statusCode);
-    console.log("Response finished before json():", res.finished);
+    console.log(`🔍 JSON: res.json called with body:`, JSON.stringify(body, null, 2));
+    logResponseState("before json()");
 
-    const result = originalJson(body);
+    try {
+      const result = originalJson(body);
+      console.log(`🔍 JSON: res.json execution completed`);
+      logResponseState("after json()");
 
-    console.log("Response finished after json():", res.finished);
-    console.log("=== RESPONSE DEBUG MIDDLEWARE END ===\n");
+      // Add a small delay to check if response actually gets sent
+      setTimeout(() => {
+        console.log(`🔍 JSON: Response state 100ms after json():`, {
+          finished: res.finished,
+          headersSent: res.headersSent,
+          statusCode: res.statusCode
+        });
+      }, 100);
 
-    return result;
+      return result;
+    } catch (error) {
+      console.error(`🔍 JSON ERROR: Exception in res.json():`, error);
+      logResponseState("error in json()");
+      throw error;
+    }
   };
 
   // Override res.send to add debugging
   const originalSend = res.send.bind(res);
   res.send = function(body?: any) {
-    console.log("res.send called with body:", body);
-    console.log("Current response headers:", JSON.stringify(res.getHeaders(), null, 2));
-    console.log("Response status code:", res.statusCode);
+    console.log(`🔍 SEND: res.send called with body:`, body);
+    console.log(`🔍 SEND: Body type:`, typeof body);
+    console.log(`🔍 SEND: Body length:`, body?.length || 'N/A');
+    logResponseState("before send()");
 
-    const result = originalSend(body);
+    try {
+      const result = originalSend(body);
+      console.log(`🔍 SEND: res.send execution completed`);
+      logResponseState("after send()");
 
-    console.log("Response finished after send():", res.finished);
-    console.log("=== RESPONSE SEND DEBUG END ===\n");
+      return result;
+    } catch (error) {
+      console.error(`🔍 SEND ERROR: Exception in res.send():`, error);
+      logResponseState("error in send()");
+      throw error;
+    }
+  };
+
+  // Override res.end to catch any direct response endings
+  const originalEnd = res.end.bind(res);
+  res.end = function(chunk?: any, encoding?: BufferEncoding) {
+    console.log(`🔍 END: res.end called with chunk:`, chunk);
+    logResponseState("before end()");
+
+    const result = originalEnd(chunk, encoding);
+    console.log(`🔍 END: res.end execution completed`);
+    logResponseState("after end()");
 
     return result;
   };
 
+  // Listen for response finish event
+  res.on('finish', () => {
+    console.log(`🔍 EVENT: Response 'finish' event fired`);
+    logResponseState("finish event");
+  });
+
+  // Listen for response close event
+  res.on('close', () => {
+    console.log(`🔍 EVENT: Response 'close' event fired`);
+    logResponseState("close event");
+  });
+
+  console.log(`=== ENHANCED RESPONSE DEBUG MIDDLEWARE SETUP COMPLETE ===\n`);
   next();
 };
+
+// Global request logging middleware
+router.use((req: Request, res: Response, next: express.NextFunction) => {
+  console.log(`\n🚀 INCOMING REQUEST: ${req.method} ${req.originalUrl || req.url}`);
+  console.log(`🚀 Timestamp: ${new Date().toISOString()}`);
+  console.log(`🚀 User-Agent: ${req.headers['user-agent'] || 'N/A'}`);
+  console.log(`🚀 Content-Type: ${req.headers['content-type'] || 'N/A'}`);
+  console.log(`🚀 Accept: ${req.headers['accept'] || 'N/A'}`);
+  console.log(`🚀 Origin: ${req.headers['origin'] || 'N/A'}`);
+  console.log(`🚀 Raw body type: ${typeof req.body}`);
+  console.log(`🚀 Raw body: ${JSON.stringify(req.body)}`);
+  console.log(`🚀 Query params: ${JSON.stringify(req.query)}`);
+  console.log(`🚀 Request complete: true\n`);
+
+  next();
+});
 
 // Apply debug middleware to all auth routes
 router.use(debugResponse);
@@ -148,12 +242,32 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     console.log("Response headers before sending:", JSON.stringify(res.getHeaders(), null, 2));
 
     console.log("Login successful for user:", username);
+
+    // Test JSON serialization before sending
+    try {
+      const jsonString = JSON.stringify(responseData);
+      console.log("✅ JSON.stringify test successful. Serialized length:", jsonString.length);
+      console.log("✅ Serialized JSON:", jsonString);
+    } catch (serializationError) {
+      console.error("❌ JSON.stringify test failed:", serializationError);
+      return res.status(500).json({ error: "Response serialization failed" });
+    }
+
     console.log("About to send JSON response...");
+    console.log("Response object to send:", responseData);
+    console.log("Response headers before status call:", JSON.stringify(res.getHeaders(), null, 2));
 
-    const jsonResponse = res.status(200).json(responseData);
+    const statusResponse = res.status(200);
+    console.log("Status 200 set successfully");
+    console.log("Response headers after status call:", JSON.stringify(statusResponse.getHeaders(), null, 2));
 
-    console.log("JSON response sent, response finished:", res.finished);
-    console.log("Response sent status:", res.statusCode);
+    const jsonResponse = statusResponse.json(responseData);
+    console.log("res.json() call completed");
+
+    console.log("JSON response object returned from res.json():", jsonResponse);
+    console.log("Final response finished state:", res.finished);
+    console.log("Final response headers sent state:", res.headersSent);
+    console.log("Final response status:", res.statusCode);
     console.log("=== ADMIN LOGIN DEBUG END ===");
 
     return jsonResponse;
