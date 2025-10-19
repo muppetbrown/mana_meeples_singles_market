@@ -72,16 +72,13 @@ router.post("/admin/login", async (req: Request, res: Response) => {
       return;
     }
 
-    // JWT signing options - remove explicit type annotation to let TS infer
-    const signOptions = {
-      expiresIn: process.env.JWT_EXPIRES_IN || "24h",
-    };
-
-    // 👇 Fix 2: cast JWT_SECRET as Secret when calling jwt.sign
+    // Create JWT token with proper type handling
     const token = jwt.sign(
       { username, role: "admin" },
       JWT_SECRET as Secret,
-      signOptions
+      {
+        expiresIn: process.env.JWT_EXPIRES_IN || "24h",
+      } as SignOptions
     );
 
     res.cookie("adminToken", token, {
@@ -96,7 +93,7 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     res.status(200).json({
       success: true,
       message: "Login successful",
-      expiresIn: signOptions.expiresIn,
+      expiresIn: process.env.JWT_EXPIRES_IN || "24h",
     });
     return;
   } catch (error) {
