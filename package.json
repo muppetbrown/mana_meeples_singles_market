@@ -18,7 +18,10 @@
     "ci": "pnpm typecheck && pnpm lint && pnpm test && pnpm build",
     "build:render": "pnpm --filter ./apps/web run build && pnpm --filter ./apps/api run build && node scripts/copy-dist-to-api.js",
     "smoke": "node scripts/smoke.mjs",
-    "export:schema": "tsx scripts/export-database-schema.ts"
+    "export:schema": "tsx scripts/export-database-schema.ts",
+    "debug:admin": "tsx scripts/debug-admin-login.ts",
+    "generate:admin": "tsx scripts/generate-admin-hash.ts",
+    "test:password": "tsx scripts/test-password.ts"
   },
   "devDependencies": {
     "@babel/parser": "^7.28.4",
