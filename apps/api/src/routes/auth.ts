@@ -72,9 +72,9 @@ router.post("/admin/login", async (req: Request, res: Response) => {
       return;
     }
 
-    // 👇 Fix 1: define a strongly typed SignOptions manually
+    // JWT signing options
     const signOptions: SignOptions = {
-      expiresIn: (process.env.JWT_EXPIRES_IN as unknown as number | undefined) ?? "24h",
+      expiresIn: process.env.JWT_EXPIRES_IN || "24h",
     };
 
     // 👇 Fix 2: cast JWT_SECRET as Secret when calling jwt.sign
