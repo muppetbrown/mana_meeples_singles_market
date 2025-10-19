@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User, AlertCircle } from 'lucide-react';
-import { API_URL } from '../config/api';
+import { api } from '../config/api';
 
 
 const AdminLogin = () => {
@@ -16,31 +16,46 @@ const AdminLogin = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/auth/admin/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify(credentials)
+      console.log('Attempting login with credentials:', {
+        username: credentials.username,
+        hasPassword: !!credentials.password
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Login failed');
-      }
+      const data = await api.post<{ success: boolean; message: string }>('/auth/admin/login', credentials);
 
-      const data = await response.json();
-      
+      console.log('Login response:', data);
+
       if (data.success) {
         navigate('/admin');
+      } else {
+        throw new Error('Login failed: Invalid response format');
       }
-    } catch (err) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Login error:', err);
+    } catch (err: any) {
+      console.error('Login error details:', {
+        message: err.message,
+        status: err.status,
+        info: err.info,
+        stack: err.stack
+      });
+
+      // Provide more specific error messages based on the error type
+      let errorMessage = 'Login failed. Please try again.';
+
+      if (err.status === 400) {
+        errorMessage = 'Please enter both username and password.';
+      } else if (err.status === 401) {
+        errorMessage = 'Invalid username or password.';
+      } else if (err.status === 500) {
+        errorMessage = 'Server configuration error. Please contact administrator.';
+      } else if (err.message?.includes('timeout')) {
+        errorMessage = 'Login request timed out. Please try again.';
+      } else if (err.message?.includes('NetworkError') || err.message?.includes('fetch')) {
+        errorMessage = 'Network error. Please check your connection and try again.';
+      } else if (err.message?.includes('JSON') || err.message?.includes('parse')) {
+        errorMessage = 'Server response error. Please try again or contact administrator.';
       }
 
-      setError(err.message || 'Login failed. Please try again.');
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
