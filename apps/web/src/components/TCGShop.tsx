@@ -1084,8 +1084,7 @@ const TCGShop = () => {
               )}
             </div>
 
-            const [loading, setLoading] = useState(false);
-            {cards.length === 0 && !loading && (
+            {cards.length === 0 && !cardsLoading && (
               <div className="text-center py-12 bg-white rounded-xl shadow-sm">
                 <p className="text-mm-forest text-lg">No cards found matching your search</p>
               </div>
@@ -1471,8 +1470,7 @@ const TCGShop = () => {
         className="sr-only"
         key={`search-${searchTerm}-${groupedCards.length}`}
       >
-        // @ts-expect-error TS(2304): Cannot find name 'loading'.
-        {searchTerm && !loading && (
+        {searchTerm && !cardsLoading && (
           groupedCards.length > 0
             ? `Found ${groupedCards.reduce((total, group) => total + group.cards.length, 0)} cards matching "${searchTerm}"`
             : `No cards found matching "${searchTerm}"`
