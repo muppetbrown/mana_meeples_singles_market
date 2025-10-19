@@ -95,12 +95,21 @@ const debugResponse = (req: Request, res: Response, next: express.NextFunction) 
 
   // Override res.end to catch any direct response endings
   const originalEnd = res.end.bind(res);
-  res.end = function(...args: any[]) {
-    console.log(`🔍 END: res.end called with args:`, args);
+  res.end = function(chunk?: any, encoding?: BufferEncoding, cb?: (() => void) | undefined) {
+    console.log(`🔍 END: res.end called with args:`, { chunk, encoding, cb: !!cb });
     logResponseState("before end()");
 
-    // Call original end with all arguments
-    const result = originalEnd.apply(res, args);
+    // Call original end with proper argument handling
+    let result;
+    if (arguments.length === 0) {
+      result = originalEnd.call(res);
+    } else if (arguments.length === 1) {
+      result = originalEnd.call(res, chunk);
+    } else if (arguments.length === 2) {
+      result = originalEnd.call(res, chunk, encoding);
+    } else {
+      result = originalEnd.call(res, chunk, encoding, cb);
+    }
 
     console.log(`🔍 END: res.end execution completed`);
     logResponseState("after end()");
