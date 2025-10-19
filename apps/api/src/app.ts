@@ -56,6 +56,17 @@ export function createApp() {
     res.json({ ok: true, service: "Mana & Meeples API", version: "1.0.0" })
   );
 
+  app.get("/cors-debug", (_req, res) => {
+  res.json({
+    allowedOrigins,
+    envVars: {
+      ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || null,
+      ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN || null,
+    },
+    requestOrigin: _req.headers.origin || null,
+    });
+  });
+
   app.use("/api/auth", authRoutes);
   app.use("/api/filters", filtersRoutes);
   app.use("/api", apiRoutes);
