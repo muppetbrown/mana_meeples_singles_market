@@ -72,8 +72,8 @@ router.post("/admin/login", async (req: Request, res: Response) => {
       return;
     }
 
-    // JWT signing options
-    const signOptions: SignOptions = {
+    // JWT signing options - remove explicit type annotation to let TS infer
+    const signOptions = {
       expiresIn: process.env.JWT_EXPIRES_IN || "24h",
     };
 
