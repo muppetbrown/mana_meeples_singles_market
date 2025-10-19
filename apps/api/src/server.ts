@@ -1,4 +1,5 @@
 // apps/api/src/server.ts
+import 'dotenv/config'; // Load environment variables first
 import express from 'express';
 import type { Request, Response, NextFunction } from 'express';
 import path from 'node:path';
@@ -16,7 +17,7 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 
-// Behind Render’s proxy -> ensures correct client IP for rate limiting/logging
+// Behind Render's proxy -> ensures correct client IP for rate limiting/logging
 app.set('trust proxy', 1);
 
 // Basic hardening (same-origin policy)
@@ -53,6 +54,12 @@ app.get('/api/health', (_req: Request, res: Response) => {
     service: 'Mana & Meeples API',
     version: process.env.APP_VERSION ?? '1.0.0',
     time: new Date().toISOString(),
+    env: {
+      hasAdminUsername: !!process.env.ADMIN_USERNAME,
+      hasAdminPasswordHash: !!process.env.ADMIN_PASSWORD_HASH,
+      hasJwtSecret: !!process.env.JWT_SECRET,
+      nodeEnv: process.env.NODE_ENV || 'development'
+    }
   });
 });
 
@@ -90,7 +97,7 @@ app.get('/api/health/db/deep', async (_req, res) => {
 // Mount your actual API routes under /api
 app.use('/api', routes);
 
-// 404s for API only (so SPA routes don’t get caught)
+// 404s for API only (so SPA routes don't get caught)
 app.use('/api', (_req: Request, res: Response) => {
   res.status(404).json({ error: 'Not found' });
 });
@@ -124,6 +131,11 @@ const HOST = '0.0.0.0';
 
 const server = app.listen(PORT, HOST, () => {
   console.log(`✅ API+Web listening on http://${HOST}:${PORT}`);
+  console.log(`🔐 Environment variables status:`);
+  console.log(`  ADMIN_USERNAME: ${process.env.ADMIN_USERNAME ? '✅ SET' : '❌ MISSING'}`);
+  console.log(`  ADMIN_PASSWORD_HASH: ${process.env.ADMIN_PASSWORD_HASH ? '✅ SET' : '❌ MISSING'}`);
+  console.log(`  JWT_SECRET: ${process.env.JWT_SECRET ? '✅ SET' : '❌ MISSING'}`);
+  console.log(`  NODE_ENV: ${process.env.NODE_ENV || 'development'}`);
 });
 
 // Graceful shutdown on Render
