@@ -3,7 +3,7 @@ services:
   - type: web
     name: mana-meeples-api
     env: node
-    buildCommand: corepack enable && pnpm install --no-frozen-lockfile && pnpm --filter ./apps/api run build
+    buildCommand: corepack enable && pnpm install --no-frozen-lockfile && pnpm run build:render
     startCommand: cd apps/api && node dist/server.js
     envVars:
       - key: NODE_VERSION
