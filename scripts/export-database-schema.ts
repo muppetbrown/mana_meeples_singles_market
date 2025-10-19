@@ -1,23 +1,25 @@
 // scripts/export-database-schema.ts
 /**
- * Database Schema Export Script (TypeScript, CommonJS-friendly)
+ * Database Schema Export Script (TypeScript, ESM-compatible)
  *
- * This version avoids ESM-only features (`import.meta`, `fileURLToPath`)
- * and uses built-in `__dirname`/`__filename`, `require`, and `module.exports`.
+ * Updated to use the modern database system for consistency.
  *
  * Usage:
  *   pnpm ts-node scripts/export-database-schema.ts
- *   # or with tsx in CJS mode:
- *   pnpm tsx --tsconfig tsconfig.json scripts/export-database-schema.ts
+ *   # or with tsx:
+ *   pnpm tsx scripts/export-database-schema.ts
  */
 
-// Runtime requires to play nicely with CJS builds
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const fs = require('fs/promises');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const path = require('path');
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const pool = require('../config/database');
+import { promises as fs } from 'fs';
+import path from 'path';
+import { Pool } from 'pg';
+
+// Create a simple pool for scripts (avoiding complex env.js dependencies)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined,
+  max: 10,
+});
 
 type Row = Record<string, unknown>;
 
@@ -320,11 +322,11 @@ async function main() {
   }
 }
 
-// Run if called directly (CJS-safe)
-if (require.main === module) {
+// Run if called directly
+if (import.meta.url === `file://${process.argv[1]}`) {
   // eslint-disable-next-line @typescript-eslint/no-floating-promises
   main();
 }
 
-// CommonJS export for reuse in other scripts/tests
-module.exports = { SchemaExporter };
+// Export for reuse in other scripts/tests
+export { SchemaExporter };
