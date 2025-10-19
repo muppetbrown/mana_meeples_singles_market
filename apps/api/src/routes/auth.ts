@@ -94,7 +94,7 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     return;
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ error: "Login failed", details: process.env.NODE_ENV === "development" ? error.message : undefined });
+    res.status(500).json({ error: "Login failed", details: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.message : String(error)) : undefined });
     return;
   }
 });
@@ -142,7 +142,7 @@ router.get("/admin/auth/check", (req: Request, res: Response) => {
     });
     return;
   } catch (error) {
-    console.log("Auth check failed:", error.message);
+    console.log("Auth check failed:", error instanceof Error ? error.message : String(error));
     res.status(401).json({ authenticated: false });
     return;
   }
