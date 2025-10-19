@@ -95,7 +95,7 @@ const debugResponse = (req: Request, res: Response, next: express.NextFunction) 
 
   // Override res.end to catch any direct response endings
   const originalEnd = res.end.bind(res);
-  res.end = function(...args: any[]) {
+  res.end = function(...args: Parameters<typeof res.end>) {
     console.log(`🔍 END: res.end called with ${args.length} args:`, args);
     logResponseState("before end()");
 
