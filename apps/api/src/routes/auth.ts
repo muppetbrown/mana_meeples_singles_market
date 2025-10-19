@@ -11,10 +11,21 @@ const router = express.Router();
  * Authenticates admin and issues JWT cookie
  */
 router.post("/admin/login", async (req: Request, res: Response) => {
+  // Set JSON content type explicitly
+  res.setHeader('Content-Type', 'application/json');
+
   try {
     const { username, password } = req.body;
 
+    // Validate request body exists
+    if (!req.body || typeof req.body !== 'object') {
+      console.error("Invalid request body:", req.body);
+      res.status(400).json({ error: "Invalid request format" });
+      return;
+    }
+
     if (!username || !password) {
+      console.error("Missing credentials:", { username: !!username, password: !!password });
       res.status(400).json({ error: "Username and password are required" });
       return;
     }
@@ -23,11 +34,16 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     const validPasswordHash = process.env.ADMIN_PASSWORD_HASH;
 
     if (!validUsername || !validPasswordHash) {
+      console.error("Missing environment variables:", {
+        hasUsername: !!validUsername,
+        hasPasswordHash: !!validPasswordHash
+      });
       res.status(500).json({ error: "Server configuration error" });
       return;
     }
 
     if (username !== validUsername) {
+      console.log("Invalid username attempt:", { provided: username, expected: validUsername });
       await new Promise((resolve) => setTimeout(resolve, 1000));
       res.status(401).json({ error: "Invalid credentials" });
       return;
@@ -35,6 +51,7 @@ router.post("/admin/login", async (req: Request, res: Response) => {
 
     const isValidPassword = await bcrypt.compare(password, validPasswordHash);
     if (!isValidPassword) {
+      console.log("Invalid password attempt for user:", username);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       res.status(401).json({ error: "Invalid credentials" });
       return;
@@ -43,6 +60,7 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     // ---- At this point, credentials are valid ----
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) {
+      console.error("Missing JWT_SECRET environment variable");
       res.status(500).json({ error: "Server misconfiguration: missing JWT_SECRET" });
       return;
     }
@@ -67,7 +85,8 @@ router.post("/admin/login", async (req: Request, res: Response) => {
       path: "/",
     });
 
-    res.json({
+    console.log("Login successful for user:", username);
+    res.status(200).json({
       success: true,
       message: "Login successful",
       expiresIn: signOptions.expiresIn,
@@ -75,7 +94,7 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     return;
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ error: "Login failed" });
+    res.status(500).json({ error: "Login failed", details: process.env.NODE_ENV === "development" ? error.message : undefined });
     return;
   }
 });
@@ -84,8 +103,9 @@ router.post("/admin/login", async (req: Request, res: Response) => {
  * POST /api/auth/admin/logout
  */
 router.post("/admin/logout", (_req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'application/json');
   res.clearCookie("adminToken");
-  res.json({ success: true, message: "Logged out successfully" });
+  res.status(200).json({ success: true, message: "Logged out successfully" });
   return;
 });
 
@@ -93,6 +113,8 @@ router.post("/admin/logout", (_req: Request, res: Response) => {
  * GET /api/auth/admin/check
  */
 router.get("/admin/auth/check", (req: Request, res: Response) => {
+  res.setHeader('Content-Type', 'application/json');
+
   try {
     const token = req.cookies?.adminToken;
     if (!token) {
@@ -100,19 +122,27 @@ router.get("/admin/auth/check", (req: Request, res: Response) => {
       return;
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as {
+    const JWT_SECRET = process.env.JWT_SECRET;
+    if (!JWT_SECRET) {
+      console.error("Missing JWT_SECRET environment variable in auth check");
+      res.status(500).json({ error: "Server configuration error", authenticated: false });
+      return;
+    }
+
+    const decoded = jwt.verify(token, JWT_SECRET) as {
       username: string;
       role: string;
       exp: number;
     };
 
-    res.json({
+    res.status(200).json({
       authenticated: true,
       user: { username: decoded.username, role: decoded.role },
       expiresAt: decoded.exp * 1000,
     });
     return;
-  } catch {
+  } catch (error) {
+    console.log("Auth check failed:", error.message);
     res.status(401).json({ authenticated: false });
     return;
   }
