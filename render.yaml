@@ -11,7 +11,7 @@ services:
       - key: PNPM_VERSION
         value: 9.x
       - key: CORS_ORIGINS
-        value: https://mana-meeples-singles-market.onrender.com
+        value: https://mana-meeples-web.onrender.com
       - key: PORT
         value: 10000
 
@@ -21,6 +21,9 @@ services:
     env: static
     buildCommand: corepack enable && pnpm install --no-frozen-lockfile && pnpm --filter ./apps/web run build
     staticPublishPath: ./apps/web/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://mana-meeples-api.onrender.com/api
     routes:
       - type: rewrite
         source: /*
