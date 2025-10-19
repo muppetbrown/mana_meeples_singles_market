@@ -20,14 +20,12 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     // Validate request body exists
     if (!req.body || typeof req.body !== 'object') {
       console.error("Invalid request body:", req.body);
-      res.status(400).json({ error: "Invalid request format" });
-      return;
+      return res.status(400).json({ error: "Invalid request format" });
     }
 
     if (!username || !password) {
       console.error("Missing credentials:", { username: !!username, password: !!password });
-      res.status(400).json({ error: "Username and password are required" });
-      return;
+      return res.status(400).json({ error: "Username and password are required" });
     }
 
     const validUsername = process.env.ADMIN_USERNAME;
@@ -40,15 +38,13 @@ router.post("/admin/login", async (req: Request, res: Response) => {
         usernameValue: validUsername || 'NOT SET',
         passwordHashPreview: validPasswordHash ? `${validPasswordHash.substring(0, 10)}...` : 'NOT SET'
       });
-      res.status(500).json({ error: "Server configuration error" });
-      return;
+      return res.status(500).json({ error: "Server configuration error" });
     }
 
     if (username !== validUsername) {
       console.log("Invalid username attempt:", { provided: username, expected: validUsername });
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      res.status(401).json({ error: "Invalid credentials" });
-      return;
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const isValidPassword = await bcrypt.compare(password, validPasswordHash);
@@ -60,16 +56,14 @@ router.post("/admin/login", async (req: Request, res: Response) => {
         isBcryptFormat: validPasswordHash.startsWith('$2b$') || validPasswordHash.startsWith('$2a$')
       });
       await new Promise((resolve) => setTimeout(resolve, 1000));
-      res.status(401).json({ error: "Invalid credentials" });
-      return;
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     // ---- At this point, credentials are valid ----
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) {
       console.error("Missing JWT_SECRET environment variable");
-      res.status(500).json({ error: "Server misconfiguration: missing JWT_SECRET" });
-      return;
+      return res.status(500).json({ error: "Server misconfiguration: missing JWT_SECRET" });
     }
 
     // Create JWT token with proper type handling
@@ -95,11 +89,9 @@ router.post("/admin/login", async (req: Request, res: Response) => {
       message: "Login successful",
       expiresIn: process.env.JWT_EXPIRES_IN || "24h",
     });
-    return;
   } catch (error) {
     console.error("Login error:", error);
-    res.status(500).json({ error: "Login failed", details: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.message : String(error)) : undefined });
-    return;
+    return res.status(500).json({ error: "Login failed", details: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.message : String(error)) : undefined });
   }
 });
 
@@ -110,7 +102,6 @@ router.post("/admin/logout", (_req: Request, res: Response) => {
   res.setHeader('Content-Type', 'application/json');
   res.clearCookie("adminToken");
   res.status(200).json({ success: true, message: "Logged out successfully" });
-  return;
 });
 
 /**
@@ -122,15 +113,13 @@ router.get("/admin/auth/check", (req: Request, res: Response) => {
   try {
     const token = req.cookies?.adminToken;
     if (!token) {
-      res.status(401).json({ authenticated: false });
-      return;
+      return res.status(401).json({ authenticated: false });
     }
 
     const JWT_SECRET = process.env.JWT_SECRET;
     if (!JWT_SECRET) {
       console.error("Missing JWT_SECRET environment variable in auth check");
-      res.status(500).json({ error: "Server configuration error", authenticated: false });
-      return;
+      return res.status(500).json({ error: "Server configuration error", authenticated: false });
     }
 
     const decoded = jwt.verify(token, JWT_SECRET) as {
@@ -144,11 +133,9 @@ router.get("/admin/auth/check", (req: Request, res: Response) => {
       user: { username: decoded.username, role: decoded.role },
       expiresAt: decoded.exp * 1000,
     });
-    return;
   } catch (error) {
     console.log("Auth check failed:", error instanceof Error ? error.message : String(error));
     res.status(401).json({ authenticated: false });
-    return;
   }
 });
 
