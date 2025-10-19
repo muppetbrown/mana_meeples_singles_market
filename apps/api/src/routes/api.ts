@@ -263,12 +263,17 @@ router.get("/games", async (req: Request, res: Response) => {
       g.name,
       g.code,
       g.active,
-      COUNT(DISTINCT c.id) AS card_count
+      COALESCE(card_counts.card_count, 0) AS card_count
     FROM games g
-    LEFT JOIN cards c ON c.game_id = g.id
-    LEFT JOIN card_inventory i ON i.card_id = c.id AND i.stock_quantity > 0
+    LEFT JOIN (
+      SELECT
+        c.game_id,
+        COUNT(DISTINCT c.id) AS card_count
+      FROM cards c
+      JOIN card_inventory i ON i.card_id = c.id AND i.stock_quantity > 0
+      GROUP BY c.game_id
+    ) card_counts ON card_counts.game_id = g.id
     WHERE g.active = true
-    GROUP BY g.id, g.name, g.code, g.active
     ORDER BY g.name ASC
   `;
 
