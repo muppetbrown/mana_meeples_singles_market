@@ -36,7 +36,9 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     if (!validUsername || !validPasswordHash) {
       console.error("Missing environment variables:", {
         hasUsername: !!validUsername,
-        hasPasswordHash: !!validPasswordHash
+        hasPasswordHash: !!validPasswordHash,
+        usernameValue: validUsername || 'NOT SET',
+        passwordHashPreview: validPasswordHash ? `${validPasswordHash.substring(0, 10)}...` : 'NOT SET'
       });
       res.status(500).json({ error: "Server configuration error" });
       return;
@@ -52,6 +54,11 @@ router.post("/admin/login", async (req: Request, res: Response) => {
     const isValidPassword = await bcrypt.compare(password, validPasswordHash);
     if (!isValidPassword) {
       console.log("Invalid password attempt for user:", username);
+      console.log("Password hash info:", {
+        hashLength: validPasswordHash.length,
+        hashPrefix: validPasswordHash.substring(0, 10),
+        isBcryptFormat: validPasswordHash.startsWith('$2b$') || validPasswordHash.startsWith('$2a$')
+      });
       await new Promise((resolve) => setTimeout(resolve, 1000));
       res.status(401).json({ error: "Invalid credentials" });
       return;
