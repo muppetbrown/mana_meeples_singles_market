@@ -43,9 +43,13 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
     try {
       const data = await api.get<{ games?: any[]; [key: string]: any }>('/games');
 
+      // Ensure we have an array to work with
+      const gamesArray = Array.isArray(data.games) ? data.games :
+                        Array.isArray(data) ? data : [];
+
       // Enrich with card counts if available
       const gamesWithCounts = await Promise.all(
-        (data.games || data).map(async (game: any) => {
+        gamesArray.map(async (game: any) => {
           try {
             const countData = await api.get<{ count: number }>(`/cards/count?game_id=${game.id}`);
             return { ...game, card_count: countData.count || 0 };
@@ -84,9 +88,12 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
 
       const data = await api.get<any[]>(`/sets?game_id=${gameId}`);
 
+      // Ensure we have an array to work with
+      const setsArray = Array.isArray(data) ? data : [];
+
       // Enrich with card counts
       const setsWithCounts = await Promise.all(
-        data.map(async (set: any) => {
+        setsArray.map(async (set: any) => {
           try {
             const countData = await api.get<{ count: number }>(`/cards/count?set_id=${set.id}`);
             return { ...set, card_count: countData.count || 0 };
