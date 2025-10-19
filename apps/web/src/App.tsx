@@ -22,7 +22,7 @@ export default function App() {
   return (
     <ErrorBoundary>
       <ToastProvider>
-        <BrowserRouter basename="/shop">
+        <BrowserRouter>
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
               <Route path="/" element={<TCGShop />} />
