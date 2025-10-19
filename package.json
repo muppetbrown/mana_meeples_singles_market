@@ -1,5 +1,6 @@
 {
   "name": "mana-meeples-singles-market",
+  "type" : "module"
   "private": true,
   "packageManager": "pnpm@9.11.0",
   "engines": {
