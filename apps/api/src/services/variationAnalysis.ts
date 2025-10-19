@@ -1,6 +1,6 @@
 /**
  * VARIATION ANALYSIS SERVICE
- * 
+ *
  * Analyzes card variations during import and maintains metadata
  * for dynamic filtering based on what actually exists in each set.
  */
@@ -477,14 +477,14 @@ async function refreshVariationFilters() {
   }
 }
 
-module.exports = {
+export {
   analyzeSetVariations,
   analyzeGameVariations,
   getSetVariations,
   getGameVariations,
   getVariationFilters,
   refreshVariationFilters,
-  
+
   // Export constants for reuse
   IGNORE_FRAME_EFFECTS,
   VISUAL_TREATMENTS,
