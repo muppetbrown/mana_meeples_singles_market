@@ -59,13 +59,11 @@ app.get('/api/health', (_req: Request, res: Response) => {
 app.get('/api/health/db', async (_req, res) => {
   try {
     const ok = await healthcheck();
-    if (!ok) return res.status(500).json({ db: false, error: 'probe returned false' });
-    res.status(200).json({ db: true });
+    if (!ok) return res.status(500).json({ database: 'disconnected' });
+    res.status(200).json({ database: 'connected' });
   } catch (err: any) {
     res.status(500).json({
-      db: false,
-      error: err?.message ?? 'unknown',
-      code: err?.code,
+      database: 'disconnected',
     });
   }
 });
