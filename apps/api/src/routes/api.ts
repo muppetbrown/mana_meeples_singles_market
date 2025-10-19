@@ -191,13 +191,13 @@ router.get("/cards/:id/inventory", async (req: Request, res: Response) => {
       i.quality,
       i.foil_type,
       i.language,
-      SUM(i.stock)::int AS stock,
+      SUM(i.stock_quantity)::int AS stock,
       MIN(i.price)::numeric AS min_price,
       MAX(i.price)::numeric AS max_price
     FROM card_inventory i
     WHERE i.card_id = $1
     GROUP BY i.quality, i.foil_type, i.language
-    HAVING SUM(i.stock) > 0
+    HAVING SUM(i.stock_quantity) > 0
     ORDER BY i.quality NULLS LAST, i.language NULLS LAST, i.foil_type NULLS LAST
   `;
 
@@ -210,5 +210,161 @@ router.get("/cards/:id/inventory", async (req: Request, res: Response) => {
   }
 });
 
+
+// ---------- GET /search/autocomplete ----------
+// Provide search suggestions/autocomplete for search box
+router.get("/search/autocomplete", async (req: Request, res: Response) => {
+  const q = req.query.q?.toString()?.trim();
+  if (!q || q.length < 2) {
+    res.json([]);
+    return;
+  }
+
+  const sql = `
+    SELECT DISTINCT
+      c.name,
+      cs.name AS set_name,
+      c.image_url,
+      'card' AS match_type,
+      GREATEST(
+        ts_rank(c.search_tsv, plainto_tsquery('simple', $1)),
+        similarity(c.name, $1) * 0.8,
+        similarity(c.card_number, $1) * 0.6
+      ) AS relevance
+    FROM cards c
+    JOIN card_sets cs ON c.set_id = cs.id
+    JOIN card_inventory i ON i.card_id = c.id
+    WHERE
+      i.stock_quantity > 0
+      AND (
+        c.search_tsv @@ plainto_tsquery('simple', $1)
+        OR c.name ILIKE $2
+        OR c.card_number ILIKE $3
+      )
+    ORDER BY relevance DESC
+    LIMIT 10
+  `;
+
+  try {
+    const rows = await db.query(sql, [q, `%${q}%`, `%${q}%`]);
+    res.json(rows);
+  } catch (err: any) {
+    console.error("❌ GET /search/autocomplete failed:", err.message);
+    res.status(500).json({ error: "Failed to fetch autocomplete suggestions" });
+  }
+});
+
+// ---------- GET /games ----------
+// Fetch available games for dropdown filters
+router.get("/games", async (req: Request, res: Response) => {
+  const sql = `
+    SELECT
+      g.id,
+      g.name,
+      g.code,
+      g.active,
+      COUNT(DISTINCT c.id) AS card_count
+    FROM games g
+    LEFT JOIN cards c ON c.game_id = g.id
+    LEFT JOIN card_inventory i ON i.card_id = c.id AND i.stock_quantity > 0
+    WHERE g.active = true
+    GROUP BY g.id, g.name, g.code, g.active
+    ORDER BY g.name ASC
+  `;
+
+  try {
+    const rows = await db.query(sql);
+    res.json(rows);
+  } catch (err: any) {
+    console.error("❌ GET /games failed:", err.message);
+    res.status(500).json({ error: "Failed to fetch games" });
+  }
+});
+
+// ---------- GET /sets ----------
+// Fetch card sets for a specific game
+router.get("/sets", async (req: Request, res: Response) => {
+  const gameId = req.query.game_id;
+  if (!gameId) {
+    res.status(400).json({ error: "game_id parameter is required" });
+    return;
+  }
+
+  const parsed = z.coerce.number().int().positive().safeParse(gameId);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid game_id parameter" });
+    return;
+  }
+
+  const sql = `
+    SELECT
+      cs.id,
+      cs.name,
+      cs.code,
+      cs.release_date,
+      cs.active,
+      COUNT(DISTINCT c.id) AS card_count
+    FROM card_sets cs
+    LEFT JOIN cards c ON c.set_id = cs.id
+    LEFT JOIN card_inventory i ON i.card_id = c.id AND i.stock_quantity > 0
+    WHERE cs.game_id = $1 AND cs.active = true
+    GROUP BY cs.id, cs.name, cs.code, cs.release_date, cs.active
+    ORDER BY cs.release_date DESC NULLS LAST, cs.name ASC
+  `;
+
+  try {
+    const rows = await db.query(sql, [parsed.data]);
+    res.json(rows);
+  } catch (err: any) {
+    console.error("❌ GET /sets failed:", err.message);
+    res.status(500).json({ error: "Failed to fetch sets" });
+  }
+});
+
+// ---------- GET /cards/count ----------
+// Get count of cards with optional filters
+router.get("/cards/count", async (req: Request, res: Response) => {
+  const gameId = req.query.game_id;
+  const setId = req.query.set_id;
+
+  const where: string[] = ["1=1"];
+  const params: any[] = [];
+
+  if (gameId) {
+    const parsed = z.coerce.number().int().positive().safeParse(gameId);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Invalid game_id parameter" });
+      return;
+    }
+    where.push(`c.game_id = $${params.length + 1}`);
+    params.push(parsed.data);
+  }
+
+  if (setId) {
+    const parsed = z.coerce.number().int().positive().safeParse(setId);
+    if (!parsed.success) {
+      res.status(400).json({ error: "Invalid set_id parameter" });
+      return;
+    }
+    where.push(`c.set_id = $${params.length + 1}`);
+    params.push(parsed.data);
+  }
+
+  const sql = `
+    SELECT COUNT(DISTINCT c.id)::int AS count
+    FROM cards c
+    JOIN card_inventory i ON i.card_id = c.id
+    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
+  `;
+
+  try {
+    const rows = await db.query<{ count: number }>(sql, params);
+    const count = rows[0]?.count ?? 0;
+    res.json({ count });
+  } catch (err: any) {
+    console.error("❌ GET /cards/count failed:", err.message);
+    res.status(500).json({ error: "Failed to count cards" });
+  }
+});
 
 export default router;
