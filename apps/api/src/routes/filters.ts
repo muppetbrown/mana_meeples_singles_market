@@ -47,7 +47,7 @@ router.get("/treatments", async (req: Request, res: Response) => {
     SELECT c.treatment AS value, c.treatment AS label, COUNT(DISTINCT c.id) AS count
     FROM cards c
     JOIN card_inventory i ON i.card_id = c.id
-    WHERE ${where.join(" AND ")}
+    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
     GROUP BY c.treatment
     ORDER BY count DESC, c.treatment;
   `;
@@ -64,7 +64,7 @@ router.get("/rarities", async (req: Request, res: Response) => {
     SELECT c.rarity AS value, c.rarity AS label, COUNT(DISTINCT c.id) AS count
     FROM cards c
     JOIN card_inventory i ON i.card_id = c.id
-    WHERE ${where.join(" AND ")}
+    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
     GROUP BY c.rarity
     ORDER BY count DESC, c.rarity;
   `;
@@ -81,7 +81,7 @@ router.get("/qualities", async (req: Request, res: Response) => {
     SELECT i.quality AS value, i.quality AS label, COUNT(DISTINCT i.id) AS count
     FROM card_inventory i
     JOIN cards c ON c.id = i.card_id
-    WHERE ${where.join(" AND ")}
+    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
     GROUP BY i.quality
     ORDER BY count DESC, i.quality;
   `;
@@ -98,7 +98,7 @@ router.get("/foil-types", async (req: Request, res: Response) => {
     SELECT i.foil_type AS value, i.foil_type AS label, COUNT(DISTINCT i.id) AS count
     FROM card_inventory i
     JOIN cards c ON c.id = i.card_id
-    WHERE ${where.join(" AND ")}
+    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
     GROUP BY i.foil_type
     ORDER BY count DESC, i.foil_type;
   `;
@@ -115,7 +115,7 @@ router.get("/languages", async (req: Request, res: Response) => {
     SELECT i.language AS value, i.language AS label, COUNT(DISTINCT i.id) AS count
     FROM card_inventory i
     JOIN cards c ON c.id = i.card_id
-    WHERE ${where.join(" AND ")}
+    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
     GROUP BY i.language
     ORDER BY count DESC, i.language;
   `;
@@ -132,7 +132,7 @@ router.get("/count", async (req: Request, res: Response) => {
     SELECT COUNT(DISTINCT c.id) AS count
     FROM cards c
     JOIN card_inventory i ON i.card_id = c.id
-    WHERE ${where.join(" AND ")};`;
+    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")};`;
 
   try {
     const rows = await db.query(sql, params);
