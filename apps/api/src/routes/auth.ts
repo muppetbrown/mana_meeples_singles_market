@@ -1,8 +1,13 @@
 import express from "express";
 import type { Request, Response } from "express";
-import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import type { Secret, SignOptions } from "jsonwebtoken";
+import {
+  createJWT,
+  verifyJWT,
+  validateCredentials,
+  getAuthCookieConfig,
+  addSecurityDelay,
+} from "../lib/authUtils.js";
+import { env } from "../lib/env.js";
 
 const router = express.Router();
 
@@ -52,53 +57,20 @@ router.post("/admin/login", async (req: Request, res: Response) => {
       return res.status(400).json({ error: "Username and password are required" });
     }
 
-    const validUsername = process.env.ADMIN_USERNAME;
-    const validPasswordHash = process.env.ADMIN_PASSWORD_HASH;
-
-    if (!validUsername || !validPasswordHash) {
-      console.error("❌ Missing environment variables");
-      return res.status(500).json({ error: "Server configuration error" });
-    }
-
-    if (username !== validUsername) {
-      console.log("❌ Invalid username attempt");
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+    const isValid = await validateCredentials(username, password);
+    if (!isValid) {
+      console.log("❌ Invalid credentials attempt");
+      await addSecurityDelay();
       return res.status(401).json({ error: "Invalid credentials" });
     }
 
-    const isValidPassword = await bcrypt.compare(password, validPasswordHash);
-    if (!isValidPassword) {
-      console.log("❌ Invalid password attempt");
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      return res.status(401).json({ error: "Invalid credentials" });
-    }
-
-    const JWT_SECRET = process.env.JWT_SECRET;
-    if (!JWT_SECRET) {
-      console.error("❌ Missing JWT_SECRET environment variable");
-      return res.status(500).json({ error: "Server misconfiguration" });
-    }
-
-    const token = jwt.sign(
-      { username, role: "admin" },
-      JWT_SECRET as Secret,
-      {
-        expiresIn: process.env.JWT_EXPIRES_IN || "24h",
-      } as SignOptions
-    );
-
-    res.cookie("adminToken", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-      path: "/",
-    });
+    const token = createJWT({ username, role: "admin" });
+    res.cookie("adminToken", token, getAuthCookieConfig());
 
     const responseData = {
       success: true,
       message: "Login successful",
-      expiresIn: process.env.JWT_EXPIRES_IN || "24h",
+      expiresIn: env.JWT_EXPIRES_IN,
     };
 
     console.log("✅ Admin login successful, preparing response");
@@ -139,17 +111,7 @@ router.get("/admin/auth/check", (req: Request, res: Response) => {
       return res.status(401).json({ authenticated: false });
     }
 
-    const JWT_SECRET = process.env.JWT_SECRET;
-    if (!JWT_SECRET) {
-      console.error("❌ Missing JWT_SECRET environment variable");
-      return res.status(500).json({ error: "Server configuration error", authenticated: false });
-    }
-
-    const decoded = jwt.verify(token, JWT_SECRET) as {
-      username: string;
-      role: string;
-      exp: number;
-    };
+    const decoded = verifyJWT(token);
 
     console.log("✅ Admin auth check successful");
     return res.status(200).json({
