@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { api } from '../config/api';
 
 
 type FilterRow = { treatment?: string; border_color?: string; finish?: string; promo_type?: string; frame_effect?: string };
@@ -10,7 +11,17 @@ const [data, setData] = useState<FilterRow[]>([]);
 const announceRef = useRef<HTMLDivElement>(null);
 
 
-useEffect(() => { (async () => { const r = await fetch('/api/filters'); setData((await r.json()).data ?? []); })(); }, []);
+useEffect(() => {
+  (async () => {
+    try {
+      const response = await api.get<{ data: FilterRow[] }>('/filters');
+      setData(response.data ?? []);
+    } catch (error) {
+      console.error('Failed to fetch filters:', error);
+      setData([]);
+    }
+  })();
+}, []);
 useEffect(() => { if (announceRef.current) announceRef.current.textContent = `Loaded ${data.length} filter values`; }, [data]);
 
 
