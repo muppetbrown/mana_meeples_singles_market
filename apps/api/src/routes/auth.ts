@@ -6,9 +6,24 @@ import type { Secret, SignOptions } from "jsonwebtoken";
 
 const router = express.Router();
 
-// Minimal request logging - no response event listeners that could interfere
+// Comprehensive request logging for debugging empty responses
 router.use((req: Request, res: Response, next: express.NextFunction) => {
-  console.log(`🔐 AUTH ${req.method} ${req.originalUrl || req.url} - ${new Date().toISOString()}`);
+  const timestamp = new Date().toISOString();
+  console.log(`\n=== AUTH REQUEST START ${timestamp} ===`);
+  console.log(`🔐 ${req.method} ${req.originalUrl || req.url}`);
+  console.log(`📋 Headers:`, JSON.stringify(req.headers, null, 2));
+  console.log(`📦 Body:`, JSON.stringify(req.body, null, 2));
+  console.log(`🍪 Cookies:`, JSON.stringify(req.cookies, null, 2));
+
+  // Hook into response to log what's being sent
+  const originalJson = res.json.bind(res);
+  res.json = function(body?: any) {
+    console.log(`📤 RESPONSE JSON:`, JSON.stringify(body, null, 2));
+    console.log(`📊 Status Code:`, res.statusCode);
+    console.log(`=== AUTH REQUEST END ===\n`);
+    return originalJson(body);
+  };
+
   next();
 });
 
@@ -17,14 +32,18 @@ router.use((req: Request, res: Response, next: express.NextFunction) => {
  * Authenticates admin and issues JWT cookie
  */
 router.post("/admin/login", async (req: Request, res: Response) => {
-  console.log("🔑 Admin login attempt");
+  console.log("🔑 Admin login attempt - entering handler");
+  console.log("🔍 Request body type:", typeof req.body);
+  console.log("🔍 Request body content:", req.body);
 
   try {
     const { username, password } = req.body;
+    console.log("🔍 Extracted credentials:", { username: username || 'MISSING', hasPassword: !!password });
 
     // Validate request body
     if (!req.body || typeof req.body !== 'object') {
-      console.error("❌ Invalid request body");
+      console.error("❌ Invalid request body - type:", typeof req.body);
+      console.error("❌ Request body value:", req.body);
       return res.status(400).json({ error: "Invalid request format" });
     }
 
@@ -82,8 +101,12 @@ router.post("/admin/login", async (req: Request, res: Response) => {
       expiresIn: process.env.JWT_EXPIRES_IN || "24h",
     };
 
-    console.log("✅ Admin login successful, sending response");
+    console.log("✅ Admin login successful, preparing response");
+    console.log("✅ Response data:", JSON.stringify(responseData, null, 2));
+    console.log("✅ About to call res.status(200).json()");
+
     res.status(200).json(responseData);
+    console.log("✅ res.json() call completed");
 
   } catch (error) {
     console.error("❌ Login error:", error instanceof Error ? error.message : String(error));
