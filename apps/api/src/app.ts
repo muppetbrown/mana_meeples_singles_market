@@ -56,14 +56,15 @@ export function createApp() {
     res.json({ ok: true, service: "Mana & Meeples API", version: "1.0.0" })
   );
 
+  // 🔍 Debug endpoint to check CORS configuration
   app.get("/cors-debug", (_req, res) => {
-  res.json({
-    allowedOrigins,
-    envVars: {
-      ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || null,
-      ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN || null,
-    },
-    requestOrigin: _req.headers.origin || null,
+    res.json({
+      allowedOrigins,
+      envVars: {
+        ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS || null,
+        ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN || null,
+      },
+      requestOrigin: _req.headers.origin || null,
     });
   });
 
@@ -108,7 +109,7 @@ export function createApp() {
         // Ensure safe sniffing
         res.setHeader("X-Content-Type-Options", "nosniff");
 
-        // HTML always no-store (fixes audit “Target should not be cached”)
+        // HTML always no-store (fixes audit "Target should not be cached")
         if (filePath.endsWith(".html")) {
           res.setHeader("Cache-Control", "no-store, must-revalidate");
           res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -127,7 +128,8 @@ export function createApp() {
   );
 
   // SPA fallback route (for client-side routing)
-  app.get("*", (_req, res) => {
+  // ⚠️ CHANGED: Express 5.x requires "/*" instead of "*"
+  app.get("/*", (_req, res) => {
     res.setHeader("Cache-Control", "no-store, must-revalidate");
     res.type("text/html; charset=utf-8");
     res.sendFile(path.join(frontendDist, "index.html"));
