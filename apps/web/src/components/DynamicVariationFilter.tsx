@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { api } from '../config/api';
 
 /**
  * Dynamic Variation Filter Component
@@ -38,13 +39,13 @@ const DynamicVariationFilter = ({
           params.append('game_id', selectedGame);
         }
         
-        const response = await fetch(`${apiUrl}/variations/filters?${params}`);
-        
-        if (!response.ok) {
-          throw new Error('Failed to fetch filters');
-        }
-        
-        const data = await response.json();
+        const data = await api.get<{
+          treatments?: any[];
+          borderColors?: any[];
+          finishes?: any[];
+          promoTypes?: any[];
+          frameEffects?: any[];
+        }>(`/variations/filters?${params}`);
         
         setAvailableFilters({
           treatments: data.treatments || [],

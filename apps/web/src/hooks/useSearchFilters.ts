@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
+import { api } from '../config/api';
 
 /**
  * Custom hook to manage dynamic search filters
@@ -40,44 +41,29 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
    */
   const fetchGames = useCallback(async () => {
     try {
-      const response = await fetch(`${apiUrl}/games`, {
-        credentials: 'include'
-      });
-      
-      if (!response.ok) {
-        throw new Error('Failed to fetch games');
-      }
-      
-      const data = await response.json();
-      
+      const data = await api.get<{ games?: any[]; [key: string]: any }>('/games');
+
       // Enrich with card counts if available
       const gamesWithCounts = await Promise.all(
         (data.games || data).map(async (game: any) => {
           try {
-            const countRes = await fetch(
-              `${apiUrl}/cards/count?game_id=${game.id}`,
-              { credentials: 'include' }
-            );
-            
-            if (countRes.ok) {
-              const countData = await countRes.json();
-              return { ...game, card_count: countData.count || 0 };
-            }
+            const countData = await api.get<{ count: number }>(`/cards/count?game_id=${game.id}`);
+            return { ...game, card_count: countData.count || 0 };
           } catch (err) {
             console.warn(`Failed to fetch count for ${game.name}`);
+            return { ...game, card_count: 0 };
           }
-          return { ...game, card_count: 0 };
         })
       );
-      
+
 
       setGames(gamesWithCounts);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching games:', err);
 
       setError(err.message);
     }
-  }, [apiUrl]);
+  }, []);
 
   /**
    * Fetch sets for selected game
@@ -96,33 +82,18 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
         return;
       }
 
-      const response = await fetch(`${apiUrl}/sets?game_id=${gameId}`, {
-        credentials: 'include'
-      });
+      const data = await api.get<any[]>(`/sets?game_id=${gameId}`);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch sets');
-      }
-
-      const data = await response.json();
-      
       // Enrich with card counts
       const setsWithCounts = await Promise.all(
         data.map(async (set: any) => {
           try {
-            const countRes = await fetch(
-              `${apiUrl}/cards/count?set_id=${set.id}`,
-              { credentials: 'include' }
-            );
-            
-            if (countRes.ok) {
-              const countData = await countRes.json();
-              return { ...set, card_count: countData.count || 0 };
-            }
+            const countData = await api.get<{ count: number }>(`/cards/count?set_id=${set.id}`);
+            return { ...set, card_count: countData.count || 0 };
           } catch (err) {
             console.warn(`Failed to fetch count for ${set.name}`);
+            return { ...set, card_count: 0 };
           }
-          return { ...set, card_count: 0 };
         })
       );
       
