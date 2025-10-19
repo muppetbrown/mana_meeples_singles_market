@@ -35,7 +35,7 @@ async function checkHTML(url) {
 
   // DB health (optional but recommended)
   try {
-    results.push(['API /api/health/db', await checkJSON(`${API}/api/health/db` , 'db')]);
+    results.push(['API /api/health/db', await checkJSON(`${API}/api/health/db` , 'database')]);
   } catch (e) {
     console.warn('WARN: /api/health/db failed:', e.message);
   }
@@ -45,8 +45,8 @@ async function checkHTML(url) {
 
   // Sample data
   const cards = await checkJSON(`${API}/api/cards?limit=1`);
-  if (!Array.isArray(cards.items)) throw new Error('/api/cards did not return items array');
-  results.push([`API /api/cards (got ${cards.items.length})`, cards.items]);
+  if (!Array.isArray(cards)) throw new Error('/api/cards did not return array');
+  results.push([`API /api/cards (got ${cards.length})`, cards]);
 
   // WEB root
   await checkHTML(WEB);
