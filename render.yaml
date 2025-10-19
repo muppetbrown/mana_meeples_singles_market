@@ -23,5 +23,5 @@ services:
     staticPublishPath: ./apps/web/dist
     routes:
       - type: rewrite
-        source: /shop/*
-        destination: /shop/index.html
+        source: /*
+        destination: /index.html
