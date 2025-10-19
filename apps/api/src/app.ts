@@ -16,8 +16,8 @@ export function createApp() {
   app.use(express.json({ limit: "1mb" }));
   app.use(cookieParser());
 
-  const allowedOrigins = process.env.ALLOWED_ORIGIN
-    ? process.env.ALLOWED_ORIGIN.split(",").map((s) => s.trim())
+  const allowedOrigins = (process.env.ALLOWED_ORIGINS || process.env.ALLOWED_ORIGIN)
+    ? (process.env.ALLOWED_ORIGINS || process.env.ALLOWED_ORIGIN)!.split(",").map((s) => s.trim())
     : [];
 
   const corsDelegate: CorsOptionsDelegate<CorsRequest> = (
