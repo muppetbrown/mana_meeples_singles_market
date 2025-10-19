@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-10-18T22:52:03.396Z",
+  "generatedAt": "2025-10-19T01:20:57.861Z",
   "root": "C:\\Git_Repos\\mana_meeples_singles_market",
   "files": [
     {
@@ -70,52 +70,6 @@
       "isTest": false
     },
     {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/config/database.ts",
-      "isExternal": true,
-      "lines": 63,
-      "sizeBytes": 2309,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "pg",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "dotenv",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/analyze-variations.ts",
-      "isExternal": true,
-      "lines": 104,
-      "sizeBytes": 3717,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "../config/database",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "../services/variationAnalysis",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
       "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/copy-dist-to-api.js",
       "isExternal": true,
       "lines": 25,
@@ -139,19 +93,17 @@
       "isTest": false
     },
     {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/create-bulk-foils.ts",
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/export-database-schema.ts",
       "isExternal": true,
-      "lines": 137,
-      "sizeBytes": 5126,
+      "lines": 333,
+      "sizeBytes": 10799,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
     },
     {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/export-database-schema.ts",
+      "id": "pg",
       "isExternal": true,
-      "lines": 521,
-      "sizeBytes": 15617,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
@@ -180,64 +132,10 @@
       "isTest": false
     },
     {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/import-onepiece-set.ts",
-      "isExternal": true,
-      "lines": 360,
-      "sizeBytes": 13953,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/import-pokemon-set.ts",
-      "isExternal": true,
-      "lines": 384,
-      "sizeBytes": 14227,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/import_mtg_with_variations.ts",
-      "isExternal": true,
-      "lines": 410,
-      "sizeBytes": 13658,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/list-pokemon-sets.ts",
-      "isExternal": true,
-      "lines": 32,
-      "sizeBytes": 1327,
-      "onlyReExports": true,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrate-card-pricing.ts",
-      "isExternal": true,
-      "lines": 145,
-      "sizeBytes": 5395,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/run-migration.ts",
-      "isExternal": true,
-      "lines": 122,
-      "sizeBytes": 3800,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
       "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/smoke.mjs",
       "isExternal": true,
       "lines": 73,
-      "sizeBytes": 2298,
+      "sizeBytes": 2280,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
@@ -254,6 +152,13 @@
       "isExternal": true,
       "lines": 55,
       "sizeBytes": 2045,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "dotenv",
+      "isExternal": true,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
@@ -330,10 +235,87 @@
       "isTest": false
     },
     {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/analyze-variations.ts",
+      "isExternal": true,
+      "lines": 108,
+      "sizeBytes": 3690,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "../../apps/api/src/services/variationAnalysis.js",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import-onepiece-set.ts",
+      "isExternal": true,
+      "lines": 360,
+      "sizeBytes": 13953,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import-pokemon-set.ts",
+      "isExternal": true,
+      "lines": 384,
+      "sizeBytes": 14227,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import_mtg_with_variations.ts",
+      "isExternal": true,
+      "lines": 410,
+      "sizeBytes": 13658,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "../services/variationAnalysis",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/list-pokemon-sets.ts",
+      "isExternal": true,
+      "lines": 32,
+      "sizeBytes": 1327,
+      "onlyReExports": true,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/migrate-card-pricing.ts",
+      "isExternal": true,
+      "lines": 145,
+      "sizeBytes": 5395,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/run-migration.ts",
+      "isExternal": true,
+      "lines": 117,
+      "sizeBytes": 3426,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/app.ts",
       "isExternal": true,
       "lines": 63,
-      "sizeBytes": 2136,
+      "sizeBytes": 2203,
       "onlyReExports": false,
       "exports": [
         {
@@ -427,8 +409,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/server.ts",
       "isExternal": true,
-      "lines": 139,
-      "sizeBytes": 4119,
+      "lines": 137,
+      "sizeBytes": 4066,
       "onlyReExports": false,
       "exports": [
         {
@@ -754,8 +736,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/api.ts",
       "isExternal": true,
-      "lines": 226,
-      "sizeBytes": 7297,
+      "lines": 215,
+      "sizeBytes": 6878,
       "onlyReExports": false,
       "exports": [
         {
@@ -969,7 +951,7 @@
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/variationAnalysis.ts",
       "isExternal": true,
       "lines": 493,
-      "sizeBytes": 14157,
+      "sizeBytes": 14046,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
@@ -2002,26 +1984,6 @@
       "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/config/database.ts",
-      "to": "pg",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/config/database.ts",
-      "to": "dotenv",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/analyze-variations.ts",
-      "to": "../config/database",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/analyze-variations.ts",
-      "to": "../services/variationAnalysis",
-      "kind": "require"
-    },
-    {
       "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/copy-dist-to-api.js",
       "to": "node:fs",
       "kind": "import"
@@ -2032,29 +1994,19 @@
       "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/create-bulk-foils.ts",
-      "to": "pg",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/create-bulk-foils.ts",
-      "to": "dotenv",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/export-database-schema.ts",
-      "to": "../config/database",
-      "kind": "require"
-    },
-    {
       "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/export-database-schema.ts",
       "to": "fs",
-      "kind": "require"
+      "kind": "import"
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/export-database-schema.ts",
       "to": "path",
-      "kind": "require"
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/export-database-schema.ts",
+      "to": "pg",
+      "kind": "import"
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/generate-admin-hash.ts",
@@ -2064,66 +2016,6 @@
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/generate-admin-hash.ts",
       "to": "readline",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/import-onepiece-set.ts",
-      "to": "pg",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/import-onepiece-set.ts",
-      "to": "dotenv",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/import-pokemon-set.ts",
-      "to": "pg",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/import-pokemon-set.ts",
-      "to": "dotenv",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/import_mtg_with_variations.ts",
-      "to": "pg",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/import_mtg_with_variations.ts",
-      "to": "../services/variationAnalysis",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/import_mtg_with_variations.ts",
-      "to": "dotenv",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrate-card-pricing.ts",
-      "to": "pg",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrate-card-pricing.ts",
-      "to": "dotenv",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/run-migration.ts",
-      "to": "fs",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/run-migration.ts",
-      "to": "path",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/run-migration.ts",
-      "to": "pg",
       "kind": "require"
     },
     {
@@ -2169,6 +2061,76 @@
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/docs/samples/api_driven_variations.ts",
       "to": "path",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/analyze-variations.ts",
+      "to": "pg",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/analyze-variations.ts",
+      "to": "../../apps/api/src/services/variationAnalysis.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import-onepiece-set.ts",
+      "to": "pg",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import-onepiece-set.ts",
+      "to": "dotenv",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import-pokemon-set.ts",
+      "to": "pg",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import-pokemon-set.ts",
+      "to": "dotenv",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import_mtg_with_variations.ts",
+      "to": "pg",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import_mtg_with_variations.ts",
+      "to": "../services/variationAnalysis",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import_mtg_with_variations.ts",
+      "to": "dotenv",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/migrate-card-pricing.ts",
+      "to": "pg",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/migrate-card-pricing.ts",
+      "to": "dotenv",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/run-migration.ts",
+      "to": "fs",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/run-migration.ts",
+      "to": "path",
+      "kind": "require"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/run-migration.ts",
+      "to": "pg",
       "kind": "require"
     },
     {
@@ -2563,8 +2525,8 @@
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/variationAnalysis.ts",
-      "to": "../config/database",
-      "kind": "require"
+      "to": "../lib/db.js",
+      "kind": "import"
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/tests/testEmail.js",

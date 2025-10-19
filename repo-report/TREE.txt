@@ -123,13 +123,12 @@ mana_meeples_singles_market
 │  ├── tailwind.config.ts
 │  ├── tsconfig.json
 │  └── vite.config.ts
-├── config/
-│ └── database.ts
 ├── database/
 │ ├── migrations/
-│ │ ├── add_card_pricing_table.sql
-│ │ ├── schema.sql
-│ │ └── variation_framework_schema.sql
+│ │ ├── 000_init_extensions.sql
+│ │ ├── 010_schema.sql
+│ │ ├── 020_variation_framework_schema.sql
+│ │ └── 030_add_card_pricing_table.sql
 │ ├── DATABASE_SCHEMA.md
 │ └── database-stats.json
 ├── docs/
@@ -144,19 +143,19 @@ mana_meeples_singles_market
 │ ├── openapi.yaml
 │ └── QUICK_START_VARIATIONS.md
 ├── scripts/
-│ ├── analyze-variations.ts
+│ ├── imports/
+│ │ ├── analyze-variations.ts
+│ │ ├── import_mtg_with_variations.ts
+│ │ ├── import-onepiece-set.ts
+│ │ ├── import-pokemon-set.ts
+│ │ └── list-pokemon-sets.ts
+│ ├── migrations/
+│ │ ├── migrate-card-pricing.ts
+│ │ └── run-migration.ts
 │ ├── copy-dist-to-api.js
-│ ├── create-bulk-foils.ts
 │ ├── export-database-schema.ts
 │ ├── generate-admin-hash.ts
-│ ├── import_mtg_with_variations.ts
-│ ├── import-onepiece-set.ts
-│ ├── import-pokemon-set.ts
-│ ├── list-pokemon-sets.ts
-│ ├── migrate-card-pricing.ts
-│ ├── migrate.sql
 │ ├── refresh-mviews.sh
-│ ├── run-migration.ts
 │ ├── smoke.mjs
 │ └── test-password.ts
 ├── utils/
@@ -168,6 +167,7 @@ mana_meeples_singles_market
 ├── api.effective.tsconfig.json
 ├── generate_tree.py
 ├── package.json
+├── pnpm
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
 ├── prettier.config.cjs

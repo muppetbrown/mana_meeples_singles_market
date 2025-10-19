@@ -12,7 +12,7 @@
 
 import { promises as fs } from 'fs';
 import path from 'path';
-import { Pool } from 'pg';
+import { Pool } from "pg";
 
 // Create a simple pool for scripts (avoiding complex env.js dependencies)
 const pool = new Pool({
