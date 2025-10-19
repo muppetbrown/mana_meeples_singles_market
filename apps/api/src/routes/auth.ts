@@ -1,3 +1,4 @@
+// apps/api/src/routes/auth.ts
 import express from "express";
 import type { Request, Response } from "express";
 import {
@@ -11,24 +12,12 @@ import { env } from "../lib/env.js";
 
 const router = express.Router();
 
-// Comprehensive request logging for debugging empty responses
-router.use((req: Request, res: Response, next: express.NextFunction) => {
-  const timestamp = new Date().toISOString();
-  console.log(`\n=== AUTH REQUEST START ${timestamp} ===`);
-  console.log(`🔐 ${req.method} ${req.originalUrl || req.url}`);
-  console.log(`📋 Headers:`, JSON.stringify(req.headers, null, 2));
-  console.log(`📦 Body:`, JSON.stringify(req.body, null, 2));
-  console.log(`🍪 Cookies:`, JSON.stringify(req.cookies, null, 2));
-
-  // Hook into response to log what's being sent
-  const originalJson = res.json.bind(res);
-  res.json = function(body?: any) {
-    console.log(`📤 RESPONSE JSON:`, JSON.stringify(body, null, 2));
-    console.log(`📊 Status Code:`, res.statusCode);
-    console.log(`=== AUTH REQUEST END ===\n`);
-    return originalJson(body);
-  };
-
+/**
+ * Simple request logging - NO response interception
+ * CRITICAL: Do not override res.json or any response methods
+ */
+router.use((req: Request, _res: Response, next: express.NextFunction) => {
+  console.log(`🔐 AUTH ${req.method} ${req.originalUrl || req.url} - ${new Date().toISOString()}`);
   next();
 });
 
@@ -36,92 +25,173 @@ router.use((req: Request, res: Response, next: express.NextFunction) => {
  * POST /api/auth/admin/login
  * Authenticates admin and issues JWT cookie
  */
-router.post("/admin/login", async (req: Request, res: Response) => {
-  console.log("🔑 Admin login attempt - entering handler");
-  console.log("🔍 Request body type:", typeof req.body);
-  console.log("🔍 Request body content:", req.body);
+router.post("/admin/login", async (req: Request, res: Response): Promise<void> => {
+  console.log("🔑 Admin login attempt - handler entered");
 
   try {
     const { username, password } = req.body;
-    console.log("🔍 Extracted credentials:", { username: username || 'MISSING', hasPassword: !!password });
+    console.log("📋 Credentials received:", {
+      username: username || "MISSING",
+      hasPassword: !!password,
+      bodyType: typeof req.body,
+    });
 
-    // Validate request body
-    if (!req.body || typeof req.body !== 'object') {
-      console.error("❌ Invalid request body - type:", typeof req.body);
-      console.error("❌ Request body value:", req.body);
-      return res.status(400).json({ error: "Invalid request format" });
+    // Validate request body structure
+    if (!req.body || typeof req.body !== "object") {
+      console.error("❌ Invalid request body");
+      res.status(400).json({ success: false, error: "Invalid request format" });
+      return;
     }
 
+    // Validate credentials presence
     if (!username || !password) {
       console.error("❌ Missing credentials");
-      return res.status(400).json({ error: "Username and password are required" });
+      res.status(400).json({
+        success: false,
+        error: "Username and password are required",
+      });
+      return;
     }
 
+    console.log("🔍 Validating credentials...");
     const isValid = await validateCredentials(username, password);
+
     if (!isValid) {
-      console.log("❌ Invalid credentials attempt");
+      console.log("❌ Invalid credentials");
       await addSecurityDelay();
-      return res.status(401).json({ error: "Invalid credentials" });
+      res.status(401).json({ success: false, error: "Invalid credentials" });
+      return;
     }
 
+    console.log("✅ Credentials valid, generating token...");
     const token = createJWT({ username, role: "admin" });
-    res.cookie("adminToken", token, getAuthCookieConfig());
+    console.log("🎫 Token generated");
 
+    // Set cookie
+    const cookieConfig = getAuthCookieConfig();
+    console.log("🍪 Setting cookie with config:", cookieConfig);
+    res.cookie("adminToken", token, cookieConfig);
+
+    // Prepare response
     const responseData = {
       success: true,
       message: "Login successful",
       expiresIn: env.JWT_EXPIRES_IN,
     };
 
-    console.log("✅ Admin login successful, preparing response");
-    console.log("✅ Response data:", JSON.stringify(responseData, null, 2));
-    console.log("✅ About to call res.status(200).json()");
+    console.log("📤 Sending response:", responseData);
 
+    // Send response - this MUST be the last thing
     res.status(200).json(responseData);
-    console.log("✅ res.json() call completed");
+    console.log("✅ Response sent successfully");
+    return;
 
   } catch (error) {
-    console.error("❌ Login error:", error instanceof Error ? error.message : String(error));
+    console.error("❌ Login error:", error);
+    console.error("❌ Error stack:", error instanceof Error ? error.stack : "No stack");
+
     res.status(500).json({
+      success: false,
       error: "Login failed",
-      details: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.message : String(error)) : undefined
+      details:
+        env.NODE_ENV === "development"
+          ? error instanceof Error
+            ? error.message
+            : String(error)
+          : undefined,
     });
+    return;
   }
 });
 
 /**
  * POST /api/auth/admin/logout
  */
-router.post("/admin/logout", (_req: Request, res: Response) => {
+router.post("/admin/logout", (_req: Request, res: Response): void => {
   console.log("🚪 Admin logout request");
-  res.clearCookie("adminToken");
-  res.status(200).json({ success: true, message: "Logged out successfully" });
+
+  const cookieConfig = getAuthCookieConfig();
+  res.clearCookie("adminToken", {
+    httpOnly: cookieConfig.httpOnly,
+    secure: cookieConfig.secure,
+    sameSite: cookieConfig.sameSite,
+    path: "/",
+    domain: cookieConfig.domain,
+  });
+
+  res.status(200).json({
+    success: true,
+    message: "Logged out successfully",
+  });
 });
 
 /**
  * GET /api/auth/admin/check
  */
-router.get("/admin/auth/check", (req: Request, res: Response) => {
+router.get("/admin/auth/check", (req: Request, res: Response): void => {
   console.log("🔍 Admin auth check request");
 
   try {
     const token = req.cookies?.adminToken;
+
     if (!token) {
       console.log("❌ No admin token found");
-      return res.status(401).json({ authenticated: false });
+      res.status(401).json({
+        authenticated: false,
+        error: "No authentication token",
+      });
+      return;
     }
 
+    console.log("🔍 Verifying token...");
     const decoded = verifyJWT(token);
 
-    console.log("✅ Admin auth check successful");
-    return res.status(200).json({
+    if (decoded.role !== "admin") {
+      console.log("❌ User does not have admin role");
+      res.status(403).json({
+        authenticated: false,
+        error: "Insufficient permissions",
+      });
+      return;
+    }
+
+    console.log("✅ Auth check successful for:", decoded.username);
+
+    res.status(200).json({
       authenticated: true,
-      user: { username: decoded.username, role: decoded.role },
+      user: {
+        username: decoded.username,
+        role: decoded.role,
+      },
       expiresAt: decoded.exp * 1000,
     });
+    return;
+
   } catch (error) {
     console.error("❌ Auth check failed:", error instanceof Error ? error.message : String(error));
-    return res.status(401).json({ authenticated: false, error: "Token verification failed" });
+
+    if (error instanceof Error) {
+      if (error.name === "TokenExpiredError") {
+        res.status(401).json({
+          authenticated: false,
+          error: "Token expired",
+        });
+        return;
+      }
+      if (error.name === "JsonWebTokenError") {
+        res.status(401).json({
+          authenticated: false,
+          error: "Invalid token",
+        });
+        return;
+      }
+    }
+
+    res.status(401).json({
+      authenticated: false,
+      error: "Authentication failed",
+    });
+    return;
   }
 });
 
