@@ -5,7 +5,7 @@
  * for dynamic filtering based on what actually exists in each set.
  */
 
-const db = require('../config/database');
+import { db } from '../lib/db.js';
 
 // Constants from MTG spec
 const IGNORE_FRAME_EFFECTS = [
