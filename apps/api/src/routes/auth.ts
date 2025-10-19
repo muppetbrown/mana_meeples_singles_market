@@ -99,8 +99,8 @@ const debugResponse = (req: Request, res: Response, next: express.NextFunction) 
     console.log(`🔍 END: res.end called with ${arguments.length} args:`, Array.from(arguments));
     logResponseState("before end()");
 
-    // Call original end with all arguments using apply to preserve exact argument handling
-    const result = originalEnd.apply(res, args);
+    // Call original end with all arguments using Reflect.apply for better type safety
+    const result = Reflect.apply(originalEnd, res, args);
 
     console.log(`🔍 END: res.end execution completed`);
     logResponseState("after end()");
