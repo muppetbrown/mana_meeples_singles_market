@@ -25,29 +25,57 @@ services:
       
       # Database
       - key: DATABASE_URL
-        sync: false  # Keep database credentials secret
+        sync: false  # Set this in Render dashboard
       
-      # Admin Authentication (CRITICAL - ADD THESE!)
+      # Admin Authentication - Set these in Render dashboard
       - key: ADMIN_USERNAME
-        sync: false  # Don't commit to repo
+        sync: false
       - key: ADMIN_PASSWORD_HASH
-        sync: false  # Don't commit to repo
+        sync: false
       - key: JWT_SECRET
-        sync: false  # Don't commit to repo
+        sync: false
       - key: JWT_EXPIRES_IN
         value: 24h
+      
+      # Session secret
+      - key: SESSION_SECRET
+        sync: false  # Set this in Render dashboard
       
       # Cookie settings for same-domain setup
       - key: COOKIE_DOMAIN
         value: .manaandmeeples.co.nz
       - key: CROSS_ORIGIN
-        value: false  # Same parent domain
+        value: true  # Changed to true since API and frontend are on different subdomains
       
       # CORS - Allow requests from your frontend domains
       - key: ALLOWED_ORIGINS
-        value: https://shop.manaandmeeples.co.nz,https://www.manaandmeeples.co.nz,https://manaandmeeples.co.nz
-      - key: CORS_ORIGINS
-        value: https://shop.manaandmeeples.co.nz,https://api.manaandmeeples.co.nz,https://mana-meeples-api.onrender.com/,https://mana-meeples-web.onrender.com/
+        value: https://shop.manaandmeeples.co.nz,https://www.manaandmeeples.co.nz,https://manaandmeeples.co.nz,http://localhost:3000,http://localhost:5173
+      
+      # CSP Configuration
+      - key: CSP_CONNECT_SRC
+        value: https://api.manaandmeeples.co.nz
+      
+      # Email Configuration - Set these in Render dashboard if using email
+      - key: OWNER_EMAIL
+        sync: false
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASSWORD
+        sync: false
+      - key: SMTP_SECURE
+        sync: false
+      - key: SMTP_FROM
+        sync: false
+      
+      # API Keys - Set these in Render dashboard
+      - key: POKEMON_TCG_API_KEY
+        sync: false
+      - key: TCGPLAYER_API_KEY
+        sync: false
 
   # Frontend Web Service
   - type: web
@@ -59,9 +87,6 @@ services:
     # Custom domain for frontend
     domains:
       - shop.manaandmeeples.co.nz
-    
-    # Note: envVars don't work reliably for static sites at build time
-    # That's why we pass VITE_API_URL directly in buildCommand above
     
     routes:
       - type: rewrite
