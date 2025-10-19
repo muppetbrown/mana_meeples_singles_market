@@ -24,11 +24,24 @@ const AdminLogin = () => {
       const data = await api.post<{ success: boolean; message: string }>('/auth/admin/login', credentials);
 
       console.log('Login response:', data);
+      console.log('Response type:', typeof data);
+      console.log('Response keys:', data ? Object.keys(data) : 'No keys (data is null/undefined)');
+
+      // Handle the case where data is undefined or null
+      if (!data) {
+        throw new Error('Login failed: Received empty response from server');
+      }
+
+      // Check if the response has the expected structure
+      if (typeof data !== 'object') {
+        throw new Error(`Login failed: Invalid response type (${typeof data})`);
+      }
 
       if (data.success) {
         navigate('/admin');
       } else {
-        throw new Error('Login failed: Invalid response format');
+        const errorMsg = data.message || 'Unknown error';
+        throw new Error(`Login failed: ${errorMsg}`);
       }
     } catch (err: any) {
       console.error('Login error details:', {

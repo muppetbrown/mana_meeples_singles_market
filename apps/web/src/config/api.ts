@@ -35,15 +35,27 @@ function join(base: string, path: string) {
 type ApiInit = RequestInit & { timeoutMs?: number };
 
 async function parseBody<T>(res: Response): Promise<T> {
-  // 204 or empty body → return undefined as any
+  // 204 No Content → return undefined as any
   if (res.status === 204) return undefined as unknown as T;
+
   const text = await res.text();
-  if (!text) return undefined as unknown as T;
+  console.log(`API Response [${res.status}]: ${text.substring(0, 200)}${text.length > 200 ? '...' : ''}`);
+
+  // Empty response body (but not 204) - this might indicate a problem
+  if (!text) {
+    console.warn(`Empty response body for status ${res.status} - this might indicate a server error`);
+    return undefined as unknown as T;
+  }
+
   try {
-    return JSON.parse(text) as T;
-  } catch {
+    const parsed = JSON.parse(text);
+    console.log('Parsed JSON successfully:', parsed);
+    return parsed as T;
+  } catch (parseError) {
+    console.error('JSON parse error:', parseError);
+    console.error('Raw response text:', text);
     // If server ever returns text, surface it as an error payload-like object
-    return { raw: text } as unknown as T;
+    return { raw: text, parseError: parseError instanceof Error ? parseError.message : 'Unknown parse error' } as unknown as T;
   }
 }
 
