@@ -95,11 +95,26 @@ const debugResponse = (req: Request, res: Response, next: express.NextFunction) 
 
   // Override res.end to catch any direct response endings
   const originalEnd = res.end.bind(res);
-  res.end = function(chunk?: any, encoding?: BufferEncoding) {
+  res.end = function(chunk?: any, encoding?: BufferEncoding, cb?: () => void) {
     console.log(`🔍 END: res.end called with chunk:`, chunk);
     logResponseState("before end()");
 
-    const result = originalEnd(chunk, encoding);
+    // Handle the different overloads of res.end()
+    let result;
+    if (typeof encoding === 'function') {
+      // res.end(chunk, callback)
+      result = originalEnd(chunk, encoding);
+    } else if (encoding !== undefined && cb !== undefined) {
+      // res.end(chunk, encoding, callback)
+      result = originalEnd(chunk, encoding, cb);
+    } else if (encoding !== undefined) {
+      // res.end(chunk, encoding)
+      result = originalEnd(chunk, encoding);
+    } else {
+      // res.end(chunk)
+      result = originalEnd(chunk);
+    }
+
     console.log(`🔍 END: res.end execution completed`);
     logResponseState("after end()");
 
