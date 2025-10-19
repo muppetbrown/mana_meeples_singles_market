@@ -48,7 +48,8 @@ mana_meeples_singles_market
 │  │ ├── logo512.png
 │  │ ├── mana_meeples_logo.ico
 │  │ ├── manifest.json
-│  │ └── robots.txt
+│  │ ├── robots.txt
+│  │ └── static.json
 │  ├── src/
 │  │ ├── a11y/
 │  │ │ └── Announcer.tsx
@@ -157,6 +158,7 @@ mana_meeples_singles_market
 │ ├── migrate.sql
 │ ├── refresh-mviews.sh
 │ ├── run-migration.ts
+│ ├── smoke.mjs
 │ └── test-password.ts
 ├── utils/
 │ └── sanitization.ts

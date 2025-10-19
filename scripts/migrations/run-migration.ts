@@ -6,15 +6,11 @@
  * Example: node scripts/run-migration.js 003_add_fulltext_search.sql
  */
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'fs'.
 const fs = require('fs');
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'path'.
 const path = require('path');
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'Pool'.
 const { Pool } = require('pg');
 
 // Database configuration
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'pool'.
 const pool = new Pool({
   user: process.env.DB_USER || 'postgres',
   host: process.env.DB_HOST || 'localhost',
@@ -87,7 +83,6 @@ async function runMigration(migrationFile: any) {
 
   } catch (error) {
     console.error('❌ Migration failed:');
-    // @ts-expect-error TS(2571): Object is of type 'unknown'.
     console.error(error.message);
     process.exit(1);
   }

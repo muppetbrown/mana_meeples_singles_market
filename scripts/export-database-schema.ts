@@ -1,520 +1,330 @@
+// scripts/export-database-schema.ts
 /**
- * Database Schema Export Script
- * 
- * Generates comprehensive documentation of the database schema including:
- * - Table structures with columns, types, and constraints
- * - Relationships and foreign keys
- * - Indexes
- * - Sample data from each table
- * - Statistics and counts
- * 
+ * Database Schema Export Script (TypeScript, CommonJS-friendly)
+ *
+ * This version avoids ESM-only features (`import.meta`, `fileURLToPath`)
+ * and uses built-in `__dirname`/`__filename`, `require`, and `module.exports`.
+ *
  * Usage:
- *   node scripts/export-database-schema.js
- * 
- * Output:
- *   docs/DATABASE_SCHEMA.md - Full schema documentation
- *   docs/database-stats.json - Machine-readable statistics
+ *   pnpm ts-node scripts/export-database-schema.ts
+ *   # or with tsx in CJS mode:
+ *   pnpm tsx --tsconfig tsconfig.json scripts/export-database-schema.ts
  */
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'pool'.
-const pool = require('../config/database');
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'fs'.
-const fs = require('fs');
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'path'.
+// Runtime requires to play nicely with CJS builds
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const fs = require('fs/promises');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const path = require('path');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pool = require('../config/database');
 
-class SchemaExporter {
-  constructor() {
-    // @ts-expect-error TS(2339): Property 'output' does not exist on type 'SchemaEx... Remove this comment to see the full error message
-    this.output = [];
-    // @ts-expect-error TS(2339): Property 'stats' does not exist on type 'SchemaExp... Remove this comment to see the full error message
-    this.stats = {};
-  }
+type Row = Record<string, unknown>;
 
-  /**
-   * Add a line to the output
-   */
-  log(line = '') {
-    // @ts-expect-error TS(2339): Property 'output' does not exist on type 'SchemaEx... Remove this comment to see the full error message
-    this.output.push(line);
-  }
+type ColumnInfo = {
+  column_name: string;
+  data_type: string;
+  is_nullable: 'YES' | 'NO';
+  column_default: string | null;
+  character_maximum_length: number | null;
+  numeric_precision: number | null;
+  numeric_scale: number | null;
+};
 
-  /**
-   * Add a header
-   */
-  header(text: any, level = 1) {
-    this.log();
-    this.log('#'.repeat(level) + ' ' + text);
-    this.log();
-  }
+type ForeignKeyInfo = {
+  constraint_name: string;
+  table_name: string;
+  column_name: string;
+  foreign_table_name: string;
+  foreign_column_name: string;
+  update_rule: string;
+  delete_rule: string;
+};
 
-  /**
-   * Add a code block
-   */
-  code(content: any, language = 'sql') {
-    this.log('```' + language);
-    this.log(content);
-    this.log('```');
-    this.log();
-  }
+type IndexInfo = {
+  index_name: string;
+  indexdef: string;
+  is_unique: boolean;
+  is_primary: boolean;
+};
 
-  /**
-   * Get all tables in the database
-   */
-  async getTables() {
-    const query = `
-      SELECT 
-        table_name,
-        (SELECT obj_description((quote_ident(table_schema)||'.'||quote_ident(table_name))::regclass)) as table_comment
-      FROM information_schema.tables
-      WHERE table_schema = 'public'
-        AND table_type = 'BASE TABLE'
-      ORDER BY table_name;
-    `;
-    
-    const result = await pool.query(query);
-    return result.rows;
-  }
+type ConstraintInfo = {
+  constraint_name: string;
+  constraint_type: 'PRIMARY KEY' | 'UNIQUE' | 'CHECK' | 'FOREIGN KEY';
+  definition?: string | null;
+};
 
-  /**
-   * Get all columns for a table
-   */
-  async getTableColumns(tableName: any) {
-    const query = `
-      SELECT 
+type SchemaDoc = {
+  generatedAt: string;
+  schema: string;
+  tables: Array<{
+    name: string;
+    columns: ColumnInfo[];
+    constraints: ConstraintInfo[];
+    foreignKeys: ForeignKeyInfo[];
+    indexes: IndexInfo[];
+    sampleRows: Row[];
+    rowCount: number;
+  }>;
+};
+
+const DEFAULT_SCHEMA = process.env.DB_SCHEMA || 'public';
+const OUTPUT_DIR = path.resolve(process.cwd(), 'docs');
+const MD_PATH = path.join(OUTPUT_DIR, 'DATABASE_SCHEMA.md');
+const JSON_PATH = path.join(OUTPUT_DIR, 'database-stats.json');
+
+function mdCode(lang: string, code: unknown): string {
+  return '```' + lang + '\n' + String(code ?? '').trim() + '\n```';
+}
+
+async function ensureDir(dir: string) {
+  await fs.mkdir(dir, { recursive: true });
+}
+
+async function getTables(schema: string): Promise<string[]> {
+  const { rows } = await pool.query(
+    `select table_name
+     from information_schema.tables
+     where table_schema = $1 and table_type='BASE TABLE'
+     order by table_name`,
+    [schema]
+  );
+  return rows.map((r: Row) => String(r.table_name));
+}
+
+async function getColumns(schema: string, table: string): Promise<ColumnInfo[]> {
+  const { rows } = await pool.query(
+    `select
         column_name,
         data_type,
-        character_maximum_length,
-        column_default,
         is_nullable,
-        udt_name
-      FROM information_schema.columns
-      WHERE table_schema = 'public'
-        AND table_name = $1
-      ORDER BY ordinal_position;
-    `;
-    
-    const result = await pool.query(query, [tableName]);
-    return result.rows;
-  }
+        column_default,
+        character_maximum_length,
+        numeric_precision,
+        numeric_scale
+     from information_schema.columns
+     where table_schema = $1 and table_name = $2
+     order by ordinal_position`,
+    [schema, table]
+  );
+  return rows as ColumnInfo[];
+}
 
-  /**
-   * Get constraints for a table
-   */
-  async getTableConstraints(tableName: any) {
-    const query = `
-      SELECT 
+async function getConstraints(schema: string, table: string): Promise<ConstraintInfo[]> {
+  const { rows } = await pool.query(
+    `select
         tc.constraint_name,
         tc.constraint_type,
+        pg_get_constraintdef(con.oid) as definition
+     from information_schema.table_constraints tc
+     join pg_constraint con
+       on con.conname = tc.constraint_name
+      and con.connamespace = (select oid from pg_namespace where nspname = $1)
+     where tc.table_schema = $1 and tc.table_name = $2
+     order by tc.constraint_type, tc.constraint_name`,
+    [schema, table]
+  );
+  return rows as ConstraintInfo[];
+}
+
+async function getForeignKeys(schema: string, table: string): Promise<ForeignKeyInfo[]> {
+  const { rows } = await pool.query(
+    `select
+        tc.constraint_name,
+        tc.table_name,
         kcu.column_name,
-        ccu.table_name AS foreign_table_name,
-        ccu.column_name AS foreign_column_name
-      FROM information_schema.table_constraints AS tc
-      LEFT JOIN information_schema.key_column_usage AS kcu
-        ON tc.constraint_name = kcu.constraint_name
-        AND tc.table_schema = kcu.table_schema
-      LEFT JOIN information_schema.constraint_column_usage AS ccu
-        ON ccu.constraint_name = tc.constraint_name
-        AND ccu.table_schema = tc.table_schema
-      WHERE tc.table_schema = 'public'
-        AND tc.table_name = $1
-      ORDER BY tc.constraint_type, tc.constraint_name;
-    `;
-    
-    const result = await pool.query(query, [tableName]);
-    return result.rows;
+        ccu.table_name as foreign_table_name,
+        ccu.column_name as foreign_column_name,
+        rc.update_rule,
+        rc.delete_rule
+     from information_schema.table_constraints as tc
+     join information_schema.key_column_usage as kcu
+       on tc.constraint_name = kcu.constraint_name
+      and tc.table_schema = kcu.table_schema
+     join information_schema.referential_constraints as rc
+       on rc.constraint_name = tc.constraint_name
+      and rc.constraint_schema = tc.table_schema
+     join information_schema.constraint_column_usage as ccu
+       on ccu.constraint_name = rc.unique_constraint_name
+      and ccu.constraint_schema = rc.unique_constraint_schema
+     where tc.constraint_type = 'FOREIGN KEY'
+       and tc.table_schema = $1
+       and tc.table_name = $2
+     order by tc.constraint_name, kcu.ordinal_position`,
+    [schema, table]
+  );
+  return rows as ForeignKeyInfo[];
+}
+
+async function getIndexes(schema: string, table: string): Promise<IndexInfo[]> {
+  const { rows } = await pool.query(
+    `select
+        i.relname as index_name,
+        pg_get_indexdef(ix.indexrelid) as indexdef,
+        ix.indisunique as is_unique,
+        ix.indisprimary as is_primary
+     from pg_index ix
+     join pg_class i on i.oid = ix.indexrelid
+     join pg_class t on t.oid = ix.indrelid
+     join pg_namespace n on n.oid = t.relnamespace
+     where n.nspname = $1 and t.relname = $2
+     order by ix.indisprimary desc, i.relname`,
+    [schema, table]
+  );
+  return rows as IndexInfo[];
+}
+
+function qIdent(name: string): string {
+  // Quote an identifier safely for Postgres: "my""name"
+  return '"' + String(name).replace(/"/g, '""') + '"';
+}
+
+async function getSample(schema: string, table: string, limit = 5): Promise<Row[]> {
+  const sql = `select * from ${qIdent(schema)}.${qIdent(table)} limit ${Math.max(0, limit)}`;
+  const { rows } = await pool.query(sql);
+  return rows as Row[];
+}
+
+async function getRowCount(schema: string, table: string): Promise<number> {
+  const { rows } = await pool.query(
+    `select reltuples::bigint as estimate
+     from pg_class c
+     join pg_namespace n on n.oid = c.relnamespace
+     where n.nspname = $1 and c.relname = $2`,
+    [schema, table]
+  );
+  const v = (rows && rows[0] && (rows[0] as any).estimate) ?? 0;
+  return typeof v === 'number' ? v : Number(v);
+}
+
+function renderColumns(columns: ColumnInfo[]): string {
+  if (!columns.length) return '_No columns found_';
+  const header = `| Column | Type | Null | Default | Length/Precision |
+|---|---|---|---|---|`;
+  const rows = columns.map((c) => {
+    const len =
+      c.character_maximum_length ??
+      (c.numeric_precision != null ? `${c.numeric_precision}${c.numeric_scale != null ? `,${c.numeric_scale}` : ''}` : '');
+    return `| \`${c.column_name}\` | \`${c.data_type}\` | \`${c.is_nullable}\` | \`${c.column_default ?? ''}\` | \`${len ?? ''}\` |`;
+  });
+  return [header, ...rows].join('\n');
+}
+
+function renderConstraints(constraints: ConstraintInfo[]): string {
+  if (!constraints.length) return '_None_';
+  return constraints
+    .map((c) => `- **${c.constraint_type}** \`${c.constraint_name}\`${c.definition ? `\n${mdCode('sql', c.definition)}` : ''}`)
+    .join('\n');
+}
+
+function renderFKs(fks: ForeignKeyInfo[]): string {
+  if (!fks.length) return '_None_';
+  return fks
+    .map(
+      (fk) =>
+        `- \`${fk.column_name}\` → \`${fk.foreign_table_name}.${fk.foreign_column_name}\` ` +
+        `(on update ${fk.update_rule.toLowerCase()}, on delete ${fk.delete_rule.toLowerCase()})`
+    )
+    .join('\n');
+}
+
+function renderIndexes(idxs: IndexInfo[]): string {
+  if (!idxs.length) return '_None_';
+  return idxs
+    .map((i) => `- ${i.is_primary ? '**PRIMARY** ' : ''}${i.is_unique ? '**UNIQUE** ' : ''}\`${i.index_name}\`\n${mdCode('sql', i.indexdef)}`)
+    .join('\n\n');
+}
+
+class SchemaExporter {
+  private schema: string;
+  constructor(schema = DEFAULT_SCHEMA) {
+    this.schema = schema;
   }
 
-  /**
-   * Get indexes for a table
-   */
-  async getTableIndexes(tableName: any) {
-    const query = `
-      SELECT
-        indexname,
-        indexdef
-      FROM pg_indexes
-      WHERE schemaname = 'public'
-        AND tablename = $1
-      ORDER BY indexname;
-    `;
-    
-    const result = await pool.query(query, [tableName]);
-    return result.rows;
-  }
-
-  /**
-   * Get row count for a table
-   */
-  async getTableCount(tableName: any) {
-    try {
-      const result = await pool.query(`SELECT COUNT(*) as count FROM ${tableName}`);
-      return parseInt(result.rows[0].count);
-    } catch (error) {
-      return 0;
-    }
-  }
-
-  /**
-   * Get sample data from a table
-   */
-  async getSampleData(tableName: any, limit = 5) {
-    try {
-      const result = await pool.query(`SELECT * FROM ${tableName} LIMIT ${limit}`);
-      return result.rows;
-    } catch (error) {
-      return [];
-    }
-  }
-
-  /**
-   * Get views
-   */
-  async getViews() {
-    const query = `
-      SELECT 
-        table_name as view_name,
-        view_definition
-      FROM information_schema.views
-      WHERE table_schema = 'public'
-      ORDER BY table_name;
-    `;
-    
-    const result = await pool.query(query);
-    return result.rows;
-  }
-
-  /**
-   * Get materialized views
-   */
-  async getMaterializedViews() {
-    const query = `
-      SELECT 
-        matviewname as view_name,
-        definition
-      FROM pg_matviews
-      WHERE schemaname = 'public'
-      ORDER BY matviewname;
-    `;
-    
-    const result = await pool.query(query);
-    return result.rows;
-  }
-
-  /**
-   * Format column information as markdown table
-   */
-  formatColumns(columns: any) {
-    let table = '| Column | Type | Nullable | Default |\n';
-    table += '|--------|------|----------|----------|\n';
-    
-    for (const col of columns) {
-      const type = col.character_maximum_length 
-        ? `${col.data_type}(${col.character_maximum_length})`
-        : col.data_type;
-      const nullable = col.is_nullable === 'YES' ? '✓' : '✗';
-      const defaultVal = col.column_default || '-';
-      
-      table += `| ${col.column_name} | ${type} | ${nullable} | ${defaultVal} |\n`;
-    }
-    
-    return table;
-  }
-
-  /**
-   * Format constraints
-   */
-  formatConstraints(constraints: any) {
-    if (constraints.length === 0) return 'None';
-
-    let output = '';
-    const grouped = {};
-    
-    // Group by constraint type
-    for (const c of constraints) {
-      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
-      if (!grouped[c.constraint_type]) {
-        // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
-        grouped[c.constraint_type] = [];
-      }
-      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
-      grouped[c.constraint_type].push(c);
-    }
-
-    // Format each type
-    for (const [type, items] of Object.entries(grouped)) {
-      output += `**${type}:**\n`;
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
-      for (const item of items) {
-        if (type === 'FOREIGN KEY' && item.foreign_table_name) {
-          output += `- \`${item.constraint_name}\`: ${item.column_name} → ${item.foreign_table_name}(${item.foreign_column_name})\n`;
-        } else {
-          output += `- \`${item.constraint_name}\`: ${item.column_name || 'multiple columns'}\n`;
-        }
-      }
-      output += '\n';
-    }
-
-    return output;
-  }
-
-  /**
-   * Format sample data as JSON
-   */
-  formatSampleData(data: any) {
-    if (data.length === 0) return 'No data available';
-    
-    return JSON.stringify(data, null, 2);
-  }
-
-  /**
-   * Generate full schema documentation
-   */
   async generate() {
-    console.log('🔍 Analyzing database schema...');
-    
-    // Header
-    this.header('Database Schema Documentation', 1);
-    this.log('**Generated:** ' + new Date().toISOString());
-    this.log('**Database:** ' + (process.env.DATABASE_URL ? 'PostgreSQL (production)' : 'Local'));
-    this.log();
-    this.log('This document provides a comprehensive overview of the database structure, including tables, relationships, indexes, and sample data.');
-
-    // Get all tables
-    const tables = await this.getTables();
-    console.log(`📊 Found ${tables.length} tables`);
-    
-    // @ts-expect-error TS(2339): Property 'stats' does not exist on type 'SchemaExp... Remove this comment to see the full error message
-    this.stats.table_count = tables.length;
-    // @ts-expect-error TS(2339): Property 'stats' does not exist on type 'SchemaExp... Remove this comment to see the full error message
-    this.stats.tables = {};
-
-    // Table of contents
-    this.header('Table of Contents', 2);
-    this.log('1. [Database Overview](#database-overview)');
-    this.log('2. [Tables](#tables)');
-    for (let i = 0; i < tables.length; i++) {
-      const cleanName = tables[i].table_name.replace(/_/g, '-');
-      this.log(`   ${i + 3}. [${tables[i].table_name}](#${cleanName})`);
-    }
-    this.log(`${tables.length + 3}. [Views](#views)`);
-    this.log(`${tables.length + 4}. [Materialized Views](#materialized-views)`);
-    this.log(`${tables.length + 5}. [Relationships Diagram](#relationships-diagram)`);
-
-    // Database Overview
-    this.header('Database Overview', 2);
-    
-    let totalRows = 0;
-    const tableSummary = [];
-    
+    const tables = await getTables(this.schema);
+    const details: SchemaDoc['tables'] = [];
     for (const table of tables) {
-      const count = await this.getTableCount(table.table_name);
-      totalRows += count;
-      tableSummary.push({
-        name: table.table_name,
-        rows: count
+      const [columns, constraints, fks, idxs, sample, count] = await Promise.all([
+        getColumns(this.schema, table),
+        getConstraints(this.schema, table),
+        getForeignKeys(this.schema, table),
+        getIndexes(this.schema, table),
+        getSample(this.schema, table, 5),
+        getRowCount(this.schema, table),
+      ]);
+      details.push({
+        name: table,
+        columns,
+        constraints,
+        foreignKeys: fks,
+        indexes: idxs,
+        sampleRows: sample,
+        rowCount: count,
       });
     }
-
-    this.log('| Table | Row Count |');
-    this.log('|-------|-----------|');
-    for (const t of tableSummary.sort((a, b) => b.rows - a.rows)) {
-      this.log(`| ${t.name} | ${t.rows.toLocaleString()} |`);
-    }
-    this.log();
-    this.log(`**Total Records:** ${totalRows.toLocaleString()}`);
-
-    // Document each table
-    this.header('Tables', 2);
-    
-    for (const table of tables) {
-      console.log(`  📋 Documenting ${table.table_name}...`);
-      
-      const tableName = table.table_name;
-      const columns = await this.getTableColumns(tableName);
-      const constraints = await this.getTableConstraints(tableName);
-      const indexes = await this.getTableIndexes(tableName);
-      const count = await this.getTableCount(tableName);
-      const samples = await getSampleData(tableName, 3);
-
-      // Store stats
-      // @ts-expect-error TS(2339): Property 'stats' does not exist on type 'SchemaExp... Remove this comment to see the full error message
-      this.stats.tables[tableName] = {
-        columns: columns.length,
-        constraints: constraints.length,
-        indexes: indexes.length,
-        rows: count
-      };
-
-      // Table header
-      this.header(tableName, 3);
-      
-      if (table.table_comment) {
-        this.log('**Description:** ' + table.table_comment);
-        this.log();
-      }
-
-      this.log(`**Row Count:** ${count.toLocaleString()}`);
-      this.log();
-
-      // Columns
-      this.log('**Columns:**');
-      this.log();
-      this.log(this.formatColumns(columns));
-      this.log();
-
-      // Constraints
-      this.log('**Constraints:**');
-      this.log();
-      this.log(this.formatConstraints(constraints));
-
-      // Indexes
-      if (indexes.length > 0) {
-        this.log('**Indexes:**');
-        this.log();
-        for (const idx of indexes) {
-          this.code(idx.indexdef, 'sql');
-        }
-      }
-
-      // Sample data
-      if (samples.length > 0) {
-        this.log('**Sample Data:**');
-        this.log();
-        this.code(this.formatSampleData(samples), 'json');
-      }
-
-      this.log('---');
-      this.log();
-    }
-
-    // Views
-    this.header('Views', 2);
-    const views = await this.getViews();
-    
-    if (views.length > 0) {
-      for (const view of views) {
-        this.header(view.view_name, 3);
-        this.code(view.view_definition, 'sql');
-      }
-    } else {
-      this.log('No views defined.');
-      this.log();
-    }
-
-    // Materialized Views
-    this.header('Materialized Views', 2);
-    const matViews = await this.getMaterializedViews();
-    
-    if (matViews.length > 0) {
-      for (const view of matViews) {
-        this.header(view.view_name, 3);
-        this.code(view.definition, 'sql');
-      }
-    } else {
-      this.log('No materialized views defined.');
-      this.log();
-    }
-
-    // Relationships Diagram
-    this.header('Relationships Diagram', 2);
-    this.log('```mermaid');
-    this.log('erDiagram');
-    
-    // Generate relationships from foreign keys
-    for (const table of tables) {
-      const constraints = await this.getTableConstraints(table.table_name);
-      const fks = constraints.filter((c: any) => c.constraint_type === 'FOREIGN KEY');
-      
-      for (const fk of fks) {
-        if (fk.foreign_table_name) {
-          this.log(`    ${table.table_name} ||--o{ ${fk.foreign_table_name} : "${fk.column_name}"`);
-        }
-      }
-    }
-    
-    this.log('```');
-    this.log();
-
-    // @ts-expect-error TS(2339): Property 'output' does not exist on type 'SchemaEx... Remove this comment to see the full error message
-    return this.output.join('\n');
+    const doc: SchemaDoc = {
+      generatedAt: new Date().toISOString(),
+      schema: this.schema,
+      tables: details,
+    };
+    return doc;
   }
 
-  /**
-   * Save documentation to file
-   */
-  async save() {
-    const docsDir = path.join(__dirname, '..', 'docs');
-    
-    // Ensure docs directory exists
-    if (!fs.existsSync(docsDir)) {
-      fs.mkdirSync(docsDir, { recursive: true });
+  async writeFiles(doc: SchemaDoc): Promise<void> {
+    await ensureDir(OUTPUT_DIR);
+    // Markdown
+    let md = `# Database Schema — schema \`${this.schema}\`\n\n`;
+    md += `Generated: ${new Date().toISOString()}\n\n`;
+    for (const t of doc.tables) {
+      md += `## ${t.name}\n\n`;
+      md += `Row estimate: \`${t.rowCount}\`\n\n`;
+      md += `### Columns\n\n${renderColumns(t.columns)}\n\n`;
+      md += `### Constraints\n\n${renderConstraints(t.constraints)}\n\n`;
+      md += `### Foreign Keys\n\n${renderFKs(t.foreignKeys)}\n\n`;
+      md += `### Indexes\n\n${renderIndexes(t.indexes)}\n\n`;
+      if (t.sampleRows.length) {
+        md += `### Sample Rows\n\n\`\`\`json\n${JSON.stringify(t.sampleRows, null, 2)}\n\`\`\`\n\n`;
+      }
     }
+    await fs.writeFile(MD_PATH, md, 'utf8');
 
-    // Generate and save markdown
-    const markdown = await this.generate();
-    const mdPath = path.join(docsDir, 'DATABASE_SCHEMA.md');
-    fs.writeFileSync(mdPath, markdown);
-    console.log(`✅ Schema documentation saved to: ${mdPath}`);
-
-    // Save JSON stats
-    const statsPath = path.join(docsDir, 'database-stats.json');
-    // @ts-expect-error TS(2339): Property 'stats' does not exist on type 'SchemaExp... Remove this comment to see the full error message
-    fs.writeFileSync(statsPath, JSON.stringify(this.stats, null, 2));
-    console.log(`✅ Database statistics saved to: ${statsPath}`);
-
-    return { mdPath, statsPath };
+    // JSON stats (compact, machine-readable)
+    const stats = {
+      generatedAt: doc.generatedAt,
+      schema: doc.schema,
+      tableCounts: Object.fromEntries(doc.tables.map((t) => [t.name, t.rowCount])),
+    };
+    await fs.writeFile(JSON_PATH, JSON.stringify(stats, null, 2), 'utf8');
   }
 }
 
-// Helper function for sample data
-async function getSampleData(tableName: any, limit = 3) {
-  try {
-    const result = await pool.query(`SELECT * FROM ${tableName} LIMIT ${limit}`);
-    return result.rows;
-  } catch (error) {
-    return [];
-  }
-}
-
-/**
- * Main execution
- */
 async function main() {
-  console.log('═'.repeat(60));
-  console.log('📚 Database Schema Export Tool');
-  console.log('═'.repeat(60));
-  console.log();
-
   try {
-    const exporter = new SchemaExporter();
-    const { mdPath, statsPath } = await exporter.save();
-
-    console.log();
-    console.log('═'.repeat(60));
-    console.log('✅ Export Complete!');
-    console.log('═'.repeat(60));
-    console.log();
-    console.log('Generated files:');
-    console.log(`  📄 ${mdPath}`);
-    console.log(`  📊 ${statsPath}`);
-    console.log();
-    console.log('💡 Commit these files to your repository:');
-    console.log('   git add docs/DATABASE_SCHEMA.md docs/database-stats.json');
-    console.log('   git commit -m "Update database schema documentation"');
-    console.log();
-
-  } catch (error) {
-    console.error('❌ Error generating schema documentation:', error);
-    process.exit(1);
+    const schema = process.env.DB_SCHEMA || DEFAULT_SCHEMA;
+    const exporter = new SchemaExporter(schema);
+    const doc = await exporter.generate();
+    await exporter.writeFiles(doc);
+    // eslint-disable-next-line no-console
+    console.log(`✅ Schema docs written to:\n- ${MD_PATH}\n- ${JSON_PATH}`);
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('❌ Error generating schema documentation:', err);
+    process.exitCode = 1;
   } finally {
-    await pool.end();
+    try {
+      await pool.end?.();
+    } catch {
+      // ignore
+    }
   }
 }
 
-// Run if called directly
+// Run if called directly (CJS-safe)
 if (require.main === module) {
+  // eslint-disable-next-line @typescript-eslint/no-floating-promises
   main();
 }
 
+// CommonJS export for reuse in other scripts/tests
 module.exports = { SchemaExporter };
