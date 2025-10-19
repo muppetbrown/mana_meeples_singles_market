@@ -1,6 +1,8 @@
-require('dotenv').config();
-const bcrypt = require('bcrypt');
-const readline = require('readline');
+import { config } from 'dotenv';
+import bcrypt from 'bcrypt';
+import readline from 'readline';
+
+config();
 
 async function debugAdminLogin() {
   const username = process.env.ADMIN_USERNAME;

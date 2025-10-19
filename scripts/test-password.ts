@@ -1,6 +1,8 @@
-require('dotenv').config();
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'bcrypt'.
-const bcrypt = require('bcrypt');
+import { config } from 'dotenv';
+import bcrypt from 'bcrypt';
+import readline from 'readline';
+
+config();
 
 async function testPassword() {
   const username = process.env.ADMIN_USERNAME;
@@ -16,7 +18,6 @@ async function testPassword() {
   console.log('='.repeat(60));
   
   // Test password
-  const readline = require('readline');
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout
