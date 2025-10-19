@@ -129,7 +129,7 @@ export function createApp() {
 
   // SPA fallback route (for client-side routing)
   // ⚠️ CHANGED: Express 5.x requires "/*" instead of "*"
-  app.get("/:path(.*)", (_req, res) => {
+  app.get(/^\/(?!api\/).*/, (_req, res) => {
     res.setHeader("Cache-Control", "no-store, must-revalidate");
     res.type("text/html; charset=utf-8");
     res.sendFile(path.join(frontendDist, "index.html"));
