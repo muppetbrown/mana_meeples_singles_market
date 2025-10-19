@@ -1,6 +1,5 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'bcrypt'.
-const bcrypt = require('bcrypt');
-const readline = require('readline');
+import bcrypt from 'bcrypt';
+import readline from 'readline';
 
 const rl = readline.createInterface({
   input: process.stdin,
