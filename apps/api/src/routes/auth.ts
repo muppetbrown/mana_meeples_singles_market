@@ -72,9 +72,11 @@ router.post("/admin/login", async (req: Request, res: Response) => {
       message: "Login successful",
       expiresIn: signOptions.expiresIn,
     });
+    return;
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({ error: "Login failed" });
+    return;
   }
 });
 
@@ -84,6 +86,7 @@ router.post("/admin/login", async (req: Request, res: Response) => {
 router.post("/admin/logout", (_req: Request, res: Response) => {
   res.clearCookie("adminToken");
   res.json({ success: true, message: "Logged out successfully" });
+  return;
 });
 
 /**
@@ -108,8 +111,10 @@ router.get("/admin/auth/check", (req: Request, res: Response) => {
       user: { username: decoded.username, role: decoded.role },
       expiresAt: decoded.exp * 1000,
     });
+    return;
   } catch {
     res.status(401).json({ authenticated: false });
+    return;
   }
 });
 
