@@ -5,25 +5,47 @@ services:
     env: node
     buildCommand: corepack enable && pnpm install --no-frozen-lockfile && pnpm run build:render
     startCommand: cd apps/api && node dist/server.js
+    
+    # Custom domain for API
+    domains:
+      - api.manaandmeeples.co.nz
+    
     envVars:
+      # Node.js version
       - key: NODE_VERSION
         value: 20.x
       - key: PNPM_VERSION
         value: 9.x
-      - key: CORS_ORIGINS
-        value: https://mana-meeples-web.onrender.com
+      
+      # Server config
       - key: PORT
         value: 10000
       - key: NODE_ENV
         value: production
+      
+      # Database
       - key: DATABASE_URL
-        value: postgresql://tcg_admin:1FhON1ZvCR7bRry4L9UoonvorMD4BjAR@dpg-d3i3387diees738trbg0-a.singapore-postgres.render.com/tcg_singles?sslmode=require
+        sync: false  # Keep database credentials secret
+      
+      # Admin Authentication (CRITICAL - ADD THESE!)
+      - key: ADMIN_USERNAME
+        sync: false  # Don't commit to repo
+      - key: ADMIN_PASSWORD_HASH
+        sync: false  # Don't commit to repo
+      - key: JWT_SECRET
+        sync: false  # Don't commit to repo
+      - key: JWT_EXPIRES_IN
+        value: 24h
+      
+      # Cookie settings for same-domain setup
       - key: COOKIE_DOMAIN
         value: .manaandmeeples.co.nz
+      - key: CROSS_ORIGIN
+        value: false  # Same parent domain
+      
+      # CORS - Allow requests from your frontend domains
       - key: ALLOWED_ORIGINS
-        value: https://manaandmeeples.co.nz,https://www.manaandmeeples.co.nz,http://localhost:3000
-
-
+        value: https://shop.manaandmeeples.co.nz,https://www.manaandmeeples.co.nz,https://manaandmeeples.co.nz
 
   # Frontend Web Service
   - type: web
@@ -31,9 +53,16 @@ services:
     env: static
     buildCommand: corepack enable && pnpm install --no-frozen-lockfile && pnpm --filter ./apps/web run build
     staticPublishPath: ./apps/web/dist
+    
+    # Custom domain for frontend
+    domains:
+      - shop.manaandmeeples.co.nz
+    
     envVars:
+      # Point to the API custom domain (not .onrender.com)
       - key: VITE_API_URL
-        value: https://mana-meeples-api.onrender.com/api
+        value: https://api.manaandmeeples.co.nz/api
+    
     routes:
       - type: rewrite
         source: /*

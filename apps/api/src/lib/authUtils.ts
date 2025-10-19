@@ -1,3 +1,4 @@
+// apps/api/src/lib/authUtils.ts
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import type { Secret, SignOptions } from "jsonwebtoken";
@@ -66,16 +67,32 @@ export const validateCredentials = async (
 
 /**
  * Get standardized cookie configuration for authentication
+ * 
+ * Behavior based on environment variables:
+ * - If COOKIE_DOMAIN is set: Use it (for same parent domain: .manaandmeeples.co.nz)
+ * - If COOKIE_DOMAIN is not set: Use undefined (for cross-origin: different domains)
+ * - If CROSS_ORIGIN=true: Use SameSite=none (required for cross-origin)
+ * - If CROSS_ORIGIN=false: Use SameSite=lax (more secure for same parent domain)
  */
 export const getAuthCookieConfig = (): CookieOptions => {
+  const isProduction = env.NODE_ENV === "production";
+  const isCrossOrigin = env.CROSS_ORIGIN;
+  
+  // Only set domain if explicitly configured AND not cross-origin
+  // When domains share parent (shop.X.com + api.X.com), set domain to .X.com
+  // When domains are different (X.onrender.com + Y.com), domain must be undefined
+  const cookieDomain = env.COOKIE_DOMAIN && !isCrossOrigin 
+    ? env.COOKIE_DOMAIN 
+    : undefined;
+
   return {
     httpOnly: true,
-    secure: env.NODE_ENV === "production",
-    sameSite: env.NODE_ENV === "production" && env.CROSS_ORIGIN
-      ? "none"
-      : "strict",
+    secure: isProduction,
+    // Cross-origin requires SameSite=none, same parent domain can use lax
+    sameSite: isProduction && isCrossOrigin ? "none" : isProduction ? "lax" : "strict",
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    domain: env.NODE_ENV === "production" ? env.COOKIE_DOMAIN : undefined,
+    path: "/",
+    domain: cookieDomain,
   };
 };
 
@@ -83,14 +100,20 @@ export const getAuthCookieConfig = (): CookieOptions => {
  * Get cookie configuration for CSRF tokens
  */
 export const getCSRFCookieConfig = (httpOnly: boolean = true): CookieOptions => {
+  const isProduction = env.NODE_ENV === "production";
+  const isCrossOrigin = env.CROSS_ORIGIN;
+  
+  const cookieDomain = env.COOKIE_DOMAIN && !isCrossOrigin 
+    ? env.COOKIE_DOMAIN 
+    : undefined;
+
   return {
     httpOnly,
-    secure: env.NODE_ENV === "production",
-    sameSite: env.NODE_ENV === "production" && env.CROSS_ORIGIN
-      ? "none"
-      : "strict",
+    secure: isProduction,
+    sameSite: isProduction && isCrossOrigin ? "none" : isProduction ? "lax" : "strict",
     maxAge: 24 * 60 * 60 * 1000, // 24 hours
-    domain: env.NODE_ENV === "production" ? env.COOKIE_DOMAIN : undefined,
+    path: "/",
+    domain: cookieDomain,
   };
 };
 
