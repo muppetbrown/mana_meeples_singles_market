@@ -2,13 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
-/* M&M Global Styles */
-@layer base {
-  * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
+:root {
+  /* ✅ Support all engines: */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 
   body {
     @apply bg-mm-cream text-mm-darkForest;
@@ -98,6 +95,33 @@
     }
   }
 }
+
+}
+
+@supports (scrollbar-width: thin) {
+  * {
+    scrollbar-width: thin;        /* Firefox */
+    scrollbar-color: auto auto;
+  }
+}
+
+/* ✅ Safari/Chromium webkit fallback */
+*::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+*::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+}
+
+
+/* M&M Global Styles */
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
 
 /* Screen Reader Only utility */
 .sr-only {
