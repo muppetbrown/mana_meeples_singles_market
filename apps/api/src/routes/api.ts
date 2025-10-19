@@ -210,16 +210,5 @@ router.get("/cards/:id/inventory", async (req: Request, res: Response) => {
   }
 });
 
-// ---------- GET /api/health/db ----------
-// DB-focused healthcheck (useful for Render + uptime)
-router.get("/health/db", async (_req: Request, res: Response) => {
-  try {
-    const r = await db.query<{ ok: number }>("SELECT 1 AS ok");
-    const ok = r[0]?.ok === 1;
-    res.json({ database: ok ? "connected" : "disconnected" });
-  } catch {
-    res.status(500).json({ database: "disconnected" });
-  }
-});
 
 export default router;
