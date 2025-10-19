@@ -324,12 +324,12 @@ async function getSetVariations(setId: any) {
       FROM set_variations_metadata
       WHERE set_id = $1
     `, [setId]);
-    
-    if (result.rows.length === 0) {
+
+    if (result.length === 0) {
       return null;
     }
-    
-    return result.rows[0];
+
+    return result[0];
   } catch (error) {
     console.error('Error getting set variations:', error);
     throw error;
@@ -355,12 +355,12 @@ async function getGameVariations(gameId: any) {
       FROM game_variations_metadata
       WHERE game_id = $1
     `, [gameId]);
-    
-    if (result.rows.length === 0) {
+
+    if (result.length === 0) {
       return null;
     }
-    
-    return result.rows[0];
+
+    return result[0];
   } catch (error) {
     console.error('Error getting game variations:', error);
     throw error;
@@ -408,9 +408,9 @@ async function getVariationFilters(gameId = null, setId = null) {
       `, [gameId]);
       
       const result = await db.query(query, params);
-      if (result.rows.length > 0) {
-        result.rows[0].finishes = finishResult.rows[0]?.finishes || [];
-        return result.rows[0];
+      if (result.length > 0) {
+        result[0].finishes = finishResult[0]?.finishes || [];
+        return result[0];
       }
       return null;
     } else {
@@ -447,16 +447,16 @@ async function getVariationFilters(gameId = null, setId = null) {
       ]);
       
       return {
-        treatments: treatments.rows[0]?.treatments || [],
-        border_colors: borders.rows[0]?.border_colors || [],
-        promo_types: foils.rows[0]?.promo_types || [],
-        frame_effects: frames.rows[0]?.frame_effects || [],
-        finishes: finishes.rows[0]?.finishes || []
+        treatments: treatments[0]?.treatments || [],
+        border_colors: borders[0]?.border_colors || [],
+        promo_types: foils[0]?.promo_types || [],
+        frame_effects: frames[0]?.frame_effects || [],
+        finishes: finishes[0]?.finishes || []
       };
     }
     
     const result = await db.query(query, params);
-    return result.rows.length > 0 ? result.rows[0] : null;
+    return result.length > 0 ? result[0] : null;
     
   } catch (error) {
     console.error('Error getting variation filters:', error);
