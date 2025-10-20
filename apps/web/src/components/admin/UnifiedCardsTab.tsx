@@ -44,20 +44,12 @@ interface UnifiedCardsTabProps { mode?: 'all' | 'inventory'; }
 // ---------- Component ----------
 const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-
   const [cards, setCards] = useState<Card[]>([]);
   const [games, setGames] = useState<Game[]>([]);
-  const [availableSets, setAvailableSets] = useState<CardSet[]>([]);
-  const [searchSuggestions, setSearchSuggestions] = useState<SearchSuggestion[]>([]);
-  const [expandedCards, setExpandedCards] = useState<Set<string>>(() => new Set<string>());
-  const [imageModalUrl, setImageModalUrl] = useState<string | null>(null);
   const [addModalData, setAddModalData] = useState<AddModalData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // UI state
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedSuggestionIndex, setSelectedSuggestionIndex] = useState(-1);
-  const [searchLoading, setSearchLoading] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
   const [addFormData, setAddFormData] = useState<AddFormData>({
     quality: 'Near Mint',
@@ -73,11 +65,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const selectedGame = searchParams.get('game') || 'all';
   const selectedSet = searchParams.get('set') || 'all';
   const filterTreatment = searchParams.get('treatment') || 'all';
-
-  // debounce + cancellation
-  const abortController = useRef<AbortController | null>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
   const isInventoryMode = mode === 'inventory';
 
   // ---------- Helpers ----------
@@ -93,13 +80,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const getUniqueFinishes = (variations: CardVariation[]): string[] =>
     Array.from(new Set((variations ?? []).map(v => v.finish)));
 
-  const toggleCard = (key: string) => {
-    setExpandedCards(prev => {
-      const next = new Set(prev);
-      next.has(key) ? next.delete(key) : next.add(key);
-      return next;
-    });
-  };
 
   const getTreatmentColor = (treatment: string) => {
     const colors: Record<string, string> = {
@@ -129,26 +109,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     }
   }, []);
 
-  const fetchSets = useCallback(async () => {
-    if (selectedGame === 'all') {
-      setAvailableSets([]);
-      return;
-    }
-    const gameId = getGameIdFromName(selectedGame);
-    if (!gameId) {
-      setAvailableSets([]);
-      return;
-    }
-
-    try {
-      const sets = await api.get<CardSet[]>(`/sets?game_id=${String(gameId)}`);
-      setAvailableSets(sets ?? []); // ✅ actually update state
-    } catch (e) {
-      console.error('Error fetching sets:', e);
-      setAvailableSets([]);
-    }
-  }, [selectedGame, getGameIdFromName]);
-
   const fetchCards = useCallback(async () => {
     setError(null);
     try {
@@ -170,73 +130,20 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     }
   }, [selectedGame, selectedSet, filterTreatment, searchTerm, getGameIdFromName]);
 
-  // ---------- Search (debounced) ----------
-  const handleSearchChange = useCallback(
-    (value: string) => {
-      // Update URL immediately
-      setSearchParams(prev => {
-        const next = new URLSearchParams(prev);
-        value ? next.set('search', value) : next.delete('search');
-        return next;
-      });
-
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-      if (abortController.current) abortController.current.abort();
-
-      if (value.length < 2) {
-        setSearchSuggestions([]);
-        setShowSuggestions(false);
-        setSelectedSuggestionIndex(-1);
-        setSearchLoading(false);
-        return;
-      }
-
-      setSearchLoading(true);
-      searchTimeoutRef.current = setTimeout(async () => {
-        try {
-          abortController.current = new AbortController();
-          // NOTE: our api client may not accept a RequestInit; avoid typing hacks that break builds
-          const data = await api.get<{ suggestions: SearchSuggestion[] }>(
-            `/search/autocomplete?q=${encodeURIComponent(value)}`
-          );
-          setSearchSuggestions(data?.suggestions ?? []);
-          setShowSuggestions((data?.suggestions?.length ?? 0) > 0);
-          setSelectedSuggestionIndex(-1);
-        } catch (err) {
-          // swallow AbortError and log others
-          if ((err as any)?.name !== 'AbortError') console.error('Autocomplete error:', err);
-        } finally {
-          setSearchLoading(false);
-        }
-      }, 300);
-    },
-    [setSearchParams]
-  );
-
-  // ---------- Effects ----------
-  useEffect(() => {
-    return () => {
-      if (searchTimeoutRef.current) clearTimeout(searchTimeoutRef.current);
-      if (abortController.current) abortController.current.abort();
-    };
-  }, []);
-
   useEffect(() => {
     fetchGames();
     fetchCards();
   }, [fetchGames, fetchCards]);
 
   useEffect(() => {
-    fetchSets();
-    // Reset set filter when game changes
-    if (selectedSet !== 'all') {
+    if (selectedSet !== 'all' && selectedGame !== 'all') {
       setSearchParams(prev => {
         const next = new URLSearchParams(prev);
         next.set('set', 'all');
         return next;
       });
     }
-  }, [selectedGame, fetchSets, selectedSet, setSearchParams]);
+  }, [selectedGame, selectedSet, setSearchParams]);
 
   // ---------- Derived ----------
   const filteredCards = useMemo(() => {
@@ -316,8 +223,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     );
   }
 
-  // (skeleton omitted for brevity)
-
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -367,11 +272,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         </div>
       </div>
 
-      {/* Filters (search, game, set, treatment) */}
-      {/* ... keep your existing JSX; it already compiles with the types above ... */}
-
-      {/* Cards list + modal */}
-      {/* ... keep your existing JSX; types are satisfied now ... */}
+      {/* Filters & results are rendered by child components in this repo now */}
+      {/* <GameSetFilter /> <SearchBar /> <CardGrid /> etc. */}
     </div>
   );
 };
