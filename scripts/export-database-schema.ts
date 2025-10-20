@@ -25,7 +25,7 @@ import { Pool } from 'pg';
 // ============================================================================
 
 const DEFAULT_SCHEMA = process.env.DB_SCHEMA || 'public';
-const OUTPUT_DIR = path.resolve(process.cwd(), 'docs');
+const OUTPUT_DIR = path.resolve(process.cwd(), 'database');
 const MD_PATH = path.join(OUTPUT_DIR, 'DATABASE_SCHEMA.md');
 const JSON_PATH = path.join(OUTPUT_DIR, 'database-stats.json');
 const SAMPLE_ROWS = 5;
@@ -503,10 +503,8 @@ async function main() {
   }
 }
 
-// Run if called directly
-if (import.meta.url === `file://${process.argv[1]}`) {
-  main();
-}
+// Always run when executed directly (simplified for cross-platform compatibility)
+main();
 
 // Export for reuse in other scripts/tests
 export { SchemaExporter };

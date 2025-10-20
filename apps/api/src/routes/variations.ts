@@ -1,7 +1,7 @@
 // apps/api/src/routes/variations.ts
 import express, { type Request, type Response } from "express";
 import { z } from "zod";
-import { db } from "../db.js";
+import { db } from "../lib/db.js";
 
 const router = express.Router();
 
