@@ -1,14 +1,246 @@
 {
-  "timestamp": "2025-10-20T06:43:12.117Z",
+  "timestamp": "2025-10-20T06:47:33.795Z",
   "summary": {
-    "totalRoutes": 0,
+    "totalRoutes": 33,
     "frontendCalls": 6,
     "documentedEndpoints": 19,
-    "notImplemented": 19,
-    "notDocumented": 0,
+    "notImplemented": 9,
+    "notDocumented": 23,
     "pathMismatches": 0
   },
-  "actualEndpoints": [],
+  "actualEndpoints": [
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "file": "api.ts",
+      "fullPath": "/healthz",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/readyz",
+      "file": "api.ts",
+      "fullPath": "/readyz",
+      "prefix": ""
+    },
+    {
+      "method": "POST",
+      "path": "/admin/login",
+      "file": "auth.ts",
+      "fullPath": "/admin/login",
+      "prefix": ""
+    },
+    {
+      "method": "POST",
+      "path": "/admin/logout",
+      "file": "auth.ts",
+      "fullPath": "/admin/logout",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/admin/auth/check",
+      "file": "auth.ts",
+      "fullPath": "/admin/auth/check",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/cards",
+      "file": "cards.ts",
+      "fullPath": "/cards",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/cards/count",
+      "file": "cards.ts",
+      "fullPath": "/cards/count",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/variations",
+      "file": "variations.ts",
+      "fullPath": "/variations",
+      "prefix": ""
+    },
+    {
+      "method": "POST",
+      "path": "/orders",
+      "file": "orders.ts",
+      "fullPath": "/orders",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/orders/:orderId",
+      "file": "orders.ts",
+      "fullPath": "/orders/:orderId",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/admin/orders",
+      "file": "orders.ts",
+      "fullPath": "/admin/orders",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/admin/orders/:orderId",
+      "file": "orders.ts",
+      "fullPath": "/admin/orders/:orderId",
+      "prefix": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/orders/:orderId/status",
+      "file": "orders.ts",
+      "fullPath": "/admin/orders/:orderId/status",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/admin/inventory",
+      "file": "inventory.ts",
+      "fullPath": "/admin/inventory",
+      "prefix": ""
+    },
+    {
+      "method": "POST",
+      "path": "/admin/inventory",
+      "file": "inventory.ts",
+      "fullPath": "/admin/inventory",
+      "prefix": ""
+    },
+    {
+      "method": "PATCH",
+      "path": "/admin/inventory/:id",
+      "file": "inventory.ts",
+      "fullPath": "/admin/inventory/:id",
+      "prefix": ""
+    },
+    {
+      "method": "DELETE",
+      "path": "/admin/inventory/:id",
+      "file": "inventory.ts",
+      "fullPath": "/admin/inventory/:id",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/admin/inventory/export",
+      "file": "inventory.ts",
+      "fullPath": "/admin/inventory/export",
+      "prefix": ""
+    },
+    {
+      "method": "POST",
+      "path": "/admin/inventory/bulk-import",
+      "file": "inventory.ts",
+      "fullPath": "/admin/inventory/bulk-import",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/sets",
+      "file": "additional.ts",
+      "fullPath": "/sets",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/sets/:id",
+      "file": "additional.ts",
+      "fullPath": "/sets/:id",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/games",
+      "file": "additional.ts",
+      "fullPath": "/games",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/games/:id",
+      "file": "additional.ts",
+      "fullPath": "/games/:id",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/search/autocomplete",
+      "file": "additional.ts",
+      "fullPath": "/search/autocomplete",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/search",
+      "file": "additional.ts",
+      "fullPath": "/search",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/auth",
+      "file": "index.ts",
+      "fullPath": "/auth",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/filters",
+      "file": "index.ts",
+      "fullPath": "/filters",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/variations",
+      "file": "index.ts",
+      "fullPath": "/variations",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/",
+      "file": "index.ts",
+      "fullPath": "/",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/",
+      "file": "index.ts",
+      "fullPath": "/",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/",
+      "file": "index.ts",
+      "fullPath": "/",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/",
+      "file": "index.ts",
+      "fullPath": "/",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "file": "index.ts",
+      "fullPath": "/health",
+      "prefix": ""
+    }
+  ],
   "documentedEndpoints": [
     "/cards",
     "/games",
@@ -65,38 +297,6 @@
   "discrepancies": {
     "notImplemented": [
       {
-        "endpoint": "/cards",
-        "usedByFrontend": true
-      },
-      {
-        "endpoint": "/games",
-        "usedByFrontend": false
-      },
-      {
-        "endpoint": "/sets",
-        "usedByFrontend": false
-      },
-      {
-        "endpoint": "/orders",
-        "usedByFrontend": true
-      },
-      {
-        "endpoint": "/admin/login",
-        "usedByFrontend": false
-      },
-      {
-        "endpoint": "/admin/logout",
-        "usedByFrontend": false
-      },
-      {
-        "endpoint": "/admin/auth/check",
-        "usedByFrontend": false
-      },
-      {
-        "endpoint": "/admin/orders",
-        "usedByFrontend": false
-      },
-      {
         "endpoint": "/admin/cards",
         "usedByFrontend": false
       },
@@ -131,17 +331,125 @@
       {
         "endpoint": "/variations/:card_id",
         "usedByFrontend": false
-      },
-      {
-        "endpoint": "/filters",
-        "usedByFrontend": false
-      },
-      {
-        "endpoint": "/health",
-        "usedByFrontend": false
       }
     ],
-    "notDocumented": [],
+    "notDocumented": [
+      {
+        "path": "/healthz",
+        "method": "GET",
+        "file": "api.ts"
+      },
+      {
+        "path": "/readyz",
+        "method": "GET",
+        "file": "api.ts"
+      },
+      {
+        "path": "/cards/count",
+        "method": "GET",
+        "file": "cards.ts"
+      },
+      {
+        "path": "/variations",
+        "method": "GET",
+        "file": "variations.ts"
+      },
+      {
+        "path": "/orders/:orderId",
+        "method": "GET",
+        "file": "orders.ts"
+      },
+      {
+        "path": "/admin/orders/:orderId",
+        "method": "GET",
+        "file": "orders.ts"
+      },
+      {
+        "path": "/admin/orders/:orderId/status",
+        "method": "PATCH",
+        "file": "orders.ts"
+      },
+      {
+        "path": "/admin/inventory",
+        "method": "GET",
+        "file": "inventory.ts"
+      },
+      {
+        "path": "/admin/inventory",
+        "method": "POST",
+        "file": "inventory.ts"
+      },
+      {
+        "path": "/admin/inventory/:id",
+        "method": "PATCH",
+        "file": "inventory.ts"
+      },
+      {
+        "path": "/admin/inventory/:id",
+        "method": "DELETE",
+        "file": "inventory.ts"
+      },
+      {
+        "path": "/admin/inventory/export",
+        "method": "GET",
+        "file": "inventory.ts"
+      },
+      {
+        "path": "/admin/inventory/bulk-import",
+        "method": "POST",
+        "file": "inventory.ts"
+      },
+      {
+        "path": "/sets/:id",
+        "method": "GET",
+        "file": "additional.ts"
+      },
+      {
+        "path": "/games/:id",
+        "method": "GET",
+        "file": "additional.ts"
+      },
+      {
+        "path": "/search/autocomplete",
+        "method": "GET",
+        "file": "additional.ts"
+      },
+      {
+        "path": "/search",
+        "method": "GET",
+        "file": "additional.ts"
+      },
+      {
+        "path": "/auth",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/variations",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/",
+        "method": "USE",
+        "file": "index.ts"
+      }
+    ],
     "pathMismatches": []
   }
 }

@@ -54,10 +54,6 @@ router.get("/treatments", async (req: Request, res: Response) => {
   }
 });
 
-/**
- * GET /filters/rarities
- * Returns available rarity options with counts
- */
 router.get("/rarities", async (req: Request, res: Response) => {
   try {
     const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : null;
@@ -105,10 +101,6 @@ router.get("/rarities", async (req: Request, res: Response) => {
   }
 });
 
-/**
- * GET /filters/qualities
- * Returns available quality/condition options with counts
- */
 router.get("/qualities", async (req: Request, res: Response) => {
   try {
     const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : null;
@@ -155,10 +147,6 @@ router.get("/qualities", async (req: Request, res: Response) => {
   }
 });
 
-/**
- * GET /filters/foil-types
- * Returns available foil type options with counts
- */
 router.get("/foil-types", async (req: Request, res: Response) => {
   try {
     const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : null;
@@ -203,10 +191,6 @@ router.get("/foil-types", async (req: Request, res: Response) => {
   }
 });
 
-/**
- * GET /filters/languages
- * Returns available language options with counts
- */
 router.get("/languages", async (req: Request, res: Response) => {
   try {
     const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : null;
