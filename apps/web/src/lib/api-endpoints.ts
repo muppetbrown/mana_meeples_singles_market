@@ -77,6 +77,32 @@ export const API_ENDPOINTS = {
  * Type-safe API methods
  */
 export const api = {
+  // Generic GET/POST helpers
+  get: async <T = any>(path: string, options?: RequestInit): Promise<T> => {
+    const response = await fetch(`${API_BASE}${path}`, {
+      ...options,
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
+  post: async <T = any>(path: string, body?: any, options?: RequestInit): Promise<T> => {
+    const response = await fetch(`${API_BASE}${path}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: body ? JSON.stringify(body) : undefined,
+      credentials: 'include',
+      ...options,
+    });
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    }
+    return response.json();
+  },
+
   // Cards
   getCards: (params?: URLSearchParams) => {
     const url = params ? `${API_ENDPOINTS.CARDS}?${params}` : API_ENDPOINTS.CARDS;

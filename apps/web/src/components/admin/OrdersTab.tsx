@@ -15,32 +15,60 @@ import {
   XCircle,
   Eye
 } from 'lucide-react';
-// Remove the import line and add:
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-const logError = (error: any, context: any) => console.error('Error:', error.message || error, context);
+import { api } from '@/lib/api-endpoints';
 
-const getAdminHeaders = () => ({
-  'Content-Type': 'application/json'
-});
+// -------------------- Types --------------------
+interface CustomerData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone?: string;
+  country: string;
+  address: string;
+  suburb?: string;
+  city: string;
+  region: string;
+  postalCode: string;
+  notes?: string;
+}
 
-const OrdersTab = () => {
-  const [orders, setOrders] = useState([]);
+interface Order {
+  id: number;
+  customer_name: string;
+  customer_email: string;
+  total: string;
+  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
+  created_at: string;
+  updated_at: string;
+  payment_intent_id: string;
+  items?: OrderItem[];
+}
+
+interface OrderItem {
+  card_name: string;
+  quality: string;
+  quantity: number;
+  unit_price: string;
+  total_price: string;
+}
+
+type OrderStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+
+const OrdersTab: React.FC = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [expandedOrders, setExpandedOrders] = useState(new Set());
-  const [selectedOrder, setSelectedOrder] = useState(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | OrderStatus>('all');
+  const [expandedOrders, setExpandedOrders] = useState<Set<number>>(new Set());
+  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
 
   // Fetch orders
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await fetch(`${API_URL}/admin/orders?limit=100`, {
-        credentials: 'include',
-        headers: getAdminHeaders()
-      });
+      const response = await api.admin.getOrders();
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -50,8 +78,7 @@ const OrdersTab = () => {
       setOrders(data.orders || []);
       setError(null);
     } catch (err) {
-      logError(err, { operation: 'fetchOrders', context: 'AdminOrders' });
-
+      console.error('Error fetching orders:', err);
       setError('Failed to load orders');
     } finally {
       setLoading(false);
@@ -65,13 +92,9 @@ const OrdersTab = () => {
   // Filter orders
   const filteredOrders = orders.filter(order => {
     const matchesSearch = searchTerm === '' ||
-
       order.customer_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-
       order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-
       order.id.toString().includes(searchTerm);
-
 
     const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
 
@@ -79,7 +102,7 @@ const OrdersTab = () => {
   });
 
   // Toggle order expansion
-  const toggleOrderExpansion = useCallback((orderId: any) => {
+  const toggleOrderExpansion = useCallback((orderId: number) => {
     setExpandedOrders(prev => {
       const newExpanded = new Set(prev);
       if (newExpanded.has(orderId)) {
@@ -92,14 +115,13 @@ const OrdersTab = () => {
   }, []);
 
   // Business logic validation for order status changes
-  const validateStatusChange = (currentStatus: any, newStatus: any) => {
-    const validTransitions = {
+  const validateStatusChange = (currentStatus: OrderStatus, newStatus: OrderStatus) => {
+    const validTransitions: Record<OrderStatus, OrderStatus[]> = {
       'pending': ['confirmed', 'cancelled'],
       'confirmed': ['completed', 'cancelled'],
-      'completed': [], // No transitions from completed
-      'cancelled': [] // No transitions from cancelled
+      'completed': [],
+      'cancelled': []
     };
-
 
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
       return {
@@ -112,15 +134,12 @@ const OrdersTab = () => {
   };
 
   // Update order status with validation
-  const updateOrderStatus = useCallback(async (orderId: any, newStatus: any) => {
-
+  const updateOrderStatus = useCallback(async (orderId: number, newStatus: OrderStatus) => {
     const order = orders.find(o => o.id === orderId);
     if (!order) {
       window.alert('Order not found');
       return;
     }
-
-    // Validate the status transition
 
     const validation = validateStatusChange(order.status, newStatus);
     if (!validation.valid) {
@@ -129,12 +148,7 @@ const OrdersTab = () => {
     }
 
     try {
-      const response = await fetch(`${API_URL}/admin/orders/${orderId}/status`, {
-        method: 'PUT',
-        credentials: 'include',
-        headers: getAdminHeaders(),
-        body: JSON.stringify({ status: newStatus })
-      });
+      const response = await api.admin.updateOrderStatus(orderId.toString(), newStatus);
 
       if (!response.ok) {
         throw new Error('Failed to update order status');
@@ -143,18 +157,15 @@ const OrdersTab = () => {
       // Refresh orders
       fetchOrders();
     } catch (error) {
-      logError(error, { operation: 'updateOrderStatus', orderId, newStatus });
+      console.error('Error updating order status:', error);
       window.alert('Failed to update order status');
     }
   }, [orders, fetchOrders]);
 
   // Show order details in modal
-  const showOrderDetails = useCallback(async (orderId: any) => {
+  const showOrderDetails = useCallback(async (orderId: number) => {
     try {
-      const response = await fetch(`${API_URL}/admin/orders/${orderId}`, {
-        credentials: 'include',
-        headers: getAdminHeaders()
-      });
+      const response = await api.admin.getOrder(orderId.toString());
 
       if (!response.ok) {
         throw new Error('Failed to fetch order details');
@@ -164,26 +175,21 @@ const OrdersTab = () => {
       setSelectedOrder(orderData);
       setShowOrderModal(true);
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Error fetching order details:', error);
-      }
+      console.error('Error fetching order details:', error);
       window.alert('Failed to load order details');
     }
   }, []);
 
   // Status badge component with AAA contrast ratios
-  const StatusBadge = ({
-    status
-  }: any) => {
-    const statusConfig = {
+  const StatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
+    const statusConfig: Record<OrderStatus, { color: string; icon: typeof Clock }> = {
       pending: { color: 'bg-yellow-50 text-yellow-900 border border-yellow-200', icon: Clock },
       confirmed: { color: 'bg-blue-50 text-blue-900 border border-blue-200', icon: CheckCircle },
       completed: { color: 'bg-green-50 text-green-900 border border-green-200', icon: CheckCircle },
       cancelled: { color: 'bg-red-50 text-red-900 border border-red-200', icon: XCircle }
     };
 
-
-    const config = statusConfig[status] || statusConfig.pending;
+    const config = statusConfig[status];
     const StatusIcon = config.icon;
 
     return (
@@ -195,12 +201,12 @@ const OrdersTab = () => {
   };
 
   // Format date
-  const formatDate = (dateString: any) => {
+  const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
   };
 
   // Parse customer data from payment_intent_id field
-  const parseCustomerData = (paymentIntentId: any) => {
+  const parseCustomerData = (paymentIntentId: string): CustomerData | null => {
     try {
       return JSON.parse(paymentIntentId);
     } catch {
@@ -271,7 +277,7 @@ const OrdersTab = () => {
             <Filter className="w-4 h-4 text-slate-500" />
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
               className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="all">All Status</option>
@@ -295,17 +301,13 @@ const OrdersTab = () => {
         ) : (
           <div className="divide-y divide-slate-200">
             {filteredOrders.map(order => {
-
               const isExpanded = expandedOrders.has(order.id);
-
               const customerData = parseCustomerData(order.payment_intent_id);
 
               return (
-
                 <div key={order.id} className="p-4 hover:bg-slate-50 transition-colors">
                   <div
                     className="flex items-center justify-between cursor-pointer"
-
                     onClick={() => toggleOrderExpansion(order.id)}
                   >
                     <div className="flex items-center gap-4">
@@ -319,13 +321,10 @@ const OrdersTab = () => {
 
                       <div>
                         <div className="flex items-center gap-3">
-                          // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
                           <span className="font-medium text-slate-900">Order #{order.id}</span>
-                          // @ts-expect-error TS(2339): Property 'status' does not exist on type 'never'.
                           <StatusBadge status={order.status} />
                         </div>
                         <div className="text-sm text-slate-600 mt-1">
-                          // @ts-expect-error TS(2339): Property 'customer_name' does not exist on type 'n... Remove this comment to see the full error message
                           {order.customer_name} • {order.customer_email}
                         </div>
                       </div>
@@ -333,11 +332,9 @@ const OrdersTab = () => {
 
                     <div className="text-right">
                       <div className="font-semibold text-slate-900">
-                        // @ts-expect-error TS(2339): Property 'total' does not exist on type 'never'.
                         ${parseFloat(order.total).toFixed(2)}
                       </div>
                       <div className="text-sm text-slate-500">
-                        // @ts-expect-error TS(2339): Property 'created_at' does not exist on type 'neve... Remove this comment to see the full error message
                         {formatDate(order.created_at)}
                       </div>
                     </div>
@@ -410,7 +407,6 @@ const OrdersTab = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-
                             showOrderDetails(order.id);
                           }}
                           className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
@@ -419,12 +415,10 @@ const OrdersTab = () => {
                           View Details
                         </button>
 
-                        // @ts-expect-error TS(2339): Property 'status' does not exist on type 'never'.
                         {order.status === 'pending' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-
                               updateOrderStatus(order.id, 'confirmed');
                             }}
                             className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors"
@@ -434,12 +428,10 @@ const OrdersTab = () => {
                           </button>
                         )}
 
-                        // @ts-expect-error TS(2339): Property 'status' does not exist on type 'never'.
                         {order.status === 'confirmed' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-
                               updateOrderStatus(order.id, 'completed');
                             }}
                             className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors"
@@ -449,13 +441,11 @@ const OrdersTab = () => {
                           </button>
                         )}
 
-                        // @ts-expect-error TS(2339): Property 'status' does not exist on type 'never'.
-                        {order.status !== 'cancelled' && (
+                        {order.status !== 'cancelled' && order.status !== 'completed' && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
                               if (window.confirm('Are you sure you want to cancel this order? This will restore inventory.')) {
-
                                 updateOrderStatus(order.id, 'cancelled');
                               }
                             }}
@@ -469,7 +459,6 @@ const OrdersTab = () => {
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-
                             window.open(`mailto:${order.customer_email}?subject=Order Update #${order.id}`);
                           }}
                           className="flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-colors"
@@ -494,7 +483,6 @@ const OrdersTab = () => {
             <div className="p-6 border-b border-slate-200">
               <div className="flex items-center justify-between">
                 <h2 className="text-xl font-bold text-slate-900">
-                  // @ts-expect-error TS(2339): Property 'id' does not exist on type 'never'.
                   Order #{selectedOrder.id} Details
                 </h2>
                 <button
@@ -521,8 +509,7 @@ const OrdersTab = () => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200">
-                      // @ts-expect-error TS(2339): Property 'items' does not exist on type 'never'.
-                      {selectedOrder.items?.map((item: any, index: any) => (
+                      {selectedOrder.items?.map((item, index) => (
                         <tr key={index}>
                           <td className="px-4 py-3">
                             <div>
@@ -541,7 +528,6 @@ const OrdersTab = () => {
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-slate-900">Order Total:</span>
                       <span className="text-xl font-bold text-slate-900">
-                        // @ts-expect-error TS(2339): Property 'total' does not exist on type 'never'.
                         ${parseFloat(selectedOrder.total).toFixed(2)}
                       </span>
                     </div>
@@ -553,7 +539,6 @@ const OrdersTab = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <h4 className="font-medium text-slate-900 mb-2">Order Status</h4>
-                  // @ts-expect-error TS(2339): Property 'status' does not exist on type 'never'.
                   <StatusBadge status={selectedOrder.status} />
                 </div>
                 <div>
@@ -561,14 +546,11 @@ const OrdersTab = () => {
                   <div className="text-sm space-y-1">
                     <div>
                       <span className="text-slate-600">Created:</span>
-                      // @ts-expect-error TS(2339): Property 'created_at' does not exist on type 'neve... Remove this comment to see the full error message
                       <span className="ml-2">{formatDate(selectedOrder.created_at)}</span>
                     </div>
-                    // @ts-expect-error TS(2339): Property 'updated_at' does not exist on type 'neve... Remove this comment to see the full error message
                     {selectedOrder.updated_at !== selectedOrder.created_at && (
                       <div>
                         <span className="text-slate-600">Updated:</span>
-                        // @ts-expect-error TS(2339): Property 'updated_at' does not exist on type 'neve... Remove this comment to see the full error message
                         <span className="ml-2">{formatDate(selectedOrder.updated_at)}</span>
                       </div>
                     )}

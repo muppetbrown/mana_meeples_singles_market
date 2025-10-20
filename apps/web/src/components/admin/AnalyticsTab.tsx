@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Package, DollarSign, AlertTriangle, RefreshCw } from 'lucide-react';
-import { API_URL } from '@/config/api';
+import { api } from '@/lib/api-endpoints';
 
 // -------------------- Types --------------------
 export type InventoryItem = {
@@ -35,7 +35,7 @@ const AnalyticsTab: React.FC = () => {
   const fetchAnalytics = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/admin/inventory`, { credentials: 'include' });
+      const response = await api.admin.getInventory();
       if (!response.ok) throw new Error('Failed to fetch data');
 
       const data = (await response.json()) as { inventory?: InventoryItem[] };
@@ -83,7 +83,6 @@ const AnalyticsTab: React.FC = () => {
 
       setAnalytics(stats);
     } catch (error) {
-      // eslint-disable-next-line no-console
       console.error('Error fetching analytics:', error);
       setAnalytics(null);
     } finally {
