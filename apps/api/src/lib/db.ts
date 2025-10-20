@@ -1,7 +1,7 @@
 // apps/api/src/lib/db.ts
 import { Pool } from "pg";
 import type { PoolClient, QueryResultRow } from "pg";
-import { env } from "./env.js"; // adjust if your env file is elsewhere
+import { env } from "./env.js";
 
 // Initialize connection pool
 export const pool = new Pool({
@@ -19,21 +19,21 @@ export const pool = new Pool({
 export const db = {
   /**
    * Run a parameterized SQL query.
-   * Automatically manages connections and logs errors.
+   * Uses pool's automatic connection management.
    */
   async query<T extends QueryResultRow = any>(
     text: string,
     params?: any[]
   ): Promise<T[]> {
-    const client = await pool.connect();
     try {
-      const result = await client.query<T>(text, params);
+      const result = await pool.query<T>(text, params);
       return result.rows;
     } catch (error: any) {
       console.error("❌ Database query error:", error.message);
+      console.error("   Query:", text.substring(0, 200));
+      console.error("   Params:", JSON.stringify(params?.slice(0, 5)));
+      console.error("   Code:", error.code);
       throw error;
-    } finally {
-      client.release();
     }
   },
 
@@ -48,6 +48,7 @@ export const db = {
 
 /**
  * Run a function with an auto-managed connection.
+ * Use this for transactions.
  */
 export async function withConn<T>(
   fn: (client: PoolClient) => Promise<T>
@@ -65,7 +66,6 @@ export async function withConn<T>(
  */
 export async function healthcheck(): Promise<boolean> {
   try {
-    // Cast to int, then accept '1' or 1 (pg often returns text)
     const { rows } = await pool.query<{ ok: number | string }>('SELECT 1::int AS ok');
     const v = rows[0]?.ok;
     return v === 1 || v === '1';
@@ -74,7 +74,26 @@ export async function healthcheck(): Promise<boolean> {
   }
 }
 
+/**
+ * Get connection pool statistics for monitoring.
+ */
+export function getPoolStats() {
+  return {
+    total: pool.totalCount,
+    idle: pool.idleCount,
+    waiting: pool.waitingCount,
+  };
+}
+
 // Log pool errors to avoid unhandled exceptions
 pool.on("error", (err) => {
   console.error("⚠️ Unexpected database pool error:", err.message);
+});
+
+// Optional: Log when pool is low on connections
+pool.on("connect", () => {
+  const stats = getPoolStats();
+  if (stats.waiting > 5) {
+    console.warn("⚠️ Pool connection pressure:", stats);
+  }
 });

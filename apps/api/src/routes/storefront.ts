@@ -1,6 +1,6 @@
 import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
-import { db } from '../lib/db.js'; // NOTE: path matches your db.ts location
+import { db } from '../lib/db.js';
 
 const router = express.Router();
 
@@ -11,7 +11,7 @@ const StorefrontQuery = z.object({
   order: z.enum(['asc', 'desc']).default('asc'),
   search: z.string().trim().max(200).optional(),
   game_id: z.coerce.number().int().optional(),
-  set_name: z.string().trim().max(200).optional(),
+  set_id: z.coerce.number().int().optional(),  // CHANGED: Use set_id instead of set_name
   rarity: z.string().trim().max(50).optional(),
 });
 
@@ -19,7 +19,7 @@ function sortToSql(alias: string, sort: string, order: 'asc' | 'desc'): string {
   switch (sort) {
     case 'number':     return `ORDER BY ${alias}.card_number ${order}, ${alias}.name ${order}`;
     case 'rarity':     return `ORDER BY ${alias}.rarity ${order}, ${alias}.name ASC`;
-    case 'created_at': // cards.created_at exists, but keep fallback safe
+    case 'created_at': 
       return `ORDER BY ${alias}.created_at ${order}, ${alias}.name ASC`;
     case 'name':
     default:           return `ORDER BY ${alias}.name ${order}, ${alias}.card_number ASC`;
@@ -31,16 +31,15 @@ router.get('/cards', async (req: Request, res: Response) => {
   if (!parsed.success) {
     return res.status(400).json({ error: 'Invalid query', details: parsed.error.flatten() });
   }
-  const { page, per_page, sort, order, search, game_id, set_name, rarity } = parsed.data;
+  const { page, per_page, sort, order, search, game_id, set_id, rarity } = parsed.data;
 
   const where: string[] = [];
   const params: any[] = [];
 
   if (typeof game_id === 'number') { params.push(game_id); where.push(`c.game_id = $${params.length}`); }
-  if (set_name)                    { params.push(set_name); where.push(`c.set_name = $${params.length}`); }
-  if (rarity)                      { params.push(rarity);   where.push(`c.rarity   = $${params.length}`); }
+  if (typeof set_id === 'number')  { params.push(set_id);  where.push(`c.set_id = $${params.length}`); } // FIXED: Use set_id
+  if (rarity)                      { params.push(rarity);  where.push(`c.rarity = $${params.length}`); }
   if (search && search.length > 1) {
-    // Safe search on guaranteed columns
     params.push(`%${search}%`);
     where.push(`(c.name ILIKE $${params.length} OR c.card_number ILIKE $${params.length})`);
   }
@@ -51,7 +50,6 @@ router.get('/cards', async (req: Request, res: Response) => {
 
   const sql = `
     WITH latest_prices AS (
-      -- Today, card_pricing is empty; this still works safely.
       SELECT DISTINCT ON (card_id)
              card_id, base_price, foil_price, price_source, updated_at
       FROM card_pricing
@@ -61,11 +59,11 @@ router.get('/cards', async (req: Request, res: Response) => {
       c.id,
       c.name,
       c.card_number,
-      c.set_name,
+      cs.name AS set_name,  -- FIXED: Join to card_sets to get set_name
       c.rarity,
       c.image_url,
       g.name AS game_name,
-      COALESCE(inv.total_stock, 0)::int   AS total_stock,
+      COALESCE(inv.total_stock, 0)::int AS total_stock,
       COALESCE(inv.variation_count, 0)::int AS variation_count,
       COALESCE(inv.variations, '[]'::jsonb) AS variations
     FROM (
@@ -76,6 +74,7 @@ router.get('/cards', async (req: Request, res: Response) => {
       LIMIT $${params.push(per_page)} OFFSET $${params.push(offset)}
     ) c
     JOIN games g ON g.id = c.game_id
+    JOIN card_sets cs ON cs.id = c.set_id  -- ADDED: Join to get set name
     LEFT JOIN LATERAL (
       SELECT
         COUNT(ci.id)::int AS variation_count,
@@ -87,7 +86,6 @@ router.get('/cards', async (req: Request, res: Response) => {
               'quality', ci.quality,
               'foil_type', COALESCE(ci.foil_type, 'Regular'),
               'language', COALESCE(ci.language, 'English'),
-              -- Derive from latest card_pricing; null if no pricing row yet
               'price',
                 CASE WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil'
                      THEN lp.foil_price ELSE lp.base_price END,
