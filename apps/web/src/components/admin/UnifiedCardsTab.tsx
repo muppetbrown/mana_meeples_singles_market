@@ -48,7 +48,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const [games, setGames] = useState<Game[]>([]);
   const [addModalData, setAddModalData] = useState<AddModalData | null>(null);
   const [error, setError] = useState<string | null>(null);
-
+  const join = (path: string, q?: URLSearchParams) => 
+    q && Array.from(q.keys()).length ? `${path}?${q.toString()}` : path;
+  
   // UI state
   const [showAddModal, setShowAddModal] = useState(false);
   const [addFormData, setAddFormData] = useState<AddFormData>({
@@ -112,16 +114,18 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const fetchCards = useCallback(async () => {
     setError(null);
     try {
-      const params = new URLSearchParams({ limit: String(1000) });
+      const params = new URLSearchParams();
+      params.set('limit', '1000');
       if (selectedGame !== 'all') {
         const gameId = getGameIdFromName(selectedGame);
-        if (gameId) params.append('game_id', String(gameId));
+        if (gameId != null) params.set('game_id', String(gameId));
       }
-      if (selectedSet !== 'all') params.append('set_name', selectedSet);
-      if (filterTreatment !== 'all') params.append('treatment', filterTreatment);
-      if (searchTerm) params.append('search', searchTerm);
+      if (selectedSet !== 'all') params.set('set_name', selectedSet);
+      if (filterTreatment !== 'all') params.set('treatment', filterTreatment);
+      if (searchTerm.trim()) params.set('search', searchTerm.trim());
 
-      const data = await api.get<{ cards: Card[] }>(`/cards/cards?${params.toString()}`);
+      const url = join('/cards/cards', params);
+      const data = await api.get<{ cards?: Card[] }>(url);
       setCards(data?.cards ?? []);
     } catch (e) {
       console.error('Error fetching cards:', e);
@@ -148,7 +152,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   // ---------- Derived ----------
   const filteredCards = useMemo(() => {
     if (!isInventoryMode) return cards;
-    return cards.filter(card => card.has_inventory && card.total_stock > 0);
+    return (cards ?? []).filter(c => Boolean(c?.has_inventory) && Number(c?.total_stock) > 0);
   }, [cards, isInventoryMode]);
 
   const totalStock = useMemo(
@@ -250,10 +254,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                   c.card_number,
                   c.set_name,
                   c.rarity ?? '',
-                  getUniqueTreatments(c.variations).join(';'),
-                  getUniqueFinishes(c.variations).join(';'),
-                  c.total_stock,
-                  c.variation_count,
+                  getUniqueTreatments(c.variations ?? []).join(';'),
+                  getUniqueFinishes(c.variations ?? []).join(';'),
+                  Number(c.total_stock || 0),
+                  Number(c.variation_count || 0),
                 ].join(',')),
               ].join('\n');
               const blob = new Blob([csv], { type: 'text/csv' });
