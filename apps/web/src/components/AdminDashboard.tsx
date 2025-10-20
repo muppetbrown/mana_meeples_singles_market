@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
-import { api } from '@/lib/api-endpoints';
+import { api } from '@/config/api';
 
 import CurrencySelector from './CurrencySelector';
 import UnifiedCardsTab from './admin/UnifiedCardsTab';

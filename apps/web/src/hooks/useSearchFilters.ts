@@ -1,18 +1,40 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/config/api';
+
+interface FilterOption {
+  value: string;
+  label: string;
+  count: number;
+}
+
+interface FilterOptions {
+  treatments: FilterOption[];
+  rarities: FilterOption[];
+  qualities: FilterOption[];
+  foilTypes: FilterOption[];
+  languages: FilterOption[];
+}
+
+interface Game {
+  id: number;
+  name: string;
+  card_count?: number;
+}
+
+interface CardSet {
+  id: number;
+  name: string;
+  card_count?: number;
+}
 
 /**
  * Custom hook to manage dynamic search filters
  * Fetches and updates available options based on selected filters
- * 
- * @param {string} apiUrl - Base API URL
- * @param {string} selectedGame - Currently selected game
- * @returns {Object} Filter state and handlers
  */
-export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
-  const [games, setGames] = useState([]);
-  const [sets, setSets] = useState([]);
-  const [filterOptions, setFilterOptions] = useState({
+export const useSearchFilters = (_apiUrl: string, selectedGame: string = 'all') => {
+  const [games, setGames] = useState<Game[]>([]);
+  const [sets, setSets] = useState<CardSet[]>([]);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     treatments: [],
     rarities: [],
     qualities: [],
@@ -20,19 +42,18 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
     languages: []
   });
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   /**
    * Game name to ID mapping
    * This should match your database structure
    */
-  const getGameIdFromName = useCallback((gameName: any) => {
-    const gameMap = {
+  const getGameIdFromName = useCallback((gameName: string): number | null => {
+    const gameMap: Record<string, number> = {
       'Magic: The Gathering': 1,
       'Pokemon': 2,
       'Yu-Gi-Oh!': 3
     };
-
     return gameMap[gameName] || null;
   }, []);
 
@@ -41,15 +62,15 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
    */
   const fetchGames = useCallback(async () => {
     try {
-      const data = await api.get<{ games?: any[]; [key: string]: any }>('/games');
-
+      const data = await api.get<{ games?: Game[] }>('/games');
+      
       // Ensure we have an array to work with
-      const gamesArray = Array.isArray(data.games) ? data.games :
-                        Array.isArray(data) ? data : [];
+      const gamesArray: Game[] = Array.isArray(data.games) ? data.games :
+                        Array.isArray(data) ? data as Game[] : [];
 
       // Enrich with card counts if available
       const gamesWithCounts = await Promise.all(
-        gamesArray.map(async (game: any) => {
+        gamesArray.map(async (game) => {
           try {
             const countData = await api.get<{ count: number }>(`/cards/count?game_id=${game.id}`);
             return { ...game, card_count: countData.count || 0 };
@@ -60,11 +81,9 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
         })
       );
 
-
       setGames(gamesWithCounts);
     } catch (err: any) {
       console.error('Error fetching games:', err);
-
       setError(err.message);
     }
   }, []);
@@ -86,14 +105,14 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
         return;
       }
 
-      const data = await api.get<any[]>(`/sets?game_id=${gameId}`);
-
+      const data = await api.get<CardSet[]>(`/sets?game_id=${gameId}`);
+      
       // Ensure we have an array to work with
-      const setsArray = Array.isArray(data) ? data : [];
+      const setsArray: CardSet[] = Array.isArray(data) ? data : [];
 
       // Enrich with card counts
       const setsWithCounts = await Promise.all(
-        setsArray.map(async (set: any) => {
+        setsArray.map(async (set) => {
           try {
             const countData = await api.get<{ count: number }>(`/cards/count?set_id=${set.id}`);
             return { ...set, card_count: countData.count || 0 };
@@ -103,20 +122,17 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
           }
         })
       );
-      
 
       setSets(setsWithCounts);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching sets:', err);
-
       setError(err.message);
       setSets([]);
     }
-  }, [apiUrl, selectedGame, getGameIdFromName]);
+  }, [selectedGame, getGameIdFromName]);
 
   /**
    * Fetch dynamic filter options based on available data
-   * This should query your materialized view or aggregate data
    */
   const fetchFilterOptions = useCallback(async () => {
     try {
@@ -125,47 +141,21 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
       if (selectedGame !== 'all') {
         const gameId = getGameIdFromName(selectedGame);
         if (gameId) {
-          params.append('game_id', gameId);
+          params.append('game_id', gameId.toString());
         }
       }
 
-      // Fetch available treatments/variations
-      const treatmentsRes = await fetch(
-        `${apiUrl}/filters/treatments?${params}`,
-        { credentials: 'include' }
-      );
-      
-      // Fetch available rarities
-      const raritiesRes = await fetch(
-        `${apiUrl}/filters/rarities?${params}`,
-        { credentials: 'include' }
-      );
+      const queryString = params.toString();
+      const baseUrl = queryString ? `?${queryString}` : '';
 
-      // Fetch available qualities
-      const qualitiesRes = await fetch(
-        `${apiUrl}/filters/qualities?${params}`,
-        { credentials: 'include' }
-      );
-
-      // Fetch available foil types
-      const foilTypesRes = await fetch(
-        `${apiUrl}/filters/foil-types?${params}`,
-        { credentials: 'include' }
-      );
-
-      // Fetch available languages
-      const languagesRes = await fetch(
-        `${apiUrl}/filters/languages?${params}`,
-        { credentials: 'include' }
-      );
-
+      // Fetch all filter options in parallel
       const [treatments, rarities, qualities, foilTypes, languages] = 
         await Promise.all([
-          treatmentsRes.ok ? treatmentsRes.json() : [],
-          raritiesRes.ok ? raritiesRes.json() : [],
-          qualitiesRes.ok ? qualitiesRes.json() : [],
-          foilTypesRes.ok ? foilTypesRes.json() : [],
-          languagesRes.ok ? languagesRes.json() : []
+          api.get<FilterOption[]>(`/filters/treatments${baseUrl}`).catch(() => []),
+          api.get<FilterOption[]>(`/filters/rarities${baseUrl}`).catch(() => []),
+          api.get<FilterOption[]>(`/filters/qualities${baseUrl}`).catch(() => []),
+          api.get<FilterOption[]>(`/filters/foil-types${baseUrl}`).catch(() => []),
+          api.get<FilterOption[]>(`/filters/languages${baseUrl}`).catch(() => [])
         ]);
 
       setFilterOptions({
@@ -186,7 +176,7 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
         languages: []
       });
     }
-  }, [apiUrl, selectedGame, getGameIdFromName]);
+  }, [selectedGame, getGameIdFromName]);
 
   /**
    * Initialize data on mount
@@ -199,9 +189,8 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
       try {
         await fetchGames();
         await fetchFilterOptions();
-      } catch (err) {
+      } catch (err: any) {
         console.error('Error loading initial data:', err);
-
         setError(err.message);
       } finally {
         setLoading(false);
@@ -238,9 +227,8 @@ export const useSearchFilters = (apiUrl: any, selectedGame = 'all') => {
         fetchSets(),
         fetchFilterOptions()
       ]);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error refreshing data:', err);
-
       setError(err.message);
     } finally {
       setLoading(false);

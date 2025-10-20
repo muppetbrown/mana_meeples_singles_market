@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Package, Search, RefreshCw, Filter, Sparkles, Download, ZoomIn, X, Plus } from 'lucide-react';
-import { api } from '@/lib/api-endpoints';
+import { api } from '@/config/api';
 
 // ---------- Types ----------
 interface CardVariation {

@@ -1,4 +1,5 @@
-// web/src/config/api.ts
+// apps/web/src/config/api.ts
+
 type ApiInit = Omit<RequestInit, 'headers' | 'body'> & {
   headers?: Record<string, string>;
   body?: BodyInit | null;
@@ -56,13 +57,80 @@ async function apiFetch<T>(path: string, init: ApiInit = {}): Promise<T> {
 }
 
 export const api = {
+  // Base HTTP methods
   get: <T>(p: string, init?: ApiInit) => apiFetch<T>(p, { method: 'GET', ...(init || {}) }),
-  post:    <T, B = unknown>(p: string, body?: B, init?: ApiInit) =>
+  post: <T, B = unknown>(p: string, body?: B, init?: ApiInit) =>
     apiFetch<T>(p, { method: 'POST', body: body ? JSON.stringify(body) : undefined, ...(init || {}) }),
-  put:     <T, B = unknown>(p: string, body?: B, init?: ApiInit) =>
+  put: <T, B = unknown>(p: string, body?: B, init?: ApiInit) =>
     apiFetch<T>(p, { method: 'PUT',  body: body ? JSON.stringify(body) : undefined, ...(init || {}) }),
-  patch:   <T, B = unknown>(p: string, body?: B, init?: ApiInit) =>
-    apiFetch<T>(p, { method: 'PATCH',body: body ? JSON.stringify(body) : undefined, ...(init || {}) }),
-  del:     <T>(p: string, init?: ApiInit) =>
+  patch: <T, B = unknown>(p: string, body?: B, init?: ApiInit) =>
+    apiFetch<T>(p, { method: 'PATCH', body: body ? JSON.stringify(body) : undefined, ...(init || {}) }),
+  del: <T>(p: string, init?: ApiInit) =>
     apiFetch<T>(p, { method: 'DELETE', ...(init || {}) }),
+
+  // Auth convenience methods
+  checkAuth: () => 
+    fetch(`${API_URL}/admin/auth/check`, { credentials: 'include' }),
+  
+  logout: () => 
+    fetch(`${API_URL}/admin/logout`, { 
+      method: 'POST', 
+      credentials: 'include' 
+    }),
+
+  // Admin methods
+  admin: {
+    // Orders
+    getOrders: () => 
+      fetch(`${API_URL}/admin/orders`, { credentials: 'include' }),
+    
+    getOrder: (orderId: string) => 
+      fetch(`${API_URL}/admin/orders/${orderId}`, { credentials: 'include' }),
+    
+    updateOrderStatus: (orderId: string, status: string) =>
+      fetch(`${API_URL}/admin/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+        credentials: 'include',
+      }),
+
+    // Inventory
+    getInventory: (params?: URLSearchParams) => {
+      const url = params 
+        ? `${API_URL}/admin/inventory?${params}` 
+        : `${API_URL}/admin/inventory`;
+      return fetch(url, { credentials: 'include' });
+    },
+
+    createInventory: (data: unknown) =>
+      fetch(`${API_URL}/admin/inventory`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        credentials: 'include',
+      }),
+
+    updateInventory: (id: string | number, data: unknown) =>
+      fetch(`${API_URL}/admin/inventory/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+        credentials: 'include',
+      }),
+
+    exportInventory: () =>
+      fetch(`${API_URL}/admin/inventory/export`, { credentials: 'include' }),
+
+    bulkImportInventory: (formData: FormData) =>
+      fetch(`${API_URL}/admin/inventory/bulk-import`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+      }),
+
+    // Analytics
+    getAnalytics: () =>
+      fetch(`${API_URL}/admin/analytics`, { credentials: 'include' }),
+  },
 };

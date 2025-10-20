@@ -18,6 +18,12 @@ import SectionHeader from './common/SectionHeader';
 import CardItem from './cards/CardItem';
 import ListCardItem from './cards/ListCardItem';
 
+interface Game {
+  id: number;
+  name: string;
+  card_count?: number;
+}
+
 // Lazy load VirtualCardGrid for code splitting
 const VirtualCardGrid = React.lazy(() => import('./VirtualCardGrid'));
 
@@ -340,9 +346,9 @@ const TCGShop = () => {
       });
 
       if (selectedGame !== 'all') {
-        const selectedGameData = games.find((g: any) => g.name === selectedGame);
+        const selectedGameData = games.find((g: Game) => g.name === selectedGame);
         if (selectedGameData) {
-          queryParams.append('game_id', selectedGameData.id);
+          queryParams.append('game_id', selectedGameData.id.toString());
         }
       }
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Package, DollarSign, AlertTriangle, RefreshCw } from 'lucide-react';
-import { api } from '@/lib/api-endpoints';
+import { api } from '@/config/api';
 
 // -------------------- Types --------------------
 export type InventoryItem = {
