@@ -16,7 +16,7 @@ import CardSkeleton from './skeletons/CardSkeleton';
 import SectionHeader from './common/SectionHeader';
 import CardItem from './cards/CardItem';
 import ListCardItem from './cards/ListCardItem';
-import { api } from '@/config/api';
+import { API_BASE } from '@/config/api';
 
 interface Game {
   id: number;
@@ -148,7 +148,7 @@ const TCGShop = () => {
     removeFromCart,
     clearCart,
     addNotification
-  } = useEnhancedCart(API_URL);
+  } = useEnhancedCart(API_BASE);
 
   // Create a simple showNotification function that uses addNotification
   const showNotification = useCallback((message: any, type = 'info', duration = 5000) => {
@@ -171,7 +171,7 @@ const TCGShop = () => {
 
 
   // Filter counts hook for dynamic counts in dropdowns
-  const { getCount, filterCounts } = useFilterCounts(API_URL, { ...filters, game: selectedGame });
+  const { getCount, filterCounts } = useFilterCounts(API_BASE, { ...filters, game: selectedGame });
 
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
@@ -361,7 +361,7 @@ const TCGShop = () => {
       if (filters.maxPrice) queryParams.append('max_price', filters.maxPrice);
 
       const cardsData = await withRetry(async () => {
-        const cardsRes = await throttledFetch(`${API_URL}/cards?${queryParams}`);
+        const cardsRes = await throttledFetch(`${API_BASE}/cards?${queryParams}`);
         if (!cardsRes.ok) {
           // Handle 429 errors specifically
           if (cardsRes.status === 429) {
@@ -692,7 +692,7 @@ const TCGShop = () => {
   const handleOrderSubmit = useCallback(async (orderData: any) => {
     try {
       // Here you would typically send the order to your backend
-      const response = await fetch(`${API_URL}/orders`, {
+      const response = await fetch(`${API_BASE}/orders`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -890,7 +890,7 @@ const TCGShop = () => {
                 games={games}
                 sets={sets}
                 additionalFilters={additionalFilters}
-                apiUrl={API_URL}
+                apiUrl={API_BASE}
                 debounceMs={300}
                 minSearchLength={2}
               />
@@ -1131,7 +1131,7 @@ const TCGShop = () => {
                   games={games}
                   sets={sets}
                   additionalFilters={additionalFilters}
-                  apiUrl={API_URL}
+                  apiUrl={API_BASE}
                   debounceMs={300}
                   minSearchLength={2}
                 />

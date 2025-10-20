@@ -20,7 +20,7 @@ const RETRY_DELAY = 2000; // 2 seconds between retries
 /**
  * Hook for managing filter counts with aggressive caching and rate limit protection
  */
-export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
+export const useFilterCounts = (API_BASE: any, currentFilters = {}) => {
   const [filterCounts, setFilterCounts] = useState(globalCache.data || {});
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -79,7 +79,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
         }
       });
 
-      const response = await fetch(`${API_URL}/filters/counts?${queryParams}`, {
+      const response = await fetch(`${API_BASE}/filters/counts?${queryParams}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json'
@@ -151,7 +151,7 @@ export const useFilterCounts = (API_URL: any, currentFilters = {}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [API_URL]);
+  }, [API_BASE]);
 
   // Update counts when filters change with debouncing
   useEffect(() => {

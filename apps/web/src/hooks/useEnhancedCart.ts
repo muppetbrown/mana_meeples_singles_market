@@ -12,7 +12,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
  * - User-friendly notifications for all cart operations
  * - Cart recovery on page load with validation
  *
- * @param {string} API_URL - The base URL for API calls
+ * @param {string} API_BASE - The base URL for API calls
  * @returns {Object} Cart management functions and state
  * @returns {Array} cart - Array of cart items with quantities, versions, and metadata
  * @returns {Array} cartNotifications - Array of user notification objects
@@ -25,7 +25,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
  * @returns {function} getCartStats - Get cart statistics (total, count, etc.)
  * @returns {function} clearExpiredItems - Remove expired items from cart
  */
-export const useEnhancedCart = (API_URL: any) => {
+export const useEnhancedCart = (API_BASE: any) => {
   const [cart, setCart] = useState([]);
   const [cartNotifications, setCartNotifications] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -190,7 +190,7 @@ export const useEnhancedCart = (API_URL: any) => {
   // Validate item prices against current market data
   const validateItemPrice = useCallback(async (item: any) => {
     try {
-      const response = await fetch(`${API_URL}/cards/${item.id}/current-price`);
+      const response = await fetch(`${API_BASE}/cards/${item.id}/current-price`);
       if (!response.ok) return item; // If API fails, keep original
 
       const { price: currentPrice } = await response.json();
@@ -213,7 +213,7 @@ export const useEnhancedCart = (API_URL: any) => {
       }
       return item; // Keep original item if validation fails
     }
-  }, [API_URL]);
+  }, [API_BASE]);
 
   // Validate all cart items
   const validateCart = useCallback(async () => {
@@ -253,7 +253,7 @@ export const useEnhancedCart = (API_URL: any) => {
       const stockChecks = await Promise.all(
         cart.map(async (item) => {
 
-          const response = await fetch(`${API_URL}/cards/${item.id}/stock`);
+          const response = await fetch(`${API_BASE}/cards/${item.id}/stock`);
           if (!response.ok) return item;
 
           const { stock } = await response.json();
@@ -286,7 +286,7 @@ export const useEnhancedCart = (API_URL: any) => {
         console.error('Failed to check stock:', error);
       }
     }
-  }, [cart, API_URL]);
+  }, [cart, API_BASE]);
 
   /**
    * Add item to cart with validation and optimistic locking

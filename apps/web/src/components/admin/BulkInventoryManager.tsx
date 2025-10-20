@@ -7,6 +7,7 @@ import {
   formatInventoryForExport,
   generateInventoryTemplate,
 } from '../../utils/csvUtils';
+import { API_BASE } from '@/config/api';
 
 // -------------------- Types --------------------
 export type InventoryCSVRow = Record<string, string | number | null | undefined>;
@@ -78,7 +79,7 @@ const BulkInventoryManager: React.FC<BulkInventoryManagerProps> = ({ onInventory
 
     setImporting(true);
     try {
-      const response = await fetch(`${API_URL}/admin/inventory/bulk-import`, {
+      const response = await fetch(`${API_BASE}/admin/inventory/bulk-import`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -115,7 +116,7 @@ const BulkInventoryManager: React.FC<BulkInventoryManagerProps> = ({ onInventory
   const handleExportInventory = async () => {
     setExporting(true);
     try {
-      const response = await fetch(`${API_URL}/admin/inventory/export`, { credentials: 'include' });
+      const response = await fetch(`${API_BASE}/admin/inventory/export`, { credentials: 'include' });
       if (!response.ok) {
         throw new Error(`Export failed: ${response.status} ${response.statusText}`);
       }
