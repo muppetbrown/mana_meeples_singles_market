@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
 import { api } from '@/config/api';
 
@@ -16,7 +16,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await api.checkAuth();
+        const response = await api.auth/checkAuth();
         if (response.ok) {
           setIsAuthenticated(true);
         } else {

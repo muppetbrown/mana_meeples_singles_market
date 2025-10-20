@@ -81,12 +81,16 @@ services:
   - type: web
     name: mana-meeples-web
     env: static
-    buildCommand: corepack enable && pnpm install --no-frozen-lockfile && VITE_API_URL=https://api.manaandmeeples.co.nz/api pnpm --filter ./apps/web run build
+    buildCommand: corepack enable && pnpm install --no-frozen-lockfile && pnpm --filter ./apps/web run build
     staticPublishPath: ./apps/web/dist
     
     # Custom domain for frontend
     domains:
       - shop.manaandmeeples.co.nz
+
+    envVars:
+      - key: VITE_API_URL
+        value: https://api.manaandmeeples.co.nz
     
     routes:
       - type: rewrite

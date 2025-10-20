@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Info, InfoIcon } from 'lucide-react';
 
 const CurrencySelector = ({
