@@ -16,9 +16,9 @@ const router = express.Router();
 router.use("/auth", authRoutes);
 router.use("/filters", filtersRoutes);
 router.use("/variations", variationsRoutes);
-router.use("/cards",cardsRoutes);
+router.use("/cards", cardsRoutes); // exposes /cards/cards, /cards/count, /cards/filters
 router.use("/", ordersRoutes);
-router.use("/", inventoryRoutes);
+router.use("/", inventoryRoutes); // exposes /admin/inventory
 router.use("/", additionalRoutes);
 
 /**
