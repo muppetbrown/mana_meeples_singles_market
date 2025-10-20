@@ -1,6 +1,6 @@
 # AI Software Development Principles
 
-> Purpose:  
+> **Purpose:**  
 > These principles define the standards for software written, refactored, or modified by an AI system.  
 > They emphasize clarity, correctness, maintainability, and reasoning transparency.
 
@@ -60,6 +60,33 @@
 
 ---
 
+## 🧭 Development Workflow Discipline
+
+### 1. Assume Existing Implementation
+Before creating any new code, **assume the functionality already exists** somewhere in the repository.
+
+Steps:
+1. **Search first:** Inspect related modules, utilities, or helper files for similar or partially implemented logic.  
+2. **Check integration points:** Verify imports, routing, and usage paths — many “missing” features are simply disconnected or misreferenced.  
+3. **Test and observe:** If something appears broken, test it in isolation or trace its data flow before rewriting.  
+4. **Confirm redundancy:** Only proceed to new implementation if no working or recoverable code exists.
+
+### 2. Modification Before Creation
+If existing code:
+- Is **not used**, fix the reference.  
+- Is **not working**, debug or refactor it.  
+- Is **pointing incorrectly**, repair the linkage.  
+Only if all these fail and functionality is still missing, **request explicit approval** to create new code.
+
+### 3. Avoid Parallel Functionality
+Never duplicate existing logic under a new name or in a new file for convenience.  
+When extending or fixing, modify or generalize the original implementation.
+
+> New code creation is the **last resort**, not the default.  
+> The AI must justify why modification was insufficient before generating new modules, functions, or files.
+
+---
+
 ## ⚙️ Meta-Principles for AI Behavior
 
 ### A. Optimize for Human Understanding
@@ -102,4 +129,3 @@ Before finalizing any change:
 ---
 
 > “Good code explains itself. Great code teaches the next developer what *good* looks like.”
-

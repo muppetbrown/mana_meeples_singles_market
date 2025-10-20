@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-10-20T03:22:25.264Z",
+  "generatedAt": "2025-10-20T21:23:03.814Z",
   "root": "C:\\Git_Repos\\mana_meeples_singles_market",
   "files": [
     {
@@ -63,8 +63,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/analyze-unused-code.js",
       "isExternal": true,
-      "lines": 399,
-      "sizeBytes": 11483,
+      "lines": 398,
+      "sizeBytes": 11469,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
@@ -82,6 +82,15 @@
       "lines": 1,
       "sizeBytes": 69,
       "onlyReExports": true,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scan-routes.js",
+      "isExternal": true,
+      "lines": 491,
+      "sizeBytes": 15127,
+      "onlyReExports": false,
       "exports": [],
       "isTest": false
     },
@@ -218,8 +227,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/vite.config.ts",
       "isExternal": true,
-      "lines": 12,
-      "sizeBytes": 292,
+      "lines": 13,
+      "sizeBytes": 320,
       "onlyReExports": false,
       "exports": [
         {
@@ -346,8 +355,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/app.ts",
       "isExternal": true,
-      "lines": 160,
-      "sizeBytes": 5187,
+      "lines": 156,
+      "sizeBytes": 4955,
       "onlyReExports": false,
       "exports": [
         {
@@ -386,21 +395,7 @@
       "isTest": false
     },
     {
-      "id": "./routes/api.js",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "./routes/auth.js",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "./routes/filters.js",
+      "id": "./routes/index.js",
       "isExternal": true,
       "onlyReExports": false,
       "exports": [],
@@ -441,8 +436,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/server.ts",
       "isExternal": true,
-      "lines": 32,
-      "sizeBytes": 1065,
+      "lines": 52,
+      "sizeBytes": 1739,
       "onlyReExports": false,
       "exports": [
         {
@@ -646,8 +641,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/lib/db.ts",
       "isExternal": true,
-      "lines": 80,
-      "sizeBytes": 2086,
+      "lines": 81,
+      "sizeBytes": 2113,
       "onlyReExports": false,
       "exports": [
         {
@@ -827,24 +822,12 @@
       "isTest": false
     },
     {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/api.ts",
+      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/additional.ts",
       "isExternal": true,
-      "lines": 134,
-      "sizeBytes": 3732,
+      "lines": 343,
+      "sizeBytes": 9281,
       "onlyReExports": false,
       "exports": [
-        {
-          "name": "validateQuery",
-          "kind": "value"
-        },
-        {
-          "name": "validateParams",
-          "kind": "value"
-        },
-        {
-          "name": "validateBody",
-          "kind": "value"
-        },
         {
           "name": "default",
           "kind": "default"
@@ -853,14 +836,7 @@
       "isTest": false
     },
     {
-      "id": "./cards.js",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "./variations.js",
+      "id": "../lib/db.js",
       "isExternal": true,
       "onlyReExports": false,
       "exports": [],
@@ -883,64 +859,16 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/cards.ts",
       "isExternal": true,
-      "lines": 85,
-      "sizeBytes": 2781,
+      "lines": 233,
+      "sizeBytes": 9805,
       "onlyReExports": false,
       "exports": [
-        {
-          "name": "default",
-          "kind": "default"
-        }
-      ],
-      "isTest": false
-    },
-    {
-      "id": "../db.js",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "./filters.js",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/filters.ts",
-      "isExternal": true,
-      "lines": 185,
-      "sizeBytes": 6126,
-      "onlyReExports": false,
-      "exports": [
-        {
-          "name": "csv",
-          "kind": "value"
-        },
-        {
-          "name": "PaginationQuery",
-          "kind": "value"
-        },
         {
           "name": "CardFiltersQuery",
           "kind": "value"
         },
         {
           "name": "CardsIndexQuery",
-          "kind": "value"
-        },
-        {
-          "name": "parseCardFilters",
-          "kind": "value"
-        },
-        {
-          "name": "buildFilterSQL",
-          "kind": "value"
-        },
-        {
-          "name": "buildPagingSQL",
           "kind": "value"
         },
         {
@@ -953,8 +881,76 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/index.ts",
       "isExternal": true,
-      "lines": 6,
-      "sizeBytes": 212,
+      "lines": 141,
+      "sizeBytes": 3926,
+      "onlyReExports": false,
+      "exports": [
+        {
+          "name": "validateQuery",
+          "kind": "value"
+        },
+        {
+          "name": "validateParams",
+          "kind": "value"
+        },
+        {
+          "name": "validateBody",
+          "kind": "value"
+        },
+        {
+          "name": "default",
+          "kind": "default"
+        }
+      ],
+      "isTest": false
+    },
+    {
+      "id": "./auth.js",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "./cards.js",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "./variations.js",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "./orders.js",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "./inventory.js",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "./additional.js",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts",
+      "isExternal": true,
+      "lines": 53,
+      "sizeBytes": 2124,
       "onlyReExports": false,
       "exports": [
         {
@@ -965,7 +961,30 @@
       "isTest": false
     },
     {
-      "id": "./api.js",
+      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/off-filters.ts",
+      "isExternal": true,
+      "lines": 12,
+      "sizeBytes": 310,
+      "onlyReExports": true,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts",
+      "isExternal": true,
+      "lines": 415,
+      "sizeBytes": 11797,
+      "onlyReExports": false,
+      "exports": [
+        {
+          "name": "default",
+          "kind": "default"
+        }
+      ],
+      "isTest": false
+    },
+    {
+      "id": "../middleware/auth.js",
       "isExternal": true,
       "onlyReExports": false,
       "exports": [],
@@ -983,6 +1002,13 @@
           "kind": "default"
         }
       ],
+      "isTest": false
+    },
+    {
+      "id": "../db.js",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
       "isTest": false
     },
     {
@@ -1034,13 +1060,6 @@
           "kind": "value"
         }
       ],
-      "isTest": false
-    },
-    {
-      "id": "../lib/db.js",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
       "isTest": false
     },
     {
@@ -1099,8 +1118,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/AdminDashboard.tsx",
       "isExternal": true,
-      "lines": 168,
-      "sizeBytes": 5885,
+      "lines": 158,
+      "sizeBytes": 6077,
       "onlyReExports": false,
       "exports": [
         {
@@ -1112,6 +1131,13 @@
     },
     {
       "id": "lucide-react",
+      "isExternal": true,
+      "onlyReExports": false,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "@/config/api",
       "isExternal": true,
       "onlyReExports": false,
       "exports": [],
@@ -1146,17 +1172,10 @@
       "isTest": false
     },
     {
-      "id": "@/config/api",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
-      "isTest": false
-    },
-    {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/AdminLogin.tsx",
       "isExternal": true,
-      "lines": 156,
-      "sizeBytes": 6242,
+      "lines": 157,
+      "sizeBytes": 6278,
       "onlyReExports": false,
       "exports": [
         {
@@ -1170,7 +1189,7 @@
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/CardGrid.tsx",
       "isExternal": true,
       "lines": 46,
-      "sizeBytes": 1543,
+      "sizeBytes": 1582,
       "onlyReExports": false,
       "exports": [
         {
@@ -1190,8 +1209,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/CardSearchBar.tsx",
       "isExternal": true,
-      "lines": 353,
-      "sizeBytes": 13275,
+      "lines": 354,
+      "sizeBytes": 13321,
       "onlyReExports": false,
       "exports": [
         {
@@ -1204,8 +1223,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/Checkout.tsx",
       "isExternal": true,
-      "lines": 654,
-      "sizeBytes": 26529,
+      "lines": 655,
+      "sizeBytes": 26563,
       "onlyReExports": false,
       "exports": [
         {
@@ -1218,8 +1237,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/CurrencySelector.tsx",
       "isExternal": true,
-      "lines": 151,
-      "sizeBytes": 4851,
+      "lines": 152,
+      "sizeBytes": 4893,
       "onlyReExports": false,
       "exports": [
         {
@@ -1232,8 +1251,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/DynamicVariationFilter.tsx",
       "isExternal": true,
-      "lines": 436,
-      "sizeBytes": 15998,
+      "lines": 437,
+      "sizeBytes": 16046,
       "onlyReExports": false,
       "exports": [
         {
@@ -1247,7 +1266,7 @@
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/EmptyState.tsx",
       "isExternal": true,
       "lines": 286,
-      "sizeBytes": 8968,
+      "sizeBytes": 8983,
       "onlyReExports": false,
       "exports": [
         {
@@ -1276,8 +1295,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/ErrorBoundary.tsx",
       "isExternal": true,
-      "lines": 32,
-      "sizeBytes": 915,
+      "lines": 33,
+      "sizeBytes": 961,
       "onlyReExports": false,
       "exports": [
         {
@@ -1290,8 +1309,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/FiltersPanel.tsx",
       "isExternal": true,
-      "lines": 45,
-      "sizeBytes": 1637,
+      "lines": 46,
+      "sizeBytes": 1682,
       "onlyReExports": false,
       "exports": [
         {
@@ -1305,7 +1324,7 @@
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/KeyboardShortcutsModal.tsx",
       "isExternal": true,
       "lines": 151,
-      "sizeBytes": 5646,
+      "sizeBytes": 5673,
       "onlyReExports": false,
       "exports": [
         {
@@ -1318,8 +1337,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/OptimizedImage.tsx",
       "isExternal": true,
-      "lines": 200,
-      "sizeBytes": 6402,
+      "lines": 201,
+      "sizeBytes": 6442,
       "onlyReExports": false,
       "exports": [
         {
@@ -1340,8 +1359,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/TCGShop.tsx",
       "isExternal": true,
-      "lines": 1491,
-      "sizeBytes": 61344,
+      "lines": 1497,
+      "sizeBytes": 61466,
       "onlyReExports": false,
       "exports": [
         {
@@ -1467,8 +1486,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/VariationBadge.tsx",
       "isExternal": true,
-      "lines": 14,
-      "sizeBytes": 589,
+      "lines": 15,
+      "sizeBytes": 636,
       "onlyReExports": false,
       "exports": [
         {
@@ -1481,8 +1500,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/VirtualCardGrid.tsx",
       "isExternal": true,
-      "lines": 205,
-      "sizeBytes": 6653,
+      "lines": 206,
+      "sizeBytes": 6701,
       "onlyReExports": false,
       "exports": [
         {
@@ -1502,14 +1521,10 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/config/api.ts",
       "isExternal": true,
-      "lines": 69,
-      "sizeBytes": 2383,
+      "lines": 82,
+      "sizeBytes": 2730,
       "onlyReExports": false,
       "exports": [
-        {
-          "name": "API_URL",
-          "kind": "value"
-        },
         {
           "name": "api",
           "kind": "value"
@@ -1606,8 +1621,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/hooks/useEnhancedCart.ts",
       "isExternal": true,
-      "lines": 573,
-      "sizeBytes": 17963,
+      "lines": 574,
+      "sizeBytes": 18011,
       "onlyReExports": false,
       "exports": [
         {
@@ -1620,8 +1635,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/hooks/useFilterCounts.ts",
       "isExternal": true,
-      "lines": 227,
-      "sizeBytes": 6812,
+      "lines": 177,
+      "sizeBytes": 6066,
       "onlyReExports": false,
       "exports": [
         {
@@ -1634,8 +1649,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/hooks/useRecentlyViewed.ts",
       "isExternal": true,
-      "lines": 100,
-      "sizeBytes": 2845,
+      "lines": 101,
+      "sizeBytes": 2889,
       "onlyReExports": false,
       "exports": [
         {
@@ -1648,8 +1663,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/hooks/useSearchFilters.ts",
       "isExternal": true,
-      "lines": 260,
-      "sizeBytes": 7078,
+      "lines": 219,
+      "sizeBytes": 6999,
       "onlyReExports": false,
       "exports": [
         {
@@ -1666,8 +1681,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/hooks/useVirtualScrolling.ts",
       "isExternal": true,
-      "lines": 207,
-      "sizeBytes": 6369,
+      "lines": 208,
+      "sizeBytes": 6415,
       "onlyReExports": false,
       "exports": [
         {
@@ -1684,8 +1699,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/services/errorHandler.ts",
       "isExternal": true,
-      "lines": 272,
-      "sizeBytes": 7325,
+      "lines": 273,
+      "sizeBytes": 7367,
       "onlyReExports": false,
       "exports": [
         {
@@ -1738,8 +1753,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/services/requestThrottler.ts",
       "isExternal": true,
-      "lines": 118,
-      "sizeBytes": 3232,
+      "lines": 119,
+      "sizeBytes": 3278,
       "onlyReExports": false,
       "exports": [
         {
@@ -1804,8 +1819,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/admin/AnalyticsTab.tsx",
       "isExternal": true,
-      "lines": 230,
-      "sizeBytes": 9079,
+      "lines": 225,
+      "sizeBytes": 8887,
       "onlyReExports": false,
       "exports": [
         {
@@ -1819,7 +1834,7 @@
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/admin/BulkInventoryManager.tsx",
       "isExternal": true,
       "lines": 323,
-      "sizeBytes": 12825,
+      "sizeBytes": 12828,
       "onlyReExports": false,
       "exports": [
         {
@@ -1839,8 +1854,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/admin/OrdersTab.tsx",
       "isExternal": true,
-      "lines": 586,
-      "sizeBytes": 25060,
+      "lines": 568,
+      "sizeBytes": 25406,
       "onlyReExports": false,
       "exports": [
         {
@@ -1853,8 +1868,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/admin/UnifiedCardsTab.tsx",
       "isExternal": true,
-      "lines": 377,
-      "sizeBytes": 13362,
+      "lines": 286,
+      "sizeBytes": 10198,
       "onlyReExports": false,
       "exports": [
         {
@@ -1867,8 +1882,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/cards/CardItem.tsx",
       "isExternal": true,
-      "lines": 166,
-      "sizeBytes": 6377,
+      "lines": 167,
+      "sizeBytes": 6424,
       "onlyReExports": false,
       "exports": [
         {
@@ -1895,8 +1910,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/cards/ListCardItem.tsx",
       "isExternal": true,
-      "lines": 211,
-      "sizeBytes": 7666,
+      "lines": 212,
+      "sizeBytes": 7717,
       "onlyReExports": false,
       "exports": [
         {
@@ -1918,8 +1933,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/common/RecentlyViewedCards.tsx",
       "isExternal": true,
-      "lines": 116,
-      "sizeBytes": 3986,
+      "lines": 117,
+      "sizeBytes": 4045,
       "onlyReExports": false,
       "exports": [
         {
@@ -1932,8 +1947,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/common/SectionHeader.tsx",
       "isExternal": true,
-      "lines": 28,
-      "sizeBytes": 873,
+      "lines": 29,
+      "sizeBytes": 926,
       "onlyReExports": false,
       "exports": [
         {
@@ -1947,7 +1962,7 @@
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/skeletons/CardSkeleton.tsx",
       "isExternal": true,
       "lines": 34,
-      "sizeBytes": 1151,
+      "sizeBytes": 1178,
       "onlyReExports": false,
       "exports": [
         {
@@ -1961,7 +1976,7 @@
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/utils/searchUtils.tsx",
       "isExternal": true,
       "lines": 20,
-      "sizeBytes": 670,
+      "sizeBytes": 692,
       "onlyReExports": false,
       "exports": [
         {
@@ -1969,27 +1984,6 @@
           "kind": "value"
         }
       ],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/cards/queries.ts",
-      "isExternal": true,
-      "lines": 19,
-      "sizeBytes": 587,
-      "onlyReExports": false,
-      "exports": [
-        {
-          "name": "useCardSearch",
-          "kind": "value"
-        }
-      ],
-      "isTest": false
-    },
-    {
-      "id": "@tanstack/react-query",
-      "isExternal": true,
-      "onlyReExports": false,
-      "exports": [],
       "isTest": false
     },
     {
@@ -2094,6 +2088,21 @@
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/analyze-unused-code.js",
+      "to": "url",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scan-routes.js",
+      "to": "fs",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scan-routes.js",
+      "to": "path",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scan-routes.js",
       "to": "url",
       "kind": "import"
     },
@@ -2294,17 +2303,7 @@
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/app.ts",
-      "to": "./routes/api.js",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/app.ts",
-      "to": "./routes/auth.js",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/app.ts",
-      "to": "./routes/filters.js",
+      "to": "./routes/index.js",
       "kind": "import"
     },
     {
@@ -2508,23 +2507,23 @@
       "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/api.ts",
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/additional.ts",
       "to": "express",
       "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/api.ts",
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/additional.ts",
+      "to": "express",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/additional.ts",
       "to": "zod",
       "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/api.ts",
-      "to": "./cards.js",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/api.ts",
-      "to": "./variations.js",
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/additional.ts",
+      "to": "../lib/db.js",
       "kind": "import"
     },
     {
@@ -2559,22 +2558,97 @@
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/cards.ts",
-      "to": "../db.js",
+      "to": "../lib/db.js",
       "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/cards.ts",
-      "to": "./filters.js",
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/index.ts",
+      "to": "express",
       "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/filters.ts",
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/index.ts",
       "to": "zod",
       "kind": "import"
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/index.ts",
-      "to": "./api.js",
+      "to": "./auth.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/index.ts",
+      "to": "./cards.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/index.ts",
+      "to": "./variations.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/index.ts",
+      "to": "./orders.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/index.ts",
+      "to": "./inventory.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/index.ts",
+      "to": "./additional.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts",
+      "to": "express",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts",
+      "to": "zod",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts",
+      "to": "../lib/db.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/off-filters.ts",
+      "to": "./cards.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/off-filters.ts",
+      "to": "./cards.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts",
+      "to": "express",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts",
+      "to": "express",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts",
+      "to": "zod",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts",
+      "to": "../lib/db.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts",
+      "to": "../middleware/auth.js",
       "kind": "import"
     },
     {
@@ -2639,12 +2713,12 @@
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/AdminDashboard.tsx",
-      "to": "react-router-dom",
+      "to": "lucide-react",
       "kind": "import"
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/AdminDashboard.tsx",
-      "to": "lucide-react",
+      "to": "@/config/api",
       "kind": "import"
     },
     {
@@ -2665,11 +2739,6 @@
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/AdminDashboard.tsx",
       "to": "./admin/AnalyticsTab",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/AdminDashboard.tsx",
-      "to": "@/config/api",
       "kind": "import"
     },
     {
@@ -2744,11 +2813,6 @@
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/EmptyState.tsx",
-      "to": "react",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/EmptyState.tsx",
       "to": "lucide-react",
       "kind": "import"
     },
@@ -2765,11 +2829,6 @@
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/FiltersPanel.tsx",
       "to": "@/config/api",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/KeyboardShortcutsModal.tsx",
-      "to": "react",
       "kind": "import"
     },
     {
@@ -2839,11 +2898,6 @@
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/TCGShop.tsx",
-      "to": "@/config/api",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/TCGShop.tsx",
       "to": "../services/errorHandler",
       "kind": "import"
     },
@@ -2873,6 +2927,11 @@
       "kind": "import"
     },
     {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/TCGShop.tsx",
+      "to": "@/config/api",
+      "kind": "import"
+    },
+    {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/Toast.tsx",
       "to": "react",
       "kind": "import"
@@ -2898,6 +2957,11 @@
       "kind": "import"
     },
     {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/config/api.ts",
+      "to": "zod",
+      "kind": "import"
+    },
+    {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/hooks/useEnhancedCart.ts",
       "to": "react",
       "kind": "import"
@@ -2910,6 +2974,11 @@
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/hooks/useFilterCounts.ts",
       "to": "../config/constants",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/hooks/useFilterCounts.ts",
+      "to": "@/config/api",
       "kind": "import"
     },
     {
@@ -2983,6 +3052,11 @@
       "kind": "import"
     },
     {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/admin/OrdersTab.tsx",
+      "to": "@/config/api",
+      "kind": "import"
+    },
+    {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/admin/UnifiedCardsTab.tsx",
       "to": "react",
       "kind": "import"
@@ -3050,26 +3124,6 @@
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/common/SectionHeader.tsx",
       "to": "lucide-react",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/skeletons/CardSkeleton.tsx",
-      "to": "react",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/components/utils/searchUtils.tsx",
-      "to": "react",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/cards/queries.ts",
-      "to": "@tanstack/react-query",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/cards/queries.ts",
-      "to": "@/config/api",
       "kind": "import"
     },
     {

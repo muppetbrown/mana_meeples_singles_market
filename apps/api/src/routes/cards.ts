@@ -194,7 +194,7 @@ router.get("/filters", async (req, res, next) => {
         COALESCE(ARRAY_AGG(DISTINCT ci.quality)     FILTER (WHERE ci.quality     IS NOT NULL), '{}') AS qualities,
         COALESCE(ARRAY_AGG(DISTINCT ci.foil_type)   FILTER (WHERE ci.foil_type   IS NOT NULL), '{}') AS foil_types,
 
-        COALESCE(COUNT(DISTINCT b.id)               FILTER (WHERE ci.stock > 0), 0) AS in_stock_count,
+        COALESCE(COUNT(DISTINCT b.id)               FILTER (WHERE ci.stock_quantity > 0), 0) AS in_stock_count,
 
         MIN(p.price) AS price_min,
         MAX(p.price) AS price_max

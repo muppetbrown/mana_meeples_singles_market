@@ -17,12 +17,14 @@ import SectionHeader from './common/SectionHeader';
 import CardItem from './cards/CardItem';
 import ListCardItem from './cards/ListCardItem';
 import { API_BASE } from '@/config/api';
-
-interface Game {
-  id: number;
-  name: string;
-  card_count?: number;
-}
+import { api } from '@/config/api';
+import type { 
+  ApiCard as Card,
+  ApiCardVariation as CardVariation,
+  ApiGame as Game,
+  ApiSet as CardSet,
+  StorefrontCard
+} from '@/types';
 
 // Lazy load VirtualCardGrid for code splitting
 const VirtualCardGrid = React.lazy(() => import('./VirtualCardGrid'));
@@ -171,7 +173,7 @@ const TCGShop = () => {
 
 
   // Filter counts hook for dynamic counts in dropdowns
-  const { getCount, filterCounts } = useFilterCounts(API_BASE, { ...filters, game: selectedGame });
+  //const { getCount, filterCounts } = useFilterCounts(API_BASE, { ...filters, game: selectedGame });
 
   const [showMobileFilters, setShowMobileFilters] = useState(false);
 
@@ -327,102 +329,50 @@ const TCGShop = () => {
 
   // Fetch cards with current filters
   const fetchCards = useCallback(async () => {
-    // Prevent multiple simultaneous card fetches
-    if (requestInFlight.current.cards) {
-      return;
-    }
+    if (requestInFlight.current.cards) return;
 
     try {
       requestInFlight.current.cards = true;
-      // Set loading state to true when starting card fetch
       setCardsLoading(true);
       setCardsError(null);
 
-      const queryParams = new URLSearchParams({
-        limit: '100',
-        search: searchTerm,
-        sort_by: filters.sortBy,
-        sort_order: filters.sortOrder
-      });
+      const params = new URLSearchParams();
 
+      // paging
+      params.set('per_page', '100');
+
+      // search
+      if (searchTerm) params.set('search', searchTerm);
+
+      // sort -> backend expects 'sort' + 'order'
+      if (filters.sortBy)   params.set('sort',  filters.sortBy === 'updated' ? 'created_at' : (filters.sortBy === 'set' ? 'name' : filters.sortBy));
+      if (filters.sortOrder) params.set('order', filters.sortOrder);
+
+      // game filter
       if (selectedGame !== 'all') {
-        const selectedGameData = games.find((g: Game) => g.name === selectedGame);
-        if (selectedGameData) {
-          queryParams.append('game_id', selectedGameData.id.toString());
-        }
+        const g = games.find((x: Game) => x.name === selectedGame);
+        if (g) params.set('game_id', String(g.id));
       }
 
-      if (filters.quality !== 'all') queryParams.append('quality', filters.quality);
-      if (filters.rarity !== 'all') queryParams.append('rarity', filters.rarity);
-      if (filters.foilType !== 'all') queryParams.append('foil_type', filters.foilType);
-      if (filters.language !== 'English') queryParams.append('language', filters.language);
-      if (filters.set !== 'all') queryParams.append('set_name', filters.set);
-      if (filters.minPrice) queryParams.append('min_price', filters.minPrice);
-      if (filters.maxPrice) queryParams.append('max_price', filters.maxPrice);
+      // set filter
+      if (filters.set && filters.set !== 'all') params.set('set_name', filters.set);
 
-      const cardsData = await withRetry(async () => {
-        const cardsRes = await throttledFetch(`${API_BASE}/cards?${queryParams}`);
-        if (!cardsRes.ok) {
-          // Handle 429 errors specifically
-          if (cardsRes.status === 429) {
-            const error = new Error('Rate limit exceeded');
+      // rarity (supported in backend)
+      if (filters.rarity && filters.rarity !== 'all') params.set('rarity', filters.rarity);
 
-            (error as any).status = 429;
-            throw error;
-          }
-          throw new Error('API request failed');
-        }
-        return cardsRes.json();
-      }, 3, 1000);
+      const qs = params.toString();
 
-      // Group cards by base card (consolidated variants)
-      const groupedCards = {};
-      cardsData.cards.forEach((item: any) => {
-        const key = `${item.game_name}-${item.set_name}-${item.card_number}`;
-
-
-        if (!groupedCards[key]) {
-
-          groupedCards[key] = {
-            id: key, // Use stable key as ID instead of inventory-specific item.id
-            name: item.name,
-            game_name: item.game_name,
-            set_name: item.set_name,
-            set_code: item.set_code,
-            card_number: item.card_number,
-            rarity: item.rarity,
-            card_type: item.card_type,
-            description: item.description,
-            image_url: item.image_url,
-            variations: []
-          };
-        }
-
-
-        groupedCards[key].variations.push({
-          inventory_id: item.inventory_id,
-          quality: item.quality,
-          variation_name: item.variation_name,
-          foil_type: item.foil_type || 'Regular',
-          language: item.language || 'English',
-          price: parseFloat(item.price) * currency.rate,
-          stock: item.stock_quantity,
-          // Add unique identifier for variation selection
-          variation_key: `${item.quality}-${item.foil_type || 'Regular'}-${item.language || 'English'}`
-        });
-      });
-
-      setCards(Object.values(groupedCards));
+      const data = await api.get<{ cards: StorefrontCard[] }>(`/storefront/cards?${qs}`);
+      setCards(data.cards);
     } catch (err) {
-      const formattedError = handleError(err, { operation: 'fetchCards' });
-
-      setCardsError(`${formattedError.title}: ${formattedError.message} Try adjusting your filters or refreshing the page.`);
+      const formatted = handleError(err, { operation: 'fetchCards' });
+      setCardsError(`${formatted.title}: ${formatted.message} Try adjusting your filters or refreshing the page.`);
     } finally {
-      // Always set loading to false when card fetch completes (success or error)
       setCardsLoading(false);
       requestInFlight.current.cards = false;
     }
-  }, [searchTerm, selectedGame, filters, games, currency.rate, handleError]);
+  }, [searchTerm, selectedGame, filters, games, handleError]);
+
 
   useEffect(() => {
     if (games.length > 0) {
@@ -689,25 +639,17 @@ const TCGShop = () => {
     setShowCart(false);
   }, []);
 
+
   const handleOrderSubmit = useCallback(async (orderData: any) => {
     try {
-      // Here you would typically send the order to your backend
-      const response = await fetch(`${API_BASE}/orders`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(orderData),
-      });
+      const result = await api.post<{ success: boolean }>('/orders', orderData);
 
-      if (response.ok) {
-        // Clear the cart after successful order
+      if (result?.success) {
         clearCart();
-        // Order submission was successful
         return true;
-      } else {
-        throw new Error('Failed to submit order');
       }
+
+      throw new Error('Failed to submit order');
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Order submission error:', error);

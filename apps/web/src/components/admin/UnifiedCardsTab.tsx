@@ -2,42 +2,26 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download } from 'lucide-react';
 import { api } from '@/config/api';
+import type { 
+  ApiCard as Card,
+  ApiCardVariation as CardVariation,
+  ApiGame as Game,
+  ApiSet as CardSet
+} from '@/types';
 
 // ---------- Types ----------
-interface CardVariation {
-  card_id: number;
-  variation_label: string;
-  treatment: string;
-  finish: string;
-  inventory_count: number;
-  stock: number;
-}
 
-interface Card {
-  id: number;
-  name: string;
-  card_number: string;
-  set_name: string;
-  rarity?: string;
-  image_url?: string;
-  variation_count: number;
-  total_stock: number;
-  has_inventory: boolean;
-  variations: CardVariation[];
-}
+type SearchSuggestion = { name: string; set_name: string; card_number: string; image_url?: string; }
 
-interface Game { id: number; name: string; }
-interface CardSet { id: number; name: string; }
-interface SearchSuggestion { name: string; set_name: string; card_number: string; image_url?: string; }
+type AddModalData = { card: Card; variation: CardVariation };
 
-interface AddModalData { card: Card; variation: CardVariation; }
-interface AddFormData {
+type AddFormData = {
   quality: string;
   foil_type: string;
   price: string;
   stock_quantity: number;
   language: string;
-}
+};
 
 interface UnifiedCardsTabProps { mode?: 'all' | 'inventory'; }
 

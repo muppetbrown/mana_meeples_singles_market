@@ -16,11 +16,13 @@ mana_meeples_singles_market
 │ │ │ │ ├── rateLimit.ts
 │ │ │ │ └── requestLog.ts
 │ │ │ ├── routes/
-│ │ │ │ ├── api.ts
+│ │ │ │ ├── additional.ts
 │ │ │ │ ├── auth.ts
 │ │ │ │ ├── cards.ts
-│ │ │ │ ├── filters.ts
 │ │ │ │ ├── index.ts
+│ │ │ │ ├── inventory.ts
+│ │ │ │ ├── off-filters.ts
+│ │ │ │ ├── orders.ts
 │ │ │ │ └── variations.ts
 │ │ │ ├── services/
 │ │ │ │ ├── emailService.ts
@@ -88,9 +90,6 @@ mana_meeples_singles_market
 │  │ ├── config/
 │  │ │ ├── api.ts
 │  │ │ └── constants.ts
-│  │ ├── features/
-│  │ │ └── cards/
-│  │ │  └── queries.ts
 │  │ ├── hooks/
 │  │ │ ├── __tests__/
 │  │ │ │ ├── useEnhancedCart.test.ts
@@ -120,7 +119,6 @@ mana_meeples_singles_market
 │  ├── index.html
 │  ├── package.json
 │  ├── postcss.config.cjs
-│  ├── README.md
 │  ├── tailwind.config.ts
 │  ├── tsconfig.json
 │  └── vite.config.ts
@@ -167,10 +165,10 @@ mana_meeples_singles_market
 ├── .env.example
 ├── .eslintrc.cjs
 ├── .gitignore
+├── ai_dev_principles.md
 ├── analyze-repo.mjs
 ├── analyze-unused-code.js
 ├── api.effective.tsconfig.json
-├── generate_tree.py
 ├── package.json
 ├── pnpm
 ├── pnpm-lock.yaml
@@ -179,7 +177,8 @@ mana_meeples_singles_market
 ├── render-deployment-guide.md
 ├── render.yaml
 ├── repo-tree.txt
-├── test-cors-fix.sh
+├── route-analysis-report.json
+├── scan-routes.js
 ├── tsconfig.base.json
 ├── tsconfig.json
 ├── typecheck_errors.txt

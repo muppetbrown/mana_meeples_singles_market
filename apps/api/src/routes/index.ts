@@ -9,6 +9,7 @@ import variationsRoutes from "./variations.js";
 import ordersRoutes from "./orders.js";
 import inventoryRoutes from "./inventory.js";
 import additionalRoutes from "./additional.js";
+import storefrontRouter from './storefront.js'; //
 
 const router = express.Router();
 
@@ -17,6 +18,7 @@ router.use("/auth", authRoutes);
 //router.use("/filters", filtersRoutes);
 router.use("/variations", variationsRoutes);
 router.use("/cards", cardsRoutes); // exposes /cards/cards, /cards/count, /cards/filters
+router.use('/storefront', storefrontRouter);
 router.use("/", ordersRoutes);
 router.use("/", inventoryRoutes); // exposes /admin/inventory
 router.use("/", additionalRoutes);

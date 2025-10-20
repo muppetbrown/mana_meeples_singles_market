@@ -33,11 +33,11 @@ router.post("/admin/inventory", async (req: Request, res: Response) => {
 
   // Upsert with explicit target matching your unique index
   const sql = `
-    INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock)
+    INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock_quantity)
     VALUES ($1, NULL, $2, $3, $4, $5, $6)
     ON CONFLICT (card_id, variation_id, quality, foil_type, language)
-    DO UPDATE SET price = EXCLUDED.price, stock = EXCLUDED.stock
-    RETURNING id, card_id, quality, foil_type, language, price, stock
+    DO UPDATE SET price = EXCLUDED.price, stock_quantity = EXCLUDED.stock_quantity
+    RETURNING id, card_id, quality, foil_type, language, price, stock_quantity
   `;
 
   try {
