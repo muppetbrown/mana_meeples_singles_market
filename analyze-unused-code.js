@@ -55,7 +55,6 @@ const KNOWN_API_ENDPOINTS = [
   '/cards',
   '/games',
   '/sets',
-  '/orders',
   '/admin/login',
   '/admin/logout',
   '/admin/orders',

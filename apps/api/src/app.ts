@@ -1,3 +1,4 @@
+// apps/api/src/app.ts
 import express from "express";
 import helmet from "helmet";
 import cors from "cors";
@@ -5,7 +6,7 @@ import type { CorsOptionsDelegate, CorsRequest } from "cors";
 import cookieParser from "cookie-parser";
 import apiRoutes from "./routes/api.js";
 import authRoutes from "./routes/auth.js";
-import filtersRoutes from "./routes/filters.js";
+import variationsRoutes from "./routes/variations.js";
 import path from "path";
 import fs from "fs";
 
@@ -14,7 +15,6 @@ export function createApp() {
 
   app.set("trust proxy", 1);
 
-  // ✅ Helmet baseline hardened; leave CSP disabled for SPA flexibility
   app.use(
     helmet({
       crossOriginResourcePolicy: { policy: "cross-origin" },
@@ -69,7 +69,7 @@ export function createApp() {
   });
 
   app.use("/api/auth", authRoutes);
-  app.use("/api/filters", filtersRoutes);
+  app.use("/api/variations", variationsRoutes);
   app.use("/api", apiRoutes);
 
   /** ===============================

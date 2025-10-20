@@ -1,0 +1,250 @@
+{
+  "timestamp": "2025-10-20T03:28:02.777Z",
+  "summary": {
+    "totalRoutes": 8,
+    "frontendCalls": 12,
+    "documentedEndpoints": 19,
+    "notImplemented": 15,
+    "notDocumented": 4,
+    "pathMismatches": 2
+  },
+  "actualEndpoints": [
+    {
+      "method": "GET",
+      "path": "/healthz",
+      "file": "api.ts",
+      "fullPath": "/healthz",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/readyz",
+      "file": "api.ts",
+      "fullPath": "/readyz",
+      "prefix": ""
+    },
+    {
+      "method": "POST",
+      "path": "/admin/login",
+      "file": "auth.ts",
+      "fullPath": "/admin/login",
+      "prefix": ""
+    },
+    {
+      "method": "POST",
+      "path": "/admin/logout",
+      "file": "auth.ts",
+      "fullPath": "/admin/logout",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/admin/auth/check",
+      "file": "auth.ts",
+      "fullPath": "/admin/auth/check",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/cards",
+      "file": "cards.ts",
+      "fullPath": "/cards",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/cards/count",
+      "file": "cards.ts",
+      "fullPath": "/cards/count",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/variations",
+      "file": "variations.ts",
+      "fullPath": "/variations",
+      "prefix": ""
+    }
+  ],
+  "documentedEndpoints": [
+    "/cards",
+    "/games",
+    "/sets",
+    "/orders",
+    "/admin/login",
+    "/admin/logout",
+    "/admin/auth/check",
+    "/admin/orders",
+    "/admin/cards",
+    "/admin/all-cards",
+    "/admin/analytics",
+    "/admin/import-card-data",
+    "/admin/refresh-prices",
+    "/admin/bulk-create-foils",
+    "/admin/bulk-create-variations",
+    "/admin/variations/:card_id",
+    "/variations/:card_id",
+    "/filters",
+    "/health"
+  ],
+  "frontendCalls": [
+    {
+      "method": "GET",
+      "endpoint": "/admin/inventory",
+      "file": "admin\\AnalyticsTab.tsx"
+    },
+    {
+      "method": "POST",
+      "endpoint": "/admin/inventory",
+      "file": "admin\\UnifiedCardsTab.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/admin/inventory/bulk-import",
+      "file": "admin\\BulkInventoryManager.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/admin/inventory/export",
+      "file": "admin\\BulkInventoryManager.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/admin/orders",
+      "file": "admin\\OrdersTab.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/admin/orders/",
+      "file": "admin\\OrdersTab.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/admin/orders//status",
+      "file": "admin\\OrdersTab.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/auth/admin/auth/check",
+      "file": "AdminDashboard.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/auth/admin/logout",
+      "file": "AdminDashboard.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/cards",
+      "file": "TCGShop.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/orders",
+      "file": "TCGShop.tsx"
+    },
+    {
+      "method": "GET",
+      "endpoint": "/search/autocomplete",
+      "file": "CardSearchBar.tsx"
+    }
+  ],
+  "discrepancies": {
+    "notImplemented": [
+      {
+        "endpoint": "/games",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/sets",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/orders",
+        "usedByFrontend": true
+      },
+      {
+        "endpoint": "/admin/orders",
+        "usedByFrontend": true
+      },
+      {
+        "endpoint": "/admin/cards",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/admin/all-cards",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/admin/analytics",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/admin/import-card-data",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/admin/refresh-prices",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/admin/bulk-create-foils",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/admin/bulk-create-variations",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/admin/variations/:card_id",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/variations/:card_id",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/filters",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/health",
+        "usedByFrontend": false
+      }
+    ],
+    "notDocumented": [
+      {
+        "path": "/healthz",
+        "method": "GET",
+        "file": "api.ts"
+      },
+      {
+        "path": "/readyz",
+        "method": "GET",
+        "file": "api.ts"
+      },
+      {
+        "path": "/cards/count",
+        "method": "GET",
+        "file": "cards.ts"
+      },
+      {
+        "path": "/variations",
+        "method": "GET",
+        "file": "variations.ts"
+      }
+    ],
+    "pathMismatches": [
+      {
+        "documented": "/games",
+        "actual": "/cards",
+        "file": "cards.ts"
+      },
+      {
+        "documented": "/health",
+        "actual": "/healthz",
+        "file": "api.ts"
+      }
+    ]
+  }
+}

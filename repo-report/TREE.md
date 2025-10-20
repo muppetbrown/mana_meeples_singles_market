@@ -168,6 +168,7 @@ mana_meeples_singles_market
 ├── .eslintrc.cjs
 ├── .gitignore
 ├── analyze-repo.mjs
+├── analyze-unused-code.js
 ├── api.effective.tsconfig.json
 ├── generate_tree.py
 ├── package.json
@@ -181,5 +182,6 @@ mana_meeples_singles_market
 ├── test-cors-fix.sh
 ├── tsconfig.base.json
 ├── tsconfig.json
-└── typecheck_errors.txt
+├── typecheck_errors.txt
+└── unused-code-report.json
 ```
