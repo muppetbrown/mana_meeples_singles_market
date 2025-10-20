@@ -97,14 +97,16 @@ function extractRoutesFromFile(filePath) {
 function scanRouteFiles() {
   console.log('🔍 Scanning Express route files...\n');
   
-  const routeFiles = [
-    'api.ts',
-    'auth.ts',
-    'cards.ts',
-    'filters.ts',
-    'variations.ts',
-    'index.ts'
-  ];
+const routeFiles = [
+  'apps/api/src/routes/api.ts',
+  'apps/api/src/routes/auth.ts',
+  'apps/api/src/routes/cards.ts',
+  'apps/api/src/routes/variations.ts',
+  'apps/api/src/routes/orders.ts',     
+  'apps/api/src/routes/inventory.ts',   
+  'apps/api/src/routes/additional.ts',  
+  'apps/api/src/routes/index.ts'
+];
   
   // Track route prefixes from index.ts
   const routePrefixes = new Map();

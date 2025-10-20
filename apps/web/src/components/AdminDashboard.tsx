@@ -1,68 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
+import { api } from '@/lib/api-endpoints';
 
 import CurrencySelector from './CurrencySelector';
 import UnifiedCardsTab from './admin/UnifiedCardsTab';
 import OrdersTab from './admin/OrdersTab';
 import AnalyticsTab from './admin/AnalyticsTab';
-import { API_URL } from '@/config/api';
-
-const getAdminHeaders = () => ({
-  'Content-Type': 'application/json'
-});
 
 const AdminDashboard = () => {
-  const navigate = useNavigate();
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authChecking, setAuthChecking] = useState(true);
-  const [activeTab, setActiveTab] = useState('inventory');
-  const [currency, setCurrency] = useState({ symbol: 'NZ$', rate: 1.0, code: 'NZD' });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [activeTab, setActiveTab] = useState<'inventory' | 'all-cards' | 'analytics' | 'orders'>('inventory');
+  const [currency, setCurrency] = useState<'USD' | 'CAD'>('USD');
 
-  // Auth check
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await fetch(`${API_URL}/auth/admin/auth/check`, {
-          credentials: 'include',
-          headers: getAdminHeaders()
-        });
-
+        const response = await api.checkAuth();
         if (response.ok) {
-          const data = await response.json();
-          if (data.authenticated) {
-            setIsAuthenticated(true);
-          } else {
-            navigate('/admin/login');
-          }
+          setIsAuthenticated(true);
         } else {
-          navigate('/admin/login');
+          window.location.href = '/admin/login';
         }
       } catch (error) {
         console.error('Auth check failed:', error);
-        navigate('/admin/login');
+        window.location.href = '/admin/login';
       } finally {
         setAuthChecking(false);
       }
     };
-
     checkAuth();
-  }, [navigate]);
-
-  const handleCurrencyChange = (newCurrency: any) => {
-    setCurrency(newCurrency);
-  };
+  }, []);
 
   const handleLogout = async () => {
     try {
-      await fetch(`${API_URL}/auth/admin/logout`, {
-        method: 'POST',
-        credentials: 'include'
-      });
-      navigate('/admin/login');
+      await api.logout();
+      window.location.href = '/admin/login';
     } catch (error) {
       console.error('Logout failed:', error);
     }
+  };
+
+  const handleCurrencyChange = (newCurrency: 'USD' | 'CAD') => {
+    setCurrency(newCurrency);
   };
 
   if (authChecking) {
@@ -93,7 +73,8 @@ const AdminDashboard = () => {
               />
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg"
+                className="flex items-center gap-2 px-4 py-2 text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                aria-label="Logout"
               >
                 <LogOut className="w-4 h-4" />
                 Logout
@@ -110,6 +91,8 @@ const AdminDashboard = () => {
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
+              aria-label="Inventory tab"
+              aria-current={activeTab === 'inventory' ? 'page' : undefined}
             >
               <Package className="w-5 h-5" />
               Inventory
@@ -122,6 +105,8 @@ const AdminDashboard = () => {
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
+              aria-label="All Cards tab"
+              aria-current={activeTab === 'all-cards' ? 'page' : undefined}
             >
               <Package className="w-5 h-5" />
               All Cards
@@ -134,6 +119,8 @@ const AdminDashboard = () => {
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
+              aria-label="Analytics tab"
+              aria-current={activeTab === 'analytics' ? 'page' : undefined}
             >
               <DollarSign className="w-5 h-5" />
               Analytics
@@ -146,6 +133,8 @@ const AdminDashboard = () => {
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
+              aria-label="Orders tab"
+              aria-current={activeTab === 'orders' ? 'page' : undefined}
             >
               <ShoppingCart className="w-5 h-5" />
               Orders
