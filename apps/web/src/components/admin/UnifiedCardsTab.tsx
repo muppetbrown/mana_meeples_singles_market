@@ -121,7 +121,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       if (filterTreatment !== 'all') params.append('treatment', filterTreatment);
       if (searchTerm) params.append('search', searchTerm);
 
-      const data = await api.get<{ cards: Card[] }>(`/admin/all-cards?${params.toString()}`);
+      const data = await api.get<{ cards: Card[] }>(`/cards/cards?${params.toString()}`);
       setCards(data?.cards ?? []);
     } catch (e) {
       console.error('Error fetching cards:', e);
