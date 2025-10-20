@@ -2,7 +2,7 @@
 import express from "express";
 import type { Request, Response } from "express";
 import { z } from "zod";
-import { db } from "../lib/db.js";
+import { db, pool } from "../lib/db.js";
 import { adminAuthJWT } from "../middleware/auth.js";
 
 const router = express.Router();
@@ -67,7 +67,7 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
     const { customer, items, total, currency, notes } = validation.data;
 
     // Start transaction
-    const client = await (db as any).pool.connect();
+    const client = await pool.connect();
     
     try {
       await client.query("BEGIN");
@@ -107,6 +107,7 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
           `INSERT INTO order_items (
             order_id, 
             inventory_id,
+            card_id,
             card_name,
             quality,
             quantity, 
@@ -117,6 +118,7 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
           [
             orderId,
             item.inventory_id,
+            item.card_id,
             item.card_name,
             "Near Mint", // Default quality, adjust if you pass it
             item.quantity,
@@ -192,7 +194,7 @@ router.get("/orders/:orderId", async (req: Request, res: Response): Promise<void
             'card_name', oi.card_name,
             'quantity', oi.quantity,
             'unit_price', oi.unit_price,
-            'subtotal', oi.subtotal
+            'total_price', oi.total_price
           )
         ) as items
       FROM orders o
@@ -321,7 +323,7 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
             'card_name', oi.card_name,
             'quantity', oi.quantity,
             'unit_price', oi.unit_price,
-            'subtotal', oi.subtotal,
+            'total_price', oi.total_price
             'card_number', c.card_number,
             'set_name', cs.name
           )
