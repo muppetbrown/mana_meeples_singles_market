@@ -3,17 +3,16 @@ import express from "express";
 
 import apiRoutes from "./api.js";
 import authRoutes from "./auth.js";
-import filtersRoutes from "./filters.js";
 import variationsRoutes from "./variations.js";
-import ordersRoutes from "./orders.js";           
-import inventoryRoutes from "./inventory.js";     
-import additionalRoutes from "./additional.js";  
+import ordersRoutes from "./orders.js";
+import inventoryRoutes from "./inventory.js";
+import additionalRoutes from "./additional.js";
 
 const router = express.Router();
 
 // --- Route grouping ---
 router.use("/auth", authRoutes);
-router.use("/filters", filtersRoutes);
+
 router.use("/variations", variationsRoutes);
 
 // ✅ NEW: Order management

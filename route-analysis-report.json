@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-10-20T03:28:02.777Z",
+  "timestamp": "2025-10-20T03:51:42.462Z",
   "summary": {
-    "totalRoutes": 8,
+    "totalRoutes": 15,
     "frontendCalls": 12,
     "documentedEndpoints": 19,
-    "notImplemented": 15,
-    "notDocumented": 4,
+    "notImplemented": 14,
+    "notDocumented": 10,
     "pathMismatches": 2
   },
   "actualEndpoints": [
@@ -63,6 +63,55 @@
       "path": "/variations",
       "file": "variations.ts",
       "fullPath": "/variations",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/auth",
+      "file": "index.ts",
+      "fullPath": "/auth",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/variations",
+      "file": "index.ts",
+      "fullPath": "/variations",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/",
+      "file": "index.ts",
+      "fullPath": "/",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/",
+      "file": "index.ts",
+      "fullPath": "/",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/",
+      "file": "index.ts",
+      "fullPath": "/",
+      "prefix": ""
+    },
+    {
+      "method": "USE",
+      "path": "/",
+      "file": "index.ts",
+      "fullPath": "/",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/health",
+      "file": "index.ts",
+      "fullPath": "/health",
       "prefix": ""
     }
   ],
@@ -206,10 +255,6 @@
       {
         "endpoint": "/filters",
         "usedByFrontend": false
-      },
-      {
-        "endpoint": "/health",
-        "usedByFrontend": false
       }
     ],
     "notDocumented": [
@@ -232,6 +277,36 @@
         "path": "/variations",
         "method": "GET",
         "file": "variations.ts"
+      },
+      {
+        "path": "/auth",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/variations",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/",
+        "method": "USE",
+        "file": "index.ts"
+      },
+      {
+        "path": "/",
+        "method": "USE",
+        "file": "index.ts"
       }
     ],
     "pathMismatches": [
@@ -241,9 +316,9 @@
         "file": "cards.ts"
       },
       {
-        "documented": "/health",
-        "actual": "/healthz",
-        "file": "api.ts"
+        "documented": "/sets",
+        "actual": "/auth",
+        "file": "index.ts"
       }
     ]
   }
