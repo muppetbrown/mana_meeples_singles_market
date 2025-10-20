@@ -151,80 +151,93 @@ router.get("/count", async (req: Request, res: Response) => {
    Mounted under /cards → final path /cards/filters
    ────────────────────────────────────────────────────────────── */
 
-const FacetQuery = z.object({
-  game: z.string().trim().toLowerCase().optional(),  // code like 'mtg'
-  set_id: z.coerce.number().int().positive().optional(),
+const FiltersQuery = z.object({
+  game: z.string().trim().optional(),
+  game_id: z.coerce.number().int().optional(),
+  set_id: z.coerce.number().int().optional(),
+  set_name: z.string().trim().optional(),
+  search: z.string().trim().optional(),
 });
 
-router.get("/filters", async (req, res, next) => {
-  try {
-    const parsed = FacetQuery.safeParse(req.query);
-    if (!parsed.success) {
-      return res.status(400).json({ error: "Invalid query", issues: parsed.error.flatten() });
-    }
-    const { game, set_id } = parsed.data;
+router.get('/filters', async (req: Request, res: Response) => {
+  const parsed = FiltersQuery.safeParse(req.query);
+  if (!parsed.success) {
+    return res.status(400).json({ error: 'Invalid query parameters', details: parsed.error.flatten() });
+  }
+  const { game, game_id, set_id, set_name, search } = parsed.data;
 
-    const vals: any[] = [];
-    const conds: string[] = [];
-    if (game) {
-      vals.push(game);
-      conds.push(`g.code = $${vals.length}`);
-    }
-    if (set_id) {
-      vals.push(set_id);
-      conds.push(`c.set_id = $${vals.length}`);
-    }
-    const whereSql = conds.length ? `WHERE ${conds.join(" AND ")}` : "";
+  const where: string[] = [];
+  const params: any[] = [];
 
-    const sql = `
-      WITH base AS (
-        SELECT c.id, c.treatment, c.finish, c.border_color, c.frame_effect, c.promo_type
-        FROM cards c
-        JOIN games g ON g.id = c.game_id
-        ${whereSql}
-      )
+  if (typeof game_id === 'number') { params.push(game_id); where.push(`c.game_id = $${params.length}`); }
+  if (game)                         { params.push(game);    where.push(`g.code = $${params.length}`); }
+  if (typeof set_id === 'number')   { params.push(set_id);  where.push(`c.set_id = $${params.length}`); }
+  if (set_name)                     { params.push(set_name);where.push(`c.set_name = $${params.length}`); }
+  if (search && search.length > 1) {
+    params.push(search, `%${search}%`);
+    where.push(`(c.search_tsv @@ plainto_tsquery('simple', $${params.length-1}) OR c.name ILIKE $${params.length})`);
+  }
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+
+  const sql = `
+    WITH latest_prices AS (
+      SELECT DISTINCT ON (card_id)
+             card_id, base_price, foil_price
+      FROM card_pricing
+      ORDER BY card_id, updated_at DESC NULLS LAST, created_at DESC NULLS LAST
+    ),
+    base AS (
       SELECT
-        COALESCE(ARRAY_AGG(DISTINCT b.treatment)    FILTER (WHERE b.treatment    IS NOT NULL), '{}') AS treatments,
-        COALESCE(ARRAY_AGG(DISTINCT b.finish)       FILTER (WHERE b.finish       IS NOT NULL), '{}') AS finishes,
-        COALESCE(ARRAY_AGG(DISTINCT b.border_color) FILTER (WHERE b.border_color IS NOT NULL), '{}') AS border_colors,
-        COALESCE(ARRAY_AGG(DISTINCT b.promo_type)   FILTER (WHERE b.promo_type   IS NOT NULL), '{}') AS promo_types,
-        COALESCE(ARRAY_AGG(DISTINCT b.frame_effect) FILTER (WHERE b.frame_effect IS NOT NULL), '{}') AS frame_effects,
-
-        COALESCE(ARRAY_AGG(DISTINCT ci.language)    FILTER (WHERE ci.language    IS NOT NULL), '{}') AS languages,
-        COALESCE(ARRAY_AGG(DISTINCT ci.quality)     FILTER (WHERE ci.quality     IS NOT NULL), '{}') AS qualities,
-        COALESCE(ARRAY_AGG(DISTINCT ci.foil_type)   FILTER (WHERE ci.foil_type   IS NOT NULL), '{}') AS foil_types,
-
-        COALESCE(COUNT(DISTINCT b.id)               FILTER (WHERE ci.stock_quantity > 0), 0) AS in_stock_count,
-
-        MIN(p.price) AS price_min,
-        MAX(p.price) AS price_max
+        c.id,
+        c.set_id
+      FROM cards c
+      JOIN games g ON g.id = c.game_id
+      ${whereSql}
+    ),
+    inv AS (
+      SELECT
+        ci.card_id,
+        ci.quality,
+        COALESCE(ci.foil_type,'Regular') AS foil_type,
+        COALESCE(ci.language,'English')  AS language,
+        ci.stock_quantity,
+        -- compute a price per inventory row from latest_prices
+        CASE WHEN COALESCE(ci.foil_type,'Regular') ILIKE 'foil'
+             THEN lp.foil_price ELSE lp.base_price END AS price
       FROM base b
-      LEFT JOIN card_inventory ci ON ci.card_id = b.id
-      LEFT JOIN card_pricing  p  ON p.card_id  = b.id
-    `;
+      JOIN card_inventory ci ON ci.card_id = b.id
+      LEFT JOIN latest_prices lp ON lp.card_id = ci.card_id
+    )
+    SELECT
+      -- Distinct sets of each facet (flatten in app)
+      ARRAY(SELECT DISTINCT c.treatment FROM cards c WHERE c.id IN (SELECT id FROM base) AND c.treatment IS NOT NULL) AS treatments,
+      ARRAY(SELECT DISTINCT inv.language FROM inv WHERE inv.language IS NOT NULL) AS languages,
+      ARRAY(SELECT DISTINCT inv.quality  FROM inv WHERE inv.quality  IS NOT NULL) AS qualities,
+      ARRAY(SELECT DISTINCT inv.foil_type FROM inv WHERE inv.foil_type IS NOT NULL) AS foilTypes,
+      MIN(inv.price) AS priceMin,
+      MAX(inv.price) AS priceMax,
+      SUM(CASE WHEN inv.stock_quantity > 0 THEN 1 ELSE 0 END)::int AS inStockCount
+    ;
+  `;
 
-    const rows = await db.query(sql, vals);
-    const r = (rows[0] ?? {}) as any;
-
-    const norm = (a: unknown) => (Array.isArray(a) ? a.filter(Boolean) : []);
-
-    res.json({
-      treatments:    norm(r.treatments),
-      finishes:      norm(r.finishes),
-      borderColors:  norm(r.border_colors),
-      promoTypes:    norm(r.promo_types),
-      frameEffects:  norm(r.frame_effects),
-      languages:     norm(r.languages),
-      qualities:     norm(r.qualities),
-      foilTypes:     norm(r.foil_types),
-      inStockCount:  Number.isFinite(r.in_stock_count) ? Number(r.in_stock_count) : 0,
-      priceMin:      r.price_min ?? null,
-      priceMax:      r.price_max ?? null,
-    });
-  } catch (err) {
-    next(err);
+  try {
+    const [row] = await db.query(sql, params);
+    const out = {
+      treatments: (row?.treatments ?? []).filter(Boolean),
+      languages: (row?.languages ?? []).filter(Boolean),
+      qualities: (row?.qualities ?? []).filter(Boolean),
+      foilTypes: (row?.foiltypes ?? row?.foilTypes ?? []).filter(Boolean),
+      priceMin: row?.pricemin ?? null,
+      priceMax: row?.pricemax ?? null,
+      inStockCount: row?.instockcount ?? 0,
+    };
+    return res.json(out);
+  } catch (err: any) {
+    console.error('GET /cards/filters failed', { code: err?.code, message: err?.message });
+    return res.status(500).json({ error: 'Failed to fetch card filters' });
   }
 });
+
 
 export default router;
 
