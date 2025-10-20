@@ -25,7 +25,7 @@ router.get("/treatments", async (req: Request, res: Response) => {
         i.foil_type as value,
         i.foil_type as label,
         COUNT(*)::int as count
-      FROM inventory i
+      FROM card_inventory i
       WHERE i.stock_quantity > 0
     `;
     
@@ -67,7 +67,7 @@ router.get("/rarities", async (req: Request, res: Response) => {
         c.rarity as value,
         c.rarity as label,
         COUNT(DISTINCT i.id)::int as count
-      FROM inventory i
+      FROM card_inventory i
       JOIN cards c ON c.id = i.card_id
       WHERE i.stock_quantity > 0
         AND c.rarity IS NOT NULL
@@ -118,7 +118,7 @@ router.get("/qualities", async (req: Request, res: Response) => {
         i.quality as value,
         i.quality as label,
         COUNT(*)::int as count
-      FROM inventory i
+      FROM card_inventory i
       WHERE i.stock_quantity > 0
     `;
     
@@ -168,7 +168,7 @@ router.get("/foil-types", async (req: Request, res: Response) => {
         i.foil_type as value,
         i.foil_type as label,
         COUNT(*)::int as count
-      FROM inventory i
+      FROM card_inventory i
       WHERE i.stock_quantity > 0
     `;
     
@@ -216,7 +216,7 @@ router.get("/languages", async (req: Request, res: Response) => {
         i.language as value,
         i.language as label,
         COUNT(*)::int as count
-      FROM inventory i
+      FROM card_inventory i
       WHERE i.stock_quantity > 0
     `;
     
