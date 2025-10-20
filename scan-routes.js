@@ -101,6 +101,7 @@ const routeFiles = [
   'api.ts',
   'auth.ts',
   'cards.ts',
+  'filters.ts',
   'variations.ts',
   'orders.ts',     
   'inventory.ts',   

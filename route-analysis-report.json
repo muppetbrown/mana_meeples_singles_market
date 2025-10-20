@@ -1,11 +1,11 @@
 {
-  "timestamp": "2025-10-20T06:47:33.795Z",
+  "timestamp": "2025-10-20T06:53:52.342Z",
   "summary": {
-    "totalRoutes": 33,
+    "totalRoutes": 38,
     "frontendCalls": 6,
     "documentedEndpoints": 19,
     "notImplemented": 9,
-    "notDocumented": 23,
+    "notDocumented": 28,
     "pathMismatches": 0
   },
   "actualEndpoints": [
@@ -56,6 +56,41 @@
       "path": "/cards/count",
       "file": "cards.ts",
       "fullPath": "/cards/count",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/treatments",
+      "file": "filters.ts",
+      "fullPath": "/treatments",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/rarities",
+      "file": "filters.ts",
+      "fullPath": "/rarities",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/qualities",
+      "file": "filters.ts",
+      "fullPath": "/qualities",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/foil-types",
+      "file": "filters.ts",
+      "fullPath": "/foil-types",
+      "prefix": ""
+    },
+    {
+      "method": "GET",
+      "path": "/languages",
+      "file": "filters.ts",
+      "fullPath": "/languages",
       "prefix": ""
     },
     {
@@ -348,6 +383,31 @@
         "path": "/cards/count",
         "method": "GET",
         "file": "cards.ts"
+      },
+      {
+        "path": "/treatments",
+        "method": "GET",
+        "file": "filters.ts"
+      },
+      {
+        "path": "/rarities",
+        "method": "GET",
+        "file": "filters.ts"
+      },
+      {
+        "path": "/qualities",
+        "method": "GET",
+        "file": "filters.ts"
+      },
+      {
+        "path": "/foil-types",
+        "method": "GET",
+        "file": "filters.ts"
+      },
+      {
+        "path": "/languages",
+        "method": "GET",
+        "file": "filters.ts"
       },
       {
         "path": "/variations",

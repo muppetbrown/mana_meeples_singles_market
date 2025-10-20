@@ -54,6 +54,10 @@ router.get("/treatments", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /filters/rarities
+ * Returns available rarity options with counts
+ */
 router.get("/rarities", async (req: Request, res: Response) => {
   try {
     const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : null;
@@ -101,6 +105,10 @@ router.get("/rarities", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /filters/qualities
+ * Returns available quality/condition options with counts
+ */
 router.get("/qualities", async (req: Request, res: Response) => {
   try {
     const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : null;
@@ -147,6 +155,10 @@ router.get("/qualities", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /filters/foil-types
+ * Returns available foil type options with counts
+ */
 router.get("/foil-types", async (req: Request, res: Response) => {
   try {
     const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : null;
@@ -191,6 +203,10 @@ router.get("/foil-types", async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * GET /filters/languages
+ * Returns available language options with counts
+ */
 router.get("/languages", async (req: Request, res: Response) => {
   try {
     const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : null;
@@ -254,21 +270,33 @@ export type CardFilters = {
 /**
  * Zod schema for cards query params (pagination + filters)
  */
+// Helper: coerce string | string[] | undefined → string[] | undefined
+const zStringArray = z.preprocess(
+  (val) => {
+    if (val == null) return undefined;
+    if (Array.isArray(val)) return val;
+    if (typeof val === "string") {
+      // support comma-separated values: ?treatment=FOIL,ETCHED
+      return val.split(",").map(s => s.trim()).filter(Boolean);
+    }
+    return undefined;
+  },
+  z.array(z.string()).optional()
+);
+
 export const CardFiltersQuery = z.object({
   game_id: z.coerce.number().int().positive().optional(),
   set_id: z.coerce.number().int().positive().optional(),
   q: z.string().optional(),
-  treatment: z.union([z.string(), z.array(z.string())]).optional(),
-  border_color: z.union([z.string(), z.array(z.string())]).optional(),
-  finish: z.union([z.string(), z.array(z.string())]).optional(),
-  promo_type: z.union([z.string(), z.array(z.string())]).optional(),
-  frame_effect: z.union([z.string(), z.array(z.string())]).optional(),
+  treatment: zStringArray,
+  border_color: zStringArray,
+  finish: zStringArray,
+  promo_type: zStringArray,
+  frame_effect: zStringArray,
   min_price: z.coerce.number().nonnegative().optional(),
   max_price: z.coerce.number().nonnegative().optional(),
-  in_stock: z
-    .string()
-    .optional()
-    .transform((val) => val === "true"),
+  // default to true (your routes expect in-stock by default)
+  in_stock: z.coerce.boolean().default(true).optional(),
 });
 
 export const CardsIndexQuery = CardFiltersQuery.extend({
