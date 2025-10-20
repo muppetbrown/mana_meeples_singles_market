@@ -1,35 +1,50 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Mail, Phone, MapPin, CreditCard, User, AlertCircle } from 'lucide-react';
 
+ type CheckoutForm = {
+  // Contact Information
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+
+  // Shipping Address
+  address: string;
+  suburb: string;
+  city: string;
+  region: string;
+  postalCode: string;
+  country: string;
+
+  // Optional
+  notes: string;
+};
+
+// 2) Errors map to form keys + an optional submit-level error
+type CheckoutErrors = Partial<Record<keyof CheckoutForm, string>> & {
+  submit?: string;
+};
+
 const Checkout = ({
   cart,
   currency,
   onBack,
   onOrderSubmit
 }: any) => {
-  const [formData, setFormData] = useState({
-    // Contact Information
+  const [formData, setFormData] = useState<CheckoutForm>({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
-
-    // Shipping Address
     address: '',
     suburb: '',
     city: '',
     region: '',
     postalCode: '',
-    country: 'New Zealand', // Default for NZ shop
-
-    // Optional fields
+    country: 'New Zealand',
     notes: '',
   });
 
- type CheckoutErrors = {
-   firstName?: string; lastName?: string; email?: string; phone?: string;
-   address?: string; city?: string; postalCode?: string; notes?: string;
- };
  const [errors, setErrors] = useState<CheckoutErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -151,31 +166,30 @@ const Checkout = ({
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleInputChange = (field: any, value: any) => {
-    // Sanitize input based on field type
-    let sanitizedValue = value;
-    const sanitizationType = {
+  const handleInputChange = <K extends keyof CheckoutForm>(field: K, value: CheckoutForm[K]) => {
+    // (keep your sanitizeInput logic here; unchanged)
+    let sanitizedValue: CheckoutForm[K] = value;
+
+    const sanitizationType: Partial<Record<keyof CheckoutForm, string>> = {
       firstName: 'name',
       lastName: 'name',
       email: 'email',
       phone: 'phone',
       address: 'address',
       city: 'name',
-      notes: 'notes'
+      notes: 'notes',
     };
 
-
-    if (sanitizationType[field]) {
-
-      sanitizedValue = sanitizeInput(value, sanitizationType[field]);
+    const sType = sanitizationType[field];
+    if (sType) {
+      sanitizedValue = sanitizeInput(value, sType) as CheckoutForm[K];
     }
 
     setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
 
-    // Clear error when user starts typing
-
+    // Clear the error for this field if it exists
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors(prev => ({ ...prev, [field]: undefined }));
     }
   };
 
@@ -230,7 +244,7 @@ const Checkout = ({
       if (process.env.NODE_ENV === 'development') {
         console.error('Order submission failed:', error);
       }
-      setErrors({ submit: 'Failed to submit order. Please try again.' });
+      setErrors(prev => ({ ...prev, submit: 'Failed to submit order. Please try again.' }));
     } finally {
       setIsSubmitting(false);
     }
@@ -282,6 +296,17 @@ const Checkout = ({
           <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
             <h2 className="text-xl font-bold text-slate-900 mb-6">Customer Details</h2>
 
+            {errors.submit && (
+              <div
+                className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-800 flex items-start gap-2"
+                role="alert"
+                aria-live="assertive"
+              >
+                <AlertCircle className="w-5 h-5 mt-0.5" />
+                <span>{errors.submit}</span>
+              </div>
+            )}
+
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Contact Information */}
               <div>
@@ -305,11 +330,9 @@ const Checkout = ({
                       }`}
                       placeholder="John"
                     />
-                    // @ts-expect-error TS(2339): Property 'firstName' does not exist on type '{}'.
                     {errors.firstName && (
                       <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                         <AlertCircle className="w-4 h-4" />
-                        // @ts-expect-error TS(2339): Property 'firstName' does not exist on type '{}'.
                         {errors.firstName}
                       </p>
                     )}
@@ -330,11 +353,9 @@ const Checkout = ({
                       }`}
                       placeholder="Smith"
                     />
-                    // @ts-expect-error TS(2339): Property 'lastName' does not exist on type '{}'.
                     {errors.lastName && (
                       <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                         <AlertCircle className="w-4 h-4" />
-                        // @ts-expect-error TS(2339): Property 'lastName' does not exist on type '{}'.
                         {errors.lastName}
                       </p>
                     )}
@@ -360,11 +381,9 @@ const Checkout = ({
                         placeholder="john@example.com"
                       />
                     </div>
-                    // @ts-expect-error TS(2339): Property 'email' does not exist on type '{}'.
                     {errors.email && (
                       <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                         <AlertCircle className="w-4 h-4" />
-                        // @ts-expect-error TS(2339): Property 'email' does not exist on type '{}'.
                         {errors.email}
                       </p>
                     )}
@@ -388,11 +407,9 @@ const Checkout = ({
                         placeholder="+64 21 123 4567"
                       />
                     </div>
-                    // @ts-expect-error TS(2339): Property 'phone' does not exist on type '{}'.
                     {errors.phone && (
                       <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                         <AlertCircle className="w-4 h-4" />
-                        // @ts-expect-error TS(2339): Property 'phone' does not exist on type '{}'.
                         {errors.phone}
                       </p>
                     )}
@@ -423,11 +440,9 @@ const Checkout = ({
                       }`}
                       placeholder="123 Main Street"
                     />
-                    // @ts-expect-error TS(2339): Property 'address' does not exist on type '{}'.
                     {errors.address && (
                       <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                         <AlertCircle className="w-4 h-4" />
-                        // @ts-expect-error TS(2339): Property 'address' does not exist on type '{}'.
                         {errors.address}
                       </p>
                     )}
@@ -479,11 +494,9 @@ const Checkout = ({
                         }`}
                         placeholder="Auckland"
                       />
-                      // @ts-expect-error TS(2339): Property 'city' does not exist on type '{}'.
                       {errors.city && (
                         <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                           <AlertCircle className="w-4 h-4" />
-                          // @ts-expect-error TS(2339): Property 'city' does not exist on type '{}'.
                           {errors.city}
                         </p>
                       )}
@@ -504,11 +517,9 @@ const Checkout = ({
                         }`}
                         placeholder="1010"
                       />
-                      // @ts-expect-error TS(2339): Property 'postalCode' does not exist on type '{}'.
                       {errors.postalCode && (
                         <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
                           <AlertCircle className="w-4 h-4" />
-                          // @ts-expect-error TS(2339): Property 'postalCode' does not exist on type '{}'.
                           {errors.postalCode}
                         </p>
                       )}

@@ -6,7 +6,7 @@ import CurrencySelector from './CurrencySelector';
 import UnifiedCardsTab from './admin/UnifiedCardsTab';
 import OrdersTab from './admin/OrdersTab';
 import AnalyticsTab from './admin/AnalyticsTab';
-import { API_URL } from '../config/api';
+import { API_URL } from '@/config/api';
 
 const getAdminHeaders = () => ({
   'Content-Type': 'application/json'

@@ -10,7 +10,7 @@ import { useFilterCounts } from '../hooks/useFilterCounts';
 import { useEnhancedCart } from '../hooks/useEnhancedCart';
 import ErrorBoundary from './ErrorBoundary';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
-import { API_URL } from '../config/api';
+import { API_URL } from '@/config/api';
 import { useErrorHandler, withRetry, throttledFetch } from '../services/errorHandler';
 import { FILTER_CONFIG, VIRTUAL_SCROLL_CONFIG } from '../config/constants';
 import CardSkeleton from './skeletons/CardSkeleton';

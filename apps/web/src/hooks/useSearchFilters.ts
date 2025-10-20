@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { api } from '../config/api';
+import { api } from '@/config/api';
 
 /**
  * Custom hook to manage dynamic search filters

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { api } from '../config/api';
+import { api } from '@/config/api';
 
 /**
  * Dynamic Variation Filter Component
@@ -29,34 +29,39 @@ const DynamicVariationFilter = ({
   useEffect(() => {
     const fetchAvailableFilters = async () => {
       setLoading(true);
-      
+
       try {
         const params = new URLSearchParams();
-        
+
         if (selectedSet && selectedSet !== 'all') {
           params.append('set_id', selectedSet);
         } else if (selectedGame && selectedGame !== 'all') {
           params.append('game_id', selectedGame);
         }
-        
-        const data = await api.get<{
-          treatments?: any[];
-          borderColors?: any[];
-          finishes?: any[];
-          promoTypes?: any[];
-          frameEffects?: any[];
-        }>(`/variations/filters?${params}`);
-        
+
+        // Explicit response typing
+        type VariationFilters = {
+          treatments?: string[];
+          borderColors?: string[];
+          finishes?: string[];
+          promoTypes?: string[];
+          frameEffects?: string[];
+        };
+
+        const data = await api.get<VariationFilters>(
+          `/variations/filters?${params}`
+        );
+
         setAvailableFilters({
           treatments: data.treatments || [],
           borderColors: data.borderColors || [],
           finishes: data.finishes || [],
           promoTypes: data.promoTypes || [],
-          frameEffects: data.frameEffects || []
+          frameEffects: data.frameEffects || [],
         });
-        
-        setFilterContext(data.context);
-        
+
+       setFilterContext(data);
+
       } catch (error) {
         console.error('Error fetching variation filters:', error);
         // Keep existing filters on error
@@ -64,7 +69,7 @@ const DynamicVariationFilter = ({
         setLoading(false);
       }
     };
-    
+
     fetchAvailableFilters();
   }, [selectedGame, selectedSet, apiUrl]);
 

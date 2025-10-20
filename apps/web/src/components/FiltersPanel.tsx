@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { api } from '../config/api';
+import { api } from '@/config/api';
 
 
 type FilterRow = { treatment?: string; border_color?: string; finish?: string; promo_type?: string; frame_effect?: string };

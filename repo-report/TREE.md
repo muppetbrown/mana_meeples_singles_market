@@ -6,6 +6,7 @@ mana_meeples_singles_market
 │ ├── api/
 │ │ ├── src/
 │ │ │ ├── lib/
+│ │ │ │ ├── authUtils.ts
 │ │ │ │ ├── db.ts
 │ │ │ │ ├── env.ts
 │ │ │ │ └── logger.ts
@@ -25,8 +26,6 @@ mana_meeples_singles_market
 │ │ │ │ ├── emailService.ts
 │ │ │ │ ├── priceService.ts
 │ │ │ │ ├── pricing.ts
-│ │ │ │ ├── search.ts
-│ │ │ │ ├── searchUtils.ts
 │ │ │ │ └── variationAnalysis.ts
 │ │ │ ├── tests/
 │ │ │ │ └── testEmail.js
@@ -47,7 +46,7 @@ mana_meeples_singles_market
 │  │ ├── logo192.png
 │  │ ├── logo512.png
 │  │ ├── mana_meeples_logo.ico
-│  │ ├── manifest.json
+│  │ ├── manifest.webmanifest
 │  │ ├── robots.txt
 │  │ └── static.json
 │  ├── src/
@@ -91,7 +90,7 @@ mana_meeples_singles_market
 │  │ │ └── constants.ts
 │  │ ├── features/
 │  │ │ └── cards/
-│  │ │  └── api.ts
+│  │ │  └── queries.ts
 │  │ ├── hooks/
 │  │ │ ├── __tests__/
 │  │ │ │ ├── useEnhancedCart.test.ts
@@ -111,11 +110,12 @@ mana_meeples_singles_market
 │  │ ├── utils/
 │  │ │ └── csvUtils.ts
 │  │ ├── App.css
-│  │ ├── app.tsx
+│  │ ├── App.tsx
 │  │ ├── logo.svg
 │  │ ├── main.tsx
 │  │ ├── reportWebVitals.ts
-│  │ └── setupTests.ts
+│  │ ├── setupTests.ts
+│  │ └── vite-env.d.ts
 │  ├── .env
 │  ├── index.html
 │  ├── package.json
@@ -142,6 +142,7 @@ mana_meeples_singles_market
 │ ├── DATABASE_SCHEMA.md
 │ ├── database-stats.json
 │ ├── openapi.yaml
+│ ├── pokemon_set_codes.txt
 │ └── QUICK_START_VARIATIONS.md
 ├── scripts/
 │ ├── imports/
@@ -154,10 +155,12 @@ mana_meeples_singles_market
 │ │ ├── migrate-card-pricing.ts
 │ │ └── run-migration.ts
 │ ├── copy-dist-to-api.js
+│ ├── debug-admin-login.ts
 │ ├── export-database-schema.ts
 │ ├── generate-admin-hash.ts
 │ ├── refresh-mviews.sh
 │ ├── smoke.mjs
+│ ├── test-login.sh
 │ └── test-password.ts
 ├── utils/
 │ └── sanitization.ts
@@ -172,7 +175,9 @@ mana_meeples_singles_market
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
 ├── prettier.config.cjs
+├── render-deployment-guide.md
 ├── render.yaml
+├── repo-tree.txt
 ├── test-cors-fix.sh
 ├── tsconfig.base.json
 ├── tsconfig.json
