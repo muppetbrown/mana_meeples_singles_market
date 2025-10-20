@@ -1,120 +1,14 @@
 {
-  "timestamp": "2025-10-20T03:51:42.462Z",
+  "timestamp": "2025-10-20T06:43:12.117Z",
   "summary": {
-    "totalRoutes": 15,
-    "frontendCalls": 12,
+    "totalRoutes": 0,
+    "frontendCalls": 6,
     "documentedEndpoints": 19,
-    "notImplemented": 14,
-    "notDocumented": 10,
-    "pathMismatches": 2
+    "notImplemented": 19,
+    "notDocumented": 0,
+    "pathMismatches": 0
   },
-  "actualEndpoints": [
-    {
-      "method": "GET",
-      "path": "/healthz",
-      "file": "api.ts",
-      "fullPath": "/healthz",
-      "prefix": ""
-    },
-    {
-      "method": "GET",
-      "path": "/readyz",
-      "file": "api.ts",
-      "fullPath": "/readyz",
-      "prefix": ""
-    },
-    {
-      "method": "POST",
-      "path": "/admin/login",
-      "file": "auth.ts",
-      "fullPath": "/admin/login",
-      "prefix": ""
-    },
-    {
-      "method": "POST",
-      "path": "/admin/logout",
-      "file": "auth.ts",
-      "fullPath": "/admin/logout",
-      "prefix": ""
-    },
-    {
-      "method": "GET",
-      "path": "/admin/auth/check",
-      "file": "auth.ts",
-      "fullPath": "/admin/auth/check",
-      "prefix": ""
-    },
-    {
-      "method": "GET",
-      "path": "/cards",
-      "file": "cards.ts",
-      "fullPath": "/cards",
-      "prefix": ""
-    },
-    {
-      "method": "GET",
-      "path": "/cards/count",
-      "file": "cards.ts",
-      "fullPath": "/cards/count",
-      "prefix": ""
-    },
-    {
-      "method": "GET",
-      "path": "/variations",
-      "file": "variations.ts",
-      "fullPath": "/variations",
-      "prefix": ""
-    },
-    {
-      "method": "USE",
-      "path": "/auth",
-      "file": "index.ts",
-      "fullPath": "/auth",
-      "prefix": ""
-    },
-    {
-      "method": "USE",
-      "path": "/variations",
-      "file": "index.ts",
-      "fullPath": "/variations",
-      "prefix": ""
-    },
-    {
-      "method": "USE",
-      "path": "/",
-      "file": "index.ts",
-      "fullPath": "/",
-      "prefix": ""
-    },
-    {
-      "method": "USE",
-      "path": "/",
-      "file": "index.ts",
-      "fullPath": "/",
-      "prefix": ""
-    },
-    {
-      "method": "USE",
-      "path": "/",
-      "file": "index.ts",
-      "fullPath": "/",
-      "prefix": ""
-    },
-    {
-      "method": "USE",
-      "path": "/",
-      "file": "index.ts",
-      "fullPath": "/",
-      "prefix": ""
-    },
-    {
-      "method": "GET",
-      "path": "/health",
-      "file": "index.ts",
-      "fullPath": "/health",
-      "prefix": ""
-    }
-  ],
+  "actualEndpoints": [],
   "documentedEndpoints": [
     "/cards",
     "/games",
@@ -138,11 +32,6 @@
   ],
   "frontendCalls": [
     {
-      "method": "GET",
-      "endpoint": "/admin/inventory",
-      "file": "admin\\AnalyticsTab.tsx"
-    },
-    {
       "method": "POST",
       "endpoint": "/admin/inventory",
       "file": "admin\\UnifiedCardsTab.tsx"
@@ -156,31 +45,6 @@
       "method": "GET",
       "endpoint": "/admin/inventory/export",
       "file": "admin\\BulkInventoryManager.tsx"
-    },
-    {
-      "method": "GET",
-      "endpoint": "/admin/orders",
-      "file": "admin\\OrdersTab.tsx"
-    },
-    {
-      "method": "GET",
-      "endpoint": "/admin/orders/",
-      "file": "admin\\OrdersTab.tsx"
-    },
-    {
-      "method": "GET",
-      "endpoint": "/admin/orders//status",
-      "file": "admin\\OrdersTab.tsx"
-    },
-    {
-      "method": "GET",
-      "endpoint": "/auth/admin/auth/check",
-      "file": "AdminDashboard.tsx"
-    },
-    {
-      "method": "GET",
-      "endpoint": "/auth/admin/logout",
-      "file": "AdminDashboard.tsx"
     },
     {
       "method": "GET",
@@ -201,6 +65,10 @@
   "discrepancies": {
     "notImplemented": [
       {
+        "endpoint": "/cards",
+        "usedByFrontend": true
+      },
+      {
         "endpoint": "/games",
         "usedByFrontend": false
       },
@@ -213,8 +81,20 @@
         "usedByFrontend": true
       },
       {
+        "endpoint": "/admin/login",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/admin/logout",
+        "usedByFrontend": false
+      },
+      {
+        "endpoint": "/admin/auth/check",
+        "usedByFrontend": false
+      },
+      {
         "endpoint": "/admin/orders",
-        "usedByFrontend": true
+        "usedByFrontend": false
       },
       {
         "endpoint": "/admin/cards",
@@ -255,71 +135,13 @@
       {
         "endpoint": "/filters",
         "usedByFrontend": false
+      },
+      {
+        "endpoint": "/health",
+        "usedByFrontend": false
       }
     ],
-    "notDocumented": [
-      {
-        "path": "/healthz",
-        "method": "GET",
-        "file": "api.ts"
-      },
-      {
-        "path": "/readyz",
-        "method": "GET",
-        "file": "api.ts"
-      },
-      {
-        "path": "/cards/count",
-        "method": "GET",
-        "file": "cards.ts"
-      },
-      {
-        "path": "/variations",
-        "method": "GET",
-        "file": "variations.ts"
-      },
-      {
-        "path": "/auth",
-        "method": "USE",
-        "file": "index.ts"
-      },
-      {
-        "path": "/variations",
-        "method": "USE",
-        "file": "index.ts"
-      },
-      {
-        "path": "/",
-        "method": "USE",
-        "file": "index.ts"
-      },
-      {
-        "path": "/",
-        "method": "USE",
-        "file": "index.ts"
-      },
-      {
-        "path": "/",
-        "method": "USE",
-        "file": "index.ts"
-      },
-      {
-        "path": "/",
-        "method": "USE",
-        "file": "index.ts"
-      }
-    ],
-    "pathMismatches": [
-      {
-        "documented": "/games",
-        "actual": "/cards",
-        "file": "cards.ts"
-      },
-      {
-        "documented": "/sets",
-        "actual": "/auth",
-        "file": "index.ts"
-      }
-    ]
+    "notDocumented": [],
+    "pathMismatches": []
   }
 }
