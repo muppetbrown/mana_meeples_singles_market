@@ -1,375 +1,133 @@
 // apps/api/src/routes/api.ts
-import express from "express";
-import type { Request, Response } from "express";
+import express, { type NextFunction, type Request, type Response } from "express";
 import { z } from "zod";
-import { db } from "../lib/db.js";
 
-// ---------- Types (aligned to your DB) ----------
-type CardRow = {
-  id: number;
-  set_id: number;
-  card_number: string;
-  name: string;
-  game_id: number;
-  finish: string | null;
-  border_color: string | null;
-  treatment: string | null;
-  frame_effect: string | null;
-  promo_type: string | null;
-  sku: string;
-};
+// IMPORTANT: keep .js extensions to match ESM transpilation in this repo.
+import cardsRouter from "./cards.js";
+import variationsRouter from "./variations.js";
 
-type InventoryAgg = {
-  quality: string | null;
-  foil_type: string | null;
-  language: string | null;
-  stock: number;
-  min_price: number | null;
-  max_price: number | null;
-};
+/**
+ * Augment Express Request to hold validated values without heavy typing.
+ */
+// eslint-disable-next-line @typescript-eslint/no-namespace
+declare global {
+  namespace Express {
+    interface Request {
+      validated?: {
+        query?: unknown;
+        body?: unknown;
+        params?: unknown;
+      };
+    }
+  }
+}
 
-// ---------- Router ----------
 const router = express.Router();
 
-// ---------- Validation ----------
-const listQuerySchema = z.object({
-  q: z.string().trim().max(200).optional(), // search term
-  game_id: z.coerce.number().int().positive().optional(),
-  set_id: z.coerce.number().int().positive().optional(),
-  // Sorting: allowlist of fields
-  sort: z
-    .enum(["name.asc", "name.desc", "number.asc", "number.desc", "created.desc", "created.asc"])
-    .optional()
-    .default("name.asc"),
-  page: z.coerce.number().int().min(1).default(1),
-  page_size: z.coerce.number().int().min(1).max(100).default(24),
+/* ------------------------- Health & Diagnostics ------------------------- */
+
+router.get("/healthz", (_req, res) => {
+  res.json({
+    status: "ok",
+    service: "api",
+    at: new Date().toISOString(),
+  });
 });
 
-const idParamSchema = z.object({
-  id: z.coerce.number().int().positive(),
+router.get("/readyz", (_req, res) => {
+  res.json({
+    status: "ready",
+    deps: { db: "unknown" },
+    at: new Date().toISOString(),
+  });
 });
 
-// ---------- Helpers ----------
-function buildOrderBy(sort: string): string {
-  switch (sort) {
-    case "name.asc":
-      return `c.name ASC, c.card_number ASC`;
-    case "name.desc":
-      return `c.name DESC, c.card_number DESC`;
-    case "number.asc":
-      // card_number is text; sort by natural-ish cast when numeric, then fallback
-      return `NULLIF(regexp_replace(c.card_number, '\\D', '', 'g'), '')::int NULLS LAST, c.card_number ASC`;
-    case "number.desc":
-      return `NULLIF(regexp_replace(c.card_number, '\\D', '', 'g'), '')::int DESC NULLS LAST, c.card_number DESC`;
-    case "created.desc":
-      return `c.id DESC`;
-    case "created.asc":
-      return `c.id ASC`;
-    default:
-      return `c.name ASC`;
-  }
-}
+/* ---------------------- Validation / Coercion Helpers ------------------- */
 
-function pushWhere(where: string[], params: any[], clause: string, value?: any) {
-  if (typeof value !== "undefined" && value !== null && value !== "") {
-    where.push(clause.replace("$n", `$${params.length + 1}`));
-    params.push(value);
-  }
-}
-
-// ---------- GET /api/cards ----------
-// List cards (each row is a variation). Supports simple search + filters + pagination.
-//
-// Notes on performance:
-// - Uses search_tsv GIN index if you pass q (text search), falls back to ILIKE/pg_trgm on name/number.
-// - Avoids joining inventory by default (fast). Ask specific aggregates via /cards/:id/inventory.
-router.get("/cards", async (req: Request, res: Response) => {
-  const parsed = listQuerySchema.safeParse(req.query);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid query parameters", details: parsed.error.flatten() });
-    return;
-  }
-  const { q, game_id, set_id, sort, page, page_size } = parsed.data;
-
-  const where: string[] = ["1=1"];
-  const params: any[] = [];
-
-  // Filters (use indexes on game_id/set_id and search_tsv/name/number)
-  if (q && q.length > 0) {
-    // Prefer full-text if available; otherwise fallback to ILIKE
-    where.push(
-      `(c.search_tsv @@ plainto_tsquery('simple', $${params.length + 1})
-        OR c.name ILIKE $${params.length + 2}
-        OR c.card_number ILIKE $${params.length + 3})`
-    );
-    params.push(q, `%${q}%`, `%${q}%`);
-  }
-  pushWhere(where, params, "c.game_id = $n", game_id);
-  pushWhere(where, params, "c.set_id = $n", set_id);
-
-  const orderBy = buildOrderBy(sort);
-  const limit = page_size;
-  const offset = (page - 1) * page_size;
-
-  // Count first (fast, no joins)
-  const countSql = `
-    SELECT COUNT(*)::int AS total
-    FROM cards c
-    WHERE ${where.join(" AND ")}
-  `;
-  // Page query
-  const pageSql = `
-    SELECT
-      c.id, c.set_id, c.card_number, c.name, c.game_id, c.finish,
-      c.border_color, c.treatment, c.frame_effect, c.promo_type, c.sku
-    FROM cards c
-    WHERE ${where.join(" AND ")}
-    ORDER BY ${orderBy}
-    LIMIT ${limit} OFFSET ${offset}
-  `;
-
-  try {
-    const [countRows, rows] = await Promise.all([
-      db.query<{ total: number }>(countSql, params),
-      db.query<CardRow>(pageSql, params),
-    ]);
-
-    const total = countRows[0]?.total ?? 0;
-    res.setHeader("X-Total-Count", String(total));
-    res.json(rows);
-  } catch (err: any) {
-    console.error("❌ GET /api/cards failed:", err.message);
-    res.status(500).json({ error: "Failed to fetch cards" });
-  }
-});
-
-// ---------- GET /api/cards/:id ----------
-// Fetch a single card/variation by ID (no inventory join by default)
-router.get("/cards/:id", async (req: Request, res: Response) => {
-  const parsed = idParamSchema.safeParse(req.params);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid card id" });
-    return;
-  }
-  const { id } = parsed.data;
-
-  const sql = `
-    SELECT
-      c.id, c.set_id, c.card_number, c.name, c.game_id, c.finish,
-      c.border_color, c.treatment, c.frame_effect, c.promo_type, c.sku
-    FROM cards c
-    WHERE c.id = $1
-    LIMIT 1
-  `;
-
-  try {
-    const rows = await db.query<CardRow>(sql, [id]);
-    if (rows.length === 0) {
-      res.status(404).json({ error: "Card not found" });
-      return;
-    }
-    res.json(rows[0]);
-  } catch (err: any) {
-    console.error("❌ GET /api/cards/:id failed:", err.message);
-    res.status(500).json({ error: "Failed to fetch card" });
-  }
-});
-
-// ---------- GET /api/cards/:id/inventory ----------
-// Aggregate inventory for a specific card variation.
-// Respect rule: inventory exists only if present in `card_inventory`.
-router.get("/cards/:id/inventory", async (req: Request, res: Response) => {
-  const parsed = idParamSchema.safeParse(req.params);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid card id" });
-    return;
-  }
-  const { id } = parsed.data;
-
-  const sql = `
-    SELECT
-      i.quality,
-      i.foil_type,
-      i.language,
-      SUM(i.stock_quantity)::int AS stock,
-      MIN(i.price)::numeric AS min_price,
-      MAX(i.price)::numeric AS max_price
-    FROM card_inventory i
-    WHERE i.card_id = $1
-    GROUP BY i.quality, i.foil_type, i.language
-    HAVING SUM(i.stock_quantity) > 0
-    ORDER BY i.quality NULLS LAST, i.language NULLS LAST, i.foil_type NULLS LAST
-  `;
-
-  try {
-    const rows = await db.query<InventoryAgg>(sql, [id]);
-    res.json(rows);
-  } catch (err: any) {
-    console.error("❌ GET /api/cards/:id/inventory failed:", err.message);
-    res.status(500).json({ error: "Failed to fetch inventory" });
-  }
-});
-
-
-// ---------- GET /search/autocomplete ----------
-// Provide search suggestions/autocomplete for search box
-router.get("/search/autocomplete", async (req: Request, res: Response) => {
-  const q = req.query.q?.toString()?.trim();
-  if (!q || q.length < 2) {
-    res.json([]);
-    return;
-  }
-
-  const sql = `
-    SELECT DISTINCT
-      c.name,
-      cs.name AS set_name,
-      c.image_url,
-      'card' AS match_type,
-      GREATEST(
-        ts_rank(c.search_tsv, plainto_tsquery('simple', $1)),
-        similarity(c.name, $1) * 0.8,
-        similarity(c.card_number, $1) * 0.6
-      ) AS relevance
-    FROM cards c
-    JOIN card_sets cs ON c.set_id = cs.id
-    JOIN card_inventory i ON i.card_id = c.id
-    WHERE
-      i.stock_quantity > 0
-      AND (
-        c.search_tsv @@ plainto_tsquery('simple', $1)
-        OR c.name ILIKE $2
-        OR c.card_number ILIKE $3
-      )
-    ORDER BY relevance DESC
-    LIMIT 10
-  `;
-
-  try {
-    const rows = await db.query(sql, [q, `%${q}%`, `%${q}%`]);
-    res.json(rows);
-  } catch (err: any) {
-    console.error("❌ GET /search/autocomplete failed:", err.message);
-    res.status(500).json({ error: "Failed to fetch autocomplete suggestions" });
-  }
-});
-
-// ---------- GET /games ----------
-// Fetch available games for dropdown filters
-router.get("/games", async (req: Request, res: Response) => {
-  const sql = `
-    SELECT
-      g.id,
-      g.name,
-      g.code,
-      g.active,
-      COALESCE(card_counts.card_count, 0) AS card_count
-    FROM games g
-    LEFT JOIN (
-      SELECT
-        c.game_id,
-        COUNT(DISTINCT c.id) AS card_count
-      FROM cards c
-      JOIN card_inventory i ON i.card_id = c.id AND i.stock_quantity > 0
-      GROUP BY c.game_id
-    ) card_counts ON card_counts.game_id = g.id
-    WHERE g.active = true
-    ORDER BY g.name ASC
-  `;
-
-  try {
-    const rows = await db.query(sql);
-    res.json(rows);
-  } catch (err: any) {
-    console.error("❌ GET /games failed:", err.message);
-    res.status(500).json({ error: "Failed to fetch games" });
-  }
-});
-
-// ---------- GET /sets ----------
-// Fetch card sets for a specific game
-router.get("/sets", async (req: Request, res: Response) => {
-  const gameId = req.query.game_id;
-  if (!gameId) {
-    res.status(400).json({ error: "game_id parameter is required" });
-    return;
-  }
-
-  const parsed = z.coerce.number().int().positive().safeParse(gameId);
-  if (!parsed.success) {
-    res.status(400).json({ error: "Invalid game_id parameter" });
-    return;
-  }
-
-  const sql = `
-    SELECT
-      cs.id,
-      cs.name,
-      cs.code,
-      cs.release_date,
-      cs.active,
-      COUNT(DISTINCT c.id) AS card_count
-    FROM card_sets cs
-    LEFT JOIN cards c ON c.set_id = cs.id
-    LEFT JOIN card_inventory i ON i.card_id = c.id AND i.stock_quantity > 0
-    WHERE cs.game_id = $1 AND cs.active = true
-    GROUP BY cs.id, cs.name, cs.code, cs.release_date, cs.active
-    ORDER BY cs.release_date DESC NULLS LAST, cs.name ASC
-  `;
-
-  try {
-    const rows = await db.query(sql, [parsed.data]);
-    res.json(rows);
-  } catch (err: any) {
-    console.error("❌ GET /sets failed:", err.message);
-    res.status(500).json({ error: "Failed to fetch sets" });
-  }
-});
-
-// ---------- GET /cards/count ----------
-// Get count of cards with optional filters
-router.get("/cards/count", async (req: Request, res: Response) => {
-  const gameId = req.query.game_id;
-  const setId = req.query.set_id;
-
-  const where: string[] = ["1=1"];
-  const params: any[] = [];
-
-  if (gameId) {
-    const parsed = z.coerce.number().int().positive().safeParse(gameId);
+export const validateQuery =
+  <S extends z.ZodTypeAny>(schema: S) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    const parsed = schema.safeParse(req.query);
     if (!parsed.success) {
-      res.status(400).json({ error: "Invalid game_id parameter" });
-      return;
+      return res.status(400).json({
+        error: "Invalid query parameters",
+        details: parsed.error.flatten(),
+      });
     }
-    where.push(`c.game_id = $${params.length + 1}`);
-    params.push(parsed.data);
-  }
+    req.validated = { ...(req.validated ?? {}), query: parsed.data };
+    next();
+  };
 
-  if (setId) {
-    const parsed = z.coerce.number().int().positive().safeParse(setId);
+export const validateParams =
+  <S extends z.ZodTypeAny>(schema: S) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    const parsed = schema.safeParse(req.params);
     if (!parsed.success) {
-      res.status(400).json({ error: "Invalid set_id parameter" });
-      return;
+      return res.status(400).json({
+        error: "Invalid URL params",
+        details: parsed.error.flatten(),
+      });
     }
-    where.push(`c.set_id = $${params.length + 1}`);
-    params.push(parsed.data);
-  }
+    req.validated = { ...(req.validated ?? {}), params: parsed.data };
+    next();
+  };
 
-  const sql = `
-    SELECT COUNT(DISTINCT c.id)::int AS count
-    FROM cards c
-    JOIN card_inventory i ON i.card_id = c.id
-    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
-  `;
+export const validateBody =
+  <S extends z.ZodTypeAny>(schema: S) =>
+  (req: Request, res: Response, next: NextFunction) => {
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({
+        error: "Invalid request body",
+        details: parsed.error.flatten(),
+      });
+    }
+    req.validated = { ...(req.validated ?? {}), body: parsed.data };
+    next();
+  };
 
-  try {
-    const rows = await db.query<{ count: number }>(sql, params);
-    const count = rows[0]?.count ?? 0;
-    res.json({ count });
-  } catch (err: any) {
-    console.error("❌ GET /cards/count failed:", err.message);
-    res.status(500).json({ error: "Failed to count cards" });
+/* --------------------------- Mount Sub-Routers -------------------------- */
+
+router.use(cardsRouter);
+router.use(variationsRouter);
+
+// If you later add sets, games, inventory, orders routes, mount them here:
+// router.use(setsRouter);
+// router.use(gamesRouter);
+// router.use(inventoryRouter);
+// router.use(ordersRouter);
+
+/* ------------------------- 404 & Error Handling ------------------------- */
+
+router.use((req, res, next) => {
+  if (req.path.startsWith("/")) {
+    return res.status(404).json({
+      error: "Not Found",
+      path: req.originalUrl,
+    });
   }
+  next();
 });
+
+router.use(
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  (err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    const status =
+      (typeof err === "object" &&
+        err !== null &&
+        "status" in err &&
+        typeof (err as any).status === "number" &&
+        (err as any).status) || 500;
+
+    const message =
+      (typeof err === "object" &&
+        err !== null &&
+        "message" in err &&
+        typeof (err as any).message === "string" &&
+        (err as any).message) || "Internal Server Error";
+
+    res.status(status).json({ error: message });
+  }
+);
 
 export default router;

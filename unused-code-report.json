@@ -1,0 +1,142 @@
+{
+  "timestamp": "2025-10-20T03:02:48.231Z",
+  "unusedConstants": [
+    {
+      "category": "IMAGE_CONFIG",
+      "constant": "LAZY_LOAD_THRESHOLD",
+      "fullName": "IMAGE_CONFIG.LAZY_LOAD_THRESHOLD"
+    },
+    {
+      "category": "IMAGE_CONFIG",
+      "constant": "PLACEHOLDER_COLOR",
+      "fullName": "IMAGE_CONFIG.PLACEHOLDER_COLOR"
+    },
+    {
+      "category": "IMAGE_CONFIG",
+      "constant": "ERROR_IMAGE",
+      "fullName": "IMAGE_CONFIG.ERROR_IMAGE"
+    },
+    {
+      "category": "VALIDATION_CONFIG",
+      "constant": "MAX_SEARCH_LENGTH",
+      "fullName": "VALIDATION_CONFIG.MAX_SEARCH_LENGTH"
+    },
+    {
+      "category": "VALIDATION_CONFIG",
+      "constant": "MIN_PRICE",
+      "fullName": "VALIDATION_CONFIG.MIN_PRICE"
+    },
+    {
+      "category": "VALIDATION_CONFIG",
+      "constant": "MAX_PRICE",
+      "fullName": "VALIDATION_CONFIG.MAX_PRICE"
+    }
+  ],
+  "unusedEndpoints": [
+    "/admin/analytics",
+    "/admin/bulk-create-foils",
+    "/admin/bulk-create-variations",
+    "/admin/cards",
+    "/admin/import-card-data",
+    "/admin/orders",
+    "/admin/refresh-prices",
+    "/admin/variations/:card_id",
+    "/orders",
+    "/sets"
+  ],
+  "unusedImports": [
+    {
+      "file": "apps\\web\\src\\components\\admin\\UnifiedCardsTab.tsx",
+      "imports": [
+        {
+          "import": "Package",
+          "source": "lucide-react",
+          "type": "named"
+        },
+        {
+          "import": "Filter",
+          "source": "lucide-react",
+          "type": "named"
+        },
+        {
+          "import": "Sparkles",
+          "source": "lucide-react",
+          "type": "named"
+        },
+        {
+          "import": "ZoomIn",
+          "source": "lucide-react",
+          "type": "named"
+        },
+        {
+          "import": "X",
+          "source": "lucide-react",
+          "type": "named"
+        },
+        {
+          "import": "Plus",
+          "source": "lucide-react",
+          "type": "named"
+        }
+      ]
+    },
+    {
+      "file": "apps\\web\\src\\components\\EmptyState.tsx",
+      "imports": [
+        {
+          "import": "React",
+          "source": "react",
+          "type": "default"
+        }
+      ]
+    },
+    {
+      "file": "apps\\web\\src\\components\\KeyboardShortcutsModal.tsx",
+      "imports": [
+        {
+          "import": "React",
+          "source": "react",
+          "type": "default"
+        }
+      ]
+    },
+    {
+      "file": "apps\\web\\src\\components\\skeletons\\CardSkeleton.tsx",
+      "imports": [
+        {
+          "import": "React",
+          "source": "react",
+          "type": "default"
+        }
+      ]
+    },
+    {
+      "file": "apps\\web\\src\\components\\TCGShop.tsx",
+      "imports": [
+        {
+          "import": "FILTER_CONFIG",
+          "source": "../config/constants",
+          "type": "named"
+        }
+      ]
+    },
+    {
+      "file": "apps\\web\\src\\hooks\\useSearchFilters.ts",
+      "imports": [
+        {
+          "import": "useMemo",
+          "source": "react",
+          "type": "named"
+        }
+      ]
+    }
+  ],
+  "unusedUtilities": [],
+  "summary": {
+    "filesScanned": 70,
+    "totalConstants": 56,
+    "totalEndpoints": 14,
+    "unusedConstantsCount": 6,
+    "unusedEndpointsCount": 10
+  }
+}

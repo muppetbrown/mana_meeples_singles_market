@@ -1,146 +1,175 @@
-import express from "express";
-import type { Request, Response } from "express";
-import { db } from "../lib/db.js"; // adjust import if your pool lives elsewhere
+// apps/api/src/routes/filters.ts
+import { z } from "zod";
 
-const router = express.Router();
+/** CSV helper: allow ?foo=A,B or ?foo=A&foo=B */
+export const csv = <T extends z.ZodTypeAny>(item: T) =>
+  z.union([
+    item.array(),
+    z
+      .string()
+      .transform((s) => s.split(",").map((v) => v.trim()).filter(Boolean))
+      .pipe(item.array()),
+  ]).optional();
+
+/** Pagination with coercion */
+export const PaginationQuery = z.object({
+  page: z.coerce.number().int().min(1).default(1),
+  per_page: z.coerce.number().int().min(1).max(100).default(24),
+  sort: z.string().min(1).max(64).optional(),
+  order: z.enum(["asc", "desc"]).default("asc"),
+});
+
+/** Facet filters with coercion + canonicalization */
+export const CardFiltersQuery = z.object({
+  game_id: z.coerce.number().int().positive().optional(),
+  set_id: z.coerce.number().int().positive().optional(),
+  // facets (uppercase to match DB canonical codes)
+  treatment: csv(z.string().transform((s) => s.toUpperCase())),
+  border_color: csv(z.string().transform((s) => s.toUpperCase())),
+  finish: csv(z.string().transform((s) => s.toUpperCase())),
+  promo_type: csv(z.string().transform((s) => s.toUpperCase())),
+  frame_effect: csv(z.string().transform((s) => s.toUpperCase())),
+  // price filters (if used)
+  min_price: z.coerce.number().nonnegative().optional(),
+  max_price: z.coerce.number().nonnegative().optional(),
+  // search
+  q: z.string().trim().min(1).max(100).optional(),
+  // stock toggle
+  in_stock: z.coerce.boolean().optional(),
+});
+
+/** Combined schema commonly used by list endpoints */
+export const CardsIndexQuery = PaginationQuery.merge(CardFiltersQuery);
+
+export type CardFilters = z.infer<typeof CardFiltersQuery>;
+export type CardsIndex = z.infer<typeof CardsIndexQuery>;
 
 /**
- * Build WHERE clause from query scope.
+ * Parse and validate query params with coercion.
+ * Returns `{ data, error }` so callers can decide how to respond.
  */
-function applyCardScope(where: string[], params: any[], scope: any = {}): void {
-  const { game_id, set_id } = scope;
-  if (game_id) {
-    where.push(`c.game_id = $${params.length + 1}`);
-    params.push(game_id);
+export function parseCardFilters(
+  query: unknown
+): { data?: CardFilters; error?: z.typeToFlattenedError<any> } {
+  const parsed = CardFiltersQuery.safeParse(query);
+  if (!parsed.success) return { error: parsed.error.flatten() };
+
+  // Ensure min/max price are consistent if both present
+  const { min_price, max_price } = parsed.data;
+  if (min_price != null && max_price != null && min_price > max_price) {
+    return {
+      error: {
+        formErrors: ["min_price cannot be greater than max_price"],
+        fieldErrors: {},
+      },
+    };
   }
-  if (set_id) {
-    where.push(`c.set_id = $${params.length + 1}`);
-    params.push(set_id);
-  }
+
+  return { data: parsed.data };
 }
 
 /**
- * Generic query helper
+ * Build SQL WHERE/JOIN/params from filters.
+ * `cardAlias` lets you use 'c' (recommended) when querying `cards c`.
  */
-async function runFilterQuery(
-  res: Response,
-  sql: string,
-  params: any[],
-  label: string
-) {
-  try {
-    const rows = await db.query(sql, params);
-    res.json(rows);
-  } catch (err: any) {
-    console.error(`❌ Error fetching ${label}:`, err);
-    res.status(500).json({ error: `Failed to fetch ${label}` });
+export function buildFilterSQL(
+  cardAlias: string,
+  filters: CardFilters
+): { where: string[]; joins: string[]; params: any[] } {
+  const where: string[] = [];
+  const joins: string[] = [];
+  const params: any[] = [];
+
+  const c = cardAlias;
+
+  if (filters.game_id != null) {
+    params.push(filters.game_id);
+    where.push(`${c}.game_id = $${params.length}`);
   }
+
+  if (filters.set_id != null) {
+    params.push(filters.set_id);
+    where.push(`${c}.set_id = $${params.length}`);
+  }
+
+  if (filters.q) {
+    params.push(filters.q);
+    // Uses GIN index on cards.search_tsv
+    where.push(`${c}.search_tsv @@ plainto_tsquery('english', $${params.length})`);
+  }
+
+  // Facet arrays → ANY($n)
+  if (filters.treatment && filters.treatment.length) {
+    params.push(filters.treatment);
+    where.push(`${c}.treatment = ANY($${params.length})`);
+  }
+  if (filters.border_color && filters.border_color.length) {
+    params.push(filters.border_color);
+    where.push(`${c}.border_color = ANY($${params.length})`);
+  }
+  if (filters.finish && filters.finish.length) {
+    params.push(filters.finish);
+    where.push(`${c}.finish = ANY($${params.length})`);
+  }
+  if (filters.promo_type && filters.promo_type.length) {
+    params.push(filters.promo_type);
+    where.push(`${c}.promo_type = ANY($${params.length})`);
+  }
+  if (filters.frame_effect && filters.frame_effect.length) {
+    params.push(filters.frame_effect);
+    where.push(`${c}.frame_effect = ANY($${params.length})`);
+  }
+
+  // Prices (adjust to your pricing table/view)
+  if (filters.min_price != null || filters.max_price != null) {
+    joins.push(`LEFT JOIN card_pricing cp ON cp.card_id = ${c}.id`);
+    if (filters.min_price != null) {
+      params.push(filters.min_price);
+      where.push(`cp.price >= $${params.length}`);
+    }
+    if (filters.max_price != null) {
+      params.push(filters.max_price);
+      where.push(`cp.price <= $${params.length}`);
+    }
+  }
+
+  if (filters.in_stock) {
+    // Leverage partial index on card_inventory(stock > 0)
+    joins.push(
+      `JOIN card_inventory ci ON ci.card_id = ${c}.id AND ci.stock > 0`
+    );
+  }
+
+  return { where, joins, params };
 }
 
-// === Treatments ===
-router.get("/treatments", async (req: Request, res: Response) => {
-  const params: any[] = [];
-  const where: string[] = ["c.treatment IS NOT NULL"];
-  applyCardScope(where, params, req.query);
-
-  const sql = `
-    SELECT c.treatment AS value, c.treatment AS label, COUNT(DISTINCT c.id) AS count
-    FROM cards c
-    JOIN card_inventory i ON i.card_id = c.id
-    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
-    GROUP BY c.treatment
-    ORDER BY count DESC, c.treatment;
-  `;
-  await runFilterQuery(res, sql, params, "treatments");
-});
-
-// === Rarities ===
-router.get("/rarities", async (req: Request, res: Response) => {
-  const params: any[] = [];
-  const where: string[] = ["c.rarity IS NOT NULL"];
-  applyCardScope(where, params, req.query);
-
-  const sql = `
-    SELECT c.rarity AS value, c.rarity AS label, COUNT(DISTINCT c.id) AS count
-    FROM cards c
-    JOIN card_inventory i ON i.card_id = c.id
-    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
-    GROUP BY c.rarity
-    ORDER BY count DESC, c.rarity;
-  `;
-  await runFilterQuery(res, sql, params, "rarities");
-});
-
-// === Qualities ===
-router.get("/qualities", async (req: Request, res: Response) => {
-  const params: any[] = [];
-  const where: string[] = ["i.quality IS NOT NULL"];
-  applyCardScope(where, params, req.query);
-
-  const sql = `
-    SELECT i.quality AS value, i.quality AS label, COUNT(DISTINCT i.id) AS count
-    FROM card_inventory i
-    JOIN cards c ON c.id = i.card_id
-    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
-    GROUP BY i.quality
-    ORDER BY count DESC, i.quality;
-  `;
-  await runFilterQuery(res, sql, params, "qualities");
-});
-
-// === Foil types ===
-router.get("/foil-types", async (req: Request, res: Response) => {
-  const params: any[] = [];
-  const where: string[] = ["i.foil_type IS NOT NULL"];
-  applyCardScope(where, params, req.query);
-
-  const sql = `
-    SELECT i.foil_type AS value, i.foil_type AS label, COUNT(DISTINCT i.id) AS count
-    FROM card_inventory i
-    JOIN cards c ON c.id = i.card_id
-    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
-    GROUP BY i.foil_type
-    ORDER BY count DESC, i.foil_type;
-  `;
-  await runFilterQuery(res, sql, params, "foil types");
-});
-
-// === Languages ===
-router.get("/languages", async (req: Request, res: Response) => {
-  const params: any[] = [];
-  const where: string[] = ["i.language IS NOT NULL"];
-  applyCardScope(where, params, req.query);
-
-  const sql = `
-    SELECT i.language AS value, i.language AS label, COUNT(DISTINCT i.id) AS count
-    FROM card_inventory i
-    JOIN cards c ON c.id = i.card_id
-    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")}
-    GROUP BY i.language
-    ORDER BY count DESC, i.language;
-  `;
-  await runFilterQuery(res, sql, params, "languages");
-});
-
-// === Card count ===
-router.get("/count", async (req: Request, res: Response) => {
-  const params: any[] = [];
-  const where: string[] = ["1=1"];
-  applyCardScope(where, params, req.query);
-
-  const sql = `
-    SELECT COUNT(DISTINCT c.id) AS count
-    FROM cards c
-    JOIN card_inventory i ON i.card_id = c.id
-    WHERE i.stock_quantity > 0 AND ${where.join(" AND ")};`;
-
-  try {
-    const rows = await db.query(sql, params);
-    res.json({ count: parseInt((rows[0] as any).count, 10) });
-  } catch (err: any) {
-    console.error("Error counting cards:", err);
-    res.status(500).json({ error: "Failed to count cards" });
+/**
+ * Build ORDER BY / LIMIT / OFFSET safely from pagination options.
+ * Only allow whitelisted sort columns to avoid SQL injection.
+ */
+export function buildPagingSQL(
+  cardAlias: string,
+  paging: z.infer<typeof PaginationQuery>,
+  sortWhitelist: Record<string, string> = {
+    name: `${cardAlias}.name`,
+    number: `${cardAlias}.card_number`,
+    price: `COALESCE(cp.price, 0)`,
+    set: `${cardAlias}.set_id`,
   }
-});
+): { orderBy: string; limitOffset: string; extraJoins: string[] } {
+  const extraJoins: string[] = [];
+  let orderByCol = sortWhitelist.name; // default to name
 
-export default router;
+  if (paging.sort && sortWhitelist[paging.sort]) {
+    orderByCol = sortWhitelist[paging.sort];
+    if (paging.sort === "price") {
+      // Ensure pricing is joined if sorting by price
+      extraJoins.push(`LEFT JOIN card_pricing cp ON cp.card_id = ${cardAlias}.id`);
+    }
+  }
+
+  const orderBy = `ORDER BY ${orderByCol} ${paging.order}`;
+  const limitOffset = `LIMIT ${paging.per_page} OFFSET ${(paging.page - 1) * paging.per_page}`;
+
+  return { orderBy, limitOffset, extraJoins };
+}
