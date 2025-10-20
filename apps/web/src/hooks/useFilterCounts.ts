@@ -8,10 +8,13 @@ const globalCache = {
   filters: null
 };
 
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
-const DEBOUNCE_DELAY = FILTER_CONFIG.DEBOUNCE_DELAY; // Use centralized config (now 300ms)
+const CACHE_DURATION = FILTER_CONFIG.CACHE_DURATION;
+const DEBOUNCE_DELAY = FILTER_CONFIG.DEBOUNCE_DELAY;
 const MAX_RETRIES = 2;
 const RETRY_DELAY = 2000; // 2 seconds between retries
+
+//const MIN_SEARCH_LENGTH = FILTER_CONFIG.MIN_SEARCH_LENGTH: 2, // Minimum characters to trigger search
+//const MAX_SUGGESTIONS = FILTER_CONFIG.MAX_SUGGESTIONS: 10, // Maximum autocomplete suggestions
 
 /**
  * Hook for managing filter counts with aggressive caching and rate limit protection

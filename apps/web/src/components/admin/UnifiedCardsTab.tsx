@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { Package, Search, RefreshCw, Filter, Sparkles, Download, ZoomIn, X, Plus } from 'lucide-react';
+import { RefreshCw, Download } from 'lucide-react';
 import { api } from '@/config/api';
 
 // ---------- Types ----------
@@ -81,14 +81,11 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const isInventoryMode = mode === 'inventory';
 
   // ---------- Helpers ----------
-  const getGameIdFromName = (gameName: string): number | null => {
-    const map: Record<string, number> = {
-      'Magic: The Gathering': 1,
-      'Pokemon': 2,
-      'Yu-Gi-Oh!': 3,
-    };
-    return map[gameName] ?? null;
-  };
+  const getGameIdFromName = useCallback((gameName: string): number | null => {
+    if (!games?.length) return null;
+    const found = games.find(g => g.name === gameName);
+    return found ? found.id : null;
+  }, [games]);
 
   const getUniqueTreatments = (variations: CardVariation[]): string[] =>
     Array.from(new Set((variations ?? []).map(v => v.treatment)));
@@ -128,6 +125,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       setGames(data?.games ?? []);
     } catch (e) {
       console.error('Error fetching games:', e);
+      setGames([]);
     }
   }, []);
 
@@ -137,15 +135,19 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       return;
     }
     const gameId = getGameIdFromName(selectedGame);
-    if (!gameId) return;
+    if (!gameId) {
+      setAvailableSets([]);
+      return;
+    }
 
     try {
       const sets = await api.get<CardSet[]>(`/sets?game_id=${String(gameId)}`);
+      setAvailableSets(sets ?? []); // ✅ actually update state
     } catch (e) {
       console.error('Error fetching sets:', e);
       setAvailableSets([]);
     }
-  }, [selectedGame]);
+  }, [selectedGame, getGameIdFromName]);
 
   const fetchCards = useCallback(async () => {
     setError(null);
@@ -153,7 +155,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       const params = new URLSearchParams({ limit: String(1000) });
       if (selectedGame !== 'all') {
         const gameId = getGameIdFromName(selectedGame);
-        if (gameId) params.append('game_id', String(gameId)); // ✅ cast to string
+        if (gameId) params.append('game_id', String(gameId));
       }
       if (selectedSet !== 'all') params.append('set_name', selectedSet);
       if (filterTreatment !== 'all') params.append('treatment', filterTreatment);
@@ -166,7 +168,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       setCards([]);
       setError(e instanceof Error ? e.message : 'Failed to fetch cards');
     }
-  }, [selectedGame, selectedSet, filterTreatment, searchTerm]);
+  }, [selectedGame, selectedSet, filterTreatment, searchTerm, getGameIdFromName]);
 
   // ---------- Search (debounced) ----------
   const handleSearchChange = useCallback(
@@ -193,14 +195,15 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       searchTimeoutRef.current = setTimeout(async () => {
         try {
           abortController.current = new AbortController();
+          // NOTE: our api client may not accept a RequestInit; avoid typing hacks that break builds
           const data = await api.get<{ suggestions: SearchSuggestion[] }>(
-            `/search/autocomplete?q=${encodeURIComponent(value)}`,
-            { signal: abortController.current.signal as unknown as undefined } // api client ignores unknown keys
+            `/search/autocomplete?q=${encodeURIComponent(value)}`
           );
           setSearchSuggestions(data?.suggestions ?? []);
           setShowSuggestions((data?.suggestions?.length ?? 0) > 0);
           setSelectedSuggestionIndex(-1);
         } catch (err) {
+          // swallow AbortError and log others
           if ((err as any)?.name !== 'AbortError') console.error('Autocomplete error:', err);
         } finally {
           setSearchLoading(false);

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CardSearchBar from './CardSearchBar';
-
 import { useSearchFilters } from '../hooks/useSearchFilters';
 import { ShoppingCart, X, Plus, Minus, Filter, ChevronDown, LayoutGrid, List } from 'lucide-react';
 import CurrencySelector from './CurrencySelector';
@@ -12,11 +11,12 @@ import ErrorBoundary from './ErrorBoundary';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import { API_URL } from '@/config/api';
 import { useErrorHandler, withRetry, throttledFetch } from '../services/errorHandler';
-import { FILTER_CONFIG, VIRTUAL_SCROLL_CONFIG } from '../config/constants';
+import { VIRTUAL_SCROLL_CONFIG } from '../config/constants';
 import CardSkeleton from './skeletons/CardSkeleton';
 import SectionHeader from './common/SectionHeader';
 import CardItem from './cards/CardItem';
 import ListCardItem from './cards/ListCardItem';
+import { api } from '@/config/api';
 
 interface Game {
   id: number;
