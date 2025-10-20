@@ -4,9 +4,7 @@ import helmet from "helmet";
 import cors from "cors";
 import type { CorsOptionsDelegate, CorsRequest } from "cors";
 import cookieParser from "cookie-parser";
-import apiRoutes from "./routes/api.js";
-import authRoutes from "./routes/auth.js";
-import variationsRoutes from "./routes/variations.js";
+import routes from "./routes/index.js";
 import path from "path";
 import fs from "fs";
 
@@ -68,9 +66,7 @@ export function createApp() {
     });
   });
 
-  app.use("/api/auth", authRoutes);
-  app.use("/api/variations", variationsRoutes);
-  app.use("/api", apiRoutes);
+  app.use("/", routes);
 
   /** ===============================
    *  ✅ Enhanced static + header handling
