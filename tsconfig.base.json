@@ -1,3 +1,4 @@
+// tsconfig.base.json
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -8,7 +9,7 @@
     "paths": {
       "@shared/*": ["utils/shared/src/*"]
     },
-    "allowJs": true,           
+    "allowJs": true,
     "checkJs": false,
     "jsx": "react-jsx",
     "noEmit": true,

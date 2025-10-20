@@ -1,3 +1,4 @@
+// apps/web/src/components/cards/CardItem.tsx
 import React from 'react';
 import OptimizedImage from '../OptimizedImage';
 import { ACCESSIBILITY_CONFIG } from '../../config/constants';

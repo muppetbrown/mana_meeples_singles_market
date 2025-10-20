@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+// apps/web/src/components/admin/OrdersTab.tsx
+import { useState, useEffect, useCallback, useMemo, type ComponentType } from 'react';
 import {
   Package,
   User,
@@ -32,29 +33,31 @@ interface CustomerData {
   notes?: string;
 }
 
-interface Order {
-  id: number;
-  customer_name: string;
-  customer_email: string;
-  total: string;
-  status: 'pending' | 'confirmed' | 'completed' | 'cancelled';
-  created_at: string;
-  updated_at: string;
-  payment_intent_id: string;
-  items?: OrderItem[];
-}
+type OrderStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
 
 interface OrderItem {
   card_name: string;
   quality: string;
   quantity: number;
-  unit_price: string;
+  unit_price: string; // string from API; we format with parseFloat
   total_price: string;
 }
 
-type OrderStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled';
+interface Order {
+  id: number;
+  customer_name: string;
+  customer_email: string;
+  total: string;
+  status: OrderStatus;
+  created_at: string;
+  updated_at: string;
+  payment_intent_id: string; // JSON string we parse for shipping info
+  items?: OrderItem[];
+}
 
-const OrdersTab: React.FC = () => {
+const nzd = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'NZD' });
+
+const OrdersTab = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -64,73 +67,77 @@ const OrdersTab: React.FC = () => {
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [showOrderModal, setShowOrderModal] = useState(false);
 
-  // Fetch orders
+  // --- API calls (using shared api client) ---
   const fetchOrders = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await api.admin.getOrders();
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      setOrders(data.orders || []);
+      // Expect { orders: Order[] } from backend
+      const data = await api.get<{ orders?: Order[] }>('/admin/orders');
+      setOrders(Array.isArray(data?.orders) ? data.orders : []);
       setError(null);
-    } catch (err) {
+    } catch (err: any) {
       console.error('Error fetching orders:', err);
       setError('Failed to load orders');
+      setOrders([]);
     } finally {
       setLoading(false);
     }
+  }, []);
+
+  const fetchOrderDetails = useCallback(async (orderId: number) => {
+    // Expect full order object with items
+    return api.get<Order>(`/admin/orders/${orderId}`);
+  }, []);
+
+  const patchOrderStatus = useCallback(async (orderId: number, newStatus: OrderStatus) => {
+    // Backend: PATCH /admin/orders/:id/status with { status }
+    return api.patch(`/admin/orders/${orderId}/status`, { status: newStatus });
   }, []);
 
   useEffect(() => {
     fetchOrders();
   }, [fetchOrders]);
 
-  // Filter orders
-  const filteredOrders = orders.filter(order => {
-    const matchesSearch = searchTerm === '' ||
-      order.customer_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      order.id.toString().includes(searchTerm);
+  // Filter orders (memoized)
+  const filteredOrders = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return orders.filter(order => {
+      const matchesSearch =
+        term === '' ||
+        order.customer_email?.toLowerCase().includes(term) ||
+        order.customer_name?.toLowerCase().includes(term) ||
+        order.id.toString().includes(term);
 
-    const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
-
-    return matchesSearch && matchesStatus;
-  });
+      const matchesStatus = statusFilter === 'all' || order.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [orders, searchTerm, statusFilter]);
 
   // Toggle order expansion
   const toggleOrderExpansion = useCallback((orderId: number) => {
     setExpandedOrders(prev => {
-      const newExpanded = new Set(prev);
-      if (newExpanded.has(orderId)) {
-        newExpanded.delete(orderId);
-      } else {
-        newExpanded.add(orderId);
-      }
-      return newExpanded;
+      const next = new Set(prev);
+      if (next.has(orderId)) next.delete(orderId);
+      else next.add(orderId);
+      return next;
     });
   }, []);
 
   // Business logic validation for order status changes
   const validateStatusChange = (currentStatus: OrderStatus, newStatus: OrderStatus) => {
     const validTransitions: Record<OrderStatus, OrderStatus[]> = {
-      'pending': ['confirmed', 'cancelled'],
-      'confirmed': ['completed', 'cancelled'],
-      'completed': [],
-      'cancelled': []
+      pending: ['confirmed', 'cancelled'],
+      confirmed: ['completed', 'cancelled'],
+      completed: [],
+      cancelled: []
     };
-
     if (!validTransitions[currentStatus]?.includes(newStatus)) {
       return {
-        valid: false,
+        valid: false as const,
         message: `Cannot change order from ${currentStatus} to ${newStatus}`
       };
     }
-
-    return { valid: true };
+    return { valid: true as const };
   };
 
   // Update order status with validation
@@ -148,62 +155,46 @@ const OrdersTab: React.FC = () => {
     }
 
     try {
-      const response = await api.admin.updateOrderStatus(orderId.toString(), newStatus);
-
-      if (!response.ok) {
-        throw new Error('Failed to update order status');
-      }
-
-      // Refresh orders
+      await patchOrderStatus(orderId, newStatus);
+      // Refresh orders after update
       fetchOrders();
-    } catch (error) {
-      console.error('Error updating order status:', error);
+    } catch (err) {
+      console.error('Error updating order status:', err);
       window.alert('Failed to update order status');
     }
-  }, [orders, fetchOrders]);
+  }, [orders, patchOrderStatus, fetchOrders]);
 
   // Show order details in modal
   const showOrderDetails = useCallback(async (orderId: number) => {
     try {
-      const response = await api.admin.getOrder(orderId.toString());
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch order details');
-      }
-
-      const orderData = await response.json();
-      setSelectedOrder(orderData);
+      const data = await fetchOrderDetails(orderId);
+      setSelectedOrder(data as unknown as Order);
       setShowOrderModal(true);
-    } catch (error) {
-      console.error('Error fetching order details:', error);
+    } catch (err) {
+      console.error('Error fetching order details:', err);
       window.alert('Failed to load order details');
     }
-  }, []);
+  }, [fetchOrderDetails]);
 
-  // Status badge component with AAA contrast ratios
-  const StatusBadge: React.FC<{ status: OrderStatus }> = ({ status }) => {
-    const statusConfig: Record<OrderStatus, { color: string; icon: typeof Clock }> = {
+  // Status badge with explicit icon component type
+  const StatusBadge = ({ status }: { status: OrderStatus }) => {
+    const statusConfig: Record<OrderStatus, { color: string; icon: ComponentType<{ className?: string }> }> = {
       pending: { color: 'bg-yellow-50 text-yellow-900 border border-yellow-200', icon: Clock },
       confirmed: { color: 'bg-blue-50 text-blue-900 border border-blue-200', icon: CheckCircle },
       completed: { color: 'bg-green-50 text-green-900 border border-green-200', icon: CheckCircle },
       cancelled: { color: 'bg-red-50 text-red-900 border border-red-200', icon: XCircle }
     };
 
-    const config = statusConfig[status];
-    const StatusIcon = config.icon;
-
+    const { color, icon: StatusIcon } = statusConfig[status];
     return (
-      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${config.color}`}>
+      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${color}`}>
         <StatusIcon className="w-3 h-3 mr-1" />
         {status.charAt(0).toUpperCase() + status.slice(1)}
       </span>
     );
   };
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
+  const formatDate = (s: string) => new Date(s).toLocaleString();
 
   // Parse customer data from payment_intent_id field
   const parseCustomerData = (paymentIntentId: string): CustomerData | null => {
@@ -216,9 +207,9 @@ const OrdersTab: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
+      <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
         <div className="text-center">
-          <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+          <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" aria-hidden="true" />
           <p className="text-slate-600">Loading orders...</p>
         </div>
       </div>
@@ -228,11 +219,11 @@ const OrdersTab: React.FC = () => {
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
-        <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-4" />
+        <AlertCircle className="w-8 h-8 text-red-600 mx-auto mb-4" aria-hidden="true" />
         <p className="text-red-800 font-medium">{error}</p>
         <button
           onClick={fetchOrders}
-          className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+          className="mt-4 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600"
         >
           Try Again
         </button>
@@ -250,9 +241,10 @@ const OrdersTab: React.FC = () => {
         </div>
         <button
           onClick={fetchOrders}
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
+          aria-label="Refresh orders"
         >
-          <RefreshCw className="w-4 h-4" />
+          <RefreshCw className="w-4 h-4" aria-hidden="true" />
           Refresh
         </button>
       </div>
@@ -262,20 +254,23 @@ const OrdersTab: React.FC = () => {
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" aria-hidden="true" />
             <input
               type="search"
               placeholder="Search by order ID, customer name, or email..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              aria-label="Search orders"
             />
           </div>
 
           {/* Status Filter */}
           <div className="flex items-center gap-2">
-            <Filter className="w-4 h-4 text-slate-500" />
+            <Filter className="w-4 h-4 text-slate-500" aria-hidden="true" />
+            <label className="sr-only" htmlFor="order-status">Filter by status</label>
             <select
+              id="order-status"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
               className="px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -294,7 +289,7 @@ const OrdersTab: React.FC = () => {
       <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
         {filteredOrders.length === 0 ? (
           <div className="text-center py-12">
-            <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <Package className="w-12 h-12 text-slate-300 mx-auto mb-4" aria-hidden="true" />
             <p className="text-slate-500 text-lg font-medium">No orders found</p>
             <p className="text-slate-400 text-sm mt-2">Orders will appear here when customers place them</p>
           </div>
@@ -309,15 +304,18 @@ const OrdersTab: React.FC = () => {
                   <div
                     className="flex items-center justify-between cursor-pointer"
                     onClick={() => toggleOrderExpansion(order.id)}
+                    role="button"
+                    aria-expanded={isExpanded}
+                    aria-controls={`order-${order.id}-details`}
                   >
                     <div className="flex items-center gap-4">
-                      <button className="p-1 hover:bg-slate-200 rounded transition-colors">
+                      <span className="p-1 hover:bg-slate-200 rounded transition-colors" aria-hidden="true">
                         {isExpanded ? (
                           <ChevronDown className="w-4 h-4 text-slate-500" />
                         ) : (
                           <ChevronRight className="w-4 h-4 text-slate-500" />
                         )}
-                      </button>
+                      </span>
 
                       <div>
                         <div className="flex items-center gap-3">
@@ -342,12 +340,12 @@ const OrdersTab: React.FC = () => {
 
                   {/* Expanded Content */}
                   {isExpanded && (
-                    <div className="mt-4 ml-8 space-y-4">
+                    <div id={`order-${order.id}-details`} className="mt-4 ml-8 space-y-4">
                       {/* Customer Details */}
                       {customerData && (
                         <div className="bg-slate-50 rounded-lg p-4">
                           <h4 className="font-medium text-slate-900 mb-3 flex items-center gap-2">
-                            <User className="w-4 h-4" />
+                            <User className="w-4 h-4" aria-hidden="true" />
                             Customer Details
                           </h4>
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
@@ -382,7 +380,7 @@ const OrdersTab: React.FC = () => {
                           {/* Shipping Address */}
                           <div className="mt-4 pt-4 border-t border-slate-200">
                             <div className="flex items-center gap-2 mb-2">
-                              <MapPin className="w-4 h-4 text-slate-500" />
+                              <MapPin className="w-4 h-4 text-slate-500" aria-hidden="true" />
                               <span className="font-medium text-slate-700">Shipping Address</span>
                             </div>
                             <div className="text-sm text-slate-600 leading-relaxed">
@@ -409,9 +407,9 @@ const OrdersTab: React.FC = () => {
                             e.stopPropagation();
                             showOrderDetails(order.id);
                           }}
-                          className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-blue-600"
                         >
-                          <Eye className="w-4 h-4" />
+                          <Eye className="w-4 h-4" aria-hidden="true" />
                           View Details
                         </button>
 
@@ -421,9 +419,9 @@ const OrdersTab: React.FC = () => {
                               e.stopPropagation();
                               updateOrderStatus(order.id, 'confirmed');
                             }}
-                            className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600"
                           >
-                            <CheckCircle className="w-4 h-4" />
+                            <CheckCircle className="w-4 h-4" aria-hidden="true" />
                             Confirm
                           </button>
                         )}
@@ -434,9 +432,9 @@ const OrdersTab: React.FC = () => {
                               e.stopPropagation();
                               updateOrderStatus(order.id, 'completed');
                             }}
-                            className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-green-600"
                           >
-                            <Package className="w-4 h-4" />
+                            <Package className="w-4 h-4" aria-hidden="true" />
                             Mark Completed
                           </button>
                         )}
@@ -449,9 +447,9 @@ const OrdersTab: React.FC = () => {
                                 updateOrderStatus(order.id, 'cancelled');
                               }
                             }}
-                            className="flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors"
+                            className="flex items-center gap-2 px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-sm rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-red-600"
                           >
-                            <XCircle className="w-4 h-4" />
+                            <XCircle className="w-4 h-4" aria-hidden="true" />
                             Cancel
                           </button>
                         )}
@@ -461,9 +459,9 @@ const OrdersTab: React.FC = () => {
                             e.stopPropagation();
                             window.open(`mailto:${order.customer_email}?subject=Order Update #${order.id}`);
                           }}
-                          className="flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-colors"
+                          className="flex items-center gap-2 px-3 py-2 bg-slate-600 hover:bg-slate-700 text-white text-sm rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-600"
                         >
-                          <Mail className="w-4 h-4" />
+                          <Mail className="w-4 h-4" aria-hidden="true" />
                           Email Customer
                         </button>
                       </div>
@@ -478,7 +476,7 @@ const OrdersTab: React.FC = () => {
 
       {/* Order Details Modal */}
       {showOrderModal && selectedOrder && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label={`Order ${selectedOrder.id} details`}>
           <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
             <div className="p-6 border-b border-slate-200">
               <div className="flex items-center justify-between">
@@ -487,9 +485,10 @@ const OrdersTab: React.FC = () => {
                 </h2>
                 <button
                   onClick={() => setShowOrderModal(false)}
-                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+                  className="p-2 hover:bg-slate-100 rounded-lg transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-600"
+                  aria-label="Close order details"
                 >
-                  <XCircle className="w-5 h-5" />
+                  <XCircle className="w-5 h-5" aria-hidden="true" />
                 </button>
               </div>
             </div>

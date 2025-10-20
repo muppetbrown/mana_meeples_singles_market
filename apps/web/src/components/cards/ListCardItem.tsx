@@ -1,3 +1,4 @@
+// apps/web/src/components/cards/ListCardItem.tsx
 import React from 'react';
 import OptimizedImage from '../OptimizedImage';
 

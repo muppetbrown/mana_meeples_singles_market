@@ -1,3 +1,4 @@
+// apps/web/src/components/admin/AnalyticsTab.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Package, DollarSign, AlertTriangle, RefreshCw } from 'lucide-react';
 import { api } from '@/config/api';
@@ -32,14 +33,12 @@ const AnalyticsTab: React.FC = () => {
   const [analytics, setAnalytics] = useState<AnalyticsStats | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchAnalytics = useCallback(async () => {
-    setLoading(true);
+const fetchAnalytics = useCallback(async () => {
+  setLoading(true);
     try {
-      const response = await api.admin.getInventory();
-      if (!response.ok) throw new Error('Failed to fetch data');
-
-      const data = (await response.json()) as { inventory?: InventoryItem[] };
-      const inventory: InventoryItem[] = data.inventory ?? [];
+      // Fetch all inventory items from the API
+      const data = await api.get<{ inventory?: InventoryItem[] }>('/admin/inventory');
+      const inventory = data?.inventory ?? [];
 
       const base: AnalyticsStats = {
         totalCards: inventory.length,
@@ -61,20 +60,17 @@ const AnalyticsTab: React.FC = () => {
         if (item.stock_quantity === 0) acc.outOfStock += 1;
         else if (item.stock_quantity <= 3) acc.lowStock += 1;
 
-        // byGame
         const g = acc.byGame[item.game_name] ?? { count: 0, value: 0, stock: 0 };
         g.count += 1;
         g.value += value;
         g.stock += item.stock_quantity;
         acc.byGame[item.game_name] = g;
 
-        // byQuality
         const q = acc.byQuality[item.quality] ?? { count: 0, value: 0 };
         q.count += 1;
         q.value += value;
         acc.byQuality[item.quality] = q;
 
-        // byPriceSource
         const src = (item.price_source ?? 'manual').toLowerCase();
         acc.byPriceSource[src] = (acc.byPriceSource[src] ?? 0) + 1;
 
@@ -89,6 +85,7 @@ const AnalyticsTab: React.FC = () => {
       setLoading(false);
     }
   }, []);
+
 
   useEffect(() => {
     fetchAnalytics();

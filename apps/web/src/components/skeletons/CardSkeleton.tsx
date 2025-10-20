@@ -1,4 +1,4 @@
-import React from 'react';
+// apps/web/src/components/skeletons/CardSkeleton.tsx
 
 /**
  * Card Skeleton Component for loading states

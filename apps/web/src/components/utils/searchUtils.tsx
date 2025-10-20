@@ -1,4 +1,4 @@
-import React from 'react';
+// apps/web/src/components/utils/searchUtils.tsx
 
 /**
  * Helper function to highlight matching text in search suggestions

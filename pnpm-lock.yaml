@@ -84,6 +84,33 @@ importers:
 
   apps/api:
     dependencies:
+      '@types/bcrypt':
+        specifier: ^6.0.0
+        version: 6.0.0
+      '@types/compression':
+        specifier: ^1.7.9
+        version: 1.8.1
+      '@types/cookie-parser':
+        specifier: ^1.4.9
+        version: 1.4.9(@types/express@4.17.23)
+      '@types/cors':
+        specifier: ^2.8.19
+        version: 2.8.19
+      '@types/express':
+        specifier: ^4.17.21
+        version: 4.17.23
+      '@types/jsonwebtoken':
+        specifier: ^9.0.10
+        version: 9.0.10
+      '@types/node':
+        specifier: ^20.19.22
+        version: 20.19.22
+      '@types/nodemailer':
+        specifier: ^7.0.2
+        version: 7.0.2
+      '@types/pg':
+        specifier: ^8.15.5
+        version: 8.15.5
       compression:
         specifier: ^1.8.1
         version: 1.8.1
@@ -114,39 +141,12 @@ importers:
       pino:
         specifier: ^10.0.0
         version: 10.0.0
-      zod:
-        specifier: ^3.23.8
-        version: 3.25.76
-      '@types/node':
-        specifier: ^20.19.22
-        version: 20.19.22
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
-      '@types/bcrypt':
-        specifier: ^6.0.0
-        version: 6.0.0
-      '@types/compression':
-        specifier: ^1.7.9
-        version: 1.8.1
-      '@types/cookie-parser':
-        specifier: ^1.4.9
-        version: 1.4.9(@types/express@4.17.23)
-      '@types/cors':
-        specifier: ^2.8.19
-        version: 2.8.19
-      '@types/express':
-        specifier: ^4.17.21
-        version: 4.17.23
-      '@types/jsonwebtoken':
-        specifier: ^9.0.10
-        version: 9.0.10
-      '@types/nodemailer':
-        specifier: ^7.0.2
-        version: 7.0.2
-      '@types/pg':
-        specifier: ^8.15.5
-        version: 8.15.5
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
     devDependencies:
       '@types/dotenv':
         specifier: ^8.2.3

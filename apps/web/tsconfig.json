@@ -1,11 +1,13 @@
+// apps/web/tsconfig.json
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "noEmit": true,
-    "baseUrl": "src",
+    "baseUrl": ".",                       
     "paths": {
-      "@/*": ["*"]
-    }
+      "@/*": ["src/*"]                    
+    },
+    "types": ["vite/client", "react"]     
   },
   "include": ["src", "vite.config.ts"]
 }

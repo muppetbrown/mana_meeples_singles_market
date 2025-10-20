@@ -1,3 +1,4 @@
+// apps/web/src/components/common/SectionHeader.tsx
 import React from 'react';
 import { LayoutGrid } from 'lucide-react';
 
