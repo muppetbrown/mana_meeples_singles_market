@@ -1,3 +1,4 @@
+// apps/web/src/components/ErrorBoundary.tsx
 import { Component, ErrorInfo, ReactNode } from "react";
 
 type Props = { fallback?: ReactNode; children: ReactNode };

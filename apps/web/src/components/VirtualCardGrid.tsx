@@ -1,3 +1,4 @@
+// apps/web/src/components/VirtualCardGrid.tsx
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useVirtualScrolling, useProgressiveLoading } from '../hooks/useVirtualScrolling';

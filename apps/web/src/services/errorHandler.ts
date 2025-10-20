@@ -1,3 +1,4 @@
+// apps/web/src/services/errorHandler.ts
 /**
  * Centralized Error Handling Service
  * Provides consistent error handling across the application with user-friendly messages

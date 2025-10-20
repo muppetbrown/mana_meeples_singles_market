@@ -1,3 +1,4 @@
+// apps/web/src/hooks/useVirtualScrolling.ts
 import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 
 /**

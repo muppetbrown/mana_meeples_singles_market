@@ -1,3 +1,4 @@
+// apps/web/src/components/VariationBadge.tsx
 type Props = { finish: string; treatment?: string; promoType?: string };
 export default function VariationBadge({ finish, treatment, promoType }: Props) {
 return (

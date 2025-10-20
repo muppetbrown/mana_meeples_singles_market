@@ -1,4 +1,4 @@
-import React from 'react';
+// apps/web/src/components/EmptyState.tsx
 import { Package, Search, Filter, ShoppingCart, RefreshCw, AlertCircle, Frown } from 'lucide-react';
 
 /**

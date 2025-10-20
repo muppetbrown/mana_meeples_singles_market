@@ -1,3 +1,4 @@
+// apps/web/src/components/DynamicVariationFilter.tsx
 import { useState, useEffect } from 'react';
 import { api } from '@/config/api';
 

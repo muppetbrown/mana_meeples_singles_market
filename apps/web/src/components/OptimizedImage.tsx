@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+// apps/web/src/components/OptimizedImage.tsx
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 
 /**
  * Optimized Image Component with LQIP (Low Quality Image Placeholder) and blur-up technique

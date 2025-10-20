@@ -1,3 +1,4 @@
+// apps/web/src/components/Checkout.tsx
 import { useState } from 'react';
 import { ArrowLeft, Mail, Phone, MapPin, CreditCard, User, AlertCircle } from 'lucide-react';
 

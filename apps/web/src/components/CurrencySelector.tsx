@@ -1,3 +1,4 @@
+// apps/web/src/components/CurrencySelector.tsx
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Info, InfoIcon } from 'lucide-react';
 

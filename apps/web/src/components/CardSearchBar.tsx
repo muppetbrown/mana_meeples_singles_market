@@ -1,3 +1,4 @@
+// apps/web/src/components/CardSearchBar.tsx
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, RefreshCw, X } from 'lucide-react';
 

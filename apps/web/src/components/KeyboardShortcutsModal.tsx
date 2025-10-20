@@ -1,4 +1,4 @@
-import React from 'react';
+// apps/web/src/components/KeyboardShortcutsModal.tsx
 import { X, Keyboard } from 'lucide-react';
 
 /**

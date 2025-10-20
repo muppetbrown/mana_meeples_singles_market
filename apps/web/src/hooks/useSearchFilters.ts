@@ -1,3 +1,4 @@
+// apps/web/src/hooks/useSearchFilters.ts
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '@/config/api';
 

@@ -1,3 +1,4 @@
+// apps/web/src/hooks/useRecentlyViewed.ts
 import { useState, useEffect, useCallback } from 'react';
 
 /**

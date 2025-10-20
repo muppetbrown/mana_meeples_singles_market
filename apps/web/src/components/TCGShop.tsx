@@ -1,3 +1,4 @@
+// apps/web/src/components/TCGShop.tsx
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CardSearchBar from './CardSearchBar';
@@ -9,7 +10,6 @@ import { useFilterCounts } from '../hooks/useFilterCounts';
 import { useEnhancedCart } from '../hooks/useEnhancedCart';
 import ErrorBoundary from './ErrorBoundary';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
-import { API_URL } from '@/config/api';
 import { useErrorHandler, withRetry, throttledFetch } from '../services/errorHandler';
 import { VIRTUAL_SCROLL_CONFIG } from '../config/constants';
 import CardSkeleton from './skeletons/CardSkeleton';
@@ -45,7 +45,7 @@ const TCGShop = () => {
    filterOptions,
    loading: filtersLoading,
    error: filtersError
-  } = useSearchFilters(API_URL, selectedGame);
+  } = useSearchFilters(API_BASE, selectedGame);
 
   // local loading/error for cards list fetch
   const [cardsLoading, setCardsLoading] = useState(false);

@@ -1,3 +1,4 @@
+// apps/web/src/hooks/useFilterCounts.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { FILTER_CONFIG } from '../config/constants';
 

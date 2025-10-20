@@ -1,3 +1,4 @@
+// apps/web/src/components/AdminDashboard.tsx
 import { useState, useEffect } from 'react';
 import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
 import { api } from '@/config/api';
@@ -16,8 +17,8 @@ const AdminDashboard = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await api.auth/checkAuth();
-        if (response.ok) {
+        const auth = await api.get<{ authenticated?: boolean; user?: unknown }>('/auth/admin/auth/check');
+        if (auth?.authenticated === true || auth?.user) {
           setIsAuthenticated(true);
         } else {
           window.location.href = '/admin/login';
@@ -34,7 +35,7 @@ const AdminDashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await api.logout();
+      await api.post('/auth/admin/logout');
       window.location.href = '/admin/login';
     } catch (error) {
       console.error('Logout failed:', error);

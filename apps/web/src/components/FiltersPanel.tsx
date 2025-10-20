@@ -1,3 +1,4 @@
+// apps/web/src/components/FiltersPanel.tsx
 import { useEffect, useRef, useState } from 'react';
 import { api } from '@/config/api';
 

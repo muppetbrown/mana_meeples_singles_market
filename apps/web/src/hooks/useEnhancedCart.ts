@@ -1,3 +1,4 @@
+// apps/web/src/hooks/useEnhancedCart.ts
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 /**
