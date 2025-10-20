@@ -1,481 +1,391 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
-  title: TCG Singles Market API
-  description: API for the Trading Card Game Singles Market application
-  version: 1.0.0
-  contact:
-    name: TCG Singles Market
-    email: support@tcgsingles.com
-  license:
-    name: MIT
-    url: https://opensource.org/licenses/MIT
+  title: Mana & Meeples Singles Market API
+  version: "1.0.0"
+  description: |
+    Public API for card listings, counts, and variation facets.
+    Query coercion: numbers/booleans accepted as strings (e.g., `?game_id=1`, `?in_stock=true`).
 
 servers:
-  - url: http://localhost:3001/api
-    description: Development server
-  - url: https://api.tcgsingles.com
-    description: Production server
+  - url: https://api.manaandmeeples.co.nz/api
+    description: Production API
+
+tags:
+  - name: Health
+  - name: Cards
+  - name: Variations
 
 paths:
-  /games:
+  /healthz:
     get:
-      summary: Get all active games
-      description: Retrieves a list of all active games available in the system
-      tags:
-        - Games
+      tags: [Health]
+      summary: Liveness probe
       responses:
-        '200':
-          description: Successful response
+        "200":
+          description: Service is alive
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Game'
-              example:
-                - id: 1
-                  name: "Magic: The Gathering"
-                  code: "mtg"
-                  active: true
-                - id: 2
-                  name: "Pokemon"
-                  code: "pokemon"
-                  active: true
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/Health"
+
+  /readyz:
+    get:
+      tags: [Health]
+      summary: Readiness probe
+      responses:
+        "200":
+          description: Service readiness status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Readiness"
 
   /cards:
     get:
-      summary: Search and filter cards
-      description: Get cards with filtering, searching, and pagination
-      tags:
-        - Cards
+      tags: [Cards]
+      summary: List cards
+      description: |
+        Returns cards matching filters and pagination.
+        Facet params accept CSV (`treatment=EXTENDED,BORDERLESS`) or repeated keys (`treatment=EXTENDED&treatment=BORDERLESS`).
       parameters:
-        - name: search
-          in: query
-          description: Search term for card names
-          schema:
-            type: string
-            maxLength: 100
-        - name: game
-          in: query
-          description: Game filter
-          schema:
-            type: string
-            enum: [all, mtg, pokemon, onepiece]
-        - name: rarity
-          in: query
-          description: Card rarity filter
-          schema:
-            type: string
-        - name: quality
-          in: query
-          description: Card condition filter
-          schema:
-            type: string
-            enum: [all, NM, LP, MP, HP, DMG]
-        - name: foilType
-          in: query
-          description: Foil type filter
-          schema:
-            type: string
-            enum: [all, Regular, Foil, Etched]
-        - name: minPrice
-          in: query
-          description: Minimum price filter
-          schema:
-            type: number
-            minimum: 0
-        - name: maxPrice
-          in: query
-          description: Maximum price filter
-          schema:
-            type: number
-            minimum: 0
-        - name: sortBy
-          in: query
-          description: Sort field
-          schema:
-            type: string
-            enum: [name, price, set, rarity]
-            default: name
-        - name: sortOrder
-          in: query
-          description: Sort order
-          schema:
-            type: string
-            enum: [asc, desc]
-            default: asc
-        - name: page
-          in: query
-          description: Page number for pagination
-          schema:
-            type: integer
-            minimum: 1
-            default: 1
-        - name: limit
-          in: query
-          description: Number of cards per page
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 100
-            default: 50
+        - $ref: "#/components/parameters/page"
+        - $ref: "#/components/parameters/per_page"
+        - $ref: "#/components/parameters/sort"
+        - $ref: "#/components/parameters/order"
+        - $ref: "#/components/parameters/game_id"
+        - $ref: "#/components/parameters/set_id"
+        - $ref: "#/components/parameters/in_stock"
+        - $ref: "#/components/parameters/q"
+        - $ref: "#/components/parameters/treatment"
+        - $ref: "#/components/parameters/border_color"
+        - $ref: "#/components/parameters/finish"
+        - $ref: "#/components/parameters/promo_type"
+        - $ref: "#/components/parameters/frame_effect"
+        - $ref: "#/components/parameters/min_price"
+        - $ref: "#/components/parameters/max_price"
       responses:
-        '200':
-          description: Successful response
+        "200":
+          description: Cards page
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  cards:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/Card'
-                  pagination:
-                    $ref: '#/components/schemas/Pagination'
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '500':
-          $ref: '#/components/responses/InternalServerError'
+                $ref: "#/components/schemas/CardsList"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
-  /orders:
-    post:
-      summary: Create a new order
-      description: Creates a new order with comprehensive validation and stock management
-      tags:
-        - Orders
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/OrderRequest'
-            example:
-              customer:
-                email: "customer@example.com"
-                phone: "+64-21-123-4567"
-                name: "John Doe"
-              items:
-                - inventory_id: "abc123"
-                  quantity: 2
-                  price: 15.99
-              total: 31.98
-              currency: "NZD"
-              timestamp: "2023-12-01T10:30:00Z"
-      responses:
-        '201':
-          description: Order created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/OrderResponse'
-              example:
-                success: true
-                orderId: "order_789"
-                message: "Order created successfully"
-        '400':
-          $ref: '#/components/responses/BadRequest'
-        '409':
-          description: Insufficient stock
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-              example:
-                error: "Insufficient stock for requested items"
-        '500':
-          $ref: '#/components/responses/InternalServerError'
-
-  /health:
+  /cards/count:
     get:
-      summary: Health check endpoint
-      description: Check the health status of the API and its dependencies
-      tags:
-        - System
+      tags: [Cards]
+      summary: Count cards
+      description: Returns count of cards matching the provided filters.
+      parameters:
+        - $ref: "#/components/parameters/game_id"
+        - $ref: "#/components/parameters/set_id"
+        - $ref: "#/components/parameters/in_stock"
+        - $ref: "#/components/parameters/q"
+        - $ref: "#/components/parameters/treatment"
+        - $ref: "#/components/parameters/border_color"
+        - $ref: "#/components/parameters/finish"
+        - $ref: "#/components/parameters/promo_type"
+        - $ref: "#/components/parameters/frame_effect"
+        - $ref: "#/components/parameters/min_price"
+        - $ref: "#/components/parameters/max_price"
       responses:
-        '200':
-          description: Service is healthy
+        "200":
+          description: Count result
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    enum: [healthy]
-                  timestamp:
-                    type: string
-                    format: date-time
-                  database:
-                    type: string
-                    enum: [connected, disconnected]
-                  uptime:
-                    type: number
-                    description: Server uptime in seconds
-              example:
-                status: "healthy"
-                timestamp: "2023-12-01T10:30:00Z"
-                database: "connected"
-                uptime: 86400
-        '503':
-          description: Service unavailable
+                $ref: "#/components/schemas/CountResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+
+  /variations:
+    get:
+      tags: [Variations]
+      summary: Variation facets for a set or game
+      description: |
+        Returns distinct variation/facet values from the materialized/view-backed source.
+        Requires either `set_id` or `game_id`.
+      parameters:
+        - $ref: "#/components/parameters/set_id_required_or_game_id"
+        - $ref: "#/components/parameters/game_id_required_or_set_id"
+      responses:
+        "200":
+          description: Facet values
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Error'
+                $ref: "#/components/schemas/VariationFacets"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
 
 components:
-  schemas:
-    Game:
-      type: object
-      properties:
-        id:
-          type: integer
-          description: Unique game identifier
-        name:
-          type: string
-          description: Game display name
-        code:
-          type: string
-          description: Game code identifier
-        active:
-          type: boolean
-          description: Whether the game is active
-      required:
-        - id
-        - name
-        - code
-        - active
+  parameters:
+    page:
+      name: page
+      in: query
+      description: 1-based page index
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    per_page:
+      name: per_page
+      in: query
+      description: Page size (max 100)
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 24
+    sort:
+      name: sort
+      in: query
+      description: Sort column (whitelisted server-side)
+      required: false
+      schema:
+        type: string
+        enum: [name, number, price, set]
+        default: name
+    order:
+      name: order
+      in: query
+      description: Sort order
+      required: false
+      schema:
+        type: string
+        enum: [asc, desc]
+        default: asc
+    game_id:
+      name: game_id
+      in: query
+      required: false
+      description: Filter by game id
+      schema:
+        type: integer
+        minimum: 1
+    set_id:
+      name: set_id
+      in: query
+      required: false
+      description: Filter by set id
+      schema:
+        type: integer
+        minimum: 1
+    in_stock:
+      name: in_stock
+      in: query
+      required: false
+      description: Only include cards with inventory (stock > 0)
+      schema:
+        type: boolean
+    q:
+      name: q
+      in: query
+      required: false
+      description: Full-text search query
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 100
+    # CSV (form, explode=false) and also accept repeated keys (server supports both)
+    treatment:
+      name: treatment
+      in: query
+      required: false
+      description: Filter by card treatment(s)
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: string }
+    border_color:
+      name: border_color
+      in: query
+      required: false
+      description: Filter by border color(s)
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: string }
+    finish:
+      name: finish
+      in: query
+      required: false
+      description: Filter by finish(es)
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: string }
+    promo_type:
+      name: promo_type
+      in: query
+      required: false
+      description: Filter by promo type(s)
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: string }
+    frame_effect:
+      name: frame_effect
+      in: query
+      required: false
+      description: Filter by frame effect(s)
+      style: form
+      explode: false
+      schema:
+        type: array
+        items: { type: string }
+    min_price:
+      name: min_price
+      in: query
+      required: false
+      description: Minimum price filter
+      schema:
+        type: number
+        minimum: 0
+    max_price:
+      name: max_price
+      in: query
+      required: false
+      description: Maximum price filter
+      schema:
+        type: number
+        minimum: 0
 
-    Card:
-      type: object
-      properties:
-        id:
-          type: string
-          description: Unique card identifier
-        name:
-          type: string
-          description: Card name
-        set_name:
-          type: string
-          description: Set or expansion name
-        card_number:
-          type: string
-          description: Card number within the set
-        rarity:
-          type: string
-          description: Card rarity
-        image_url:
-          type: string
-          format: uri
-          description: URL to card image
-        variations:
-          type: array
-          items:
-            $ref: '#/components/schemas/CardVariation'
-      required:
-        - id
-        - name
-        - set_name
-        - variations
-
-    CardVariation:
-      type: object
-      properties:
-        inventory_id:
-          type: string
-          description: Unique inventory identifier
-        quality:
-          type: string
-          enum: [NM, LP, MP, HP, DMG]
-          description: Card condition
-        price:
-          type: number
-          format: decimal
-          minimum: 0
-          description: Price in base currency
-        stock:
-          type: integer
-          minimum: 0
-          description: Available quantity
-        foil_type:
-          type: string
-          enum: [Regular, Foil, Etched]
-          description: Foil treatment type
-        language:
-          type: string
-          description: Card language
-      required:
-        - inventory_id
-        - quality
-        - price
-        - stock
-        - foil_type
-        - language
-
-    Customer:
-      type: object
-      properties:
-        email:
-          type: string
-          format: email
-          maxLength: 255
-          description: Customer email address
-        phone:
-          type: string
-          pattern: '^[\+]?[\d\-\s\(\)]{10,20}$'
-          description: Customer phone number
-        name:
-          type: string
-          maxLength: 255
-          description: Customer name
-      required:
-        - email
-        - phone
-        - name
-
-    OrderItem:
-      type: object
-      properties:
-        inventory_id:
-          type: string
-          description: Inventory item identifier
-        quantity:
-          type: integer
-          minimum: 1
-          maximum: 99
-          description: Quantity to order
-        price:
-          type: number
-          format: decimal
-          minimum: 0
-          description: Price per item
-      required:
-        - inventory_id
-        - quantity
-        - price
-
-    OrderRequest:
-      type: object
-      properties:
-        customer:
-          $ref: '#/components/schemas/Customer'
-        items:
-          type: array
-          items:
-            $ref: '#/components/schemas/OrderItem'
-          minItems: 1
-          maxItems: 100
-        total:
-          type: number
-          format: decimal
-          minimum: 0
-          description: Total order amount
-        currency:
-          type: string
-          enum: [USD, NZD, EUR, GBP, CAD, AUD]
-          description: Currency code
-        timestamp:
-          type: string
-          format: date-time
-          description: Order timestamp
-      required:
-        - customer
-        - items
-        - total
-        - currency
-        - timestamp
-
-    OrderResponse:
-      type: object
-      properties:
-        success:
-          type: boolean
-          description: Whether the order was successful
-        orderId:
-          type: string
-          description: Generated order identifier
-        message:
-          type: string
-          description: Success message
-      required:
-        - success
-        - orderId
-        - message
-
-    Pagination:
-      type: object
-      properties:
-        page:
-          type: integer
-          minimum: 1
-          description: Current page number
-        limit:
-          type: integer
-          minimum: 1
-          maximum: 100
-          description: Items per page
-        total:
-          type: integer
-          minimum: 0
-          description: Total number of items
-        pages:
-          type: integer
-          minimum: 0
-          description: Total number of pages
-      required:
-        - page
-        - limit
-        - total
-        - pages
-
-    Error:
-      type: object
-      properties:
-        error:
-          type: string
-          description: Error message
-        details:
-          type: array
-          items:
-            type: string
-          description: Additional error details
-      required:
-        - error
+    # Mutually optional: one of set_id or game_id must be provided; documented separately for clarity
+    set_id_required_or_game_id:
+      name: set_id
+      in: query
+      required: false
+      description: Set id (required if `game_id` not provided)
+      schema:
+        type: integer
+        minimum: 1
+    game_id_required_or_set_id:
+      name: game_id
+      in: query
+      required: false
+      description: Game id (required if `set_id` not provided)
+      schema:
+        type: integer
+        minimum: 1
 
   responses:
     BadRequest:
-      description: Bad request - invalid input
+      description: Invalid input
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: "Validation failed"
-            details:
-              - "Email is required"
-              - "Quantity must be between 1 and 99"
-
-    InternalServerError:
-      description: Internal server error
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            validation:
+              value:
+                error: Invalid query parameters
+                details:
+                  fieldErrors:
+                    game_id: ["Expected number, received string"]
+    ServerError:
+      description: Unexpected server error
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/Error'
-          example:
-            error: "Internal server error"
+            $ref: "#/components/schemas/ErrorResponse"
 
-  securitySchemes:
-    AdminAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-      description: JWT token for admin authentication
+  schemas:
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        error:
+          type: string
+        details:
+          description: Optional validation details
+          type: object
+    CountResponse:
+      type: object
+      additionalProperties: false
+      properties:
+        count:
+          type: integer
+          minimum: 0
+      required: [count]
 
-# Rate limiting information
-x-rateLimit:
-  normal: "100 requests per minute"
-  strict: "30 requests per minute for expensive operations"
-  lenient: "200 requests per minute for lightweight operations"
+    Health:
+      type: object
+      properties:
+        status: { type: string, example: ok }
+        service: { type: string, example: api }
+        at: { type: string, format: date-time }
+      required: [status, at]
+
+    Readiness:
+      type: object
+      properties:
+        status: { type: string, example: ready }
+        deps:
+          type: object
+          additionalProperties: true
+          example: { db: "unknown" }
+        at: { type: string, format: date-time }
+      required: [status, at]
+
+    VariationFacets:
+      type: object
+      properties:
+        treatments:
+          type: array
+          items: { type: string }
+        border_colors:
+          type: array
+          items: { type: string }
+        finishes:
+          type: array
+          items: { type: string }
+        promo_types:
+          type: array
+          items: { type: string }
+        frame_effects:
+          type: array
+          items: { type: string }
+      required:
+        - treatments
+        - border_colors
+        - finishes
+        - promo_types
+        - frame_effects
+
+    # Minimal Card model: reflect columns you actually return.
+    # Adjust as needed if your SELECT includes additional fields.
+    Card:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        game_id: { type: integer }
+        set_id: { type: integer }
+        card_number: { type: string }
+        finish: { type: string }
+        treatment: { type: string }
+        border_color: { type: string }
+        frame_effect: { type: string }
+        promo_type: { type: string }
+        sku: { type: string }
+      additionalProperties: true
+
+    CardsList:
+      type: array
+      items:
+        $ref: "#/components/schemas/Card"
