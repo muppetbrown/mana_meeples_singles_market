@@ -138,6 +138,7 @@ mana_meeples_singles_market
 │  │ │ │ │ └── VariationBadge.tsx
 │  │ │ │ └── index.ts
 │  │ │ └── hooks/
+│  │ │  ├── index.ts
 │  │ │  └── useVirtualScroll.ts
 │  │ ├── styles/
 │  │ │ └── index.css
@@ -157,6 +158,7 @@ mana_meeples_singles_market
 │  │ │ └── index.ts
 │  │ ├── App.tsx
 │  │ ├── main.tsx
+│  │ ├── pnpm typecheck.txt
 │  │ └── reportWebVitals.ts
 │  ├── .env
 │  ├── index.html
