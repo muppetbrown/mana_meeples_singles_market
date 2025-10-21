@@ -1,5 +1,5 @@
 // apps/api/src/scripts/testEmail.ts
-import { sendEmail } from "../services/emailService.js";
+import { sendEmail } from "../src/services/emailService.js";
 
 (async () => {
   console.log("📧 Sending test email via Gmail SMTP...");
