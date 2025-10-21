@@ -329,49 +329,63 @@ const TCGShop = () => {
 
   // Fetch cards with current filters
   const fetchCards = useCallback(async () => {
-    if (requestInFlight.current.cards) return;
+  // Prevent duplicate requests
+  if (requestInFlight.current.cards) return;
+  requestInFlight.current.cards = true;
 
-    try {
-      requestInFlight.current.cards = true;
-      setCardsLoading(true);
-      setCardsError(null);
+  try {
+    setLoading(true);
+    setError(null);
 
-      const params = new URLSearchParams();
+    const params = new URLSearchParams();
 
-      // paging
-      params.set('per_page', '100');
-
-      // search
-      if (searchTerm) params.set('search', searchTerm);
-
-      // sort -> backend expects 'sort' + 'order'
-      if (filters.sortBy)   params.set('sort',  filters.sortBy === 'updated' ? 'created_at' : (filters.sortBy === 'set' ? 'name' : filters.sortBy));
-      if (filters.sortOrder) params.set('order', filters.sortOrder);
-
-      // game filter
-      if (selectedGame !== 'all') {
-        const g = games.find((x: Game) => x.name === selectedGame);
-        if (g) params.set('game_id', String(g.id));
+    // Add game filter
+    if (selectedGame && selectedGame !== 'all') {
+      const game = games.find(g => g.name === selectedGame);
+      if (game?.id) {
+        params.append('game_id', String(game.id));
       }
-
-      // set filter
-      if (filters.set && filters.set !== 'all') params.set('set_name', filters.set);
-
-      // rarity (supported in backend)
-      if (filters.rarity && filters.rarity !== 'all') params.set('rarity', filters.rarity);
-
-      const qs = params.toString();
-
-      const data = await api.get<{ cards: StorefrontCard[] }>(`/storefront/cards?${qs}`);
-      setCards(data.cards);
-    } catch (err) {
-      const formatted = handleError(err, { operation: 'fetchCards' });
-      setCardsError(`${formatted.title}: ${formatted.message} Try adjusting your filters or refreshing the page.`);
-    } finally {
-      setCardsLoading(false);
-      requestInFlight.current.cards = false;
     }
-  }, [searchTerm, selectedGame, filters, games, handleError]);
+
+    // Add set filter
+    if (selectedSet && selectedSet !== 'all') {
+      const set = sets.find(s => s.name === selectedSet);
+      if (set?.id) {
+        params.append('set_id', String(set.id));
+      }
+    }
+
+    // Add search term
+    if (searchTerm && searchTerm.trim()) {
+      params.append('search', searchTerm.trim());
+    }
+
+    // Add treatment filter (if you have this)
+    if (selectedTreatment && selectedTreatment !== 'all') {
+      params.append('treatment', selectedTreatment);
+    }
+
+    // Add pagination
+    params.append('page', '1');
+    params.append('per_page', '100');
+    params.append('sort', 'name');
+    params.append('order', 'asc');
+
+    // ✅ USE THE STOREFRONT ENDPOINT
+    const response = await api.get<{ cards: StorefrontCard[] }>(
+      `/storefront/cards?${params.toString()}`
+    );
+
+    setCards(response.cards ?? []);
+  } catch (err: any) {
+    console.error('Error fetching cards:', err);
+    setError(err?.message ?? 'Failed to load cards');
+    handleError(err, 'fetching cards');
+  } finally {
+    setLoading(false);
+    requestInFlight.current.cards = false;
+  }
+}, [selectedGame, selectedSet, searchTerm, selectedTreatment, games, sets, handleError]);
 
 
   useEffect(() => {
