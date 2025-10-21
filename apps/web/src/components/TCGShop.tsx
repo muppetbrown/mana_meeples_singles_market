@@ -103,14 +103,14 @@ const TCGShop: React.FC = () => {
 
   // Group cards by card_number (same logic as admin)
   const groupedCardsFlat = useMemo(() => {
-    const groups = new Map<string, StorefrontCard[]>();
+    const groups = new Map<string, CardForDisplay[]>(); 
     
     cards.forEach(card => {
       const key = `${card.set_name}-${card.card_number}`;
       if (!groups.has(key)) {
         groups.set(key, []);
       }
-      groups.get(key)!.push(card);
+      groups.get(key)!.push(card); 
     });
     
     // Merge cards with same card_number
@@ -513,13 +513,13 @@ const TCGShop: React.FC = () => {
   // CARD GROUPING AND SORTING - FIXED PRICE GROUPING
   // ============================================================================
   const groupedCards = useMemo(() => {
-  if (!groupedCardsFlat.length) return []; // ← Changed from cards
+  if (!groupedCardsFlat.length) return [];
   
   const { sortBy } = filters;
 
   // If no grouping needed, return ungrouped
   if (!['name', 'set', 'rarity', 'price', 'price_low', 'price_high'].includes(sortBy)) {
-    return [{ section: null, cards: groupedCardsFlat }]; // ← Changed from cards
+    return [{ section: null, cards: groupedCardsFlat }]; 
   }
 
   const groups = new Map<string, CardForDisplay[]>();
@@ -882,7 +882,7 @@ const TCGShop: React.FC = () => {
             <div className="flex items-center mb-4">
               <div className="flex-1 pr-4">
                 <p className="text-mm-teal" aria-live="polite">
-                  <span className="font-medium">{cards.length}</span> cards found
+                  <span className="font-medium">{groupedCardsFlat.length}</span> cards found
                 </p>
               </div>
 
