@@ -2,20 +2,20 @@
 // Complete overhaul - Phase 1 & 2 fixes - All functionality preserved
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import CardSearchBar from './CardSearchBar';
-import { useShopFilters } from '../hooks/useShopFilters';
+import CardSearchBar from '@/features/shop/components/Search/SearchBar';
+import { useShopFilters } from '@/features/shop/hooks/useShopFilters';
 import { ShoppingCart, X, Plus, Minus, Filter, ChevronDown, LayoutGrid, List } from 'lucide-react';
-import CurrencySelector from './CurrencySelector';
-import Checkout from './Checkout';
-import { useCart } from '../hooks/useCart';
-import ErrorBoundary from './ErrorBoundary';
-import KeyboardShortcutsModal from './KeyboardShortcutsModal';
-import { useErrorHandler } from '../services/errorHandler';
-import { VIRTUAL_SCROLL_CONFIG } from '../config/constants';
-import CardSkeleton from './skeletons/CardSkeleton';
-import SectionHeader from './common/SectionHeader';
-import CardItem from './cards/CardItem';
-import ListCardItem from './cards/ListCardItem';
+import CurrencySelector from '@/shared/components/forms/CurrencySelector';
+import Checkout from '@/features/shop/components/Cart/Checkout';
+import { useCart } from '@/features/shop/hooks/useCart';
+import ErrorBoundary from '@/shared/components/layout/ErrorBoundary';
+import KeyboardShortcutsModal from '@/shared/components/layout/KeyboardShortcuts';
+import { useErrorHandler } from '@/services/error/handler';
+import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
+import CardSkeleton from '@/features/shop/components/CardDisplay/CardSkeleton';
+import SectionHeader from '@/shared/components/ui/SectionHeader';
+import CardItem from '@/features/shop/components/CardDisplay/CardItem';
+import ListCardItem from './components/CardDisplay/ListCardItem';
 import { API_BASE, api } from '@/lib/api';
 import type { 
   StorefrontCard,
@@ -23,7 +23,7 @@ import type {
 } from '@/types';
 
 // Lazy load VirtualCardGrid for code splitting
-const VirtualCardGrid = React.lazy(() => import('./VirtualCardGrid'));
+const VirtualCardGrid = React.lazy(() => import('@/features/shop/components/CardDisplay/CardGrid'));
 
 // ============================================================================
 // LOCAL TYPE DEFINITIONS (not exported elsewhere)

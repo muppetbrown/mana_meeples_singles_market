@@ -1,7 +1,7 @@
 // apps/web/src/components/common/RecentlyViewedCards.tsx
 import React from 'react';
 import { Clock, X } from 'lucide-react';
-import OptimizedImage from '../OptimizedImage';
+import OptimizedImage from '@/shared/components/media/OptimizedImage';
 
 type ViewedCard = {
   id: string | number;

@@ -3,12 +3,12 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download, LayoutGrid, List } from 'lucide-react';
 import { api, API_BASE } from '@/lib/api';
-import { useShopFilters } from '../../hooks/useShopFilters';
-import CardSearchBar from '../CardSearchBar';
-import EmptyState from '../EmptyState';
-import CardSkeleton from '../skeletons/CardSkeleton';
+import { useShopFilters } from '@/features/shop/hooks/useShopFilters';
+import CardSearchBar from '@/features/shop/components/Search/SearchBar';
+import EmptyState from '@/shared/components/ui/EmptyState';
+import CardSkeleton from '@/features/shop/components/CardDisplay/CardSkeleton';
 import AddToInventoryModal from './AddToInventoryModal';
-import AdminCardGrid from './AdminCardGrid';
+import AdminCardGrid from '@/features/shop/components/CardDisplay/CardGrid';
 import { Package } from 'lucide-react';
 import type { 
   Card,

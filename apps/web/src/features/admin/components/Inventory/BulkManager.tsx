@@ -6,7 +6,7 @@ import {
   validateInventoryCSV,
   formatInventoryForExport,
   generateInventoryTemplate,
-} from '../../utils/csvUtils';
+} from '@/lib/utils';
 import { API_BASE } from '@/lib/api';
 
 // -------------------- Types --------------------

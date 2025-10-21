@@ -1,7 +1,7 @@
 // apps/web/src/components/cards/CardItem.tsx
 import React from 'react';
-import OptimizedImage from '../OptimizedImage';
-import { ACCESSIBILITY_CONFIG } from '../../config/constants';
+import OptimizedImage from '@/shared/components/media/OptimizedImage';
+import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
 
 type Variation = {
   variation_key: string;

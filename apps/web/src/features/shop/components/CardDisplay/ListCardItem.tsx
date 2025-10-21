@@ -1,6 +1,6 @@
 // apps/web/src/components/cards/ListCardItem.tsx
 import React from 'react';
-import OptimizedImage from '../OptimizedImage';
+import OptimizedImage from '@/shared/components/media/OptimizedImage';
 
 type Variation = {
   variation_key: string;

@@ -3,10 +3,10 @@ import { useState, useEffect } from 'react';
 import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
 import { api } from '@/lib/api';
 
-import CurrencySelector from './CurrencySelector';
-import UnifiedCardsTab from './admin/UnifiedCardsTab';
-import OrdersTab from './admin/OrdersTab';
-import AnalyticsTab from './admin/AnalyticsTab';
+import CurrencySelector from '@/shared/components/forms/CurrencySelector';
+import UnifiedCardsTab from './Cards/CardsTab';
+import OrdersTab from './Orders/OrdersTab';
+import AnalyticsTab from './Analytics/AnalyticsTab';
 
 const AdminDashboard = () => {
   const [authChecking, setAuthChecking] = useState(true);
