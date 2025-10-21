@@ -1,0 +1,2 @@
+export { MiniCart } from './MiniCart';
+export { default as Checkout } from './Checkout';

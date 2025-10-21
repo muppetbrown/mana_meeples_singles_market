@@ -61,6 +61,7 @@ mana_meeples_singles_market
 │  │ │ │ │ ├── Analytics/
 │  │ │ │ │ │ └── AnalyticsTab.tsx
 │  │ │ │ │ ├── Cards/
+│  │ │ │ │ │ ├── AddToInventoryModal.tsx
 │  │ │ │ │ │ └── CardsTab.tsx
 │  │ │ │ │ ├── Inventory/
 │  │ │ │ │ │ └── BulkManager.tsx
@@ -74,21 +75,32 @@ mana_meeples_singles_market
 │  │ │ └── shop/
 │  │ │  ├── components/
 │  │ │  │ ├── CardDisplay/
+│  │ │  │ │ ├── CardDisplay.tsx
 │  │ │  │ │ ├── CardGrid.tsx
 │  │ │  │ │ ├── CardItem.tsx
+│  │ │  │ │ ├── CardList.tsx
 │  │ │  │ │ ├── CardSkeleton.tsx
 │  │ │  │ │ └── ListCardItem.tsx
 │  │ │  │ ├── Cart/
+│  │ │  │ │ ├── CartItem.tsx
+│  │ │  │ │ ├── CartModal.tsx
 │  │ │  │ │ ├── CartPanel.tsx
-│  │ │  │ │ └── Checkout.tsx
+│  │ │  │ │ ├── Checkout.tsx
+│  │ │  │ │ ├── index.ts
+│  │ │  │ │ └── MiniCart.tsx
 │  │ │  │ ├── Search/
+│  │ │  │ │ ├── ActiveFilters.tsx
 │  │ │  │ │ ├── FiltersPanel.tsx
 │  │ │  │ │ └── SearchBar.tsx
-│  │ │  │ └── RecentlyViewed.tsx
+│  │ │  │ ├── RecentlyViewed.tsx
+│  │ │  │ └── ShopHeader.tsx
 │  │ │  ├── hooks/
+│  │ │  │ ├── useCardFetching.ts
 │  │ │  │ ├── useCart.ts
 │  │ │  │ ├── useRecentlyViewed.ts
-│  │ │  │ └── useShopFilters.ts
+│  │ │  │ ├── useShopFilters.ts
+│  │ │  │ ├── useShopState.ts
+│  │ │  │ └── useVariationSelection.ts
 │  │ │  ├── index.ts
 │  │ │  └── ShopPage.tsx
 │  │ ├── lib/
@@ -105,7 +117,6 @@ mana_meeples_singles_market
 │  │ │  ├── index.ts
 │  │ │  └── search.ts
 │  │ ├── retired/
-│  │ │ ├── AddToInventoryModal.tsx
 │  │ │ ├── AdminCardGrid.tsx
 │  │ │ ├── App.css
 │  │ │ ├── setupTests.ts
@@ -159,7 +170,8 @@ mana_meeples_singles_market
 │  │ ├── App.tsx
 │  │ ├── main.tsx
 │  │ ├── pnpm typecheck.txt
-│  │ └── reportWebVitals.ts
+│  │ ├── reportWebVitals.ts
+│  │ └── vit-env.d.ts
 │  ├── .env
 │  ├── index.html
 │  ├── package.json

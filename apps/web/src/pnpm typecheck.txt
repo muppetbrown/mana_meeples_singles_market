@@ -3,66 +3,47 @@ C:\Git_Repos\mana_meeples_singles_market\apps\web>pnpm typecheck
 > web@0.1.0 typecheck C:\Git_Repos\mana_meeples_singles_market\apps\web
 > tsc -p tsconfig.json --noEmit
 
-src/features/admin/components/Cards/CardsTab.tsx:10:33 - error TS2307: Cannot find module './AddToInventoryModal' or its corresponding type declarations.
+src/features/admin/components/Cards/AddToInventoryModal.tsx:117:71 - error TS2551: Property 'variation_label' does not exist on type 'CardVariation'. Did you mean 'variation_key'?
 
-10 import AddToInventoryModal from './AddToInventoryModal';
-                                   ~~~~~~~~~~~~~~~~~~~~~~~
+117               <span className="font-medium text-slate-900">{variation.variation_label}</span>
+                                                                          ~~~~~~~~~~~~~~~
 
-src/features/admin/components/Cards/CardsTab.tsx:65:5 - error TS2339: Property 'games' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
-
-65     games,
-       ~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:66:5 - error TS2339: Property 'sets' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
-
-66     sets,
-       ~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:67:5 - error TS2339: Property 'filterOptions' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
-
-67     filterOptions,
-       ~~~~~~~~~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:68:5 - error TS2339: Property 'loading' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
-
-68     loading: filtersLoading,
-       ~~~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:69:5 - error TS2339: Property 'error' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
-
-69     error: filtersError
-       ~~~~~
+  src/types/models/card.ts:23:3
+    23   variation_key: string;
+         ~~~~~~~~~~~~~
+    'variation_key' is declared here.
 
 src/features/admin/components/Cards/CardsTab.tsx:70:22 - error TS2554: Expected 0 arguments, but got 2.
 
 70   } = useShopFilters(API_BASE, selectedGame);
                         ~~~~~~~~~~~~~~~~~~~~~~
 
-src/features/admin/components/Cards/CardsTab.tsx:222:28 - error TS2339: Property 'finish' does not exist on type 'CardVariation'.
-
-222       foil_type: variation.finish === 'foil' ? 'Foil' : 'Regular',
-                               ~~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:248:41 - error TS2339: Property 'card_id' does not exist on type 'CardVariation'.
-
-248         card_id: addModalData.variation.card_id,
-                                            ~~~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:271:58 - error TS2339: Property 'treatment' does not exist on type 'CardVariation'.
-
-271         Array.from(new Set((variations ?? []).map(v => v.treatment)));
-                                                             ~~~~~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:274:58 - error TS2339: Property 'finish' does not exist on type 'CardVariation'.
-
-274         Array.from(new Set((variations ?? []).map(v => v.finish)));
-                                                             ~~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:430:15 - error TS2322: Type '{ cards: Card[]; mode: "all" | "inventory"; viewMode: "list" | "grid"; onAddToInventory: (card: Card, variation: CardVariation) => void; }' is not assignable to type 'IntrinsicAttributes & CardGridProps<Card>'.
+src/features/admin/components/Cards/CardsTab.tsx:430:15 - error TS2322: Type '{ cards: Card[]; mode: "all" | "inventory"; viewMode: "grid" | "list"; onAddToInventory: (card: Card, variation: CardVariation) => void; }' is not assignable to type 'IntrinsicAttributes & CardGridProps<Card>'.
   Property 'mode' does not exist on type 'IntrinsicAttributes & CardGridProps<Card>'.
 
 430               mode={mode}
                   ~~~~
+
+src/features/shop/components/CardDisplay/CardDisplay.tsx:2:10 - error TS2304: Cannot find name 'StorefrontCard'.
+
+2   cards: StorefrontCard[];
+           ~~~~~~~~~~~~~~
+
+src/features/shop/components/CardDisplay/CardDisplay.tsx:4:13 - error TS2304: Cannot find name 'Currency'.
+
+4   currency: Currency;
+              ~~~~~~~~
+
+src/features/shop/components/CardDisplay/CardDisplay.tsx:8:28 - error TS2304: Cannot find name 'CartItem'.
+
+8   onAddToCart: (item: Omit<CartItem, 'quantity'>) => void;
+                             ~~~~~~~~
+
+src/features/shop/components/CardDisplay/CardDisplay.tsx:11:14 - error TS2322: Type '(props: CardDisplayProps) => void' is not assignable to type 'FC<CardDisplayProps>'.
+  Type 'void' is not assignable to type 'ReactNode'.
+
+11 export const CardDisplay: React.FC<CardDisplayProps> = (props) => {
+                ~~~~~~~~~~~
 
 src/features/shop/components/CardDisplay/CardGrid.tsx:104:9 - error TS2322: Type 'T' is not assignable to type 'Card'.
   Type 'import("C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/models/card").Card' is not assignable to type 'Card'.
@@ -76,318 +57,161 @@ src/features/shop/components/CardDisplay/CardGrid.tsx:104:9 - error TS2322: Type
          ~~~~
     The expected type comes from property 'card' which is declared here on type 'IntrinsicAttributes & CardItemProps'
 
-src/features/shop/components/CardDisplay/CardGrid.tsx:125:33 - error TS2322: Type '{ key: number; viewMode: "list" | "grid"; }' is not assignable to type 'IntrinsicAttributes'.
-  Property 'viewMode' does not exist on type 'IntrinsicAttributes'.
+src/features/shop/components/Cart/CartItem.tsx:2:9 - error TS2304: Cannot find name 'CartItem'.
 
-125           <CardSkeleton key={i} viewMode={viewMode} />
-                                    ~~~~~~~~
+2   item: CartItem;
+          ~~~~~~~~
 
-src/features/shop/components/CardDisplay/CardItem.tsx:62:13 - error TS2322: Type '{ src: string; alt: string; width: number; height: number; className: string; placeholder: string; sizes: string; }' is not assignable to type 'IntrinsicAttributes & OptimizedImageProps'.
-  Property 'placeholder' does not exist on type 'IntrinsicAttributes & OptimizedImageProps'.
+src/features/shop/components/Cart/CartItem.tsx:3:13 - error TS2304: Cannot find name 'Currency'.
 
-62             placeholder="blur"
-               ~~~~~~~~~~~
+3   currency: Currency;
+              ~~~~~~~~
 
-src/features/shop/components/CardDisplay/ListCardItem.tsx:58:15 - error TS2322: Type '{ src: string; alt: string; width: number; height: number; className: string; placeholder: string; sizes: string; }' is not assignable to type 'IntrinsicAttributes & OptimizedImageProps'.
-  Property 'placeholder' does not exist on type 'IntrinsicAttributes & OptimizedImageProps'.
+src/features/shop/components/Cart/CartItem.tsx:8:14 - error TS2322: Type '(props: CartItemDisplayProps) => void' is not assignable to type 'FC<CartItemDisplayProps>'.
+  Type 'void' is not assignable to type 'ReactNode'.
 
-58               placeholder="blur"
-                 ~~~~~~~~~~~
+8 export const CartItemDisplay: React.FC<CartItemDisplayProps> = (props) => {
+               ~~~~~~~~~~~~~~~
 
-src/features/shop/components/RecentlyViewed.tsx:92:17 - error TS2322: Type '{ src: string; alt: string; width: number; height: number; className: string; placeholder: string; sizes: string; }' is not assignable to type 'IntrinsicAttributes & OptimizedImageProps'.
-  Property 'placeholder' does not exist on type 'IntrinsicAttributes & OptimizedImageProps'.
+src/features/shop/components/Search/ActiveFilters.tsx:2:12 - error TS2304: Cannot find name 'SearchFilters'.
 
-92                 placeholder="blur"
-                   ~~~~~~~~~~~
+2   filters: SearchFilters;
+             ~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:80:5 - error TS2339: Property 'games' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
+src/features/shop/components/Search/ActiveFilters.tsx:7:14 - error TS2322: Type '(props: ActiveFiltersProps) => void' is not assignable to type 'FC<ActiveFiltersProps>'.
+  Type 'void' is not assignable to type 'ReactNode'.
 
-80     games,
-       ~~~~~
+7 export const ActiveFilters: React.FC<ActiveFiltersProps> = (props) => {
+               ~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:81:5 - error TS2339: Property 'sets' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
+src/features/shop/components/ShopHeader.tsx:2:9 - error TS2304: Cannot find name 'Cart'.
 
-81     sets,
-       ~~~~
+2   cart: Cart;
+          ~~~~
 
-src/features/shop/ShopPage.tsx:82:5 - error TS2339: Property 'filterOptions' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
+src/features/shop/components/ShopHeader.tsx:3:13 - error TS2304: Cannot find name 'Currency'.
 
-82     filterOptions,
-       ~~~~~~~~~~~~~
+3   currency: Currency;
+              ~~~~~~~~
 
-src/features/shop/ShopPage.tsx:83:5 - error TS2339: Property 'loading' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
+src/features/shop/components/ShopHeader.tsx:4:32 - error TS2304: Cannot find name 'Currency'.
 
-83     loading: filtersLoading,
-       ~~~~~~~
+4   onCurrencyChange: (currency: Currency) => void;
+                                 ~~~~~~~~
 
-src/features/shop/ShopPage.tsx:84:5 - error TS2339: Property 'error' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
+src/features/shop/hooks/useCardFetching.ts:2:12 - error TS2304: Cannot find name 'SearchFilters'.
 
-84     error: filtersError
-       ~~~~~
+2   filters: SearchFilters,
+             ~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:85:22 - error TS2554: Expected 0 arguments, but got 2.
+src/features/shop/hooks/useCardFetching.ts:3:10 - error TS2304: Cannot find name 'Game'.
 
-85   } = useShopFilters(API_BASE, selectedGame);
-                        ~~~~~~~~~~~~~~~~~~~~~~
+3   games: Game[],
+           ~~~~
 
-src/features/shop/ShopPage.tsx:91:5 - error TS2339: Property 'cartNotifications' does not exist on type '{ cart: Cart; addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void; updateQuantity: (cardId: number, variationKey: string, quantity: number) => void; removeItem: (cardId: number, variationKey: string) => void; clearCart: () => void; getItem: (cardId: number, variationKey: string) => CartItem; hasIt...'.
+src/features/shop/hooks/useCardFetching.ts:4:9 - error TS2314: Generic type 'Set<T>' requires 1 type argument(s).
 
-91     cartNotifications,
-       ~~~~~~~~~~~~~~~~~
+4   sets: Set[]
+          ~~~
 
-src/features/shop/ShopPage.tsx:92:5 - error TS2339: Property 'addToCart' does not exist on type '{ cart: Cart; addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void; updateQuantity: (cardId: number, variationKey: string, quantity: number) => void; removeItem: (cardId: number, variationKey: string) => void; clearCart: () => void; getItem: (cardId: number, variationKey: string) => CartItem; hasIt...'.
+src/features/shop/hooks/useCardFetching.ts:6:29 - error TS2304: Cannot find name 'useState'.
 
-92     addToCart,
-       ~~~~~~~~~
+6   const [cards, setCards] = useState<StorefrontCard[]>([]);
+                              ~~~~~~~~
 
-src/features/shop/ShopPage.tsx:94:5 - error TS2339: Property 'removeFromCart' does not exist on type '{ cart: Cart; addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void; updateQuantity: (cardId: number, variationKey: string, quantity: number) => void; removeItem: (cardId: number, variationKey: string) => void; clearCart: () => void; getItem: (cardId: number, variationKey: string) => CartItem; hasIt...'.
+src/features/shop/hooks/useCardFetching.ts:6:38 - error TS2304: Cannot find name 'StorefrontCard'.
 
-94     removeFromCart,
-       ~~~~~~~~~~~~~~
+6   const [cards, setCards] = useState<StorefrontCard[]>([]);
+                                       ~~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:96:5 - error TS2339: Property 'addNotification' does not exist on type '{ cart: Cart; addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void; updateQuantity: (cardId: number, variationKey: string, quantity: number) => void; removeItem: (cardId: number, variationKey: string) => void; clearCart: () => void; getItem: (cardId: number, variationKey: string) => CartItem; hasIt...'.
+src/features/shop/hooks/useCardFetching.ts:7:33 - error TS2304: Cannot find name 'useState'.
 
-96     addNotification
-       ~~~~~~~~~~~~~~~
+7   const [loading, setLoading] = useState(false);
+                                  ~~~~~~~~
 
-src/features/shop/ShopPage.tsx:97:15 - error TS2554: Expected 0 arguments, but got 1.
+src/features/shop/hooks/useCardFetching.ts:8:29 - error TS2304: Cannot find name 'useState'.
 
-97   } = useCart(API_BASE);
-                 ~~~~~~~~
+8   const [error, setError] = useState<string | null>(null);
+                              ~~~~~~~~
 
-src/features/shop/ShopPage.tsx:381:37 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'Record<string, any>'.
+src/features/shop/hooks/useCardFetching.ts:10:3 - error TS2304: Cannot find name 'useEffect'.
 
-381       errorHandler.handleError(err, 'fetching cards');
-                                        ~~~~~~~~~~~~~~~~
+10   useEffect(() => {
+     ~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:652:55 - error TS2339: Property 'id' does not exist on type 'CartItem'.
+src/features/shop/hooks/useCardFetching.ts:16:18 - error TS2552: Cannot find name 'fetchedCards'. Did you mean 'fetchCards'?
 
-652     const existingItem = cart.items.find(item => item.id === id && item.quality === quality);
-                                                          ~~
+16         setCards(fetchedCards);
+                    ~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:973:25 - error TS2322: Type 'CardForDisplay[]' is not assignable to type 'Card[]'.
-  Type 'CardForDisplay' is not assignable to type 'Card'.
-    Types of property 'variations' are incompatible.
-      Type '{ variation_key: string; quality: string; foil_type: string; language?: string; price: number; stock: number; inventory_id: number; }[]' is not assignable to type 'CardVariation[]'.
-        Type '{ variation_key: string; quality: string; foil_type: string; language?: string; price: number; stock: number; inventory_id: number; }' is not assignable to type 'CardVariation'.
-          Property 'language' is optional in type '{ variation_key: string; quality: string; foil_type: string; language?: string; price: number; stock: number; inventory_id: number; }' but required in type 'CardVariation'.
+  src/features/shop/hooks/useCardFetching.ts:12:11
+    12     const fetchCards = async () => {
+                 ~~~~~~~~~~
+    'fetchCards' is declared here.
 
-973                         cards={cards}
-                            ~~~~~
+src/features/shop/hooks/useVariationSelection.ts:1:46 - error TS2304: Cannot find name 'StorefrontCard'.
 
-  src/features/shop/components/CardDisplay/CardGrid.tsx:20:3
-    20   cards: T[];
-         ~~~~~
-    The expected type comes from property 'cards' which is declared here on type 'IntrinsicAttributes & CardGridProps<Card>'
+1 export function useVariationSelection(cards: StorefrontCard[]) {
+                                               ~~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:1141:33 - error TS2339: Property 'id' does not exist on type 'CartItem'.
+src/features/shop/hooks/useVariationSelection.ts:2:39 - error TS2304: Cannot find name 'useState'.
 
-1141               <div key={`${item.id}-${item.quality}`} className="flex items-center gap-2 text-sm">
-                                     ~~
+2   const [selections, setSelections] = useState<Record<number, string>>({});
+                                        ~~~~~~~~
 
-src/features/shop/ShopPage.tsx:1143:29 - error TS2551: Property 'image_url' does not exist on type 'CartItem'. Did you mean 'imageUrl'?
+src/features/shop/hooks/useVariationSelection.ts:4:27 - error TS2304: Cannot find name 'useCallback'.
 
-1143                   src={item.image_url}
-                                 ~~~~~~~~~
+4   const selectVariation = useCallback((cardId: number, varKey: string) => {
+                            ~~~~~~~~~~~
 
-  src/types/ui/cart.ts:11:3
-    11   imageUrl?: string;
-         ~~~~~~~~
-    'imageUrl' is declared here.
+src/features/shop/hooks/useVariationSelection.ts:8:23 - error TS2304: Cannot find name 'useCallback'.
 
-src/features/shop/ShopPage.tsx:1144:29 - error TS2339: Property 'name' does not exist on type 'CartItem'.
+8   const getSelected = useCallback((cardId: number) => {
+                        ~~~~~~~~~~~
 
-1144                   alt={item.name}
-                                 ~~~~
+src/features/shop/hooks/useVariationSelection.ts:13:3 - error TS2304: Cannot find name 'useEffect'.
 
-src/features/shop/ShopPage.tsx:1151:63 - error TS2339: Property 'name' does not exist on type 'CartItem'.
+13   useEffect(() => {
+     ~~~~~~~~~
 
-1151                   <div className="truncate font-medium">{item.name}</div>
-                                                                   ~~~~
+src/features/shop/hooks/useVariationSelection.ts:19:11 - error TS2322: Type 'unknown' is not assignable to type 'string'.
 
-src/features/shop/ShopPage.tsx:1153:53 - error TS2551: Property 'set_name' does not exist on type 'CartItem'. Did you mean 'setName'?
+19           filtered[Number(id)] = key;
+             ~~~~~~~~~~~~~~~~~~~~
 
-1153                     <div className="truncate">{item.set_name} #{item.card_number}</div>
-                                                         ~~~~~~~~
+src/features/shop/ShopPage.tsx:5:8 - error TS2613: Module '"C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/ShopHeader"' has no default export. Did you mean to use 'import { ShopHeader } from "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/ShopHeader"' instead?
 
-  src/types/ui/cart.ts:12:3
-    12   setName: string;
-         ~~~~~~~
-    'setName' is declared here.
+5 import ShopHeader from './components/ShopHeader';
+         ~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:1153:70 - error TS2339: Property 'card_number' does not exist on type 'CartItem'.
+src/features/shop/ShopPage.tsx:7:8 - error TS2613: Module '"C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/Search/ActiveFilters"' has no default export. Did you mean to use 'import { ActiveFilters } from "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/Search/ActiveFilters"' instead?
 
-1153                     <div className="truncate">{item.set_name} #{item.card_number}</div>
-                                                                          ~~~~~~~~~~~
+7 import ActiveFilters from './components/Search/ActiveFilters';
+         ~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:1155:27 - error TS2551: Property 'foil_type' does not exist on type 'CartItem'. Did you mean 'foilType'?
+src/features/shop/ShopPage.tsx:8:8 - error TS2613: Module '"C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/CardDisplay/CardDisplay"' has no default export. Did you mean to use 'import { CardDisplay } from "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/CardDisplay/CardDisplay"' instead?
 
-1155                     {item.foil_type && item.foil_type !== 'Regular' && (
-                               ~~~~~~~~~
+8 import CardDisplay from './components/CardDisplay/CardDisplay';
+         ~~~~~~~~~~~
 
-  src/types/ui/cart.ts:7:3
-    7   foilType: string;
-        ~~~~~~~~
-    'foilType' is declared here.
+src/features/shop/ShopPage.tsx:81:15 - error TS2322: Type '{ filters: SearchFilters; games: Game[]; sets: Set[]; filterOptions: FilterOptions; onFilterChange: (updates: Partial<SearchFilters>) => void; onClearFilters: () => void; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'filters' does not exist on type 'IntrinsicAttributes'.
 
-src/features/shop/ShopPage.tsx:1155:45 - error TS2551: Property 'foil_type' does not exist on type 'CartItem'. Did you mean 'foilType'?
+81               filters={filters}
+                 ~~~~~~~
 
-1155                     {item.foil_type && item.foil_type !== 'Regular' && (
-                                                 ~~~~~~~~~
 
-  src/types/ui/cart.ts:7:3
-    7   foilType: string;
-        ~~~~~~~~
-    'foilType' is declared here.
-
-src/features/shop/ShopPage.tsx:1156:64 - error TS2551: Property 'foil_type' does not exist on type 'CartItem'. Did you mean 'foilType'?
-
-1156                       <div className="text-yellow-600">✨ {item.foil_type}</div>
-                                                                    ~~~~~~~~~
-
-  src/types/ui/cart.ts:7:3
-    7   foilType: string;
-        ~~~~~~~~
-    'foilType' is declared here.
-
-src/features/shop/ShopPage.tsx:1201:39 - error TS2339: Property 'id' does not exist on type 'CartItem'.
-
-1201                     <div key={`${item.id}-${item.quality}`} className="flex gap-4 p-4 bg-mm-tealLight rounded-lg border border-mm-warmAccent">
-                                           ~~
-
-src/features/shop/ShopPage.tsx:1203:35 - error TS2551: Property 'image_url' does not exist on type 'CartItem'. Did you mean 'imageUrl'?
-
-1203                         src={item.image_url}
-                                       ~~~~~~~~~
-
-  src/types/ui/cart.ts:11:3
-    11   imageUrl?: string;
-         ~~~~~~~~
-    'imageUrl' is declared here.
-
-src/features/shop/ShopPage.tsx:1204:35 - error TS2339: Property 'name' does not exist on type 'CartItem'.
-
-1204                         alt={item.name}
-                                       ~~~~
-
-src/features/shop/ShopPage.tsx:1212:83 - error TS2339: Property 'name' does not exist on type 'CartItem'.
-
-1212                         <h3 className="font-bold text-sm mb-1 line-clamp-2">{item.name}</h3>
-                                                                                       ~~~~
-
-src/features/shop/ShopPage.tsx:1214:62 - error TS2339: Property 'game_name' does not exist on type 'CartItem'.
-
-1214                           <div className="font-medium">{item.game_name}</div>
-                                                                  ~~~~~~~~~
-
-src/features/shop/ShopPage.tsx:1215:38 - error TS2551: Property 'set_name' does not exist on type 'CartItem'. Did you mean 'setName'?
-
-1215                           <div>{item.set_name} #{item.card_number}</div>
-                                          ~~~~~~~~
-
-  src/types/ui/cart.ts:12:3
-    12   setName: string;
-         ~~~~~~~
-    'setName' is declared here.
-
-src/features/shop/ShopPage.tsx:1215:55 - error TS2339: Property 'card_number' does not exist on type 'CartItem'.
-
-1215                           <div>{item.set_name} #{item.card_number}</div>
-                                                           ~~~~~~~~~~~
-
-src/features/shop/ShopPage.tsx:1217:33 - error TS2551: Property 'foil_type' does not exist on type 'CartItem'. Did you mean 'foilType'?
-
-1217                           {item.foil_type && item.foil_type !== 'Regular' && (
-                                     ~~~~~~~~~
-
-  src/types/ui/cart.ts:7:3
-    7   foilType: string;
-        ~~~~~~~~
-    'foilType' is declared here.
-
-src/features/shop/ShopPage.tsx:1217:51 - error TS2551: Property 'foil_type' does not exist on type 'CartItem'. Did you mean 'foilType'?
-
-1217                           {item.foil_type && item.foil_type !== 'Regular' && (
-                                                       ~~~~~~~~~
-
-  src/types/ui/cart.ts:7:3
-    7   foilType: string;
-        ~~~~~~~~
-    'foilType' is declared here.
-
-src/features/shop/ShopPage.tsx:1220:83 - error TS2551: Property 'foil_type' does not exist on type 'CartItem'. Did you mean 'foilType'?
-
-1220                               <span className="font-medium text-yellow-600">{item.foil_type}</span>
-                                                                                       ~~~~~~~~~
-
-  src/types/ui/cart.ts:7:3
-    7   foilType: string;
-        ~~~~~~~~
-    'foilType' is declared here.
-
-src/features/shop/ShopPage.tsx:1229:68 - error TS2339: Property 'id' does not exist on type 'CartItem'.
-
-1229                             onClick={() => updateCartQuantity(item.id, item.quality, -1)}
-                                                                        ~~
-
-src/features/shop/ShopPage.tsx:1238:68 - error TS2339: Property 'id' does not exist on type 'CartItem'.
-
-1238                             onClick={() => updateCartQuantity(item.id, item.quality, 1)}
-                                                                        ~~
-
-src/features/shop/ShopPage.tsx:1239:61 - error TS2339: Property 'stock' does not exist on type 'CartItem'.
-
-1239                             disabled={item.quantity >= item.stock}
-                                                                 ~~~~~
-
-src/features/shop/ShopPage.tsx:1246:64 - error TS2339: Property 'id' does not exist on type 'CartItem'.
-
-1246                             onClick={() => removeFromCart(item.id, item.quality)}
-                                                                    ~~
-
-src/lib/api/client.ts:12:30 - error TS2339: Property 'env' does not exist on type 'ImportMeta'.
-
-12 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
-                                ~~~
-
-src/reportWebVitals.ts:6:41 - error TS2339: Property 'onFID' does not exist on type 'typeof import("C:/Git_Repos/mana_meeples_singles_market/node_modules/.pnpm/web-vitals@5.1.0/node_modules/web-vitals/dist/modules/index")'.
-
-6     import('web-vitals').then(({ onCLS, onFID, onFCP, onLCP, onTTFB }) => {
-                                          ~~~~~
-
-src/testUtils/storageMocks.ts:7:14 - error TS2304: Cannot find name 'jest'.
-
-7     getItem: jest.fn((k: string) => store[k] ?? null),
-               ~~~~
-
-src/testUtils/storageMocks.ts:8:14 - error TS2304: Cannot find name 'jest'.
-
-8     setItem: jest.fn((k: string, v: string) => { store[k] = String(v); }),
-               ~~~~
-
-src/testUtils/storageMocks.ts:9:17 - error TS2304: Cannot find name 'jest'.
-
-9     removeItem: jest.fn((k: string) => { delete store[k]; }),
-                  ~~~~
-
-src/testUtils/storageMocks.ts:10:12 - error TS2304: Cannot find name 'jest'.
-
-10     clear: jest.fn(() => { store = {}; }),
-              ~~~~
-
-
-Found 60 errors in 9 files.
+Found 35 errors in 10 files.
 
 Errors  Files
-    12  src/features/admin/components/Cards/CardsTab.tsx:10
-     2  src/features/shop/components/CardDisplay/CardGrid.tsx:104
-     1  src/features/shop/components/CardDisplay/CardItem.tsx:62
-     1  src/features/shop/components/CardDisplay/ListCardItem.tsx:58
-     1  src/features/shop/components/RecentlyViewed.tsx:92
-    37  src/features/shop/ShopPage.tsx:80
-     1  src/lib/api/client.ts:12
-     1  src/reportWebVitals.ts:6
-     4  src/testUtils/storageMocks.ts:7
+     1  src/features/admin/components/Cards/AddToInventoryModal.tsx:117
+     2  src/features/admin/components/Cards/CardsTab.tsx:70
+     4  src/features/shop/components/CardDisplay/CardDisplay.tsx:2
+     1  src/features/shop/components/CardDisplay/CardGrid.tsx:104
+     3  src/features/shop/components/Cart/CartItem.tsx:2
+     2  src/features/shop/components/Search/ActiveFilters.tsx:2
+     3  src/features/shop/components/ShopHeader.tsx:2
+     9  src/features/shop/hooks/useCardFetching.ts:2
+     6  src/features/shop/hooks/useVariationSelection.ts:1
+     4  src/features/shop/ShopPage.tsx:5
  ELIFECYCLE  Command failed with exit code 2.
-
-C:\Git_Repos\mana_meeples_singles_market\apps\web>

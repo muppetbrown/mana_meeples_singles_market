@@ -1,16 +1,14 @@
-// ============================================================================
-// features/shop/hooks/useCart.ts - Simplified cart management
-// ============================================================================
-
 import { useState, useCallback, useEffect } from 'react';
 import type { CartItem, Cart } from '@/types';
 
 const STORAGE_KEY = 'mana_meeples_cart';
 
-/**
- * Cart management hook
- * Handles cart state, localStorage persistence, and cart operations
- */
+interface Notification {
+  id: number;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'info';
+}
+
 export function useCart() {
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
@@ -21,35 +19,40 @@ export function useCart() {
     }
   });
 
-  const [cartNotifications, setCartNotifications] = useState<any[]>([]);
+  const [cartNotifications, setCartNotifications] = useState<Notification[]>([]);
 
   // Persist to localStorage
   useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
     } catch (error) {
-      console.warn('Failed to save cart to localStorage:', error);
+      console.warn('Failed to save cart:', error);
     }
   }, [items]);
 
-  // Calculate totals
+  // Auto-clear notifications after 5 seconds
+  useEffect(() => {
+    if (cartNotifications.length > 0) {
+      const timer = setTimeout(() => {
+        setCartNotifications(prev => prev.slice(1));
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [cartNotifications]);
+
   const cart: Cart = {
     items,
     total: items.reduce((sum, item) => sum + item.price * item.quantity, 0),
     itemCount: items.reduce((sum, item) => sum + item.quantity, 0)
   };
 
-  /**
-   * Add item to cart (or update quantity if exists)
-   */
   const addItem = useCallback((item: Omit<CartItem, 'quantity'>, quantity = 1) => {
     setItems(current => {
       const existingIndex = current.findIndex(
-        i => i.cardId === item.cardId && i.variationKey === item.variationKey
+        i => i.card_id === item.card_id && i.variation_key === item.variation_key
       );
 
       if (existingIndex >= 0) {
-        // Update existing item
         const updated = [...current];
         updated[existingIndex] = {
           ...updated[existingIndex],
@@ -58,90 +61,78 @@ export function useCart() {
         return updated;
       }
 
-      // Add new item
       return [...current, { ...item, quantity }];
     });
   }, []);
 
-  /**
-   * Update item quantity
-   */
+  const addToCart = useCallback((item: Omit<CartItem, 'quantity'>, quantity = 1) => {
+    addItem(item, quantity);
+    setCartNotifications(prev => [...prev, {
+      id: Date.now(),
+      message: `Added ${item.card_name} to cart`,
+      type: 'success'
+    }]);
+  }, [addItem]);
+
   const updateQuantity = useCallback((cardId: number, variationKey: string, quantity: number) => {
     setItems(current => {
       if (quantity <= 0) {
-        // Remove item if quantity is 0
         return current.filter(
-          item => !(item.cardId === cardId && item.variationKey === variationKey)
+          item => !(item.card_id === cardId && item.variation_key === variationKey)
         );
       }
 
       return current.map(item =>
-        item.cardId === cardId && item.variationKey === variationKey
+        item.card_id === cardId && item.variation_key === variationKey
           ? { ...item, quantity }
           : item
       );
     });
   }, []);
 
-  /**
-   * Remove item from cart
-   */
   const removeItem = useCallback((cardId: number, variationKey: string) => {
     setItems(current =>
-      current.filter(item => !(item.cardId === cardId && item.variationKey === variationKey))
+      current.filter(item => !(item.card_id === cardId && item.variation_key === variationKey))
     );
   }, []);
 
-  /**
-   * Clear entire cart
-   */
+  const removeFromCart = useCallback((cardId: number, variationKey: string) => {
+    removeItem(cardId, variationKey);
+  }, [removeItem]);
+
   const clearCart = useCallback(() => {
     setItems([]);
   }, []);
 
-  /**
-   * Get specific item from cart
-   */
   const getItem = useCallback((cardId: number, variationKey: string) => {
-    return items.find(item => item.cardId === cardId && item.variationKey === variationKey);
+    return items.find(item => item.card_id === cardId && item.variation_key === variationKey);
   }, [items]);
 
-  /**
-   * Check if item is in cart
-   */
   const hasItem = useCallback((cardId: number, variationKey: string) => {
-    return items.some(item => item.cardId === cardId && item.variationKey === variationKey);
+    return items.some(item => item.card_id === cardId && item.variation_key === variationKey);
   }, [items]);
 
-  const addToCart = useCallback((item: Omit<CartItem, 'quantity'>, quantity = 1) => {
-    addItem(item, quantity);
-    // Add notification
-    setCartNotifications(prev => [...prev, { 
-      id: Date.now(), 
-      message: `Added ${item.card_name} to cart` 
-    }]);
-  }, [addItem]);
-
-  const removeFromCart = useCallback((cardId: number, quality: string) => {
-    removeItem(cardId, quality);
-  }, [removeItem]);
-
-  const addNotification = useCallback((notification: any) => {
-    setCartNotifications(prev => [...prev, notification]);
+  const addNotification = useCallback((message: string, type: Notification['type'] = 'info', duration = 5000) => {
+    const id = Date.now();
+    setCartNotifications(prev => [...prev, { id, message, type }]);
+    if (duration > 0) {
+      setTimeout(() => {
+        setCartNotifications(prev => prev.filter(n => n.id !== id));
+      }, duration);
+    }
   }, []);
 
   return {
     cart,
     addItem,
+    addToCart,
     updateQuantity,
     removeItem,
+    removeFromCart,
     clearCart,
     getItem,
     hasItem,
-    // Add these:
     cartNotifications,
-    addToCart,
-    removeFromCart,
     addNotification
   };
 }
