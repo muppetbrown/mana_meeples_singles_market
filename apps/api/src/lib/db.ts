@@ -1,19 +1,58 @@
 // apps/api/src/lib/db.ts
 import { Pool } from "pg";
 import type { PoolClient, QueryResultRow } from "pg";
-import { env } from "./env.js";
 
-// Initialize connection pool
-export const pool = new Pool({
-  connectionString: env.DATABASE_URL,
-  ssl:
-    process.env.NODE_ENV === "production"
-      ? { rejectUnauthorized: false }
-      : undefined,
-  max: parseInt(process.env.DB_POOL_MAX || "20", 10),
-  idleTimeoutMillis: 30_000,
-  connectionTimeoutMillis: 10_000,
-});
+let pool: Pool | null = null;
+
+/**
+ * Get or create the connection pool
+ * In test mode, this allows the test to set DATABASE_URL before pool creation
+ */
+function getPool(): Pool {
+  if (!pool) {
+    const connectionString = process.env.DATABASE_URL;
+    if (!connectionString) {
+      throw new Error("DATABASE_URL environment variable is not set");
+    }
+
+    pool = new Pool({
+      connectionString,
+      ssl:
+        process.env.NODE_ENV === "production"
+          ? { rejectUnauthorized: false }
+          : undefined,
+      max: parseInt(process.env.DB_POOL_MAX || "20", 10),
+      idleTimeoutMillis: 30_000,
+      connectionTimeoutMillis: 10_000,
+    });
+
+    // Log pool errors to avoid unhandled exceptions
+    pool.on("error", (err) => {
+      console.error("⚠️ Unexpected database pool error:", err.message);
+    });
+
+    // Optional: Log when pool is low on connections
+    pool.on("connect", () => {
+      const stats = getPoolStats();
+      if (stats.waiting > 5) {
+        console.warn("⚠️ Pool connection pressure:", stats);
+      }
+    });
+  }
+
+  return pool;
+}
+
+/**
+ * Reset the pool (for tests)
+ * This allows tests to override DATABASE_URL
+ */
+export async function resetPool(): Promise<void> {
+  if (pool) {
+    await pool.end();
+    pool = null;
+  }
+}
 
 // Generic query wrapper for convenience
 export const db = {
@@ -26,7 +65,7 @@ export const db = {
     params?: any[]
   ): Promise<T[]> {
     try {
-      const result = await pool.query<T>(text, params);
+      const result = await getPool().query<T>(text, params);
       return result.rows;
     } catch (error: any) {
       console.error("❌ Database query error:", error.message);
@@ -42,7 +81,7 @@ export const db = {
    * Remember to release it manually.
    */
   async getClient(): Promise<PoolClient> {
-    return pool.connect();
+    return getPool().connect();
   },
 };
 
@@ -53,7 +92,7 @@ export const db = {
 export async function withConn<T>(
   fn: (client: PoolClient) => Promise<T>
 ): Promise<T> {
-  const client = await pool.connect();
+  const client = await getPool().connect();
   try {
     return await fn(client);
   } finally {
@@ -66,7 +105,7 @@ export async function withConn<T>(
  */
 export async function healthcheck(): Promise<boolean> {
   try {
-    const { rows } = await pool.query<{ ok: number | string }>('SELECT 1::int AS ok');
+    const { rows } = await getPool().query<{ ok: number | string }>('SELECT 1::int AS ok');
     const v = rows[0]?.ok;
     return v === 1 || v === '1';
   } catch {
@@ -78,22 +117,13 @@ export async function healthcheck(): Promise<boolean> {
  * Get connection pool statistics for monitoring.
  */
 export function getPoolStats() {
+  const p = getPool();
   return {
-    total: pool.totalCount,
-    idle: pool.idleCount,
-    waiting: pool.waitingCount,
+    total: p.totalCount,
+    idle: p.idleCount,
+    waiting: p.waitingCount,
   };
 }
 
-// Log pool errors to avoid unhandled exceptions
-pool.on("error", (err) => {
-  console.error("⚠️ Unexpected database pool error:", err.message);
-});
-
-// Optional: Log when pool is low on connections
-pool.on("connect", () => {
-  const stats = getPoolStats();
-  if (stats.waiting > 5) {
-    console.warn("⚠️ Pool connection pressure:", stats);
-  }
-});
+// Export the pool getter for routes that need direct access
+export { getPool as pool };

@@ -3,14 +3,20 @@ import { beforeAll, afterAll, describe, it, expect } from "vitest";
 import request from "supertest";
 import { startPostgres, stopPostgres, bootstrapMinimalSchema } from "../setup/testEnv.js";
 import { seedCards } from "../setup/db.js";
-import { createApp } from "../../src/app.js";
 
-let app: ReturnType<typeof createApp>;
+// Import createApp AFTER startPostgres sets DATABASE_URL
+let createApp: any;
+let app: any;
 
 beforeAll(async () => {
+  // CRITICAL: Start postgres and set DATABASE_URL BEFORE importing createApp
   await startPostgres();
   await bootstrapMinimalSchema();
   await seedCards();
+  
+  // Now import createApp (which will load db.ts with correct DATABASE_URL)
+  const appModule = await import("../../src/app.js");
+  createApp = appModule.createApp;
   app = createApp();
 }, 60_000);
 
