@@ -1,18 +1,20 @@
-import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+// apps/web/src/components/admin/UnifiedCardsTab.tsx
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { RefreshCw, Download } from 'lucide-react';
-import { api } from '@/config/api';
+import { RefreshCw, Download, Plus, Package } from 'lucide-react';
+import { api, API_BASE } from '@/config/api';
+import { useSearchFilters } from '../../hooks/useSearchFilters';
+import CardSearchBar from '../CardSearchBar';
+import EmptyState from '../EmptyState';
+import CardSkeleton from '../skeletons/CardSkeleton';
+import AddToInventoryModal from './AddToInventoryModal';
+import AdminCardGrid from './AdminCardGrid';
 import type { 
   ApiCard as Card,
   ApiCardVariation as CardVariation,
-  ApiGame as Game,
-  ApiSet as CardSet
 } from '@/types';
 
 // ---------- Types ----------
-
-type SearchSuggestion = { name: string; set_name: string; card_number: string; image_url?: string; }
-
 type AddModalData = { card: Card; variation: CardVariation };
 
 type AddFormData = {
@@ -23,20 +25,20 @@ type AddFormData = {
   language: string;
 };
 
-interface UnifiedCardsTabProps { mode?: 'all' | 'inventory'; }
+interface UnifiedCardsTabProps { 
+  mode?: 'all' | 'inventory'; 
+}
 
 // ---------- Component ----------
 const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [cards, setCards] = useState<Card[]>([]);
-  const [games, setGames] = useState<Game[]>([]);
-  const [addModalData, setAddModalData] = useState<AddModalData | null>(null);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const join = (path: string, q?: URLSearchParams) => 
-    q && Array.from(q.keys()).length ? `${path}?${q.toString()}` : path;
   
-  // UI state
+  // Modal state for adding to inventory
   const [showAddModal, setShowAddModal] = useState(false);
+  const [addModalData, setAddModalData] = useState<AddModalData | null>(null);
   const [addFormData, setAddFormData] = useState<AddFormData>({
     quality: 'Near Mint',
     foil_type: 'Regular',
@@ -46,110 +48,140 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   });
   const [saving, setSaving] = useState(false);
 
-  // URL state
+  // Get URL params
   const searchTerm = searchParams.get('search') || '';
   const selectedGame = searchParams.get('game') || 'all';
   const selectedSet = searchParams.get('set') || 'all';
-  const filterTreatment = searchParams.get('treatment') || 'all';
+  const selectedTreatment = searchParams.get('treatment') || 'all';
+  
   const isInventoryMode = mode === 'inventory';
 
-  // ---------- Helpers ----------
-  const getGameIdFromName = useCallback((gameName: string): number | null => {
-    if (!games?.length) return null;
-    const found = games.find(g => g.name === gameName);
-    return found ? found.id : null;
-  }, [games]);
+  // ✅ REUSE useSearchFilters hook (already extracted and working)
+  const {
+    games,
+    sets,
+    filterOptions,
+    loading: filtersLoading,
+    error: filtersError
+  } = useSearchFilters(API_BASE, selectedGame);
 
-  const getUniqueTreatments = (variations: CardVariation[]): string[] =>
-    Array.from(new Set((variations ?? []).map(v => v.treatment)));
+  // ---------- URL State Management (copied from TCGShop) ----------
+  const updateParam = useCallback((key: string, value: string) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (value && value !== 'all') {
+        newParams.set(key, value);
+      } else {
+        newParams.delete(key);
+      }
+      return newParams;
+    });
+  }, [setSearchParams]);
 
-  const getUniqueFinishes = (variations: CardVariation[]): string[] =>
-    Array.from(new Set((variations ?? []).map(v => v.finish)));
+  const handleSearchChange = useCallback((value: string) => {
+    updateParam('search', value);
+  }, [updateParam]);
 
+  const handleGameChange = useCallback((game: string) => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      if (game && game !== 'all') {
+        newParams.set('game', game);
+      } else {
+        newParams.delete('game');
+      }
+      newParams.delete('set'); // Clear set when game changes
+      return newParams;
+    });
+  }, [setSearchParams]);
 
-  const getTreatmentColor = (treatment: string) => {
-    const colors: Record<string, string> = {
-      STANDARD: 'bg-slate-100 text-slate-700 border-slate-300',
-      BORDERLESS: 'bg-purple-100 text-purple-700 border-purple-300',
-      EXTENDED_ART: 'bg-blue-100 text-blue-700 border-blue-300',
-      SHOWCASE: 'bg-pink-100 text-pink-700 border-pink-300',
-      PROMO: 'bg-amber-100 text-amber-700 border-amber-300',
-      EXTENDED: 'bg-indigo-100 text-indigo-700 border-indigo-300',
-    };
-    return colors[treatment] || 'bg-gray-100 text-gray-700 border-gray-300';
+  const handleSetChange = useCallback((set: string) => {
+    updateParam('set', set);
+  }, [updateParam]);
+
+  // Additional filters configuration (following TCGShop pattern)
+  const additionalFilters = {
+    treatment: {
+      value: selectedTreatment,
+      onChange: (value: string) => updateParam('treatment', value),
+      label: 'Treatment',
+      options: filterOptions.treatments.map(t => ({ value: t.value, label: t.label })),
+    },
   };
 
-  const getFinishBadge = (finish: string) =>
-    finish === 'foil'
-      ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-800 border-amber-300'
-      : 'bg-slate-100 text-slate-600 border-slate-300';
-
-  // ---------- Data fetchers (via shared api client) ----------
-  const fetchGames = useCallback(async () => {
-    try {
-      const data = await api.get<{ games: Game[] }>('/games');
-      setGames(data?.games ?? []);
-    } catch (e) {
-      console.error('Error fetching games:', e);
-      setGames([]);
-    }
-  }, []);
-
+  // ---------- Data Fetching ----------
   const fetchCards = useCallback(async () => {
+    setLoading(true);
     setError(null);
+    
     try {
       const params = new URLSearchParams();
       params.set('limit', '1000');
-      if (selectedGame !== 'all') {
-        const gameId = getGameIdFromName(selectedGame);
-        if (gameId != null) params.set('game_id', String(gameId));
+      
+      // Add game filter
+      if (selectedGame && selectedGame !== 'all') {
+        const game = games.find(g => g.name === selectedGame);
+        if (game?.id) {
+          params.set('game_id', String(game.id));
+        }
       }
-      if (selectedSet !== 'all') params.set('set_name', selectedSet);
-      if (filterTreatment !== 'all') params.set('treatment', filterTreatment);
-      if (searchTerm.trim()) params.set('search', searchTerm.trim());
+      
+      // Add set filter
+      if (selectedSet && selectedSet !== 'all') {
+        const set = sets.find(s => s.name === selectedSet);
+        if (set?.id) {
+          params.set('set_id', String(set.id));
+        }
+      }
+      
+      // Add search term
+      if (searchTerm && searchTerm.trim()) {
+        params.set('search', searchTerm.trim());
+      }
+      
+      // Add treatment filter
+      if (selectedTreatment && selectedTreatment !== 'all') {
+        params.set('treatment', selectedTreatment);
+      }
 
-      const url = join('/cards/cards', params);
+      const url = `/cards/cards?${params.toString()}`;
       const data = await api.get<{ cards?: Card[] }>(url);
       setCards(data?.cards ?? []);
-    } catch (e) {
-      console.error('Error fetching cards:', e);
+    } catch (err) {
+      console.error('Error fetching cards:', err);
       setCards([]);
-      setError(e instanceof Error ? e.message : 'Failed to fetch cards');
+      setError(err instanceof Error ? err.message : 'Failed to fetch cards');
+    } finally {
+      setLoading(false);
     }
-  }, [selectedGame, selectedSet, filterTreatment, searchTerm, getGameIdFromName]);
+  }, [selectedGame, selectedSet, searchTerm, selectedTreatment, games, sets]);
 
+  // Fetch cards when dependencies change
   useEffect(() => {
-    fetchGames();
-    fetchCards();
-  }, [fetchGames, fetchCards]);
-
-  useEffect(() => {
-    if (selectedSet !== 'all' && selectedGame !== 'all') {
-      setSearchParams(prev => {
-        const next = new URLSearchParams(prev);
-        next.set('set', 'all');
-        return next;
-      });
+    if (games.length > 0) {
+      fetchCards();
     }
-  }, [selectedGame, selectedSet, setSearchParams]);
+  }, [fetchCards, games]);
 
-  // ---------- Derived ----------
+  // ---------- Derived Data ----------
   const filteredCards = useMemo(() => {
     if (!isInventoryMode) return cards;
-    return (cards ?? []).filter(c => Boolean(c?.has_inventory) && Number(c?.total_stock) > 0);
+    // In inventory mode, only show cards with stock
+    return cards.filter(c => Boolean(c?.has_inventory) && Number(c?.total_stock) > 0);
   }, [cards, isInventoryMode]);
 
   const totalStock = useMemo(
-    () => filteredCards.reduce((sum, c) => sum + c.total_stock, 0),
+    () => filteredCards.reduce((sum, c) => sum + (c.total_stock || 0), 0),
     [filteredCards]
   );
+  
   const totalVariations = useMemo(
-    () => filteredCards.reduce((sum, c) => sum + c.variation_count, 0),
+    () => filteredCards.reduce((sum, c) => sum + (c.variation_count || 0), 0),
     [filteredCards]
   );
 
-  // ---------- Inventory modal actions ----------
-  const openAddModal = (card: Card, variation: CardVariation) => {
+  // ---------- Modal Actions ----------
+  const openAddModal = useCallback((card: Card, variation: CardVariation) => {
     setAddModalData({ card, variation });
     setAddFormData({
       quality: 'Near Mint',
@@ -159,9 +191,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       language: 'English',
     });
     setShowAddModal(true);
-  };
+  }, []);
 
-  const closeAddModal = () => {
+  const closeAddModal = useCallback(() => {
     setShowAddModal(false);
     setAddModalData(null);
     setAddFormData({
@@ -171,10 +203,11 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       stock_quantity: 1,
       language: 'English',
     });
-  };
+  }, []);
 
-  const handleAddToInventory = async () => {
+  const handleAddToInventory = useCallback(async () => {
     if (!addModalData) return;
+    
     setSaving(true);
     try {
       await api.post('/admin/inventory', {
@@ -182,11 +215,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         quality: addFormData.quality,
         foil_type: addFormData.foil_type,
         price: parseFloat(addFormData.price) || 0,
-        stock_quantity: Number.isFinite(addFormData.stock_quantity)
-          ? addFormData.stock_quantity
-          : 0,
+        stock_quantity: Number(addFormData.stock_quantity) || 0,
         language: addFormData.language,
       });
+      
       await fetchCards();
       closeAddModal();
       alert(`✅ ${addModalData.card.name} added to inventory successfully!`);
@@ -196,15 +228,63 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     } finally {
       setSaving(false);
     }
-  };
+  }, [addModalData, addFormData, fetchCards, closeAddModal]);
+
+  // ---------- CSV Export ----------
+  const handleExport = useCallback(() => {
+    try {
+      const getUniqueTreatments = (variations: CardVariation[]) =>
+        Array.from(new Set((variations ?? []).map(v => v.treatment)));
+      
+      const getUniqueFinishes = (variations: CardVariation[]) =>
+        Array.from(new Set((variations ?? []).map(v => v.finish)));
+
+      const csv = [
+        ['Card Name', 'Number', 'Set', 'Rarity', 'Treatments', 'Finishes', 'Stock', 'Variations'].join(','),
+        ...filteredCards.map(c => [
+          `"${(c.name || '').replace(/"/g, '""')}"`, // Proper CSV escaping
+          c.card_number || '',
+          `"${(c.set_name || '').replace(/"/g, '""')}"`,
+          c.rarity || '',
+          getUniqueTreatments(c.variations ?? []).join(';'),
+          getUniqueFinishes(c.variations ?? []).join(';'),
+          c.total_stock || 0,
+          c.variation_count || 0,
+        ].join(',')),
+      ].join('\n');
+      
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${isInventoryMode ? 'inventory' : 'all-cards'}-${new Date().toISOString().split('T')[0]}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Export failed:', err);
+      alert('Failed to export CSV. Please try again.');
+    }
+  }, [filteredCards, isInventoryMode]);
 
   // ---------- Render ----------
+  if (filtersError) {
+    return (
+      <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <p className="text-red-700 font-medium">Error loading filters</p>
+        <p className="text-red-600 text-sm mt-2">{filtersError}</p>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
         <p className="text-red-700 font-medium">Error loading cards</p>
         <p className="text-red-600 text-sm mt-2">{error}</p>
-        <button onClick={fetchCards} className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
+        <button 
+          onClick={fetchCards} 
+          className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+        >
           Try Again
         </button>
       </div>
@@ -214,7 +294,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-900">
             {isInventoryMode ? 'Inventory Management' : 'All Cards Database'}
@@ -224,44 +304,91 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
             {isInventoryMode && ` • ${totalStock} in stock`}
           </p>
         </div>
+        
         <div className="flex items-center gap-3">
-          <button onClick={fetchCards} className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-            <RefreshCw className="w-4 h-4" />
+          <button 
+            onClick={fetchCards}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Refresh cards"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
             Refresh
           </button>
+          
           <button
-            onClick={() => {
-              const csv = [
-                ['Card Name','Number','Set','Rarity','Treatments','Finishes','Stock','Variations'].join(','),
-                ...filteredCards.map(c => [
-                  `"${c.name}"`,
-                  c.card_number,
-                  c.set_name,
-                  c.rarity ?? '',
-                  getUniqueTreatments(c.variations ?? []).join(';'),
-                  getUniqueFinishes(c.variations ?? []).join(';'),
-                  Number(c.total_stock || 0),
-                  Number(c.variation_count || 0),
-                ].join(',')),
-              ].join('\n');
-              const blob = new Blob([csv], { type: 'text/csv' });
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = `${isInventoryMode ? 'inventory' : 'all-cards'}-${new Date().toISOString().split('T')[0]}.csv`;
-              a.click();
-              URL.revokeObjectURL(url);
-            }}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+            onClick={handleExport}
+            disabled={filteredCards.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label="Export to CSV"
           >
             <Download className="w-4 h-4" />
-            Export
+            Export CSV
           </button>
         </div>
       </div>
 
-      {/* Filters & results are rendered by child components in this repo now */}
-      {/* <GameSetFilter /> <SearchBar /> <CardGrid /> etc. */}
+      {/* ✅ REUSE CardSearchBar Component */}
+      <div className="bg-white rounded-lg border border-slate-200 p-4">
+        <CardSearchBar
+          searchTerm={searchTerm}
+          onSearchChange={handleSearchChange}
+          selectedGame={selectedGame}
+          onGameChange={handleGameChange}
+          selectedSet={selectedSet}
+          onSetChange={handleSetChange}
+          games={games}
+          sets={sets}
+          additionalFilters={additionalFilters}
+          apiUrl={API_BASE}
+          debounceMs={300}
+          minSearchLength={2}
+          showAutocomplete={false} // Disable for admin simplicity
+        />
+      </div>
+
+      {/* Loading State */}
+      {(loading || filtersLoading) && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <CardSkeleton key={i} />
+          ))}
+        </div>
+      )}
+
+      {/* Cards Grid */}
+      {!loading && !filtersLoading && (
+        <>
+          {filteredCards.length > 0 ? (
+            <AdminCardGrid
+              cards={filteredCards}
+              mode={mode}
+              onAddToInventory={isInventoryMode ? openAddModal : undefined}
+            />
+          ) : (
+            <EmptyState
+              icon={Package}
+              title={isInventoryMode ? "No inventory items" : "No cards found"}
+              message={isInventoryMode 
+                ? "Start by adding cards to your inventory" 
+                : "Try adjusting your search filters"}
+            />
+          )}
+        </>
+      )}
+
+      {/* Add to Inventory Modal */}
+      {showAddModal && addModalData && (
+        <AddToInventoryModal
+          card={addModalData.card}
+          variation={addModalData.variation}
+          formData={addFormData}
+          onFormChange={setAddFormData}
+          onSave={handleAddToInventory}
+          onClose={closeAddModal}
+          saving={saving}
+        />
+      )}
     </div>
   );
 };

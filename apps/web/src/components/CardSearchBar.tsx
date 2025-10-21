@@ -186,6 +186,19 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
 
   const listboxId = 'search-suggestions';
 
+  const highlightMatch = (text: any, query: any) => {
+    if (!query || !text) return text;
+
+    const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const parts = text.split(regex);
+
+    return parts.map((part: any, idx: any) =>
+      regex.test(part) ?
+        <mark key={idx} className="bg-yellow-200 font-medium">{part}</mark> :
+        part
+    );
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {/* Search Input with Autocomplete */}
