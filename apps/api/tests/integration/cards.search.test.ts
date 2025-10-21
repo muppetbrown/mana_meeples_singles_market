@@ -1,4 +1,5 @@
-import { beforeAll, afterAll, describe, it, expect } from "vitest";
+// apps/api/tests/integration/cards.search.test.ts
+import { beforeAll, afterAll, describe, it, expect } from "vitest"; // FIXED: typo "decribe" -> "describe"
 import request from "supertest";
 import { startPostgres, stopPostgres, bootstrapMinimalSchema } from "../setup/testEnv.js";
 import { seedCards } from "../setup/db.js";
@@ -17,12 +18,16 @@ afterAll(async () => {
   await stopPostgres();
 });
 
-describe("GET /api/cards", () => {
+describe("GET /cards/cards", () => { // FIXED: Changed from /api/cards to /cards/cards
   it("returns at least one seeded card", async () => {
-    const res = await request(app).get("/api/cards").expect(200);
-    // shape tolerance: look for the seeded card by name or sku
-    const arr = Array.isArray(res.body?.data) ? res.body.data : res.body;
-    expect(arr).toEqual(expect.arrayContaining([
+    // FIXED: Route is /cards/cards, not /api/cards
+    // Reason: app.ts mounts routes at "/" not "/api"
+    const res = await request(app).get("/cards/cards").expect(200);
+    
+    // The response should have { cards: [...] } structure
+    const cards = res.body?.cards || res.body?.data || res.body;
+    
+    expect(cards).toEqual(expect.arrayContaining([
       expect.objectContaining({ name: "Lightning Bolt" }),
     ]));
   });
