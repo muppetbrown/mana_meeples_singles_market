@@ -1,7 +1,7 @@
 // apps/web/src/components/admin/UnifiedCardsTab.tsx
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { RefreshCw, Download, Plus, Package } from 'lucide-react';
+import { RefreshCw, Download, LayoutGrid, List } from 'lucide-react';
 import { api, API_BASE } from '@/config/api';
 import { useSearchFilters } from '../../hooks/useSearchFilters';
 import CardSearchBar from '../CardSearchBar';
@@ -9,6 +9,7 @@ import EmptyState from '../EmptyState';
 import CardSkeleton from '../skeletons/CardSkeleton';
 import AddToInventoryModal from './AddToInventoryModal';
 import AdminCardGrid from './AdminCardGrid';
+import { Package } from 'lucide-react';
 import type { 
   ApiCard as Card,
   ApiCardVariation as CardVariation,
@@ -35,6 +36,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // View mode state (list is default for admin)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   
   // Modal state for adding to inventory
   const [showAddModal, setShowAddModal] = useState(false);
@@ -170,14 +174,44 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     return cards.filter(c => Boolean(c?.has_inventory) && Number(c?.total_stock) > 0);
   }, [cards, isInventoryMode]);
 
+  // Group cards by card_number for proper display
+  const groupedCards = useMemo(() => {
+    const groups = new Map<string, Card[]>();
+    
+    filteredCards.forEach(card => {
+      const key = `${card.set_name}-${card.card_number}`;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(card);
+    });
+    
+    // Convert to array and merge cards with same card_number
+    return Array.from(groups.values()).map(cardGroup => {
+      if (cardGroup.length === 1) return cardGroup[0];
+      
+      // Merge multiple cards into one with combined variations
+      const baseCard = cardGroup[0];
+      const allVariations = cardGroup.flatMap(c => c.variations || []);
+      
+      return {
+        ...baseCard,
+        variations: allVariations,
+        variation_count: allVariations.length,
+        total_stock: allVariations.reduce((sum, v) => sum + (v.stock || 0), 0),
+        has_inventory: allVariations.some(v => (v.stock || 0) > 0),
+      };
+    });
+  }, [filteredCards]);
+
   const totalStock = useMemo(
-    () => filteredCards.reduce((sum, c) => sum + (c.total_stock || 0), 0),
-    [filteredCards]
+    () => groupedCards.reduce((sum, c) => sum + (c.total_stock || 0), 0),
+    [groupedCards]
   );
   
   const totalVariations = useMemo(
-    () => filteredCards.reduce((sum, c) => sum + (c.variation_count || 0), 0),
-    [filteredCards]
+    () => groupedCards.reduce((sum, c) => sum + (c.variation_count || 0), 0),
+    [groupedCards]
   );
 
   // ---------- Modal Actions ----------
@@ -241,7 +275,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
       const csv = [
         ['Card Name', 'Number', 'Set', 'Rarity', 'Treatments', 'Finishes', 'Stock', 'Variations'].join(','),
-        ...filteredCards.map(c => [
+        ...groupedCards.map(c => [
           `"${(c.name || '').replace(/"/g, '""')}"`, // Proper CSV escaping
           c.card_number || '',
           `"${(c.set_name || '').replace(/"/g, '""')}"`,
@@ -264,7 +298,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       console.error('Export failed:', err);
       alert('Failed to export CSV. Please try again.');
     }
-  }, [filteredCards, isInventoryMode]);
+  }, [groupedCards, isInventoryMode]);
 
   // ---------- Render ----------
   if (filtersError) {
@@ -300,12 +334,43 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
             {isInventoryMode ? 'Inventory Management' : 'All Cards Database'}
           </h2>
           <p className="text-slate-600 mt-1">
-            {filteredCards.length} cards • {totalVariations} variations
+            {groupedCards.length} cards • {totalVariations} variations
             {isInventoryMode && ` • ${totalStock} in stock`}
           </p>
         </div>
         
         <div className="flex items-center gap-3">
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-600 hidden sm:inline">View:</span>
+            <div className="inline-flex rounded-lg border border-slate-300 bg-white p-0.5">
+              <button
+                onClick={() => setViewMode('list')}
+                className={`px-3 py-2 rounded-md transition-colors ${
+                  viewMode === 'list'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+                aria-pressed={viewMode === 'list'}
+                aria-label="Switch to list view"
+              >
+                <List className="w-5 h-5" />
+              </button>
+              <button
+                onClick={() => setViewMode('grid')}
+                className={`px-3 py-2 rounded-md transition-colors ${
+                  viewMode === 'grid'
+                    ? 'bg-blue-600 text-white shadow-sm'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+                aria-pressed={viewMode === 'grid'}
+                aria-label="Switch to grid view"
+              >
+                <LayoutGrid className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+          
           <button 
             onClick={fetchCards}
             disabled={loading}
@@ -356,14 +421,15 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         </div>
       )}
 
-      {/* Cards Grid */}
+      {/* Cards Display */}
       {!loading && !filtersLoading && (
         <>
-          {filteredCards.length > 0 ? (
+          {groupedCards.length > 0 ? (
             <AdminCardGrid
-              cards={filteredCards}
+              cards={groupedCards}
               mode={mode}
-              onAddToInventory={isInventoryMode ? openAddModal : undefined}
+              viewMode={viewMode}
+              onAddToInventory={isInventoryMode ? undefined : openAddModal}
             />
           ) : (
             <EmptyState

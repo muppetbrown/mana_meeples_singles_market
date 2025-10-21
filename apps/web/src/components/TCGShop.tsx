@@ -100,6 +100,36 @@ const TCGShop: React.FC = () => {
   // LOCAL STATE - ALL PROPERLY DECLARED
   // ============================================================================
   const [cards, setCards] = useState<CardForDisplay[]>([]);
+
+  // Group cards by card_number (same logic as admin)
+  const groupedCardsFlat = useMemo(() => {
+    const groups = new Map<string, StorefrontCard[]>();
+    
+    cards.forEach(card => {
+      const key = `${card.set_name}-${card.card_number}`;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(card);
+    });
+    
+    // Merge cards with same card_number
+    return Array.from(groups.values()).map(cardGroup => {
+      if (cardGroup.length === 1) return cardGroup[0];
+      
+      // Merge multiple cards into one with combined variations
+      const baseCard = cardGroup[0];
+      const allVariations = cardGroup.flatMap(c => c.variations || []);
+      
+      return {
+        ...baseCard,
+        variations: allVariations,
+        variation_count: allVariations.length,
+        total_stock: allVariations.reduce((sum, v) => sum + (v.stock || 0), 0),
+      };
+    });
+  }, [cards]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -483,68 +513,68 @@ const TCGShop: React.FC = () => {
   // CARD GROUPING AND SORTING - FIXED PRICE GROUPING
   // ============================================================================
   const groupedCards = useMemo(() => {
-    if (!cards.length) return [];
+  if (!groupedCardsFlat.length) return []; // ← Changed from cards
+  
+  const { sortBy } = filters;
 
-    const { sortBy } = filters;
+  // If no grouping needed, return ungrouped
+  if (!['name', 'set', 'rarity', 'price', 'price_low', 'price_high'].includes(sortBy)) {
+    return [{ section: null, cards: groupedCardsFlat }]; // ← Changed from cards
+  }
 
-    // If no grouping needed, return ungrouped
-    if (!['name', 'set', 'rarity', 'price', 'price_low', 'price_high'].includes(sortBy)) {
-      return [{ section: null, cards }];
+  const groups = new Map<string, CardForDisplay[]>();
+
+  groupedCardsFlat.forEach(card => { // ← Changed from cards.forEach
+    // ... rest of the code stays exactly the same
+    let sectionKey: string;
+    let sectionTitle: string;
+
+    if (sortBy === 'name') {
+      const firstLetter = card.name.charAt(0).toUpperCase();
+      sectionKey = firstLetter;
+      sectionTitle = firstLetter;
+    } else if (sortBy === 'set') {
+      sectionKey = card.set_name;
+      sectionTitle = card.set_name;
+    } else if (sortBy === 'rarity') {
+      const rarity = card.rarity || 'Unknown';
+      sectionKey = rarity;
+      sectionTitle = rarity;
+    } else if (['price', 'price_low', 'price_high'].includes(sortBy)) {
+      const price = card.variations?.[0]?.price ?? 0;
+      
+      if (price < 1) {
+        sectionKey = 'Under $1';
+        sectionTitle = 'Under $1';
+      } else if (price < 5) {
+        sectionKey = '$1 - $4.99';
+        sectionTitle = '$1 - $4.99';
+      } else if (price < 10) {
+        sectionKey = '$5 - $9.99';
+        sectionTitle = '$5 - $9.99';
+      } else if (price < 25) {
+        sectionKey = '$10 - $24.99';
+        sectionTitle = '$10 - $24.99';
+      } else if (price < 50) {
+        sectionKey = '$25 - $49.99';
+        sectionTitle = '$25 - $49.99';
+      } else if (price < 100) {
+        sectionKey = '$50 - $99.99';
+        sectionTitle = '$50 - $99.99';
+      } else {
+        sectionKey = '$100+';
+        sectionTitle = '$100+';
+      }
+    } else {
+      sectionKey = 'Other';
+      sectionTitle = 'Other';
     }
 
-    const groups = new Map<string, CardForDisplay[]>();
-
-    cards.forEach(card => {
-      let sectionKey: string;
-      let sectionTitle: string;
-
-      if (sortBy === 'name') {
-        const firstLetter = card.name.charAt(0).toUpperCase();
-        sectionKey = firstLetter;
-        sectionTitle = firstLetter;
-      } else if (sortBy === 'set') {
-        sectionKey = card.set_name;
-        sectionTitle = card.set_name;
-      } else if (sortBy === 'rarity') {
-        const rarity = card.rarity || 'Unknown';
-        sectionKey = rarity;
-        sectionTitle = rarity;
-      } else if (['price', 'price_low', 'price_high'].includes(sortBy)) {
-        // FIXED: Complete price grouping logic
-        const price = card.variations?.[0]?.price ?? 0;
-        
-        if (price < 1) {
-          sectionKey = 'Under $1';
-          sectionTitle = 'Under $1';
-        } else if (price < 5) {
-          sectionKey = '$1 - $4.99';
-          sectionTitle = '$1 - $4.99';
-        } else if (price < 10) {
-          sectionKey = '$5 - $9.99';
-          sectionTitle = '$5 - $9.99';
-        } else if (price < 25) {
-          sectionKey = '$10 - $24.99';
-          sectionTitle = '$10 - $24.99';
-        } else if (price < 50) {
-          sectionKey = '$25 - $49.99';
-          sectionTitle = '$25 - $49.99';
-        } else if (price < 100) {
-          sectionKey = '$50 - $99.99';
-          sectionTitle = '$50 - $99.99';
-        } else {
-          sectionKey = '$100+';
-          sectionTitle = '$100+';
-        }
-      } else {
-        sectionKey = 'Other';
-        sectionTitle = 'Other';
-      }
-
-      if (!groups.has(sectionKey)) {
-        groups.set(sectionKey, []);
-      }
-      groups.get(sectionKey)!.push(card);
-    });
+    if (!groups.has(sectionKey)) {
+      groups.set(sectionKey, []);
+    }
+    groups.get(sectionKey)!.push(card);
+  });
 
     // Convert to array and sort groups
     const sortedGroups = Array.from(groups.entries()).map(([section, cards]) => ({

@@ -8,6 +8,7 @@ import type { ApiCard as Card, ApiCardVariation as CardVariation } from '@/types
 interface AdminCardGridProps {
   cards: Card[];
   mode?: 'all' | 'inventory';
+  viewMode?: 'grid' | 'list';
   onAddToInventory?: (card: Card, variation: CardVariation) => void;
 }
 
