@@ -102,12 +102,6 @@ importers:
 
   apps/api:
     dependencies:
-      '@types/bcrypt':
-        specifier: ^6.0.0
-        version: 6.0.0
-      '@types/compression':
-        specifier: ^1.7.9
-        version: 1.8.1
       '@types/cookie-parser':
         specifier: ^1.4.9
         version: 1.4.9(@types/express@4.17.23)
@@ -129,6 +123,9 @@ importers:
       '@types/pg':
         specifier: ^8.15.5
         version: 8.15.5
+      '@types/pino':
+        specifier: ^7.0.5
+        version: 7.0.5
       compression:
         specifier: ^1.8.1
         version: 1.8.1
@@ -172,15 +169,6 @@ importers:
       '@types/dotenv':
         specifier: ^8.2.3
         version: 8.2.3
-      '@types/pino':
-        specifier: ^7.0.5
-        version: 7.0.5
-      '@types/react':
-        specifier: ^18.3.10
-        version: 18.3.26
-      '@types/react-dom':
-        specifier: ^18.3.0
-        version: 18.3.0
       pino-pretty:
         specifier: ^13.1.2
         version: 13.1.2
@@ -1347,9 +1335,6 @@ packages:
 
   '@types/body-parser@1.19.6':
     resolution: {integrity: sha512-HLFeCYgz89uk22N5Qg3dvGvsv46B8GLvKKo1zKG4NybA8U2DiEO3w9lqGg29t/tfLRJpJ6iQxnVw4OnB7MoM9g==}
-
-  '@types/compression@1.8.1':
-    resolution: {integrity: sha512-kCFuWS0ebDbmxs0AXYn6e2r2nrGAb5KwQhknjSPSPgJcGd8+HVSILlUyFhGqML2gk39HcG7D1ydW9/qpYkN00Q==}
 
   '@types/connect@3.4.38':
     resolution: {integrity: sha512-K6uROf1LD88uDQqJCktA4yzL1YYAK6NgfsI0v/mTgyPKWsX1CnJ0XPSDhViejru1GcRkLWb8RlzFYJRqGUbaug==}
@@ -5270,11 +5255,6 @@ snapshots:
   '@types/body-parser@1.19.6':
     dependencies:
       '@types/connect': 3.4.38
-      '@types/node': 20.19.22
-
-  '@types/compression@1.8.1':
-    dependencies:
-      '@types/express': 4.17.23
       '@types/node': 20.19.22
 
   '@types/connect@3.4.38':
