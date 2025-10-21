@@ -4,25 +4,15 @@
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-
-    "rootDir": "src",
-    "outDir": "dist",
-
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": false,
 
+    // Common flags
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "verbatimModuleSyntax": true,
-
     "baseUrl": ".",
-    "paths": {
-      "@shared/*": ["../../utils/shared/src/*"]
-    },
-
     "types": ["node"]
-  },
-  "include": ["src"]
+  }
 }

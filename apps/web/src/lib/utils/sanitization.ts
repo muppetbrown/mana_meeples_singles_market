@@ -88,7 +88,6 @@ const sanitizeAddress = (address: any) => {
 /**
  * Sanitize customer data from orders
  */
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'sanitizeCu... Remove this comment to see the full error message
 const sanitizeCustomerData = (customer: any) => {
   return {
     firstName: sanitizeText(customer.firstName),

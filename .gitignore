@@ -16,14 +16,7 @@ Thumbs.db
 /apps/api/.pnp
 /apps/api/.pnp.js
 
-# testing
-/apps/api/coverage
 
-# production
-/apps/api/build
-
-# misc
-/apps/api/.DS_Store
 /apps/api/.env.local
 /apps/api/.env.development.local
 /apps/api/.env.test.local
@@ -37,12 +30,6 @@ Thumbs.db
 /apps/web/node_modules
 /apps/web/.pnp
 /apps/web/.pnp.js
-
-# testing
-/apps/web/coverage
-
-# production
-/apps/web/build
 
 # misc
 /apps/web/.DS_Store

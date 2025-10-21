@@ -10,7 +10,7 @@
   "scripts": {
     "dev": "pnpm -r --parallel run dev",
     "build": "pnpm -r run build",
-    "typecheck": "pnpm -r run typecheck",
+    "typecheck": "pnpm -r --parallel run typecheck",
     "lint": "pnpm -r run lint",
     "test": "pnpm -r run test",
     "format": "pnpm -r run format",
