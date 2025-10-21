@@ -649,11 +649,11 @@ const TCGShop: React.FC = () => {
     });
   }, [addToCart]);
 
-  const updateCartQuantity = useCallback((id: number, quality: string, delta: number) => {
-    const existingItem = cart.items.find(item => item.card_id === id && item.quality === quality);
+  const updateCartQuantity = useCallback((cardId: number, quality: string, delta: number) => {
+    const existingItem = cart.items.find(item => item.card_id === cardId && item.quality === quality);
     if (existingItem) {
       const newQuantity = existingItem.quantity + delta;
-      updateQuantity(id, quality, newQuantity);
+      updateQuantity(cardId, existingItem.variation_key, newQuantity);
     }
   }, [cart, updateQuantity]);
 
@@ -972,10 +972,12 @@ const TCGShop: React.FC = () => {
                     }>
                       <VirtualCardGrid
                         cards={cards as any}
-                        selectedVariations={selectedVariations}
-                        currency={currency}
-                        onVariationChange={handleVariationChange}
-                        onAddToCart={handleAddToCart}
+                        cardProps={{
+                          currency,
+                          selectedVariations,
+                          onVariationChange: handleVariationChange,
+                          onAddToCart: handleAddToCart
+                        }}
                       />
                     </Suspense>
                   </ErrorBoundary>
@@ -1139,17 +1141,17 @@ const TCGShop: React.FC = () => {
 
           <div className="space-y-2 max-h-48 overflow-y-auto">
             {cart.items.slice(0, 3).map((item) => (
-              <div key={`${item.id}-${item.quality}`} className="flex items-center gap-2 text-sm">
+              <div key={`${item.card_id}-${item.quality}`} className="flex items-center gap-2 text-sm">
                 <img
                   src={item.image_url}
-                  alt={item.name}
+                  alt={item.card_name}
                   className="w-8 h-10 object-contain rounded"
                   onError={(e) => {
                     (e.target as HTMLImageElement).style.display = 'none';
                   }}
                 />
                 <div className="flex-1 min-w-0">
-                  <div className="truncate font-medium">{item.name}</div>
+                  <div className="truncate font-medium">{item.card_name}</div>
                   <div className="text-xs text-mm-teal">
                     <div className="truncate">{item.set_name} #{item.card_number}</div>
                     <div>{item.quality} × {item.quantity}</div>
@@ -1199,10 +1201,10 @@ const TCGShop: React.FC = () => {
               ) : (
                 <div className="space-y-4">
                   {cart.items.map(item => (
-                    <div key={`${item.id}-${item.quality}`} className="flex gap-4 p-4 bg-mm-tealLight rounded-lg border border-mm-warmAccent">
+                    <div key={`${item.card_id}-${item.quality}`} className="flex gap-4 p-4 bg-mm-tealLight rounded-lg border border-mm-warmAccent">
                       <img
                         src={item.image_url}
-                        alt={item.name}
+                        alt={item.card_name}
                         className="w-20 h-28 object-contain rounded bg-white"
                         onError={(e) => {
                           (e.target as HTMLImageElement).onerror = null;
@@ -1210,7 +1212,7 @@ const TCGShop: React.FC = () => {
                         }}
                       />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-sm mb-1 line-clamp-2">{item.name}</h3>
+                        <h3 className="font-bold text-sm mb-1 line-clamp-2">{item.card_name}</h3>
                         <div className="text-xs text-mm-teal mb-2 space-y-1">
                           <div className="font-medium">{item.game_name}</div>
                           <div>{item.set_name} #{item.card_number}</div>
@@ -1227,7 +1229,7 @@ const TCGShop: React.FC = () => {
                         </div>
                         <div className="flex items-center gap-2 mt-2">
                           <button
-                            onClick={() => updateCartQuantity(item.id, item.quality, -1)}
+                            onClick={() => updateCartQuantity(item.card_id, item.quality, -1)}
                             disabled={item.quantity <= 1}
                             className="w-8 h-8 flex items-center justify-center rounded-md bg-mm-warmAccent hover:bg-mm-teal hover:text-white disabled:opacity-50 disabled:cursor-not-allowed focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none"
                             aria-label="Decrease quantity"
@@ -1236,7 +1238,7 @@ const TCGShop: React.FC = () => {
                           </button>
                           <span className="font-medium min-w-[2rem] text-center">{item.quantity}</span>
                           <button
-                            onClick={() => updateCartQuantity(item.id, item.quality, 1)}
+                            onClick={() => updateCartQuantity(item.card_id, item.quality, 1)}
                             disabled={item.quantity >= item.stock}
                             className="w-8 h-8 flex items-center justify-center rounded-md bg-mm-warmAccent hover:bg-mm-teal hover:text-white disabled:opacity-50 disabled:cursor-not-allowed focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none"
                             aria-label="Increase quantity"
@@ -1244,7 +1246,7 @@ const TCGShop: React.FC = () => {
                             <Plus className="w-4 h-4" />
                           </button>
                           <button
-                            onClick={() => removeFromCart(item.id, item.quality)}
+                            onClick={() => removeFromCart(item.card_id, item.quality)}
                             className="ml-auto text-red-600 hover:text-red-700 focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none rounded"
                             aria-label="Remove item from cart"
                           >
