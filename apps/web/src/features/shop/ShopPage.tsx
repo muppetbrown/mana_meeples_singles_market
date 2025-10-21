@@ -77,14 +77,7 @@ const ShopPage: React.FC = () => {
         <div className="lg:flex lg:gap-6">
           {/* Filters Sidebar */}
           <aside className="lg:w-80">
-            <FiltersPanel
-              filters={filters}
-              games={games}
-              sets={sets}
-              filterOptions={filterOptions}
-              onFilterChange={updateFilters}
-              onClearFilters={clearFilters}
-            />
+            <FiltersPanel />
           </aside>
 
           {/* Main Content */}

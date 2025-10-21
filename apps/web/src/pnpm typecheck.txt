@@ -3,47 +3,11 @@ C:\Git_Repos\mana_meeples_singles_market\apps\web>pnpm typecheck
 > web@0.1.0 typecheck C:\Git_Repos\mana_meeples_singles_market\apps\web
 > tsc -p tsconfig.json --noEmit
 
-src/features/admin/components/Cards/AddToInventoryModal.tsx:117:71 - error TS2551: Property 'variation_label' does not exist on type 'CardVariation'. Did you mean 'variation_key'?
-
-117               <span className="font-medium text-slate-900">{variation.variation_label}</span>
-                                                                          ~~~~~~~~~~~~~~~
-
-  src/types/models/card.ts:23:3
-    23   variation_key: string;
-         ~~~~~~~~~~~~~
-    'variation_key' is declared here.
-
-src/features/admin/components/Cards/CardsTab.tsx:70:22 - error TS2554: Expected 0 arguments, but got 2.
-
-70   } = useShopFilters(API_BASE, selectedGame);
-                        ~~~~~~~~~~~~~~~~~~~~~~
-
 src/features/admin/components/Cards/CardsTab.tsx:430:15 - error TS2322: Type '{ cards: Card[]; mode: "all" | "inventory"; viewMode: "grid" | "list"; onAddToInventory: (card: Card, variation: CardVariation) => void; }' is not assignable to type 'IntrinsicAttributes & CardGridProps<Card>'.
   Property 'mode' does not exist on type 'IntrinsicAttributes & CardGridProps<Card>'.
 
 430               mode={mode}
                   ~~~~
-
-src/features/shop/components/CardDisplay/CardDisplay.tsx:2:10 - error TS2304: Cannot find name 'StorefrontCard'.
-
-2   cards: StorefrontCard[];
-           ~~~~~~~~~~~~~~
-
-src/features/shop/components/CardDisplay/CardDisplay.tsx:4:13 - error TS2304: Cannot find name 'Currency'.
-
-4   currency: Currency;
-              ~~~~~~~~
-
-src/features/shop/components/CardDisplay/CardDisplay.tsx:8:28 - error TS2304: Cannot find name 'CartItem'.
-
-8   onAddToCart: (item: Omit<CartItem, 'quantity'>) => void;
-                             ~~~~~~~~
-
-src/features/shop/components/CardDisplay/CardDisplay.tsx:11:14 - error TS2322: Type '(props: CardDisplayProps) => void' is not assignable to type 'FC<CardDisplayProps>'.
-  Type 'void' is not assignable to type 'ReactNode'.
-
-11 export const CardDisplay: React.FC<CardDisplayProps> = (props) => {
-                ~~~~~~~~~~~
 
 src/features/shop/components/CardDisplay/CardGrid.tsx:104:9 - error TS2322: Type 'T' is not assignable to type 'Card'.
   Type 'import("C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/models/card").Card' is not assignable to type 'Card'.
@@ -57,161 +21,29 @@ src/features/shop/components/CardDisplay/CardGrid.tsx:104:9 - error TS2322: Type
          ~~~~
     The expected type comes from property 'card' which is declared here on type 'IntrinsicAttributes & CardItemProps'
 
-src/features/shop/components/Cart/CartItem.tsx:2:9 - error TS2304: Cannot find name 'CartItem'.
-
-2   item: CartItem;
-          ~~~~~~~~
-
-src/features/shop/components/Cart/CartItem.tsx:3:13 - error TS2304: Cannot find name 'Currency'.
-
-3   currency: Currency;
-              ~~~~~~~~
-
-src/features/shop/components/Cart/CartItem.tsx:8:14 - error TS2322: Type '(props: CartItemDisplayProps) => void' is not assignable to type 'FC<CartItemDisplayProps>'.
-  Type 'void' is not assignable to type 'ReactNode'.
-
-8 export const CartItemDisplay: React.FC<CartItemDisplayProps> = (props) => {
-               ~~~~~~~~~~~~~~~
-
-src/features/shop/components/Search/ActiveFilters.tsx:2:12 - error TS2304: Cannot find name 'SearchFilters'.
-
-2   filters: SearchFilters;
-             ~~~~~~~~~~~~~
-
-src/features/shop/components/Search/ActiveFilters.tsx:7:14 - error TS2322: Type '(props: ActiveFiltersProps) => void' is not assignable to type 'FC<ActiveFiltersProps>'.
-  Type 'void' is not assignable to type 'ReactNode'.
-
-7 export const ActiveFilters: React.FC<ActiveFiltersProps> = (props) => {
-               ~~~~~~~~~~~~~
-
-src/features/shop/components/ShopHeader.tsx:2:9 - error TS2304: Cannot find name 'Cart'.
-
-2   cart: Cart;
-          ~~~~
-
-src/features/shop/components/ShopHeader.tsx:3:13 - error TS2304: Cannot find name 'Currency'.
-
-3   currency: Currency;
-              ~~~~~~~~
-
-src/features/shop/components/ShopHeader.tsx:4:32 - error TS2304: Cannot find name 'Currency'.
-
-4   onCurrencyChange: (currency: Currency) => void;
-                                 ~~~~~~~~
-
-src/features/shop/hooks/useCardFetching.ts:2:12 - error TS2304: Cannot find name 'SearchFilters'.
-
-2   filters: SearchFilters,
-             ~~~~~~~~~~~~~
-
-src/features/shop/hooks/useCardFetching.ts:3:10 - error TS2304: Cannot find name 'Game'.
-
-3   games: Game[],
-           ~~~~
-
-src/features/shop/hooks/useCardFetching.ts:4:9 - error TS2314: Generic type 'Set<T>' requires 1 type argument(s).
-
-4   sets: Set[]
-          ~~~
-
-src/features/shop/hooks/useCardFetching.ts:6:29 - error TS2304: Cannot find name 'useState'.
-
-6   const [cards, setCards] = useState<StorefrontCard[]>([]);
-                              ~~~~~~~~
-
-src/features/shop/hooks/useCardFetching.ts:6:38 - error TS2304: Cannot find name 'StorefrontCard'.
-
-6   const [cards, setCards] = useState<StorefrontCard[]>([]);
-                                       ~~~~~~~~~~~~~~
-
-src/features/shop/hooks/useCardFetching.ts:7:33 - error TS2304: Cannot find name 'useState'.
-
-7   const [loading, setLoading] = useState(false);
-                                  ~~~~~~~~
-
-src/features/shop/hooks/useCardFetching.ts:8:29 - error TS2304: Cannot find name 'useState'.
-
-8   const [error, setError] = useState<string | null>(null);
-                              ~~~~~~~~
-
-src/features/shop/hooks/useCardFetching.ts:10:3 - error TS2304: Cannot find name 'useEffect'.
-
-10   useEffect(() => {
-     ~~~~~~~~~
-
-src/features/shop/hooks/useCardFetching.ts:16:18 - error TS2552: Cannot find name 'fetchedCards'. Did you mean 'fetchCards'?
-
-16         setCards(fetchedCards);
-                    ~~~~~~~~~~~~
-
-  src/features/shop/hooks/useCardFetching.ts:12:11
-    12     const fetchCards = async () => {
-                 ~~~~~~~~~~
-    'fetchCards' is declared here.
-
-src/features/shop/hooks/useVariationSelection.ts:1:46 - error TS2304: Cannot find name 'StorefrontCard'.
-
-1 export function useVariationSelection(cards: StorefrontCard[]) {
-                                               ~~~~~~~~~~~~~~
-
-src/features/shop/hooks/useVariationSelection.ts:2:39 - error TS2304: Cannot find name 'useState'.
-
-2   const [selections, setSelections] = useState<Record<number, string>>({});
-                                        ~~~~~~~~
-
-src/features/shop/hooks/useVariationSelection.ts:4:27 - error TS2304: Cannot find name 'useCallback'.
-
-4   const selectVariation = useCallback((cardId: number, varKey: string) => {
-                            ~~~~~~~~~~~
-
-src/features/shop/hooks/useVariationSelection.ts:8:23 - error TS2304: Cannot find name 'useCallback'.
-
-8   const getSelected = useCallback((cardId: number) => {
-                        ~~~~~~~~~~~
-
-src/features/shop/hooks/useVariationSelection.ts:13:3 - error TS2304: Cannot find name 'useEffect'.
-
-13   useEffect(() => {
-     ~~~~~~~~~
-
-src/features/shop/hooks/useVariationSelection.ts:19:11 - error TS2322: Type 'unknown' is not assignable to type 'string'.
-
-19           filtered[Number(id)] = key;
-             ~~~~~~~~~~~~~~~~~~~~
-
-src/features/shop/ShopPage.tsx:5:8 - error TS2613: Module '"C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/ShopHeader"' has no default export. Did you mean to use 'import { ShopHeader } from "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/ShopHeader"' instead?
-
-5 import ShopHeader from './components/ShopHeader';
-         ~~~~~~~~~~
-
-src/features/shop/ShopPage.tsx:7:8 - error TS2613: Module '"C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/Search/ActiveFilters"' has no default export. Did you mean to use 'import { ActiveFilters } from "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/Search/ActiveFilters"' instead?
-
-7 import ActiveFilters from './components/Search/ActiveFilters';
-         ~~~~~~~~~~~~~
-
-src/features/shop/ShopPage.tsx:8:8 - error TS2613: Module '"C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/CardDisplay/CardDisplay"' has no default export. Did you mean to use 'import { CardDisplay } from "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/CardDisplay/CardDisplay"' instead?
-
-8 import CardDisplay from './components/CardDisplay/CardDisplay';
-         ~~~~~~~~~~~
-
 src/features/shop/ShopPage.tsx:81:15 - error TS2322: Type '{ filters: SearchFilters; games: Game[]; sets: Set[]; filterOptions: FilterOptions; onFilterChange: (updates: Partial<SearchFilters>) => void; onClearFilters: () => void; }' is not assignable to type 'IntrinsicAttributes'.
   Property 'filters' does not exist on type 'IntrinsicAttributes'.
 
 81               filters={filters}
                  ~~~~~~~
 
+src/features/shop/ShopPage.tsx:94:15 - error TS2322: Type '(updates: Partial<SearchFilters>) => void' is not assignable to type '(key: string, value: string) => void'.
+  Types of parameters 'updates' and 'key' are incompatible.
+    Type 'string' has no properties in common with type 'Partial<SearchFilters>'.
 
-Found 35 errors in 10 files.
+94               onClearFilter={updateFilters}
+                 ~~~~~~~~~~~~~
+
+  src/features/shop/components/Search/ActiveFilters.tsx:6:3
+    6   onClearFilter: (key: string, value: string) => void;
+        ~~~~~~~~~~~~~
+    The expected type comes from property 'onClearFilter' which is declared here on type 'IntrinsicAttributes & ActiveFiltersProps'
+
+
+Found 4 errors in 3 files.
 
 Errors  Files
-     1  src/features/admin/components/Cards/AddToInventoryModal.tsx:117
-     2  src/features/admin/components/Cards/CardsTab.tsx:70
-     4  src/features/shop/components/CardDisplay/CardDisplay.tsx:2
+     1  src/features/admin/components/Cards/CardsTab.tsx:430
      1  src/features/shop/components/CardDisplay/CardGrid.tsx:104
-     3  src/features/shop/components/Cart/CartItem.tsx:2
-     2  src/features/shop/components/Search/ActiveFilters.tsx:2
-     3  src/features/shop/components/ShopHeader.tsx:2
-     9  src/features/shop/hooks/useCardFetching.ts:2
-     6  src/features/shop/hooks/useVariationSelection.ts:1
-     4  src/features/shop/ShopPage.tsx:5
+     2  src/features/shop/ShopPage.tsx:81
  ELIFECYCLE  Command failed with exit code 2.

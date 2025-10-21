@@ -8,7 +8,7 @@ import React, { useRef, useMemo } from 'react';
 import { useVirtualScroll } from '@/shared/hooks';
 import { Card } from '@/types';
 import CardItem from './CardItem';
-import ListCardItem from './ListCardItem';
+//import ListCardItem from './ListCardItem';
 import CardSkeleton from './CardSkeleton';
 import { ChevronDown } from 'lucide-react';
 
@@ -26,8 +26,9 @@ interface CardGridProps<T extends Card = Card> {
   enableVirtualScroll?: boolean;
   onCardClick?: (card: T) => void;
   renderCard?: (card: T) => React.ReactNode;
-  // Props passed to individual card components
   cardProps?: Record<string, any>;
+  mode?: 'all' | 'inventory';
+  onAddToInventory?: (card: T, variation: any) => void;
 }
 
 // ============================================================================
@@ -95,18 +96,22 @@ export const CardGrid = <T extends Card = Card>({
     }
   };
 
-  // Default card renderer
-  const defaultRenderCard = (card: T) => {
-    const CardComponent = viewMode === 'list' ? ListCardItem : CardItem;
-    return (
-      <CardComponent
-        key={card.id}
-        card={card}
-        onClick={() => onCardClick?.(card)}
-        {...cardProps}
-      />
-    );
-  };
+// Default card renderer
+const defaultRenderCard = (card: T) => {
+  // For now, always use CardItem (list view coming later)
+  return (
+    <CardItem
+      key={card.id}
+      card={card as any} // Type assertion - CardItem has its own Card type
+      selectedVariationKey={cardProps?.selectedVariationKey || ''}
+      selectedVariation={cardProps?.selectedVariation}
+      currency={cardProps?.currency || { symbol: '$', rate: 1 }}
+      onVariationChange={cardProps?.onVariationChange || (() => {})}
+      onAddToCart={cardProps?.onAddToCart || (() => {})}
+      {...cardProps}
+    />
+  );
+};
 
   const cardRenderer = renderCard || defaultRenderCard;
 
@@ -231,59 +236,5 @@ export const CardGrid = <T extends Card = Card>({
 export default CardGrid;
 
 // Also export compound components for flexibility
-export { CardItem, ListCardItem, CardSkeleton };
-
-// ============================================================================
-// USAGE EXAMPLES
-// ============================================================================
-
-/*
-// Basic usage
-<CardGrid cards={cards} />
-
-// Grid view with custom columns
-<CardGrid 
-  cards={cards} 
-  viewMode="grid"
-  columnCount={3}
-/>
-
-// List view
-<CardGrid 
-  cards={cards} 
-  viewMode="list"
-/>
-
-// Force virtual scrolling off
-<CardGrid 
-  cards={cards}
-  enableVirtualScroll={false}
-/>
-
-// Custom card renderer
-<CardGrid
-  cards={cards}
-  renderCard={(card) => (
-    <CustomCardComponent 
-      card={card}
-      onFavorite={() => handleFavorite(card.id)}
-    />
-  )}
-/>
-
-// With loading state
-<CardGrid 
-  cards={cards}
-  isLoading={isLoading}
-/>
-
-// Pass props to card components
-<CardGrid
-  cards={cards}
-  cardProps={{
-    currency: 'NZD',
-    onAddToCart: handleAddToCart,
-    selectedVariationKey: selectedVariations[card.id]
-  }}
-/>
-*/
+//export { CardItem, ListCardItem, CardSkeleton };
+export { CardItem, CardSkeleton };

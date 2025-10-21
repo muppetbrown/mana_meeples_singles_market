@@ -3,7 +3,7 @@ import type { SearchFilters } from '@/types';
 
 interface ActiveFiltersProps {
   filters: SearchFilters;
-  onClearFilter: (key: string, value: string) => void;
+  onClearFilter: (updates: Partial<SearchFilters>) => void;
   onClearAll: () => void;
 }
 

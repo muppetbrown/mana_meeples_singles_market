@@ -16,11 +16,16 @@ type Variation = {
 type Card = {
   id: string | number;
   name: string;
-  image_url: string;
+  image_url?: string;
   set_name: string;
   card_number?: string;
   variations: Variation[];
 };
+
+interface CardWithVariations extends Card {
+  variations: Variation[];
+  image_url?: string;
+}
 
 type Currency = {
   symbol: string;
