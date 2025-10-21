@@ -1,3 +1,6 @@
+import React from 'react';
+import type { Cart, Currency } from '@/types';
+
 interface ShopHeaderProps {
   cart: Cart;
   currency: Currency;
@@ -5,15 +8,14 @@ interface ShopHeaderProps {
   onCartClick: () => void;
 }
 
-export const ShopHeader: React.FC<ShopHeaderProps> = ({
-  cart,
-  currency,
-  onCurrencyChange,
-  onCartClick
-}) => {
+export const ShopHeader: React.FC<ShopHeaderProps> = (props) => {
+  // TODO: Implementation will come later
+  // For now, return a simple placeholder
   return (
-    <header className="bg-white shadow-sm sticky top-0 z-40">
-      {/* Header content - extract from ShopPage */}
-    </header>
+    <div>
+      <p>Shop Header Component - To be implemented</p>
+    </div>
   );
 };
+
+export default ShopHeader;

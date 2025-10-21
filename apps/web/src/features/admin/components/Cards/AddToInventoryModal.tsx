@@ -114,7 +114,7 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
           <div className="bg-slate-50 rounded-lg p-4 space-y-2">
             <div className="flex items-center gap-2 text-sm">
               <span className="text-slate-600">Variation:</span>
-              <span className="font-medium text-slate-900">{variation.variation_label}</span>
+              <span className="font-medium text-slate-900">{variation.variation_key}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <span className="text-slate-600">Treatment:</span>

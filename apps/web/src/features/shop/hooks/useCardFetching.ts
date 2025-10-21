@@ -1,3 +1,17 @@
+import { useState, useEffect } from 'react';
+import type { StorefrontCard, SearchFilters } from '@/types';
+
+interface Game {
+  id: number;
+  name: string;
+  code?: string;
+}
+
+interface Set {
+  id: number;
+  name: string;
+}
+
 export function useCardFetching(
   filters: SearchFilters,
   games: Game[],
@@ -8,13 +22,13 @@ export function useCardFetching(
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Extract fetch logic from ShopPage
     const fetchCards = async () => {
       setLoading(true);
       try {
-        // ... fetch implementation
-        setCards(fetchedCards);
-      } catch (err) {
+        // TODO: Implement actual fetch logic
+        // For now, just set empty array
+        setCards([]);
+      } catch (err: any) {
         setError(err.message);
       } finally {
         setLoading(false);

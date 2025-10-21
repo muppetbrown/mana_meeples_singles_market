@@ -1,3 +1,6 @@
+import React from 'react';
+import type { SearchFilters } from '@/types';
+
 interface ActiveFiltersProps {
   filters: SearchFilters;
   onClearFilter: (key: string, value: string) => void;
@@ -5,5 +8,13 @@ interface ActiveFiltersProps {
 }
 
 export const ActiveFilters: React.FC<ActiveFiltersProps> = (props) => {
-  // Extract active filters badges from ShopPage
+  // TODO: Implementation will come later
+  // For now, return a simple placeholder
+  return (
+    <div>
+      <p>Active Filters Component - To be implemented</p>
+    </div>
+  );
 };
+
+export default ActiveFilters;

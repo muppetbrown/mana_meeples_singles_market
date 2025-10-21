@@ -1,3 +1,6 @@
+import React from 'react';
+import type { CartItem, Currency } from '@/types';
+
 interface CartItemDisplayProps {
   item: CartItem;
   currency: Currency;
@@ -6,5 +9,13 @@ interface CartItemDisplayProps {
 }
 
 export const CartItemDisplay: React.FC<CartItemDisplayProps> = (props) => {
-  // Extract cart item rendering logic
+  // TODO: Implementation will come later
+  // For now, return a simple placeholder
+  return (
+    <div>
+      <p>Cart Item Component - To be implemented</p>
+    </div>
+  );
 };
+
+export default CartItemDisplay;

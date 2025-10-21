@@ -1,3 +1,6 @@
+import React from 'react';
+import type { StorefrontCard, Currency, CartItem } from '@/types';
+
 interface CardDisplayProps {
   cards: StorefrontCard[];
   viewMode: 'grid' | 'list';
@@ -9,6 +12,13 @@ interface CardDisplayProps {
 }
 
 export const CardDisplay: React.FC<CardDisplayProps> = (props) => {
-  // Handles view mode toggle, loading states, error states
-  // Delegates to CardGrid or CardList based on viewMode
+  // TODO: Implementation will come later
+  // For now, return a simple placeholder
+  return (
+    <div>
+      <p>Card Display Component - To be implemented</p>
+    </div>
+  );
 };
+
+export default CardDisplay;

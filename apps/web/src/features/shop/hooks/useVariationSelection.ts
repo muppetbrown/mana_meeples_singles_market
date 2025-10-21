@@ -1,3 +1,6 @@
+import { useState, useCallback, useEffect } from 'react';
+import type { StorefrontCard } from '@/types';
+
 export function useVariationSelection(cards: StorefrontCard[]) {
   const [selections, setSelections] = useState<Record<number, string>>({});
 
@@ -16,7 +19,7 @@ export function useVariationSelection(cards: StorefrontCard[]) {
       const filtered: Record<number, string> = {};
       Object.entries(prev).forEach(([id, key]) => {
         if (currentIds.has(Number(id))) {
-          filtered[Number(id)] = key;
+          filtered[Number(id)] = key as string;
         }
       });
       return filtered;

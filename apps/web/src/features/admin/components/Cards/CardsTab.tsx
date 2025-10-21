@@ -67,7 +67,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     filterOptions,
     loading: filtersLoading,
     error: filtersError
-  } = useShopFilters(API_BASE, selectedGame);
+  } = useShopFilters();
 
   // ---------- URL State Management (copied from TCGShop) ----------
   const updateParam = useCallback((key: string, value: string) => {
