@@ -2,7 +2,7 @@
 // shared/hooks/useVirtualScroll.ts - Virtual scrolling logic
 // ============================================================================
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 
 interface VirtualScrollConfig {
   items: any[];

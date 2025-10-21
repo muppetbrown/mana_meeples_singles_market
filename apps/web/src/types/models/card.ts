@@ -9,6 +9,8 @@ export interface Card {
   image_url?: string;
   total_stock: number;
   variation_count: number;
+  variations?: CardVariation[];
+  has_inventory?: boolean;
 }
 
 export interface CardVariation {

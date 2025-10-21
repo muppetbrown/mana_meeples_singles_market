@@ -1,5 +1,9 @@
 // 7. types/ui/common.ts - Common UI types
-export type Currency = 'NZD' | 'USD' | 'AUD';
+export interface Currency {
+  code: string;
+  symbol: string;
+  rate: number;
+}
 
 export type ViewMode = 'grid' | 'list';
 

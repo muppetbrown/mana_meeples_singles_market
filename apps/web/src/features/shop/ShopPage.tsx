@@ -166,12 +166,12 @@ const TCGShop: React.FC = () => {
   }), [searchParams, selectedQuality, selectedRarity, selectedFoilType, selectedSet]);
 
   const cartTotal = useMemo(() => 
-    cart.reduce((sum, item) => sum + (item.price * item.quantity), 0), 
+    cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0), 
     [cart]
   );
 
   const cartCount = useMemo(() => 
-    cart.reduce((sum, item) => sum + item.quantity, 0), 
+    cart.items.reduce((sum, item) => sum + item.quantity, 0), 
     [cart]
   );
 
@@ -436,7 +436,7 @@ const TCGShop: React.FC = () => {
 
   // Show mini cart when items added
   useEffect(() => {
-    if (cart.length > 0 && !showCart) {
+    if (cart.items.length > 0 && !showCart) {
       setShowMiniCart(true);
     }
   }, [cart, showCart]);
@@ -649,7 +649,7 @@ const TCGShop: React.FC = () => {
   }, [addToCart]);
 
   const updateCartQuantity = useCallback((id: number, quality: string, delta: number) => {
-    const existingItem = cart.find(item => item.id === id && item.quality === quality);
+    const existingItem = cart.items.find(item => item.id === id && item.quality === quality);
     if (existingItem) {
       const newQuantity = existingItem.quantity + delta;
       updateQuantity(id, quality, newQuantity);
@@ -1123,7 +1123,7 @@ const TCGShop: React.FC = () => {
       </main>
 
       {/* Persistent Mini Cart */}
-      {showMiniCart && cart.length > 0 && !showCart && (
+      {showMiniCart && cart.items.length > 0 && !showCart && (
         <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg border border-mm-warmAccent p-4 z-40 max-w-sm">
           <div className="flex items-center justify-between mb-2">
             <h3 className="font-semibold text-mm-darkForest">Cart ({cartCount})</h3>
@@ -1137,7 +1137,7 @@ const TCGShop: React.FC = () => {
           </div>
 
           <div className="space-y-2 max-h-48 overflow-y-auto">
-            {cart.slice(0, 3).map((item) => (
+            {cart.items.slice(0, 3).map((item) => (
               <div key={`${item.id}-${item.quality}`} className="flex items-center gap-2 text-sm">
                 <img
                   src={item.image_url}
@@ -1164,8 +1164,8 @@ const TCGShop: React.FC = () => {
             ))}
           </div>
 
-          {cart.length > 3 && (
-            <p className="text-xs text-mm-teal mt-2">+ {cart.length - 3} more items</p>
+          {cart.items.length > 3 && (
+            <p className="text-xs text-mm-teal mt-2">+ {cart.items.length - 3} more items</p>
           )}
 
           <button onClick={() => setShowCart(true)} className="btn-mm-primary w-full mt-3">
@@ -1190,14 +1190,14 @@ const TCGShop: React.FC = () => {
             </div>
 
             <div className="flex-1 overflow-y-auto p-6">
-              {cart.length === 0 ? (
+              {cart.items.length === 0 ? (
                 <div className="text-center py-12">
                   <ShoppingCart className="w-16 h-16 text-mm-teal mx-auto mb-4" />
                   <p className="text-mm-forest">Your cart is empty</p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {cart.map(item => (
+                  {cart.items.map(item => (
                     <div key={`${item.id}-${item.quality}`} className="flex gap-4 p-4 bg-mm-tealLight rounded-lg border border-mm-warmAccent">
                       <img
                         src={item.image_url}
@@ -1265,7 +1265,7 @@ const TCGShop: React.FC = () => {
               )}
             </div>
 
-            {cart.length > 0 && (
+            {cart.items.length > 0 && (
               <div className="p-6 border-t bg-mm-cream">
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-lg font-semibold text-mm-darkForest">Total:</span>

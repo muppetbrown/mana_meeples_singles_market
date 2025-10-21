@@ -50,7 +50,7 @@ const Checkout = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const cartTotal = cart.reduce((sum: any, item: any) => sum + (item.price * item.quantity), 0);
+  const cartTotal = cart.items.reduce((sum: any, item: any) => sum + (item.price * item.quantity), 0);
 
   // Input sanitization function
   const sanitizeInput = (input: any, type = 'text') => {
@@ -221,7 +221,7 @@ const Checkout = ({
 
       const orderData = {
         customer: sanitizedCustomer,
-        items: cart.map((item: any) => ({
+        items: cart.items.map((item: any) => ({
           inventory_id: item.inventory_id || item.id,
 
           // Sanitize quantity
@@ -591,7 +591,7 @@ const Checkout = ({
             <h2 className="text-xl font-bold text-slate-900 mb-6">Order Summary</h2>
 
             <div className="space-y-4 mb-6">
-              {cart.map((item: any) => <div key={`${item.id}-${item.quality}`} className="flex gap-4">
+              {cart.items.map((item: any) => <div key={`${item.id}-${item.quality}`} className="flex gap-4">
                 <img
                   src={item.image_url}
                   alt={item.name}

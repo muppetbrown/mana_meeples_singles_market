@@ -28,35 +28,40 @@ src/App.tsx:21:7 - error TS2304: Cannot find name 'Routes'.
 21     </Routes>
          ~~~~~~
 
-src/features/admin/components/Cards/CardsTab.tsx:6:32 - error TS2307: Cannot find module '../../hooks/useShopFilters' or its corresponding type declarations.
-
-6 import { useShopFilters } from '../../hooks/useShopFilters';
-                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:7:27 - error TS2307: Cannot find module '../CardSearchBar' or its corresponding type declarations.
-
-7 import CardSearchBar from '../CardSearchBar';
-                            ~~~~~~~~~~~~~~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:8:24 - error TS2307: Cannot find module '../EmptyState' or its corresponding type declarations.
-
-8 import EmptyState from '../EmptyState';
-                         ~~~~~~~~~~~~~~~
-
-src/features/admin/components/Cards/CardsTab.tsx:9:26 - error TS2307: Cannot find module '../skeletons/CardSkeleton' or its corresponding type declarations.
-
-9 import CardSkeleton from '../skeletons/CardSkeleton';
-                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 src/features/admin/components/Cards/CardsTab.tsx:10:33 - error TS2307: Cannot find module './AddToInventoryModal' or its corresponding type declarations.
 
 10 import AddToInventoryModal from './AddToInventoryModal';
                                    ~~~~~~~~~~~~~~~~~~~~~~~
 
-src/features/admin/components/Cards/CardsTab.tsx:11:27 - error TS2307: Cannot find module './AdminCardGrid' or its corresponding type declarations.
+src/features/admin/components/Cards/CardsTab.tsx:65:5 - error TS2339: Property 'games' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
 
-11 import AdminCardGrid from './AdminCardGrid';
-                             ~~~~~~~~~~~~~~~~~
+65     games,
+       ~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:66:5 - error TS2339: Property 'sets' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
+
+66     sets,
+       ~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:67:5 - error TS2339: Property 'filterOptions' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
+
+67     filterOptions,
+       ~~~~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:68:5 - error TS2339: Property 'loading' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
+
+68     loading: filtersLoading,
+       ~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:69:5 - error TS2339: Property 'error' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
+
+69     error: filtersError
+       ~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:70:22 - error TS2554: Expected 0 arguments, but got 2.
+
+70   } = useShopFilters(API_BASE, selectedGame);
+                        ~~~~~~~~~~~~~~~~~~~~~~
 
 src/features/admin/components/Cards/CardsTab.tsx:174:41 - error TS2339: Property 'has_inventory' does not exist on type 'Card'.
 
@@ -100,35 +105,11 @@ src/features/admin/components/Cards/CardsTab.tsx:284:31 - error TS2339: Property
 284           getUniqueFinishes(c.variations ?? []).join(';'),
                                   ~~~~~~~~~~
 
-src/features/admin/components/Dashboard.tsx:6:30 - error TS2307: Cannot find module './CurrencySelector' or its corresponding type declarations.
+src/features/admin/components/Cards/CardsTab.tsx:430:15 - error TS2322: Type '{ cards: (Card | { variations: any[]; variation_count: number; total_stock: any; has_inventory: boolean; id: number; name: string; card_number: string; set_name: string; game_name: string; rarity?: string; image_url?: string; })[]; mode: "all" | "inventory"; viewMode: "list" | "grid"; onAddToInventory: (card: Card, ...' is not assignable to type 'IntrinsicAttributes & CardGridProps<Card | { variations: any[]; variation_count: number; total_stock: any; has_inventory: boolean; id: number; name: string; card_number: string; set_name: string; game_name: string; rarity?: string; image_url?: string; }>'.
+  Property 'mode' does not exist on type 'IntrinsicAttributes & CardGridProps<Card | { variations: any[]; variation_count: number; total_stock: any; has_inventory: boolean; id: number; name: string; card_number: string; set_name: string; game_name: string; rarity?: string; image_url?: string; }>'.
 
-6 import CurrencySelector from './CurrencySelector';
-                               ~~~~~~~~~~~~~~~~~~~~
-
-src/features/admin/components/Dashboard.tsx:7:29 - error TS2307: Cannot find module './admin/UnifiedCardsTab' or its corresponding type declarations.
-
-7 import UnifiedCardsTab from './admin/UnifiedCardsTab';
-                              ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-src/features/admin/components/Dashboard.tsx:8:23 - error TS2307: Cannot find module './admin/OrdersTab' or its corresponding type declarations.
-
-8 import OrdersTab from './admin/OrdersTab';
-                        ~~~~~~~~~~~~~~~~~~~
-
-src/features/admin/components/Dashboard.tsx:9:26 - error TS2307: Cannot find module './admin/AnalyticsTab' or its corresponding type declarations.
-
-9 import AnalyticsTab from './admin/AnalyticsTab';
-                           ~~~~~~~~~~~~~~~~~~~~~~
-
-src/features/admin/components/Inventory/BulkManager.tsx:9:8 - error TS2307: Cannot find module '../../utils/csvUtils' or its corresponding type declarations.
-
-9 } from '../../utils/csvUtils';
-         ~~~~~~~~~~~~~~~~~~~~~~
-
-src/features/admin/hooks/useFilterCounts.ts:3:31 - error TS2307: Cannot find module '../config/constants' or its corresponding type declarations.
-
-3 import { FILTER_CONFIG } from '../config/constants';
-                                ~~~~~~~~~~~~~~~~~~~~~
+430               mode={mode}
+                  ~~~~
 
 src/features/shop/components/CardDisplay/CardGrid.tsx:8:34 - error TS2307: Cannot find module '@/shared/hooks' or its corresponding type declarations.
 
@@ -150,106 +131,152 @@ src/features/shop/components/CardDisplay/CardGrid.tsx:104:9 - error TS2322: Type
          ~~~~
     The expected type comes from property 'card' which is declared here on type 'IntrinsicAttributes & CardItemProps'
 
-src/features/shop/components/CardDisplay/CardGrid.tsx:125:33 - error TS2322: Type '{ key: number; viewMode: "grid" | "list"; }' is not assignable to type 'IntrinsicAttributes'.
+src/features/shop/components/CardDisplay/CardGrid.tsx:125:33 - error TS2322: Type '{ key: number; viewMode: "list" | "grid"; }' is not assignable to type 'IntrinsicAttributes'.
   Property 'viewMode' does not exist on type 'IntrinsicAttributes'.
 
 125           <CardSkeleton key={i} viewMode={viewMode} />
                                     ~~~~~~~~
 
-src/features/shop/components/CardDisplay/CardItem.tsx:3:28 - error TS2307: Cannot find module '../OptimizedImage' or its corresponding type declarations.
+src/features/shop/components/CardDisplay/CardItem.tsx:62:13 - error TS2322: Type '{ src: string; alt: string; width: number; height: number; className: string; placeholder: string; sizes: string; }' is not assignable to type 'IntrinsicAttributes & OptimizedImageProps'.
+  Property 'placeholder' does not exist on type 'IntrinsicAttributes & OptimizedImageProps'.
 
-3 import OptimizedImage from '../OptimizedImage';
-                             ~~~~~~~~~~~~~~~~~~~
+62             placeholder="blur"
+               ~~~~~~~~~~~
 
-src/features/shop/components/CardDisplay/CardItem.tsx:4:38 - error TS2307: Cannot find module '../../config/constants' or its corresponding type declarations.
+src/features/shop/components/CardDisplay/ListCardItem.tsx:58:15 - error TS2322: Type '{ src: string; alt: string; width: number; height: number; className: string; placeholder: string; sizes: string; }' is not assignable to type 'IntrinsicAttributes & OptimizedImageProps'.
+  Property 'placeholder' does not exist on type 'IntrinsicAttributes & OptimizedImageProps'.
 
-4 import { ACCESSIBILITY_CONFIG } from '../../config/constants';
-                                       ~~~~~~~~~~~~~~~~~~~~~~~~
+58               placeholder="blur"
+                 ~~~~~~~~~~~
 
-src/features/shop/components/CardDisplay/ListCardItem.tsx:3:28 - error TS2307: Cannot find module '../OptimizedImage' or its corresponding type declarations.
+src/features/shop/components/RecentlyViewed.tsx:92:17 - error TS2322: Type '{ src: string; alt: string; width: number; height: number; className: string; placeholder: string; sizes: string; }' is not assignable to type 'IntrinsicAttributes & OptimizedImageProps'.
+  Property 'placeholder' does not exist on type 'IntrinsicAttributes & OptimizedImageProps'.
 
-3 import OptimizedImage from '../OptimizedImage';
-                             ~~~~~~~~~~~~~~~~~~~
+92                 placeholder="blur"
+                   ~~~~~~~~~~~
 
-src/features/shop/components/RecentlyViewed.tsx:4:28 - error TS2307: Cannot find module '../OptimizedImage' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:80:5 - error TS2339: Property 'games' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
 
-4 import OptimizedImage from '../OptimizedImage';
-                             ~~~~~~~~~~~~~~~~~~~
+80     games,
+       ~~~~~
 
-src/features/shop/ShopPage.tsx:5:27 - error TS2307: Cannot find module './CardSearchBar' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:81:5 - error TS2339: Property 'sets' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
 
-5 import CardSearchBar from './CardSearchBar';
-                            ~~~~~~~~~~~~~~~~~
+81     sets,
+       ~~~~
 
-src/features/shop/ShopPage.tsx:6:32 - error TS2307: Cannot find module '../hooks/useShopFilters' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:82:5 - error TS2339: Property 'filterOptions' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
 
-6 import { useShopFilters } from '../hooks/useShopFilters';
-                                 ~~~~~~~~~~~~~~~~~~~~~~~~~
+82     filterOptions,
+       ~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:8:30 - error TS2307: Cannot find module './CurrencySelector' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:83:5 - error TS2339: Property 'loading' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
 
-8 import CurrencySelector from './CurrencySelector';
-                               ~~~~~~~~~~~~~~~~~~~~
+83     loading: filtersLoading,
+       ~~~~~~~
 
-src/features/shop/ShopPage.tsx:9:22 - error TS2307: Cannot find module './Checkout' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:84:5 - error TS2339: Property 'error' does not exist on type '{ filters: SearchFilters; updateFilters: (updates: Partial<SearchFilters>) => void; clearFilters: () => void; searchCards: (searchTerm?: string) => Promise<...>; getFilterOptions: () => Promise<...>; isLoading: boolean; }'.
 
-9 import Checkout from './Checkout';
-                       ~~~~~~~~~~~~
+84     error: filtersError
+       ~~~~~
 
-src/features/shop/ShopPage.tsx:10:25 - error TS2307: Cannot find module '../hooks/useCart' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:85:22 - error TS2554: Expected 0 arguments, but got 2.
 
-10 import { useCart } from '../hooks/useCart';
-                           ~~~~~~~~~~~~~~~~~~
+85   } = useShopFilters(API_BASE, selectedGame);
+                        ~~~~~~~~~~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:11:27 - error TS2307: Cannot find module './ErrorBoundary' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:91:5 - error TS2339: Property 'cartNotifications' does not exist on type '{ cart: Cart; addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void; updateQuantity: (cardId: number, variationKey: string, quantity: number) => void; removeItem: (cardId: number, variationKey: string) => void; clearCart: () => void; getItem: (cardId: number, variationKey: string) => CartItem; hasIt...'.
 
-11 import ErrorBoundary from './ErrorBoundary';
-                             ~~~~~~~~~~~~~~~~~
+91     cartNotifications,
+       ~~~~~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:12:36 - error TS2307: Cannot find module './KeyboardShortcutsModal' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:92:5 - error TS2339: Property 'addToCart' does not exist on type '{ cart: Cart; addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void; updateQuantity: (cardId: number, variationKey: string, quantity: number) => void; removeItem: (cardId: number, variationKey: string) => void; clearCart: () => void; getItem: (cardId: number, variationKey: string) => CartItem; hasIt...'.
 
-12 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
-                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~
+92     addToCart,
+       ~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:13:33 - error TS2307: Cannot find module '../services/errorHandler' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:94:5 - error TS2339: Property 'removeFromCart' does not exist on type '{ cart: Cart; addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void; updateQuantity: (cardId: number, variationKey: string, quantity: number) => void; removeItem: (cardId: number, variationKey: string) => void; clearCart: () => void; getItem: (cardId: number, variationKey: string) => CartItem; hasIt...'.
 
-13 import { useErrorHandler } from '../services/errorHandler';
-                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~
+94     removeFromCart,
+       ~~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:14:39 - error TS2307: Cannot find module '../config/constants' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:96:5 - error TS2339: Property 'addNotification' does not exist on type '{ cart: Cart; addItem: (item: Omit<CartItem, "quantity">, quantity?: number) => void; updateQuantity: (cardId: number, variationKey: string, quantity: number) => void; removeItem: (cardId: number, variationKey: string) => void; clearCart: () => void; getItem: (cardId: number, variationKey: string) => CartItem; hasIt...'.
 
-14 import { VIRTUAL_SCROLL_CONFIG } from '../config/constants';
-                                         ~~~~~~~~~~~~~~~~~~~~~
+96     addNotification
+       ~~~~~~~~~~~~~~~
 
-src/features/shop/ShopPage.tsx:15:26 - error TS2307: Cannot find module './skeletons/CardSkeleton' or its corresponding type declarations.
+src/features/shop/ShopPage.tsx:97:15 - error TS2554: Expected 0 arguments, but got 1.
 
-15 import CardSkeleton from './skeletons/CardSkeleton';
-                            ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-src/features/shop/ShopPage.tsx:16:27 - error TS2307: Cannot find module './common/SectionHeader' or its corresponding type declarations.
-
-16 import SectionHeader from './common/SectionHeader';
-                             ~~~~~~~~~~~~~~~~~~~~~~~~
-
-src/features/shop/ShopPage.tsx:17:22 - error TS2307: Cannot find module './cards/CardItem' or its corresponding type declarations.
-
-17 import CardItem from './cards/CardItem';
-                        ~~~~~~~~~~~~~~~~~~
-
-src/features/shop/ShopPage.tsx:18:26 - error TS2307: Cannot find module './cards/ListCardItem' or its corresponding type declarations.
-
-18 import ListCardItem from './cards/ListCardItem';
-                            ~~~~~~~~~~~~~~~~~~~~~~
-
-src/features/shop/ShopPage.tsx:26:49 - error TS2307: Cannot find module './VirtualCardGrid' or its corresponding type declarations.
-
-26 const VirtualCardGrid = React.lazy(() => import('./VirtualCardGrid'));
-                                                   ~~~~~~~~~~~~~~~~~~~
+97   } = useCart(API_BASE);
+                 ~~~~~~~~
 
 src/features/shop/ShopPage.tsx:145:56 - error TS2353: Object literal may only specify known properties, and 'symbol' does not exist in type '() => Currency'.
 
 145   const [currency, setCurrency] = useState<Currency>({ symbol: 'NZ$', rate: 1.0, code: 'NZD' });
                                                            ~~~~~~
+
+src/features/shop/ShopPage.tsx:169:10 - error TS2339: Property 'reduce' does not exist on type 'Cart'.
+
+169     cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+             ~~~~~~
+
+src/features/shop/ShopPage.tsx:174:10 - error TS2339: Property 'reduce' does not exist on type 'Cart'.
+
+174     cart.items.reduce((sum, item) => sum + item.quantity, 0),
+             ~~~~~~
+
+src/features/shop/ShopPage.tsx:381:37 - error TS2345: Argument of type 'string' is not assignable to parameter of type 'Record<string, any>'.
+
+381       errorHandler.handleError(err, 'fetching cards');
+                                        ~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:439:14 - error TS2339: Property 'length' does not exist on type 'Cart'.
+
+439     if (cart.items.length > 0 && !showCart) {
+                 ~~~~~~
+
+src/features/shop/ShopPage.tsx:652:31 - error TS2339: Property 'find' does not exist on type 'Cart'.
+
+652     const existingItem = cart.items.find(item => item.id === id && item.quality === quality);
+                                  ~~~~
+
+src/features/shop/ShopPage.tsx:974:25 - error TS2322: Type '{ cards: CardForDisplay[]; selectedVariations: SelectedVariations; currency: Currency; onVariationChange: (cardId: number) => (e: ChangeEvent<HTMLSelectElement>) => void; onAddToCart: (card: CardForDisplay, selectedVariation: any) => () => void; }' is not assignable to type 'IntrinsicAttributes & CardGridProps<Card>'.
+  Property 'selectedVariations' does not exist on type 'IntrinsicAttributes & CardGridProps<Card>'.
+
+974                         selectedVariations={selectedVariations}
+                            ~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:999:33 - error TS2322: Type 'string' is not assignable to type 'Currency'.
+  Type 'string' is not assignable to type 'Currency'.
+
+999                                 currency={currency}
+                                    ~~~~~~~~
+
+  src/features/shop/components/CardDisplay/CardItem.tsx:34:3
+    34   currency: Currency;
+         ~~~~~~~~
+    The expected type comes from property 'currency' which is declared here on type 'IntrinsicAttributes & CardItemProps'
+
+src/features/shop/ShopPage.tsx:1029:31 - error TS2322: Type 'string' is not assignable to type 'Currency'.
+  Type 'string' is not assignable to type 'Currency'.
+
+1029                               currency={currency}
+                                   ~~~~~~~~
+
+  src/features/shop/components/CardDisplay/ListCardItem.tsx:33:3
+    33   currency: Currency;
+         ~~~~~~~~
+    The expected type comes from property 'currency' which is declared here on type 'IntrinsicAttributes & Props'
+
+src/features/shop/ShopPage.tsx:1126:29 - error TS2339: Property 'length' does not exist on type 'Cart'.
+
+1126       {showMiniCart && cart.items.length > 0 && !showCart && (
+                                 ~~~~~~
+
+src/features/shop/ShopPage.tsx:1140:19 - error TS2339: Property 'slice' does not exist on type 'Cart'.
+
+1140             {cart.items.slice(0, 3).map((item) => (
+                       ~~~~~
 
 src/features/shop/ShopPage.tsx:1161:29 - error TS2339: Property 'symbol' does not exist on type 'Currency'.
   Property 'symbol' does not exist on type '"NZD"'.
@@ -263,6 +290,16 @@ src/features/shop/ShopPage.tsx:1161:76 - error TS2339: Property 'rate' does not 
 1161                   {currency.symbol}{(item.price * item.quantity * currency.rate).toFixed(2)}
                                                                                 ~~~~
 
+src/features/shop/ShopPage.tsx:1167:17 - error TS2339: Property 'length' does not exist on type 'Cart'.
+
+1167           {cart.items.length > 3 && (
+                     ~~~~~~
+
+src/features/shop/ShopPage.tsx:1168:62 - error TS2339: Property 'length' does not exist on type 'Cart'.
+
+1168             <p className="text-xs text-mm-teal mt-2">+ {cart.items.length - 3} more items</p>
+                                                                  ~~~~~~
+
 src/features/shop/ShopPage.tsx:1172:34 - error TS2339: Property 'symbol' does not exist on type 'Currency'.
   Property 'symbol' does not exist on type '"NZD"'.
 
@@ -274,6 +311,16 @@ src/features/shop/ShopPage.tsx:1172:64 - error TS2339: Property 'rate' does not 
 
 1172             View Cart ({currency.symbol}{(cartTotal * currency.rate).toFixed(2)})
                                                                     ~~~~
+
+src/features/shop/ShopPage.tsx:1193:21 - error TS2339: Property 'length' does not exist on type 'Cart'.
+
+1193               {cart.items.length === 0 ? (
+                         ~~~~~~
+
+src/features/shop/ShopPage.tsx:1200:25 - error TS2339: Property 'map' does not exist on type 'Cart'.
+
+1200                   {cart.items.map(item => (
+                             ~~~
 
 src/features/shop/ShopPage.tsx:1256:37 - error TS2339: Property 'symbol' does not exist on type 'Currency'.
   Property 'symbol' does not exist on type '"NZD"'.
@@ -299,6 +346,11 @@ src/features/shop/ShopPage.tsx:1259:68 - error TS2339: Property 'rate' does not 
 1259                           {currency.symbol}{(item.price * currency.rate).toFixed(2)} each
                                                                         ~~~~
 
+src/features/shop/ShopPage.tsx:1268:19 - error TS2339: Property 'length' does not exist on type 'Cart'.
+
+1268             {cart.items.length > 0 && (
+                       ~~~~~~
+
 src/features/shop/ShopPage.tsx:1273:31 - error TS2339: Property 'symbol' does not exist on type 'Currency'.
   Property 'symbol' does not exist on type '"NZD"'.
 
@@ -311,24 +363,14 @@ src/features/shop/ShopPage.tsx:1273:61 - error TS2339: Property 'rate' does not 
 1273                     {currency.symbol}{(cartTotal * currency.rate).toFixed(2)}
                                                                  ~~~~
 
-src/lib/utils/index.ts:1:10 - error TS2614: Module '"./csv"' has no exported member 'parseCSV'. Did you mean to use 'import parseCSV from "./csv"' instead?
+src/lib/utils/index.ts:3:44 - error TS2306: File 'C:/Git_Repos/mana_meeples_singles_market/apps/web/src/lib/utils/format.ts' is not a module.
 
-1 export { parseCSV, exportCSV } from './csv';
-           ~~~~~~~~
-
-src/lib/utils/index.ts:1:20 - error TS2614: Module '"./csv"' has no exported member 'exportCSV'. Did you mean to use 'import exportCSV from "./csv"' instead?
-
-1 export { parseCSV, exportCSV } from './csv';
-                     ~~~~~~~~~
-
-src/lib/utils/index.ts:2:44 - error TS2306: File 'C:/Git_Repos/mana_meeples_singles_market/apps/web/src/lib/utils/format.ts' is not a module.
-
-2 export { formatCurrency, formatDate } from './format';
+3 export { formatCurrency, formatDate } from './format';
                                              ~~~~~~~~~~
 
-src/lib/utils/index.ts:3:41 - error TS2306: File 'C:/Git_Repos/mana_meeples_singles_market/apps/web/src/lib/utils/search.ts' is not a module.
+src/lib/utils/index.ts:4:41 - error TS2306: File 'C:/Git_Repos/mana_meeples_singles_market/apps/web/src/lib/utils/search.ts' is not a module.
 
-3 export { searchCards, fuzzyMatch } from './search';
+4 export { searchCards, fuzzyMatch } from './search';
                                           ~~~~~~~~~~
 
 src/main.tsx:3:8 - error TS1192: Module '"C:/Git_Repos/mana_meeples_singles_market/apps/web/src/App"' has no default export.
@@ -522,20 +564,17 @@ src/shared/hooks/useVirtualScroll.ts:57:72 - error TS2304: Cannot find name 'use
                                                                           ~~~~~~~
 
 
-Found 99 errors in 19 files.
+Found 104 errors in 16 files.
 
 Errors  Files
      5  src/App.tsx:17
-    14  src/features/admin/components/Cards/CardsTab.tsx:6
-     4  src/features/admin/components/Dashboard.tsx:6
-     1  src/features/admin/components/Inventory/BulkManager.tsx:9
-     1  src/features/admin/hooks/useFilterCounts.ts:3
+    16  src/features/admin/components/Cards/CardsTab.tsx:10
      3  src/features/shop/components/CardDisplay/CardGrid.tsx:8
-     2  src/features/shop/components/CardDisplay/CardItem.tsx:3
-     1  src/features/shop/components/CardDisplay/ListCardItem.tsx:3
-     1  src/features/shop/components/RecentlyViewed.tsx:4
-    25  src/features/shop/ShopPage.tsx:5
-     4  src/lib/utils/index.ts:1
+     1  src/features/shop/components/CardDisplay/CardItem.tsx:62
+     1  src/features/shop/components/CardDisplay/ListCardItem.tsx:58
+     1  src/features/shop/components/RecentlyViewed.tsx:92
+    37  src/features/shop/ShopPage.tsx:80
+     2  src/lib/utils/index.ts:3
      1  src/main.tsx:3
      6  src/reportWebVitals.ts:1
      2  src/retired/AddToInventoryModal.tsx:4
@@ -545,3 +584,5 @@ Errors  Files
      1  src/retired/VirtualCardGrid.tsx:4
      1  src/shared/hooks/useVirtualScroll.ts:57
  ELIFECYCLE  Command failed with exit code 2.
+
+C:\Git_Repos\mana_meeples_singles_market\apps\web>
