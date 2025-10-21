@@ -5,7 +5,12 @@ import { Dashboard, Login } from '@/features/admin';
 
 function App() {
   return (
-    <BrowserRouter>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true
+      }}
+    >
       <Routes>
         <Route path="/" element={<ShopPage />} />
         <Route path="/admin" element={<Dashboard />} />

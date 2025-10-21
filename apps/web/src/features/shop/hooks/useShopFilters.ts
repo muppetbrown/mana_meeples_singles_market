@@ -55,7 +55,7 @@ export function useShopFilters() {
     const loadOptions = async () => {
       setIsLoading(true);
       try {
-        const options = await api.get<FilterOptions>(ENDPOINTS.STOREFRONT.FILTERS);
+        const options = await api.get<FilterOptions>(ENDPOINTS.CARDS.FILTERS);
         setFilterOptions(options);
       } catch (err: any) {
         setError(err.message || 'Failed to load filters');
