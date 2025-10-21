@@ -3,11 +3,11 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import CardSearchBar from './CardSearchBar';
-import { useSearchFilters } from '../hooks/useSearchFilters';
+import { useShopFilters } from '../hooks/useShopFilters';
 import { ShoppingCart, X, Plus, Minus, Filter, ChevronDown, LayoutGrid, List } from 'lucide-react';
 import CurrencySelector from './CurrencySelector';
 import Checkout from './Checkout';
-import { useEnhancedCart } from '../hooks/useEnhancedCart';
+import { useCart } from '../hooks/useCart';
 import ErrorBoundary from './ErrorBoundary';
 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
 import { useErrorHandler } from '../services/errorHandler';
@@ -16,7 +16,7 @@ import CardSkeleton from './skeletons/CardSkeleton';
 import SectionHeader from './common/SectionHeader';
 import CardItem from './cards/CardItem';
 import ListCardItem from './cards/ListCardItem';
-import { API_BASE, api } from '@/config/api';
+import { API_BASE, api } from '@/lib/api';
 import type { 
   StorefrontCard,
   Currency
@@ -82,7 +82,7 @@ const TCGShop: React.FC = () => {
     filterOptions,
     loading: filtersLoading,
     error: filtersError
-  } = useSearchFilters(API_BASE, selectedGame);
+  } = useShopFilters(API_BASE, selectedGame);
 
   const errorHandler = useErrorHandler();
   
@@ -94,7 +94,7 @@ const TCGShop: React.FC = () => {
     removeFromCart,
     clearCart,
     addNotification
-  } = useEnhancedCart(API_BASE);
+  } = useCart(API_BASE);
 
   // ============================================================================
   // LOCAL STATE - ALL PROPERLY DECLARED

@@ -1,7 +1,7 @@
 // apps/web/src/components/AdminDashboard.tsx
 import { useState, useEffect } from 'react';
 import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
-import { api } from '@/config/api';
+import { api } from '@/lib/api';
 
 import CurrencySelector from './CurrencySelector';
 import UnifiedCardsTab from './admin/UnifiedCardsTab';

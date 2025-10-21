@@ -1,7 +1,7 @@
 // apps/web/src/components/VirtualCardGrid.tsx
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
-import { useVirtualScrolling, useProgressiveLoading } from '../hooks/useVirtualScrolling';
+import { useVirtualScroll, useProgressiveLoading } from '../hooks/useVirtualScroll';
 
 /**
  * Virtual Card Grid Component
@@ -44,7 +44,7 @@ const VirtualCardGrid = ({
     updateContainerSize,
     responsiveColumnCount,
     visibleRange
-  } = useVirtualScrolling({
+  } = useVirtualScroll({
     items: displayCards,
     itemHeight: cardHeight,
     containerHeight: containerDimensions.height,

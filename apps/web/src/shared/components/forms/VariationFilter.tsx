@@ -1,6 +1,6 @@
 // apps/web/src/components/DynamicVariationFilter.tsx
 import { useState, useEffect } from 'react';
-import { api } from '@/config/api';
+import { api } from '@/lib/api';
 
 type VariationFiltersResponse = {
   treatments?: string[];

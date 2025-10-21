@@ -1,43 +1,34 @@
-// apps/web/src/services/errorHandler.ts
+// ============================================================================
+// services/error/handler.ts - Centralized error handling
+// ============================================================================
+
+import { ErrorType, FormattedError, ErrorTemplate } from './types';
+
 /**
- * Centralized Error Handling Service
- * Provides consistent error handling across the application with user-friendly messages
+ * User-friendly error messages by type
  */
-
-import { ERROR_CONFIG } from '../config/constants';
-
-// Error types for categorization
-export const ERROR_TYPES = {
-  NETWORK: 'NETWORK',
-  AUTH: 'AUTH',
-  VALIDATION: 'VALIDATION',
-  API: 'API',
-  UNKNOWN: 'UNKNOWN'
-};
-
-// User-friendly error messages
-const ERROR_MESSAGES = {
-  [ERROR_TYPES.NETWORK]: {
+const ERROR_TEMPLATES: Record<ErrorType, ErrorTemplate> = {
+  [ErrorType.NETWORK]: {
     title: 'Connection Error',
     message: 'Please check your internet connection and try again.',
     action: 'Retry'
   },
-  [ERROR_TYPES.AUTH]: {
+  [ErrorType.AUTH]: {
     title: 'Authentication Error',
     message: 'Your session has expired. Please log in again.',
     action: 'Login'
   },
-  [ERROR_TYPES.VALIDATION]: {
+  [ErrorType.VALIDATION]: {
     title: 'Validation Error',
     message: 'Please check your input and try again.',
     action: 'Fix'
   },
-  [ERROR_TYPES.API]: {
+  [ErrorType.API]: {
     title: 'Server Error',
     message: 'Something went wrong on our end. Please try again later.',
     action: 'Retry'
   },
-  [ERROR_TYPES.UNKNOWN]: {
+  [ErrorType.UNKNOWN]: {
     title: 'Unexpected Error',
     message: 'An unexpected error occurred. Please try again.',
     action: 'Retry'
@@ -45,229 +36,90 @@ const ERROR_MESSAGES = {
 };
 
 /**
- * Categorize error based on type and status
+ * HTTP status code ranges
  */
-export const categorizeError = (error: any) => {
+const HTTP_STATUS = {
+  UNAUTHORIZED: 401,
+  FORBIDDEN: 403,
+  BAD_REQUEST: 400,
+  UNPROCESSABLE_ENTITY: 422,
+  INTERNAL_SERVER_ERROR: 500
+} as const;
+
+/**
+ * Categorize error based on characteristics
+ */
+export function categorizeError(error: any): ErrorType {
   // Network errors
   if (!navigator.onLine || (error.name === 'TypeError' && error.message.includes('fetch'))) {
-    return ERROR_TYPES.NETWORK;
+    return ErrorType.NETWORK;
   }
 
+  // Extract status code
+  const status = error.status || error.response?.status;
+
   // Authentication errors
-  if (error.status === ERROR_CONFIG.HTTP_STATUS.UNAUTHORIZED || error.status === ERROR_CONFIG.HTTP_STATUS.FORBIDDEN) {
-    return ERROR_TYPES.AUTH;
+  if (status === HTTP_STATUS.UNAUTHORIZED || status === HTTP_STATUS.FORBIDDEN) {
+    return ErrorType.AUTH;
   }
 
   // Validation errors
-  if (error.status === ERROR_CONFIG.HTTP_STATUS.BAD_REQUEST || error.status === ERROR_CONFIG.HTTP_STATUS.UNPROCESSABLE_ENTITY) {
-    return ERROR_TYPES.VALIDATION;
+  if (status === HTTP_STATUS.BAD_REQUEST || status === HTTP_STATUS.UNPROCESSABLE_ENTITY) {
+    return ErrorType.VALIDATION;
   }
 
   // API errors
-
-  if (error.status >= ERROR_CONFIG.HTTP_STATUS.INTERNAL_SERVER_ERROR || (error.status >= ERROR_CONFIG.CLIENT_ERROR_RANGE[0] && error.status < ERROR_CONFIG.SERVER_ERROR_RANGE[0])) {
-    return ERROR_TYPES.API;
+  if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR || (status >= 400 && status < 500)) {
+    return ErrorType.API;
   }
 
-  return ERROR_TYPES.UNKNOWN;
-};
+  return ErrorType.UNKNOWN;
+}
 
 /**
- * Format error for display to user
+ * Format error for user display
  */
-export const formatError = (error: any, customMessage = null) => {
+export function formatError(error: any, customMessage?: string): FormattedError {
   const category = categorizeError(error);
-  const template = ERROR_MESSAGES[category];
+  const template = ERROR_TEMPLATES[category];
 
   return {
     type: category,
-
     title: template.title,
-
     message: customMessage || error.message || template.message,
-
     action: template.action,
     originalError: error,
     timestamp: new Date().toISOString()
   };
-};
+}
 
 /**
- * Log error for debugging/monitoring
+ * Log error for monitoring (console in dev, service in prod)
  */
-export const logError = (error: any, context = {}) => {
+export function logError(error: any, context: Record<string, any> = {}): void {
   const formattedError = formatError(error);
 
-  // In production, you'd send this to an error monitoring service like Sentry
   if (process.env.NODE_ENV === 'development') {
-    console.group(`🚨 ${formattedError.title}`);
-    console.error('Error:', formattedError.originalError);
-    console.log('Context:', context);
-    console.log('Formatted:', formattedError);
-    console.groupEnd();
-  }
-
-  // Return formatted error for further handling
-  return formattedError;
-};
-
-/**
- * Handle API response errors consistently
- */
-export const handleApiError = async (response: any, context = {}) => {
-  let errorData = {
-    status: response.status,
-    statusText: response.statusText
-  };
-
-  try {
-    const jsonError = await response.json();
-    errorData = { ...errorData, ...jsonError };
-  } catch (parseError) {
-    // Response isn't JSON, use status text
-
-    (errorData as any).message = response.statusText || `HTTP ${response.status}`;
-  }
-
-
-  const error = new Error((errorData as any).message || (errorData as any).error || `HTTP ${response.status}`);
-
- (error as any).status = response.status;
- (error as any).response = response;
-
-  return logError(error, context);
-};
-
-/**
- * React Error Boundary helper
- */
-export class ErrorBoundary extends Error {
-  componentStack: any;
-  constructor(message: any, componentStack: any) {
-    super(message);
-    this.name = 'ErrorBoundary';
-    this.componentStack = componentStack;
+    console.error('Error occurred:', {
+      ...formattedError,
+      context,
+      stack: error.stack
+    });
+  } else {
+    // In production, send to monitoring service (Sentry, etc.)
+    // Example: Sentry.captureException(error, { extra: context });
+    console.error('Error:', formattedError.type, formattedError.message);
   }
 }
 
 /**
- * Hook for handling errors in components
+ * React hook for error handling
  */
-export const useErrorHandler = () => {
-  const handleError = (error: any, context = {}) => {
-    const formattedError = logError(error, context);
-
-    // You could dispatch to a global error state here
-    // or trigger a toast notification
-
-    return formattedError;
+export function useErrorHandler() {
+  const handleError = (error: any, context?: Record<string, any>) => {
+    logError(error, context);
+    return formatError(error);
   };
 
-  const handleApiCall = async (apiCall: any, context = {}) => {
-    try {
-      const response = await apiCall();
-
-      if (!response.ok) {
-        throw await handleApiError(response, context);
-      }
-
-      return response;
-    } catch (error) {
-      throw handleError(error, context);
-    }
-  };
-
-  return { handleError, handleApiCall };
-};
-
-/**
- * Global error event listeners for unhandled errors
- */
-export const setupGlobalErrorHandling = () => {
-  // Unhandled promise rejections
-  window.addEventListener('unhandledrejection', (event) => {
-    logError(event.reason, { type: 'unhandledrejection' });
-    event.preventDefault(); // Prevent default browser behavior
-  });
-
-  // JavaScript errors
-  window.addEventListener('error', (event) => {
-    logError(event.error, {
-      type: 'javascript',
-      filename: event.filename,
-      lineno: event.lineno,
-      colno: event.colno
-    });
-  });
-};
-
-/**
- * Retry utility for failed operations with special handling for rate limiting
- */
-export const withRetry = async (operation: any, maxRetries = ERROR_CONFIG.DEFAULT_MAX_RETRIES, delay = ERROR_CONFIG.DEFAULT_RETRY_DELAY) => {
-  let lastError;
-
-  for (let attempt = 1; attempt <= maxRetries; attempt++) {
-    try {
-      return await operation();
-    } catch (error) {
-      lastError = error;
-
-      // Enhanced 429 handling: Don't retry, fail immediately to prevent cascading
-
-      if (error.status === 429) {
-        throw logError(error, {
-          attempts: attempt,
-          operation: operation.name || 'anonymous',
-          rateLimited: true,
-          message: 'Rate limit exceeded. The server is currently busy. Please wait a moment and refresh the page.'
-        });
-      }
-
-      if (attempt === maxRetries) {
-        throw logError(error, {
-          attempts: maxRetries,
-          operation: operation.name || 'anonymous'
-        });
-      }
-
-      // Normal exponential backoff for other errors
-      await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, attempt - 1)));
-    }
-  }
-
-  throw lastError;
-};
-
-/**
- * Throttled fetch wrapper that prevents overwhelming the API
- */
-export const throttledFetch = async (url: any, options = {}) => {
-  const requestThrottler = (await import('./requestThrottler')).default;
-
-  try {
-    return await requestThrottler.fetch(url, options);
-  } catch (error) {
-    // Enhance error with status if it's a response error
-
-    if (error.response) {
-
-      error.status = error.response.status;
-    }
-    throw error;
-  }
-};
-
-const errorHandler = {
-  ERROR_TYPES,
-  categorizeError,
-  formatError,
-  logError,
-  handleApiError,
-  useErrorHandler,
-  setupGlobalErrorHandling,
-  withRetry,
-  throttledFetch
-};
-
-export default errorHandler;
+  return { handleError, formatError, categorizeError };
+}

@@ -1,7 +1,7 @@
 // apps/web/src/hooks/useFilterCounts.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { FILTER_CONFIG } from '../config/constants';
-import { api } from '@/config/api';
+import { api } from '@/lib/api';
 
 type Filters = Record<string, string | number | boolean | undefined | null>;
 

@@ -1,12 +1,6 @@
-import React, { Suspense } from "react";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import ErrorBoundary from "./components/ErrorBoundary";
-import { ToastProvider } from "./components/Toast";
-
-// Lazy load components
-const TCGShop = React.lazy(() => import("./components/TCGShop"));
-const AdminLogin = React.lazy(() => import("./components/AdminLogin"));
-const AdminDashboard = React.lazy(() => import("./components/AdminDashboard"));
+// apps/web/src/App.tsx
+import { ShopPage } from '@/features/shop';
+import { Dashboard, Login } from '@/features/admin';
 
 // Accessible loading spinner
 const LoadingSpinner: React.FC = () => (
@@ -18,6 +12,17 @@ const LoadingSpinner: React.FC = () => (
   </div>
 );
 
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<ShopPage />} />
+      <Route path="/admin" element={<Dashboard />} />
+      <Route path="/admin/login" element={<Login />} />
+    </Routes>
+  );
+}
+
+/**
 export default function App() {
   return (
     <ErrorBoundary>
@@ -25,9 +30,9 @@ export default function App() {
         <BrowserRouter>
           <Suspense fallback={<LoadingSpinner />}>
             <Routes>
-              <Route path="/" element={<TCGShop />} />
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/" element={<ShopPage />} />
+              <Route path="/admin" element={<Dashboard />} />
+              <Route path="/admin/login" element={<Login />} />
             </Routes>
           </Suspense>
         </BrowserRouter>
@@ -35,3 +40,4 @@ export default function App() {
     </ErrorBoundary>
   );
 }
+*/

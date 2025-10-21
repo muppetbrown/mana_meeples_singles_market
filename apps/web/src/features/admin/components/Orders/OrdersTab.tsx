@@ -16,7 +16,7 @@ import {
   XCircle,
   Eye
 } from 'lucide-react';
-import { api } from '@/config/api';
+import { api } from '@/lib/api';
 
 // -------------------- Types --------------------
 interface CustomerData {

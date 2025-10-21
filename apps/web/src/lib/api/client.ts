@@ -1,81 +1,168 @@
-// Robust, no-hardcode API client with strict env handling
-import { z } from "zod";
+// ============================================================================
+// lib/api/client.ts - Unified API client
+// ============================================================================
 
-const UrlSchema = z.string().url().transform((u) => u.replace(/\/+$/, "")); // strip trailing slash
+import { z } from 'zod';
+import { throttledFetch } from '@/services/http/throttler';
+import { logError } from '@/services/error/handler';
 
-// Read once at module init. Frontend builds read VITE_* at build time.
-const rawEnvUrl = import.meta.env.VITE_API_URL as string | undefined;
+/**
+ * API Client Configuration
+ */
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
-// In production, require the env var so we never silently point to the wrong host.
-// In dev, fall back to localhost for ergonomics.
-const API_BASE = (() => {
-  if (import.meta.env.PROD) {
-    const parsed = UrlSchema.safeParse(rawEnvUrl);
-    if (!parsed.success) {
-      // Fail loudly with a helpful message visible in console + error boundary
-      const msg =
-        "[API] Missing or invalid VITE_API_URL in production. " +
-        "Set it to e.g. https://api.manaandmeeples.co.nz";
-      console.error(msg);
-      throw new Error(msg);
+/**
+ * Type-safe API client
+ */
+class ApiClient {
+  private baseUrl: string;
+  private defaultHeaders: HeadersInit;
+
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl.replace(/\/$/, ''); // Remove trailing slash
+    this.defaultHeaders = {
+      'Content-Type': 'application/json'
+    };
+  }
+
+  /**
+   * Set authentication token
+   */
+  setAuthToken(token: string | null): void {
+    if (token) {
+      this.defaultHeaders = {
+        ...this.defaultHeaders,
+        Authorization: `Bearer ${token}`
+      };
+    } else {
+      const { Authorization, ...rest } = this.defaultHeaders as any;
+      this.defaultHeaders = rest;
     }
-    return parsed.data;
-  } else {
-    // Dev fallback keeps your DX smooth if you haven't set .env.local yet.
-    const fallback = "http://localhost:10000";
-    const parsed = UrlSchema.safeParse(rawEnvUrl ?? fallback);
-    return parsed.success ? parsed.data : fallback;
-  }
-})();
-
-// Safe join: prevents accidental double slashes
-const join = (base: string, path: string) =>
-  `${base}${path.startsWith("/") ? path : `/${path}`}`;
-
-// Thin wrapper over fetch with sane defaults & typed JSON
-async function request<T>(
-  path: string,
-  init?: RequestInit & { expect?: "json" | "text" }
-): Promise<T> {
-  const url = join(API_BASE, path);
-
-  const res = await fetch(url, {
-    ...init,
-    headers: {
-      "Content-Type": "application/json",
-      ...(init?.headers ?? {}),
-    },
-    credentials: "include", // keep if you use cookies; remove if not
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => "");
-    const err = new Error(
-      `[API ${res.status}] ${res.statusText} @ ${url} :: ${body}`
-    );
-    // Surface quickly in consoles
-    console.error(err);
-    throw err;
   }
 
-  const expect = init?.expect ?? "json";
-  // @ts-expect-error – runtime gated by 'expect'
-  return expect === "json" ? await res.json() : await res.text();
+  /**
+   * Build full URL
+   */
+  private buildUrl(endpoint: string, params?: Record<string, any>): string {
+    const url = new URL(`${this.baseUrl}${endpoint}`);
+    
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          url.searchParams.append(key, String(value));
+        }
+      });
+    }
+
+    return url.toString();
+  }
+
+  /**
+   * Generic request handler with error handling
+   */
+  private async request<T>(
+    method: string,
+    endpoint: string,
+    options: {
+      params?: Record<string, any>;
+      body?: any;
+      headers?: HeadersInit;
+      schema?: z.ZodType<T>;
+    } = {}
+  ): Promise<T> {
+    const url = this.buildUrl(endpoint, options.params);
+
+    try {
+      const response = await throttledFetch(url, {
+        method,
+        headers: {
+          ...this.defaultHeaders,
+          ...options.headers
+        },
+        body: options.body ? JSON.stringify(options.body) : undefined,
+        credentials: 'include' // Include cookies for sessions
+      });
+
+      // Handle non-OK responses
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw {
+          status: response.status,
+          message: errorData.error || errorData.message || response.statusText,
+          data: errorData
+        };
+      }
+
+      // Parse response
+      const data = await response.json();
+
+      // Validate with schema if provided
+      if (options.schema) {
+        return options.schema.parse(data);
+      }
+
+      return data;
+    } catch (error) {
+      logError(error, { method, endpoint, params: options.params });
+      throw error;
+    }
+  }
+
+  /**
+   * GET request
+   */
+  async get<T>(
+    endpoint: string,
+    params?: Record<string, any>,
+    schema?: z.ZodType<T>
+  ): Promise<T> {
+    return this.request<T>('GET', endpoint, { params, schema });
+  }
+
+  /**
+   * POST request
+   */
+  async post<T>(
+    endpoint: string,
+    body?: any,
+    schema?: z.ZodType<T>
+  ): Promise<T> {
+    return this.request<T>('POST', endpoint, { body, schema });
+  }
+
+  /**
+   * PUT request
+   */
+  async put<T>(
+    endpoint: string,
+    body?: any,
+    schema?: z.ZodType<T>
+  ): Promise<T> {
+    return this.request<T>('PUT', endpoint, { body, schema });
+  }
+
+  /**
+   * PATCH request
+   */
+  async patch<T>(
+    endpoint: string,
+    body?: any,
+    schema?: z.ZodType<T>
+  ): Promise<T> {
+    return this.request<T>('PATCH', endpoint, { body, schema });
+  }
+
+  /**
+   * DELETE request
+   */
+  async delete<T>(
+    endpoint: string,
+    schema?: z.ZodType<T>
+  ): Promise<T> {
+    return this.request<T>('DELETE', endpoint, { schema });
+  }
 }
 
-export const api = {
-  get: <T>(path: string) => request<T>(path, { method: "GET" }),
-  post: <T>(path: string, body?: unknown) =>
-    request<T>(path, {
-      method: "POST",
-      body: body == null ? undefined : JSON.stringify(body),
-    }),
-  patch: <T>(path: string, body?: unknown) =>
-    request<T>(path, {
-      method: "PATCH",
-      body: body == null ? undefined : JSON.stringify(body),
-    }),
-  del: <T>(path: string) => request<T>(path, { method: "DELETE" }),
-};
-
+// Export singleton instance
+export const api = new ApiClient(API_BASE);
 export { API_BASE };

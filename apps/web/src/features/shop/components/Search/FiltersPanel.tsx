@@ -1,6 +1,6 @@
 // apps/web/src/components/FiltersPanel.tsx
 import { useEffect, useRef, useState } from 'react';
-import { api } from '@/config/api';
+import { api } from '@/lib/api';
 
 type FilterOption = {
   type: 'treatment' | 'quality' | 'foilType' | 'language';

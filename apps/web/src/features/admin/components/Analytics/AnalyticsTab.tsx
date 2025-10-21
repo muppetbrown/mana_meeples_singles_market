@@ -1,7 +1,7 @@
 // apps/web/src/components/admin/AnalyticsTab.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Package, DollarSign, AlertTriangle, RefreshCw } from 'lucide-react';
-import { api } from '@/config/api';
+import { api } from '@/lib/api';
 
 // -------------------- Types --------------------
 export type InventoryItem = {

@@ -1,157 +1,99 @@
-// apps/web/src/hooks/useVirtualScrolling.ts
-import { useState, useMemo, useCallback, useEffect, useRef } from 'react';
+// ============================================================================
+// shared/hooks/useVirtualScroll.ts - Virtual scrolling logic
+// ============================================================================
+
+import { useState, useCallback, useEffect, useRef } from 'react';
+
+interface VirtualScrollConfig {
+  items: any[];
+  enabled?: boolean;
+  itemHeight: number;
+  containerHeight: number;
+  columnCount?: number;
+  overscan?: number;
+}
+
+interface VirtualScrollResult {
+  visibleItems: any[];
+  totalHeight: number;
+  offsetY: number;
+  handleScroll: (e: React.UIEvent<HTMLDivElement>) => void;
+  visibleRange: { startIndex: number; endIndex: number };
+  responsiveColumnCount: number;
+}
 
 /**
- * Custom hook for virtual scrolling implementation
- * Optimized for card grids with responsive columns
+ * Virtual scrolling hook for large lists
  */
-export const useVirtualScrolling = ({
-  items = [],
-  itemHeight = 420, // Height of each card including margins
-  containerHeight = 800, // Height of the visible container
-  overscan = 2, // Number of extra rows to render outside visible area
-  columnCount = 4 // Default column count
-}) => {
+export function useVirtualScroll({
+  items,
+  enabled = true,
+  itemHeight,
+  containerHeight,
+  columnCount = 4,
+  overscan = 3
+}: VirtualScrollConfig): VirtualScrollResult {
   const [scrollTop, setScrollTop] = useState(0);
-  const [containerSize, setContainerSize] = useState({ width: 0, height: containerHeight });
-  const [isLoading, setIsLoading] = useState(false);
+  const [responsiveColumnCount, setResponsiveColumnCount] = useState(columnCount);
 
-  const scrollTimeoutRef = useRef(null);
-  const resizeObserverRef = useRef(null);
-  const previousItemsLengthRef = useRef(items.length);
-
-  // Reset scroll position when items change significantly (e.g., filter change)
+  // Handle responsive columns
   useEffect(() => {
-    const itemsLengthChanged = items.length !== previousItemsLengthRef.current;
+    if (!enabled) return;
 
-    if (itemsLengthChanged) {
-      // Batch state updates to prevent race conditions
-      setIsLoading(true);
-
-      // Small delay to allow items to render before scroll calculation
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-
-
-      scrollTimeoutRef.current = setTimeout(() => {
-        setScrollTop(0); // Reset scroll to top on filter change
-        setIsLoading(false);
-        previousItemsLengthRef.current = items.length;
-      }, 50);
-    }
-
-    return () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
+    const updateColumns = () => {
+      const width = window.innerWidth;
+      if (width < 640) setResponsiveColumnCount(1);
+      else if (width < 1024) setResponsiveColumnCount(Math.min(2, columnCount));
+      else if (width < 1280) setResponsiveColumnCount(Math.min(3, columnCount));
+      else setResponsiveColumnCount(columnCount);
     };
-  }, [items.length]);
+
+    updateColumns();
+    window.addEventListener('resize', updateColumns);
+    return () => window.removeEventListener('resize', updateColumns);
+  }, [enabled, columnCount]);
 
   // Calculate visible range
-  const visibleRange = useMemo(() => {
-    const rowHeight = itemHeight;
-    const totalRows = Math.ceil(items.length / columnCount);
-    const visibleRowCount = Math.ceil(containerSize.height / rowHeight);
-
-    const startRow = Math.max(0, Math.floor(scrollTop / rowHeight) - overscan);
-    const endRow = Math.min(totalRows - 1, startRow + visibleRowCount + overscan * 2);
-
-    const startIndex = startRow * columnCount;
-    const endIndex = Math.min(items.length - 1, (endRow + 1) * columnCount - 1);
-
-    return {
-      startIndex,
-      endIndex,
-      startRow,
-      endRow,
-      totalRows,
-      visibleRowCount
-    };
-  }, [items.length, columnCount, containerSize.height, scrollTop, itemHeight, overscan]);
-
-  // Get visible items
-  const visibleItems = useMemo(() => {
-    return items.slice(visibleRange.startIndex, visibleRange.endIndex + 1);
-  }, [items, visibleRange.startIndex, visibleRange.endIndex]);
-
-  // Calculate container dimensions
-  const totalHeight = useMemo(() => {
-    const totalRows = Math.ceil(items.length / columnCount);
-    return totalRows * itemHeight;
-  }, [items.length, columnCount, itemHeight]);
-
-  const offsetY = useMemo(() => {
-    return visibleRange.startRow * itemHeight;
-  }, [visibleRange.startRow, itemHeight]);
-
-  // Handle scroll events
-  const handleScroll = useCallback((e: any) => {
-    setScrollTop(e.currentTarget.scrollTop);
-  }, []);
-
-  // Resize observer for responsive column count
-  const updateContainerSize = useCallback((element: any) => {
-    if (!element) return;
-
-    // Clean up previous observer
-    if (resizeObserverRef.current) {
-
-      resizeObserverRef.current.disconnect();
+  const { startIndex, endIndex, visibleItems, totalHeight, offsetY } = useMemo(() => {
+    if (!enabled || items.length === 0) {
+      return {
+        startIndex: 0,
+        endIndex: items.length - 1,
+        visibleItems: items,
+        totalHeight: 0,
+        offsetY: 0
+      };
     }
 
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        const { width, height } = entry.contentRect;
-        // Batch size updates to prevent flickering
-        setContainerSize((prev) => {
-          if (prev.width === width && prev.height === height) return prev;
-          return { width, height };
-        });
-      }
-    });
+    const rowHeight = itemHeight;
+    const totalRows = Math.ceil(items.length / responsiveColumnCount);
+    const totalHeight = totalRows * rowHeight;
 
-    resizeObserver.observe(element);
+    // Calculate visible rows
+    const startRow = Math.floor(scrollTop / rowHeight);
+    const endRow = Math.ceil((scrollTop + containerHeight) / rowHeight);
 
-    resizeObserverRef.current = resizeObserver;
+    // Add overscan
+    const overscanStartRow = Math.max(0, startRow - overscan);
+    const overscanEndRow = Math.min(totalRows - 1, endRow + overscan);
 
-    return () => {
-      resizeObserver.disconnect();
-      if (resizeObserverRef.current === resizeObserver) {
-        resizeObserverRef.current = null;
-      }
-    };
-  }, []);
+    // Convert to item indices
+    const startIndex = overscanStartRow * responsiveColumnCount;
+    const endIndex = Math.min(
+      items.length - 1,
+      (overscanEndRow + 1) * responsiveColumnCount - 1
+    );
 
-  // Calculate responsive column count based on container width
-  const responsiveColumnCount = useMemo(() => {
-    if (containerSize.width === 0) return columnCount;
+    const visibleItems = items.slice(startIndex, endIndex + 1);
+    const offsetY = overscanStartRow * rowHeight;
 
-    // Responsive breakpoints matching Tailwind
-    if (containerSize.width < 640) return 1;  // sm
-    if (containerSize.width < 1024) return 2; // lg
-    if (containerSize.width < 1280) return 3; // xl
-    return 4; // xl and above
-  }, [containerSize.width, columnCount]);
+    return { startIndex, endIndex, visibleItems, totalHeight, offsetY };
+  }, [items, enabled, scrollTop, itemHeight, containerHeight, responsiveColumnCount, overscan]);
 
-  // Scroll to specific item
-  const scrollToItem = useCallback((index: any) => {
-    const row = Math.floor(index / responsiveColumnCount);
-    const scrollPosition = row * itemHeight;
-    return scrollPosition;
-  }, [responsiveColumnCount, itemHeight]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-      if (resizeObserverRef.current) {
-
-        resizeObserverRef.current.disconnect();
-      }
-    };
+  // Scroll handler
+  const handleScroll = useCallback((e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    setScrollTop(target.scrollTop);
   }, []);
 
   return {
@@ -159,50 +101,7 @@ export const useVirtualScrolling = ({
     totalHeight,
     offsetY,
     handleScroll,
-    updateContainerSize,
-    responsiveColumnCount,
-    scrollToItem,
-    visibleRange,
-    isLoading // Add loading state for consumers
+    visibleRange: { startIndex, endIndex },
+    responsiveColumnCount
   };
-};
-
-/**
- * Hook for progressive loading with virtual scrolling
- * Implements "Load More" functionality
- */
-export const useProgressiveLoading = ({
-  initialBatchSize = 100,
-  batchSize = 50,
-  totalItems = 0
-}) => {
-  const [loadedCount, setLoadedCount] = useState(initialBatchSize);
-  const [isLoading, setIsLoading] = useState(false);
-
-  const loadMore = useCallback(() => {
-    if (isLoading || loadedCount >= totalItems) return;
-
-    setIsLoading(true);
-
-    // Simulate loading delay (remove in production if data is immediately available)
-    setTimeout(() => {
-      setLoadedCount(prev => Math.min(prev + batchSize, totalItems));
-      setIsLoading(false);
-    }, 100);
-  }, [isLoading, loadedCount, totalItems, batchSize]);
-
-  const reset = useCallback(() => {
-    setLoadedCount(initialBatchSize);
-    setIsLoading(false);
-  }, [initialBatchSize]);
-
-  const hasMore = loadedCount < totalItems;
-
-  return {
-    loadedCount,
-    isLoading,
-    hasMore,
-    loadMore,
-    reset
-  };
-};
+}

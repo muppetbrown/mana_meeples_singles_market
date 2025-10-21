@@ -7,7 +7,7 @@ import {
   formatInventoryForExport,
   generateInventoryTemplate,
 } from '../../utils/csvUtils';
-import { API_BASE } from '@/config/api';
+import { API_BASE } from '@/lib/api';
 
 // -------------------- Types --------------------
 export type InventoryCSVRow = Record<string, string | number | null | undefined>;

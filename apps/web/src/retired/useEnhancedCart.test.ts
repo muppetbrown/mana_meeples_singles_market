@@ -1,5 +1,5 @@
 import { makeStorage } from '../testUtils/storageMocks';
-import { useEnhancedCart } from '../useEnhancedCart';
+import { useCart } from '../useCart';
 
 // Mock localStorage
 const localStorageMock = {
@@ -20,7 +20,7 @@ global.sessionStorage = makeStorage();
 const mockApiUrl = 'http://localhost:3001/api';
 
 
-describe('useEnhancedCart', () => {
+describe('useCart', () => {
 
   beforeEach(() => {
 
@@ -30,7 +30,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should initialize with empty cart', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
 
     expect(result.current.cart).toEqual([]);
@@ -40,7 +40,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should add item to cart', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
     const testCard = {
       id: 'test-card-1',
@@ -75,7 +75,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should update quantity when adding same item', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
     const testCard = {
       id: 'test-card-1',
@@ -99,7 +99,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should not exceed stock limit', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
     const testCard = {
       id: 'test-card-1',
@@ -126,7 +126,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should update item quantity', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
     const testCard = {
       id: 'test-card-1',
@@ -148,7 +148,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should remove item when quantity is 0', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
     const testCard = {
       id: 'test-card-1',
@@ -170,7 +170,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should remove item from cart', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
     const testCard = {
       id: 'test-card-1',
@@ -192,7 +192,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should clear entire cart', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
     const testCards = [
       { id: 'card-1', quality: 'NM', price: 10, stock: 5 },
@@ -210,7 +210,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should handle different card conditions as separate items', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
     const cardNM = {
       id: 'test-card-1',
@@ -245,7 +245,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should persist cart to localStorage', () => {
-    renderHook(() => useEnhancedCart(mockApiUrl));
+    renderHook(() => useCart(mockApiUrl));
 
 
     expect(localStorageMock.setItem).toHaveBeenCalledWith(
@@ -266,7 +266,7 @@ describe('useEnhancedCart', () => {
 
     localStorageMock.getItem.mockReturnValue(JSON.stringify(savedCart));
 
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
 
     expect(result.current.cart).toEqual(savedCart);
@@ -274,7 +274,7 @@ describe('useEnhancedCart', () => {
 
 
   test('should add notification when adding item to cart', () => {
-    const { result } = renderHook(() => useEnhancedCart(mockApiUrl));
+    const { result } = renderHook(() => useCart(mockApiUrl));
 
     const testCard = {
       id: 'test-card-1',

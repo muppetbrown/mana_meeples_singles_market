@@ -2,8 +2,8 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download, LayoutGrid, List } from 'lucide-react';
-import { api, API_BASE } from '@/config/api';
-import { useSearchFilters } from '../../hooks/useSearchFilters';
+import { api, API_BASE } from '@/lib/api';
+import { useShopFilters } from '../../hooks/useShopFilters';
 import CardSearchBar from '../CardSearchBar';
 import EmptyState from '../EmptyState';
 import CardSkeleton from '../skeletons/CardSkeleton';
@@ -11,8 +11,8 @@ import AddToInventoryModal from './AddToInventoryModal';
 import AdminCardGrid from './AdminCardGrid';
 import { Package } from 'lucide-react';
 import type { 
-  ApiCard as Card,
-  ApiCardVariation as CardVariation,
+  Card,
+  CardVariation,
 } from '@/types';
 
 // ---------- Types ----------
@@ -60,14 +60,14 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   
   const isInventoryMode = mode === 'inventory';
 
-  // ✅ REUSE useSearchFilters hook (already extracted and working)
+  // ✅ REUSE useShopFilters hook (already extracted and working)
   const {
     games,
     sets,
     filterOptions,
     loading: filtersLoading,
     error: filtersError
-  } = useSearchFilters(API_BASE, selectedGame);
+  } = useShopFilters(API_BASE, selectedGame);
 
   // ---------- URL State Management (copied from TCGShop) ----------
   const updateParam = useCallback((key: string, value: string) => {

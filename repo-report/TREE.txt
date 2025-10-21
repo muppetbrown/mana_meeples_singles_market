@@ -22,6 +22,7 @@ mana_meeples_singles_market
 │ │ │ │ ├── inventory.ts
 │ │ │ │ ├── off-filters.ts
 │ │ │ │ ├── orders.ts
+│ │ │ │ ├── storefront.ts
 │ │ │ │ └── variations.ts
 │ │ │ ├── services/
 │ │ │ │ ├── emailService.ts
@@ -53,67 +54,109 @@ mana_meeples_singles_market
 │  ├── src/
 │  │ ├── a11y/
 │  │ │ └── Announcer.tsx
-│  │ ├── components/
+│  │ ├── features/
 │  │ │ ├── admin/
-│  │ │ │ ├── AnalyticsTab.tsx
-│  │ │ │ ├── BulkInventoryManager.tsx
-│  │ │ │ ├── OrdersTab.tsx
-│  │ │ │ └── UnifiedCardsTab.tsx
-│  │ │ ├── cards/
-│  │ │ │ ├── CardItem.tsx
-│  │ │ │ ├── ListCardItem.tsx
-│  │ │ │ └── types.ts
-│  │ │ ├── common/
-│  │ │ │ ├── RecentlyViewedCards.tsx
-│  │ │ │ └── SectionHeader.tsx
-│  │ │ ├── skeletons/
-│  │ │ │ └── CardSkeleton.tsx
-│  │ │ ├── utils/
-│  │ │ │ └── searchUtils.tsx
-│  │ │ ├── AdminDashboard.tsx
-│  │ │ ├── AdminLogin.tsx
-│  │ │ ├── CardGrid.tsx
-│  │ │ ├── CardSearchBar.tsx
-│  │ │ ├── Checkout.tsx
-│  │ │ ├── CurrencySelector.tsx
-│  │ │ ├── DynamicVariationFilter.tsx
-│  │ │ ├── EmptyState.tsx
-│  │ │ ├── ErrorBoundary.tsx
-│  │ │ ├── FiltersPanel.tsx
-│  │ │ ├── KeyboardShortcutsModal.tsx
-│  │ │ ├── OptimizedImage.tsx
-│  │ │ ├── TCGShop.tsx
-│  │ │ ├── Toast.tsx
-│  │ │ ├── VariationBadge.tsx
-│  │ │ └── VirtualCardGrid.tsx
-│  │ ├── config/
-│  │ │ ├── api.ts
-│  │ │ └── constants.ts
-│  │ ├── hooks/
-│  │ │ ├── __tests__/
-│  │ │ │ ├── useEnhancedCart.test.ts
-│  │ │ │ └── useRecentlyViewed.test.ts
-│  │ │ ├── useEnhancedCart.ts
-│  │ │ ├── useFilterCounts.ts
-│  │ │ ├── useRecentlyViewed.ts
-│  │ │ ├── useSearchFilters.ts
-│  │ │ └── useVirtualScrolling.ts
+│  │ │ │ ├── components/
+│  │ │ │ │ ├── Analytics/
+│  │ │ │ │ │ └── AnalyticsTab.tsx
+│  │ │ │ │ ├── Cards/
+│  │ │ │ │ │ └── CardsTab.tsx
+│  │ │ │ │ ├── Inventory/
+│  │ │ │ │ │ └── BulkManager.tsx
+│  │ │ │ │ ├── Orders/
+│  │ │ │ │ │ └── OrdersTab.tsx
+│  │ │ │ │ ├── Dashboard.tsx
+│  │ │ │ │ └── Login.tsx
+│  │ │ │ ├── hooks/
+│  │ │ │ │ └── useFilterCounts.ts
+│  │ │ │ └── index.ts
+│  │ │ └── shop/
+│  │ │  ├── components/
+│  │ │  │ ├── CardDisplay/
+│  │ │  │ │ ├── CardGrid.tsx
+│  │ │  │ │ ├── CardItem.tsx
+│  │ │  │ │ ├── CardSkeleton.tsx
+│  │ │  │ │ └── ListCardItem.tsx
+│  │ │  │ ├── Cart/
+│  │ │  │ │ ├── CartPanel.tsx
+│  │ │  │ │ └── Checkout.tsx
+│  │ │  │ ├── Search/
+│  │ │  │ │ ├── FiltersPanel.tsx
+│  │ │  │ │ └── SearchBar.tsx
+│  │ │  │ └── RecentlyViewed.tsx
+│  │ │  ├── hooks/
+│  │ │  │ ├── useCart.ts
+│  │ │  │ ├── useRecentlyViewed.ts
+│  │ │  │ └── useShopFilters.ts
+│  │ │  ├── index.ts
+│  │ │  └── ShopPage.tsx
+│  │ ├── lib/
+│  │ │ ├── api/
+│  │ │ │ ├── client.ts
+│  │ │ │ ├── endpoints.ts
+│  │ │ │ └── index.ts
+│  │ │ ├── constants/
+│  │ │ │ ├── index.ts
+│  │ │ │ └── validation.ts
+│  │ │ └── utils/
+│  │ │  ├── csv.ts
+│  │ │  ├── format.ts
+│  │ │  ├── index.ts
+│  │ │  └── search.ts
+│  │ ├── retired/
+│  │ │ ├── AddToInventoryModal.tsx
+│  │ │ ├── AdminCardGrid.tsx
+│  │ │ ├── App.css
+│  │ │ ├── setupTests.ts
+│  │ │ ├── useEnhancedCart.test.ts
+│  │ │ ├── useRecentlyViewed.test.ts
+│  │ │ ├── VirtualCardGrid.tsx
+│  │ │ └── vite-env.d.ts
 │  │ ├── services/
-│  │ │ ├── errorHandler.ts
-│  │ │ └── requestThrottler.ts
+│  │ │ ├── error/
+│  │ │ │ ├── handler.ts
+│  │ │ │ └── types.ts
+│  │ │ └── http/
+│  │ │  └── throttler.ts
+│  │ ├── shared/
+│  │ │ ├── components/
+│  │ │ │ ├── forms/
+│  │ │ │ │ ├── CurrencySelector.tsx
+│  │ │ │ │ └── VariationFilter.tsx
+│  │ │ │ ├── layout/
+│  │ │ │ │ ├── ErrorBoundary.tsx
+│  │ │ │ │ └── KeyboardShortcuts.tsx
+│  │ │ │ ├── media/
+│  │ │ │ │ └── OptimizedImage.tsx
+│  │ │ │ ├── ui/
+│  │ │ │ │ ├── Button.tsx
+│  │ │ │ │ ├── EmptyState.tsx
+│  │ │ │ │ ├── Modal.tsx
+│  │ │ │ │ ├── SectionHeader.tsx
+│  │ │ │ │ ├── Toast.tsx
+│  │ │ │ │ └── VariationBadge.tsx
+│  │ │ │ └── index.ts
+│  │ │ └── hooks/
+│  │ │  └── useVirtualScroll.ts
 │  │ ├── styles/
 │  │ │ └── index.css
 │  │ ├── testUtils/
 │  │ │ └── storageMocks.ts
-│  │ ├── utils/
-│  │ │ └── csvUtils.ts
-│  │ ├── App.css
+│  │ ├── types/
+│  │ │ ├── api/
+│  │ │ │ ├── requests.ts
+│  │ │ │ └── responses.ts
+│  │ │ ├── models/
+│  │ │ │ ├── card.ts
+│  │ │ │ ├── inventory.ts
+│  │ │ │ └── order.ts
+│  │ │ ├── ui/
+│  │ │ │ ├── cart.ts
+│  │ │ │ └── common.ts
+│  │ │ └── index.ts
 │  │ ├── App.tsx
-│  │ ├── logo.svg
 │  │ ├── main.tsx
-│  │ ├── reportWebVitals.ts
-│  │ ├── setupTests.ts
-│  │ └── vite-env.d.ts
+│  │ └── reportWebVitals.ts
 │  ├── .env
 │  ├── index.html
 │  ├── package.json
@@ -122,11 +165,6 @@ mana_meeples_singles_market
 │  ├── tsconfig.json
 │  └── vite.config.ts
 ├── database/
-│ ├── migrations/
-│ │ ├── 000_init_extensions.sql
-│ │ ├── 010_schema.sql
-│ │ ├── 020_variation_framework_schema.sql
-│ │ └── 030_add_card_pricing_table.sql
 │ ├── DATABASE_SCHEMA.md
 │ └── database-stats.json
 ├── docs/
@@ -136,8 +174,6 @@ mana_meeples_singles_market
 │ │ ├── onepiece_card_variations_sample.json
 │ │ └── sv_card_variations_sample.json
 │ ├── CARD_VARIATIONS_GUIDE.md
-│ ├── DATABASE_SCHEMA.md
-│ ├── database-stats.json
 │ ├── openapi.yaml
 │ ├── pokemon_set_codes.txt
 │ └── QUICK_START_VARIATIONS.md
@@ -157,6 +193,7 @@ mana_meeples_singles_market
 │ ├── generate-admin-hash.ts
 │ ├── refresh-mviews.sh
 │ ├── smoke.mjs
+│ ├── test-db-connected.ts
 │ ├── test-login.sh
 │ └── test-password.ts
 ├── utils/

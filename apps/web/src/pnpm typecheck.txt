@@ -1,0 +1,547 @@
+C:\Git_Repos\mana_meeples_singles_market\apps\web>pnpm typecheck
+
+> web@0.1.0 typecheck C:\Git_Repos\mana_meeples_singles_market\apps\web
+> tsc -p tsconfig.json --noEmit
+
+src/App.tsx:17:6 - error TS2304: Cannot find name 'Routes'.
+
+17     <Routes>
+        ~~~~~~
+
+src/App.tsx:18:8 - error TS2304: Cannot find name 'Route'.
+
+18       <Route path="/" element={<ShopPage />} />
+          ~~~~~
+
+src/App.tsx:19:8 - error TS2304: Cannot find name 'Route'.
+
+19       <Route path="/admin" element={<Dashboard />} />
+          ~~~~~
+
+src/App.tsx:20:8 - error TS2304: Cannot find name 'Route'.
+
+20       <Route path="/admin/login" element={<Login />} />
+          ~~~~~
+
+src/App.tsx:21:7 - error TS2304: Cannot find name 'Routes'.
+
+21     </Routes>
+         ~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:6:32 - error TS2307: Cannot find module '../../hooks/useShopFilters' or its corresponding type declarations.
+
+6 import { useShopFilters } from '../../hooks/useShopFilters';
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:7:27 - error TS2307: Cannot find module '../CardSearchBar' or its corresponding type declarations.
+
+7 import CardSearchBar from '../CardSearchBar';
+                            ~~~~~~~~~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:8:24 - error TS2307: Cannot find module '../EmptyState' or its corresponding type declarations.
+
+8 import EmptyState from '../EmptyState';
+                         ~~~~~~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:9:26 - error TS2307: Cannot find module '../skeletons/CardSkeleton' or its corresponding type declarations.
+
+9 import CardSkeleton from '../skeletons/CardSkeleton';
+                           ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:10:33 - error TS2307: Cannot find module './AddToInventoryModal' or its corresponding type declarations.
+
+10 import AddToInventoryModal from './AddToInventoryModal';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:11:27 - error TS2307: Cannot find module './AdminCardGrid' or its corresponding type declarations.
+
+11 import AdminCardGrid from './AdminCardGrid';
+                             ~~~~~~~~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:174:41 - error TS2339: Property 'has_inventory' does not exist on type 'Card'.
+
+174     return cards.filter(c => Boolean(c?.has_inventory) && Number(c?.total_stock) > 0);
+                                            ~~~~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:195:54 - error TS2339: Property 'variations' does not exist on type 'Card'.
+
+195       const allVariations = cardGroup.flatMap(c => c.variations || []);
+                                                         ~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:222:28 - error TS2339: Property 'finish' does not exist on type 'CardVariation'.
+
+222       foil_type: variation.finish === 'foil' ? 'Foil' : 'Regular',
+                               ~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:248:41 - error TS2339: Property 'card_id' does not exist on type 'CardVariation'.
+
+248         card_id: addModalData.variation.card_id,
+                                            ~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:271:58 - error TS2339: Property 'treatment' does not exist on type 'CardVariation'.
+
+271         Array.from(new Set((variations ?? []).map(v => v.treatment)));
+                                                             ~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:274:58 - error TS2339: Property 'finish' does not exist on type 'CardVariation'.
+
+274         Array.from(new Set((variations ?? []).map(v => v.finish)));
+                                                             ~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:283:33 - error TS2339: Property 'variations' does not exist on type 'Card | { variations: any[]; variation_count: number; total_stock: any; has_inventory: boolean; id: number; name: string; card_number: string; set_name: string; game_name: string; rarity?: string; image_url?: string; }'.
+  Property 'variations' does not exist on type 'Card'.
+
+283           getUniqueTreatments(c.variations ?? []).join(';'),
+                                    ~~~~~~~~~~
+
+src/features/admin/components/Cards/CardsTab.tsx:284:31 - error TS2339: Property 'variations' does not exist on type 'Card | { variations: any[]; variation_count: number; total_stock: any; has_inventory: boolean; id: number; name: string; card_number: string; set_name: string; game_name: string; rarity?: string; image_url?: string; }'.
+  Property 'variations' does not exist on type 'Card'.
+
+284           getUniqueFinishes(c.variations ?? []).join(';'),
+                                  ~~~~~~~~~~
+
+src/features/admin/components/Dashboard.tsx:6:30 - error TS2307: Cannot find module './CurrencySelector' or its corresponding type declarations.
+
+6 import CurrencySelector from './CurrencySelector';
+                               ~~~~~~~~~~~~~~~~~~~~
+
+src/features/admin/components/Dashboard.tsx:7:29 - error TS2307: Cannot find module './admin/UnifiedCardsTab' or its corresponding type declarations.
+
+7 import UnifiedCardsTab from './admin/UnifiedCardsTab';
+                              ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/admin/components/Dashboard.tsx:8:23 - error TS2307: Cannot find module './admin/OrdersTab' or its corresponding type declarations.
+
+8 import OrdersTab from './admin/OrdersTab';
+                        ~~~~~~~~~~~~~~~~~~~
+
+src/features/admin/components/Dashboard.tsx:9:26 - error TS2307: Cannot find module './admin/AnalyticsTab' or its corresponding type declarations.
+
+9 import AnalyticsTab from './admin/AnalyticsTab';
+                           ~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/admin/components/Inventory/BulkManager.tsx:9:8 - error TS2307: Cannot find module '../../utils/csvUtils' or its corresponding type declarations.
+
+9 } from '../../utils/csvUtils';
+         ~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/admin/hooks/useFilterCounts.ts:3:31 - error TS2307: Cannot find module '../config/constants' or its corresponding type declarations.
+
+3 import { FILTER_CONFIG } from '../config/constants';
+                                ~~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/components/CardDisplay/CardGrid.tsx:8:34 - error TS2307: Cannot find module '@/shared/hooks' or its corresponding type declarations.
+
+8 import { useVirtualScroll } from '@/shared/hooks';
+                                   ~~~~~~~~~~~~~~~~
+
+src/features/shop/components/CardDisplay/CardGrid.tsx:104:9 - error TS2322: Type 'T' is not assignable to type 'Card'.
+  Property 'variations' is missing in type 'import("C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/models/card").Card' but required in type 'Card'.
+
+104         card={card}
+            ~~~~
+
+  src/features/shop/components/CardDisplay/CardItem.tsx:22:3
+    22   variations: Variation[];
+         ~~~~~~~~~~
+    'variations' is declared here.
+  src/features/shop/components/CardDisplay/CardItem.tsx:31:3
+    31   card: Card;
+         ~~~~
+    The expected type comes from property 'card' which is declared here on type 'IntrinsicAttributes & CardItemProps'
+
+src/features/shop/components/CardDisplay/CardGrid.tsx:125:33 - error TS2322: Type '{ key: number; viewMode: "grid" | "list"; }' is not assignable to type 'IntrinsicAttributes'.
+  Property 'viewMode' does not exist on type 'IntrinsicAttributes'.
+
+125           <CardSkeleton key={i} viewMode={viewMode} />
+                                    ~~~~~~~~
+
+src/features/shop/components/CardDisplay/CardItem.tsx:3:28 - error TS2307: Cannot find module '../OptimizedImage' or its corresponding type declarations.
+
+3 import OptimizedImage from '../OptimizedImage';
+                             ~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/components/CardDisplay/CardItem.tsx:4:38 - error TS2307: Cannot find module '../../config/constants' or its corresponding type declarations.
+
+4 import { ACCESSIBILITY_CONFIG } from '../../config/constants';
+                                       ~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/components/CardDisplay/ListCardItem.tsx:3:28 - error TS2307: Cannot find module '../OptimizedImage' or its corresponding type declarations.
+
+3 import OptimizedImage from '../OptimizedImage';
+                             ~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/components/RecentlyViewed.tsx:4:28 - error TS2307: Cannot find module '../OptimizedImage' or its corresponding type declarations.
+
+4 import OptimizedImage from '../OptimizedImage';
+                             ~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:5:27 - error TS2307: Cannot find module './CardSearchBar' or its corresponding type declarations.
+
+5 import CardSearchBar from './CardSearchBar';
+                            ~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:6:32 - error TS2307: Cannot find module '../hooks/useShopFilters' or its corresponding type declarations.
+
+6 import { useShopFilters } from '../hooks/useShopFilters';
+                                 ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:8:30 - error TS2307: Cannot find module './CurrencySelector' or its corresponding type declarations.
+
+8 import CurrencySelector from './CurrencySelector';
+                               ~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:9:22 - error TS2307: Cannot find module './Checkout' or its corresponding type declarations.
+
+9 import Checkout from './Checkout';
+                       ~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:10:25 - error TS2307: Cannot find module '../hooks/useCart' or its corresponding type declarations.
+
+10 import { useCart } from '../hooks/useCart';
+                           ~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:11:27 - error TS2307: Cannot find module './ErrorBoundary' or its corresponding type declarations.
+
+11 import ErrorBoundary from './ErrorBoundary';
+                             ~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:12:36 - error TS2307: Cannot find module './KeyboardShortcutsModal' or its corresponding type declarations.
+
+12 import KeyboardShortcutsModal from './KeyboardShortcutsModal';
+                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:13:33 - error TS2307: Cannot find module '../services/errorHandler' or its corresponding type declarations.
+
+13 import { useErrorHandler } from '../services/errorHandler';
+                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:14:39 - error TS2307: Cannot find module '../config/constants' or its corresponding type declarations.
+
+14 import { VIRTUAL_SCROLL_CONFIG } from '../config/constants';
+                                         ~~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:15:26 - error TS2307: Cannot find module './skeletons/CardSkeleton' or its corresponding type declarations.
+
+15 import CardSkeleton from './skeletons/CardSkeleton';
+                            ~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:16:27 - error TS2307: Cannot find module './common/SectionHeader' or its corresponding type declarations.
+
+16 import SectionHeader from './common/SectionHeader';
+                             ~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:17:22 - error TS2307: Cannot find module './cards/CardItem' or its corresponding type declarations.
+
+17 import CardItem from './cards/CardItem';
+                        ~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:18:26 - error TS2307: Cannot find module './cards/ListCardItem' or its corresponding type declarations.
+
+18 import ListCardItem from './cards/ListCardItem';
+                            ~~~~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:26:49 - error TS2307: Cannot find module './VirtualCardGrid' or its corresponding type declarations.
+
+26 const VirtualCardGrid = React.lazy(() => import('./VirtualCardGrid'));
+                                                   ~~~~~~~~~~~~~~~~~~~
+
+src/features/shop/ShopPage.tsx:145:56 - error TS2353: Object literal may only specify known properties, and 'symbol' does not exist in type '() => Currency'.
+
+145   const [currency, setCurrency] = useState<Currency>({ symbol: 'NZ$', rate: 1.0, code: 'NZD' });
+                                                           ~~~~~~
+
+src/features/shop/ShopPage.tsx:1161:29 - error TS2339: Property 'symbol' does not exist on type 'Currency'.
+  Property 'symbol' does not exist on type '"NZD"'.
+
+1161                   {currency.symbol}{(item.price * item.quantity * currency.rate).toFixed(2)}
+                                 ~~~~~~
+
+src/features/shop/ShopPage.tsx:1161:76 - error TS2339: Property 'rate' does not exist on type 'Currency'.
+  Property 'rate' does not exist on type '"NZD"'.
+
+1161                   {currency.symbol}{(item.price * item.quantity * currency.rate).toFixed(2)}
+                                                                                ~~~~
+
+src/features/shop/ShopPage.tsx:1172:34 - error TS2339: Property 'symbol' does not exist on type 'Currency'.
+  Property 'symbol' does not exist on type '"NZD"'.
+
+1172             View Cart ({currency.symbol}{(cartTotal * currency.rate).toFixed(2)})
+                                      ~~~~~~
+
+src/features/shop/ShopPage.tsx:1172:64 - error TS2339: Property 'rate' does not exist on type 'Currency'.
+  Property 'rate' does not exist on type '"NZD"'.
+
+1172             View Cart ({currency.symbol}{(cartTotal * currency.rate).toFixed(2)})
+                                                                    ~~~~
+
+src/features/shop/ShopPage.tsx:1256:37 - error TS2339: Property 'symbol' does not exist on type 'Currency'.
+  Property 'symbol' does not exist on type '"NZD"'.
+
+1256                           {currency.symbol}{(item.price * item.quantity * currency.rate).toFixed(2)}
+                                         ~~~~~~
+
+src/features/shop/ShopPage.tsx:1256:84 - error TS2339: Property 'rate' does not exist on type 'Currency'.
+  Property 'rate' does not exist on type '"NZD"'.
+
+1256                           {currency.symbol}{(item.price * item.quantity * currency.rate).toFixed(2)}
+                                                                                        ~~~~
+
+src/features/shop/ShopPage.tsx:1259:37 - error TS2339: Property 'symbol' does not exist on type 'Currency'.
+  Property 'symbol' does not exist on type '"NZD"'.
+
+1259                           {currency.symbol}{(item.price * currency.rate).toFixed(2)} each
+                                         ~~~~~~
+
+src/features/shop/ShopPage.tsx:1259:68 - error TS2339: Property 'rate' does not exist on type 'Currency'.
+  Property 'rate' does not exist on type '"NZD"'.
+
+1259                           {currency.symbol}{(item.price * currency.rate).toFixed(2)} each
+                                                                        ~~~~
+
+src/features/shop/ShopPage.tsx:1273:31 - error TS2339: Property 'symbol' does not exist on type 'Currency'.
+  Property 'symbol' does not exist on type '"NZD"'.
+
+1273                     {currency.symbol}{(cartTotal * currency.rate).toFixed(2)}
+                                   ~~~~~~
+
+src/features/shop/ShopPage.tsx:1273:61 - error TS2339: Property 'rate' does not exist on type 'Currency'.
+  Property 'rate' does not exist on type '"NZD"'.
+
+1273                     {currency.symbol}{(cartTotal * currency.rate).toFixed(2)}
+                                                                 ~~~~
+
+src/lib/utils/index.ts:1:10 - error TS2614: Module '"./csv"' has no exported member 'parseCSV'. Did you mean to use 'import parseCSV from "./csv"' instead?
+
+1 export { parseCSV, exportCSV } from './csv';
+           ~~~~~~~~
+
+src/lib/utils/index.ts:1:20 - error TS2614: Module '"./csv"' has no exported member 'exportCSV'. Did you mean to use 'import exportCSV from "./csv"' instead?
+
+1 export { parseCSV, exportCSV } from './csv';
+                     ~~~~~~~~~
+
+src/lib/utils/index.ts:2:44 - error TS2306: File 'C:/Git_Repos/mana_meeples_singles_market/apps/web/src/lib/utils/format.ts' is not a module.
+
+2 export { formatCurrency, formatDate } from './format';
+                                             ~~~~~~~~~~
+
+src/lib/utils/index.ts:3:41 - error TS2306: File 'C:/Git_Repos/mana_meeples_singles_market/apps/web/src/lib/utils/search.ts' is not a module.
+
+3 export { searchCards, fuzzyMatch } from './search';
+                                          ~~~~~~~~~~
+
+src/main.tsx:3:8 - error TS1192: Module '"C:/Git_Repos/mana_meeples_singles_market/apps/web/src/App"' has no default export.
+
+3 import App from "./App";
+         ~~~
+
+src/reportWebVitals.ts:1:10 - error TS2305: Module '"web-vitals"' has no exported member 'ReportHandler'.
+
+1 import { ReportHandler } from 'web-vitals';
+           ~~~~~~~~~~~~~
+
+src/reportWebVitals.ts:5:34 - error TS2339: Property 'getCLS' does not exist on type 'typeof import("C:/Git_Repos/mana_meeples_singles_market/node_modules/.pnpm/web-vitals@5.1.0/node_modules/web-vitals/dist/modules/index")'.
+
+5     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+                                   ~~~~~~
+
+src/reportWebVitals.ts:5:42 - error TS2339: Property 'getFID' does not exist on type 'typeof import("C:/Git_Repos/mana_meeples_singles_market/node_modules/.pnpm/web-vitals@5.1.0/node_modules/web-vitals/dist/modules/index")'.
+
+5     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+                                           ~~~~~~
+
+src/reportWebVitals.ts:5:50 - error TS2339: Property 'getFCP' does not exist on type 'typeof import("C:/Git_Repos/mana_meeples_singles_market/node_modules/.pnpm/web-vitals@5.1.0/node_modules/web-vitals/dist/modules/index")'.
+
+5     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+                                                   ~~~~~~
+
+src/reportWebVitals.ts:5:58 - error TS2339: Property 'getLCP' does not exist on type 'typeof import("C:/Git_Repos/mana_meeples_singles_market/node_modules/.pnpm/web-vitals@5.1.0/node_modules/web-vitals/dist/modules/index")'.
+
+5     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+                                                           ~~~~~~
+
+src/reportWebVitals.ts:5:66 - error TS2339: Property 'getTTFB' does not exist on type 'typeof import("C:/Git_Repos/mana_meeples_singles_market/node_modules/.pnpm/web-vitals@5.1.0/node_modules/web-vitals/dist/modules/index")'.
+
+5     import('web-vitals').then(({ getCLS, getFID, getFCP, getLCP, getTTFB }) => {
+                                                                   ~~~~~~~
+
+src/retired/AddToInventoryModal.tsx:4:15 - error TS2305: Module '"@/types"' has no exported member 'ApiCard'.
+
+4 import type { ApiCard as Card, ApiCardVariation as CardVariation } from '@/types';
+                ~~~~~~~
+
+src/retired/AddToInventoryModal.tsx:4:32 - error TS2724: '"@/types"' has no exported member named 'ApiCardVariation'. Did you mean 'CardVariation'?
+
+4 import type { ApiCard as Card, ApiCardVariation as CardVariation } from '@/types';
+                                 ~~~~~~~~~~~~~~~~
+
+src/retired/AdminCardGrid.tsx:4:28 - error TS2307: Cannot find module '../OptimizedImage' or its corresponding type declarations.
+
+4 import OptimizedImage from '../OptimizedImage';
+                             ~~~~~~~~~~~~~~~~~~~
+
+src/retired/AdminCardGrid.tsx:5:15 - error TS2305: Module '"@/types"' has no exported member 'ApiCard'.
+
+5 import type { ApiCard as Card, ApiCardVariation as CardVariation } from '@/types';
+                ~~~~~~~
+
+src/retired/AdminCardGrid.tsx:5:32 - error TS2724: '"@/types"' has no exported member named 'ApiCardVariation'. Did you mean 'CardVariation'?
+
+5 import type { ApiCard as Card, ApiCardVariation as CardVariation } from '@/types';
+                                 ~~~~~~~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:2:25 - error TS2307: Cannot find module '../useCart' or its corresponding type declarations.
+
+2 import { useCart } from '../useCart';
+                          ~~~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:33:24 - error TS2304: Cannot find name 'renderHook'.
+
+33     const { result } = renderHook(() => useCart(mockApiUrl));
+                          ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:43:24 - error TS2304: Cannot find name 'renderHook'.
+
+43     const { result } = renderHook(() => useCart(mockApiUrl));
+                          ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:61:5 - error TS2304: Cannot find name 'act'.
+
+61     act(() => {
+       ~~~
+
+src/retired/useEnhancedCart.test.ts:78:24 - error TS2304: Cannot find name 'renderHook'.
+
+78     const { result } = renderHook(() => useCart(mockApiUrl));
+                          ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:89:5 - error TS2304: Cannot find name 'act'.
+
+89     act(() => {
+       ~~~
+
+src/retired/useEnhancedCart.test.ts:102:24 - error TS2304: Cannot find name 'renderHook'.
+
+102     const { result } = renderHook(() => useCart(mockApiUrl));
+                           ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:113:5 - error TS2304: Cannot find name 'act'.
+
+113     act(() => {
+        ~~~
+
+src/retired/useEnhancedCart.test.ts:129:24 - error TS2304: Cannot find name 'renderHook'.
+
+129     const { result } = renderHook(() => useCart(mockApiUrl));
+                           ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:140:5 - error TS2304: Cannot find name 'act'.
+
+140     act(() => {
+        ~~~
+
+src/retired/useEnhancedCart.test.ts:151:24 - error TS2304: Cannot find name 'renderHook'.
+
+151     const { result } = renderHook(() => useCart(mockApiUrl));
+                           ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:162:5 - error TS2304: Cannot find name 'act'.
+
+162     act(() => {
+        ~~~
+
+src/retired/useEnhancedCart.test.ts:173:24 - error TS2304: Cannot find name 'renderHook'.
+
+173     const { result } = renderHook(() => useCart(mockApiUrl));
+                           ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:184:5 - error TS2304: Cannot find name 'act'.
+
+184     act(() => {
+        ~~~
+
+src/retired/useEnhancedCart.test.ts:195:24 - error TS2304: Cannot find name 'renderHook'.
+
+195     const { result } = renderHook(() => useCart(mockApiUrl));
+                           ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:202:5 - error TS2304: Cannot find name 'act'.
+
+202     act(() => {
+        ~~~
+
+src/retired/useEnhancedCart.test.ts:213:24 - error TS2304: Cannot find name 'renderHook'.
+
+213     const { result } = renderHook(() => useCart(mockApiUrl));
+                           ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:233:5 - error TS2304: Cannot find name 'act'.
+
+233     act(() => {
+        ~~~
+
+src/retired/useEnhancedCart.test.ts:248:5 - error TS2304: Cannot find name 'renderHook'.
+
+248     renderHook(() => useCart(mockApiUrl));
+        ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:269:24 - error TS2304: Cannot find name 'renderHook'.
+
+269     const { result } = renderHook(() => useCart(mockApiUrl));
+                           ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:277:24 - error TS2304: Cannot find name 'renderHook'.
+
+277     const { result } = renderHook(() => useCart(mockApiUrl));
+                           ~~~~~~~~~~
+
+src/retired/useEnhancedCart.test.ts:286:5 - error TS2304: Cannot find name 'act'.
+
+286     act(() => {
+        ~~~
+
+src/retired/useRecentlyViewed.test.ts:2:35 - error TS2307: Cannot find module '../useRecentlyViewed' or its corresponding type declarations.
+
+2 import { useRecentlyViewed } from '../useRecentlyViewed';
+                                    ~~~~~~~~~~~~~~~~~~~~~~
+
+src/retired/useRecentlyViewed.test.ts:16:1 - error TS2739: Type '{ getItem: Mock<any, any, any>; setItem: Mock<any, any, any>; removeItem: Mock<any, any, any>; clear: Mock<any, any, any>; }' is missing the following properties from type 'Storage': length, key
+
+16 global.sessionStorage = sessionStorageMock;
+   ~~~~~~~~~~~~~~~~~~~~~
+
+src/retired/VirtualCardGrid.tsx:4:57 - error TS2307: Cannot find module '../hooks/useVirtualScroll' or its corresponding type declarations.
+
+4 import { useVirtualScroll, useProgressiveLoading } from '../hooks/useVirtualScroll';
+                                                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+src/shared/hooks/useVirtualScroll.ts:57:72 - error TS2304: Cannot find name 'useMemo'.
+
+57   const { startIndex, endIndex, visibleItems, totalHeight, offsetY } = useMemo(() => {
+                                                                          ~~~~~~~
+
+
+Found 99 errors in 19 files.
+
+Errors  Files
+     5  src/App.tsx:17
+    14  src/features/admin/components/Cards/CardsTab.tsx:6
+     4  src/features/admin/components/Dashboard.tsx:6
+     1  src/features/admin/components/Inventory/BulkManager.tsx:9
+     1  src/features/admin/hooks/useFilterCounts.ts:3
+     3  src/features/shop/components/CardDisplay/CardGrid.tsx:8
+     2  src/features/shop/components/CardDisplay/CardItem.tsx:3
+     1  src/features/shop/components/CardDisplay/ListCardItem.tsx:3
+     1  src/features/shop/components/RecentlyViewed.tsx:4
+    25  src/features/shop/ShopPage.tsx:5
+     4  src/lib/utils/index.ts:1
+     1  src/main.tsx:3
+     6  src/reportWebVitals.ts:1
+     2  src/retired/AddToInventoryModal.tsx:4
+     3  src/retired/AdminCardGrid.tsx:4
+    22  src/retired/useEnhancedCart.test.ts:2
+     2  src/retired/useRecentlyViewed.test.ts:2
+     1  src/retired/VirtualCardGrid.tsx:4
+     1  src/shared/hooks/useVirtualScroll.ts:57
+ ELIFECYCLE  Command failed with exit code 2.
