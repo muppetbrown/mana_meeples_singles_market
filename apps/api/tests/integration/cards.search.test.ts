@@ -1,5 +1,5 @@
 // apps/api/tests/integration/cards.search.test.ts
-import { beforeAll, afterAll, describe, it, expect } from "vitest"; // FIXED: typo "decribe" -> "describe"
+import { beforeAll, afterAll, describe, it, expect } from "vitest";
 import request from "supertest";
 import { startPostgres, stopPostgres, bootstrapMinimalSchema } from "../setup/testEnv.js";
 import { seedCards } from "../setup/db.js";
@@ -18,11 +18,11 @@ afterAll(async () => {
   await stopPostgres();
 });
 
-describe("GET /cards/cards", () => { // FIXED: Changed from /api/cards to /cards/cards
+describe("GET /api/cards/cards", () => {
   it("returns at least one seeded card", async () => {
-    // FIXED: Route is /cards/cards, not /api/cards
-    // Reason: app.ts mounts routes at "/" not "/api"
-    const res = await request(app).get("/cards/cards").expect(200);
+    // Route structure: app.use("/api", routes) -> router.use("/cards", cardsRoutes) -> router.get("/cards", ...)
+    // Final path: /api/cards/cards
+    const res = await request(app).get("/api/cards/cards").expect(200);
     
     // The response should have { cards: [...] } structure
     const cards = res.body?.cards || res.body?.data || res.body;
