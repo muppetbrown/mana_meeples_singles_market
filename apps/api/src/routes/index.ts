@@ -5,17 +5,15 @@ import { z } from "zod";
 import authRoutes from "./auth.js";
 import cardsRoutes from "./cards.js";
 import variationsRoutes from "./variations.js";
-//import filtersRoutes from "./filters.js";
 import ordersRoutes from "./orders.js";
 import inventoryRoutes from "./inventory.js";
 import additionalRoutes from "./additional.js";
-import storefrontRouter from './storefront.js'; //
+import storefrontRouter from './storefront.js';
 
 const router = express.Router();
 
 // --- Route grouping ---
 router.use("/auth", authRoutes);
-//router.use("/filters", filtersRoutes);
 router.use("/variations", variationsRoutes);
 router.use("/cards", cardsRoutes); // exposes /cards/cards, /cards/count, /cards/filters
 router.use('/storefront', storefrontRouter);
@@ -110,16 +108,15 @@ export const validateBody =
 
 /* ------------------------- 404 & Error Handling ------------------------- */
 
-router.use((req, res, next) => {
-  if (req.path.startsWith("/")) {
-    return res.status(404).json({
-      error: "Not Found",
-      path: req.originalUrl,
-    });
-  }
-  next();
+// FIXED: Simplified 404 handler - catches any unmatched routes
+router.use((_req, res) => {
+  res.status(404).json({
+    error: "Not Found",
+    path: _req.originalUrl,
+  });
 });
 
+// Error handler
 router.use(
   (err: unknown, _req: Request, res: Response, _next: NextFunction) => {
     const status =
