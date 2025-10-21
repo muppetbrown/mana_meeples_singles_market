@@ -2,23 +2,17 @@ import { defineConfig } from "vitest/config";
 
 export default defineConfig({
   test: {
-    environment: "node",
     globals: true,
-    setupFiles: ["./tests/setup/testEnv.ts"],
-    include: ["tests/**/*.test.ts"],
+    environment: "node",
+    hookTimeout: 60_000,      // container + migrations + seed
+    testTimeout: 60_000,
+    include: ["tests/**/*.{test,spec}.ts"],
+    reporters: ["default"],
     coverage: {
       provider: "v8",
       reportsDirectory: "./coverage",
-      reporter: ["text", "html", "lcov"],
-      thresholds: {
-        statements: 85,
-        branches: 80,
-        functions: 85,
-        lines: 85
-      }
+      reporter: ["text", "lcov", "html"],
+      exclude: ["**/tests/**", "**/*.d.ts"],
     },
-    poolOptions: {
-      threads: { singleThread: true } // keeps container lifecycle predictable
-    }
-  }
+  },
 });

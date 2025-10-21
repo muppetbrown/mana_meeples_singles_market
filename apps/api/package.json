@@ -13,6 +13,7 @@
     "test:unit": "vitest --dir tests/unit",
     "test:int": "vitest --dir tests/integration",
     "test:ci": "vitest run --coverage",
+    "test:ui": "vitest --ui",
     "coverage": "vitest run --coverage && node ./scripts/print-coverage-summary.mjs"
   },
   "dependencies": {

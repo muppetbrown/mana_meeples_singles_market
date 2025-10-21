@@ -66,7 +66,7 @@ export function createApp() {
     });
   });
 
-  app.use("/", routes);
+  app.use("/api", routes);
 
   /** ===============================
    *  ✅ Enhanced static + header handling
