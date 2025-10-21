@@ -1,4 +1,6 @@
 // apps/web/src/testUtils/storageMocks.ts
+import { vi } from 'vitest'; // If using vitest
+
 export const makeStorage = () => {
   let store: Record<string, string> = {};
   return {

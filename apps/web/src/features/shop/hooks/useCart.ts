@@ -21,6 +21,8 @@ export function useCart() {
     }
   });
 
+  const [cartNotifications, setCartNotifications] = useState<any[]>([]);
+
   // Persist to localStorage
   useEffect(() => {
     try {
@@ -111,6 +113,23 @@ export function useCart() {
     return items.some(item => item.cardId === cardId && item.variationKey === variationKey);
   }, [items]);
 
+  const addToCart = useCallback((item: Omit<CartItem, 'quantity'>, quantity = 1) => {
+    addItem(item, quantity);
+    // Add notification
+    setCartNotifications(prev => [...prev, { 
+      id: Date.now(), 
+      message: `Added ${item.card_name} to cart` 
+    }]);
+  }, [addItem]);
+
+  const removeFromCart = useCallback((cardId: number, quality: string) => {
+    removeItem(cardId, quality);
+  }, [removeItem]);
+
+  const addNotification = useCallback((notification: any) => {
+    setCartNotifications(prev => [...prev, notification]);
+  }, []);
+
   return {
     cart,
     addItem,
@@ -118,6 +137,11 @@ export function useCart() {
     removeItem,
     clearCart,
     getItem,
-    hasItem
+    hasItem,
+    // Add these:
+    cartNotifications,
+    addToCart,
+    removeFromCart,
+    addNotification
   };
 }

@@ -14,5 +14,5 @@
     },
   },
   "include": ["src", "vite.config.ts"],
-  "exclude": ["src/retired/**/*"]
+  "exclude": ["src/retired/**/*", "src/testUtils/**/*"]
 }

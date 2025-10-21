@@ -43,6 +43,8 @@ const CardItem = React.memo<CardItemProps>(
         ? (selectedVariation.price * currency.rate).toFixed(2)
         : (0).toFixed(2);
 
+    const imageUrl = card.image_url || '/placeholder-card.png';
+
     const inStock = (selectedVariation?.stock ?? 0) > 0;
 
     return (
@@ -50,8 +52,8 @@ const CardItem = React.memo<CardItemProps>(
         {/* Image */}
         <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full">
           <OptimizedImage
-            src={card.image_url}
-            alt={`${card.name} from ${card.set_name}`}
+            src={imageUrl}
+            alt={card.name}
             width={250}
             height={350}
             className={`w-full h-32 sm:h-44 lg:h-64 object-cover bg-gradient-to-br from-mm-warmAccent to-mm-tealLight ${

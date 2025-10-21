@@ -14,6 +14,10 @@ import { api, ENDPOINTS } from '@/lib/api';
 export function useShopFilters() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [games, setGames] = useState<Array<{name: string; count: number}>>([]);
+  const [sets, setSets] = useState<Array<{name: string; count: number}>>([]);
+  const [filterOptions, setFilterOptions] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // Parse filters from URL
   const filters: SearchFilters = useMemo(() => ({
@@ -81,19 +85,42 @@ export function useShopFilters() {
     }
   }, [filters]);
 
-  /**
+ /**
    * Get available filter options
    */
   const getFilterOptions = useCallback(async () => {
     return api.get(ENDPOINTS.STOREFRONT.FILTERS);
   }, []);
 
-  return {
+  // Fetch filter options on mount
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        setIsLoading(true);
+        const options = await api.get(ENDPOINTS.STOREFRONT.FILTERS);
+        setFilterOptions(options);
+        setGames(options.games || []);
+        setSets(options.sets || []);
+      } catch (err) {
+        setError('Failed to load filter options');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchOptions();
+  }, []);
+
+   return {
     filters,
     updateFilters,
     clearFilters,
     searchCards,
     getFilterOptions,
-    isLoading
+    isLoading,
+    games,
+    sets,
+    filterOptions,
+    loading: isLoading,
+    error
   };
 }

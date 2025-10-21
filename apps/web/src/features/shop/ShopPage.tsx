@@ -378,7 +378,7 @@ const TCGShop: React.FC = () => {
     } catch (err: any) {
       console.error('Error fetching cards:', err);
       setError(err?.message ?? 'Failed to load cards');
-      errorHandler.handleError(err, 'fetching cards');
+      errorHandler.handleError(err, { context: 'fetching cards' });
     } finally {
       setLoading(false);
       requestInFlight.current.cards = false;

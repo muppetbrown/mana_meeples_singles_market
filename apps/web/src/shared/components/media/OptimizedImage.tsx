@@ -15,6 +15,8 @@ interface OptimizedImageProps {
   className?: string;
   width?: number;
   height?: number;
+  sizes?: string;
+  placeholder?: 'blur' | 'empty';
   priority?: boolean;
   onLoad?: () => void;
   onError?: (error: Error) => void;

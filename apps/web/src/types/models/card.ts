@@ -21,6 +21,9 @@ export interface CardVariation {
   price: number | null;
   stock: number | null;
   variation_key: string;
+  finish?: string;  // Used for finish === 'foil' check
+  card_id?: number; // Used when adding inventory
+  treatment?: string; // Used in getUniqueTreatments
 }
 
 export interface StorefrontCard extends Card {

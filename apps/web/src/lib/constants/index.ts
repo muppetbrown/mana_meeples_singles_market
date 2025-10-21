@@ -1,3 +1,5 @@
+// apps/web/src/lib/constants/index.ts
+
 /**
  * Application Constants
  * Centralized location for all magic numbers, configuration values, and constants
@@ -141,6 +143,8 @@ export const FEATURES = {
   ADVANCED_FILTERS: true,
   BULK_OPERATIONS: true,
 };
+
+export const PLACEHOLDER_CARD_IMAGE = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQyMCIgZmlsbD0iI2YzZjRmNiIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzljYTNhZiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIEltYWdlPC90ZXh0Pjwvc3ZnPg==';
 
 // UI Text and Labels
 export const UI_TEXT = {

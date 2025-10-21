@@ -1,15 +1,18 @@
 // 6. types/ui/cart.ts - UI-specific cart types
 export interface CartItem {
-  cardId: number;
-  cardName: string;
-  variationKey: string;
+  card_id: number;
+  card_name: string;
+  variation_key: string;
   quality: string;
-  foilType: string;
+  foil_type: string;
   language: string;
   price: number;
   quantity: number;
-  imageUrl?: string;
-  setName: string;
+  image_url?: string;
+  set_name: string;
+  card_number?: string;
+  game_name?: string;
+  stock?: number;
 }
 
 export interface Cart {

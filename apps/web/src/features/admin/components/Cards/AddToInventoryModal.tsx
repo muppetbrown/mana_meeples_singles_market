@@ -1,7 +1,7 @@
 // apps/web/src/components/admin/AddToInventoryModal.tsx
 import React from 'react';
 import { X, Package, DollarSign } from 'lucide-react';
-import type { ApiCard as Card, ApiCardVariation as CardVariation } from '@/types';
+import type { Card, CardVariation } from '@/types';
 
 // ---------- Types ----------
 type AddFormData = {
