@@ -8,7 +8,10 @@ import { join } from "path";
 let container: StartedPostgreSqlContainer | null = null;
 let pool: pg.Pool | null = null;
 let schemaBootstrapped = false;
+
+// Singleton control - prevents duplicate initialization
 let initializationPromise: Promise<void> | null = null;
+let isInitialized = false;
 
 // Configuration for logging - both formats
 const LOG_DIR = join(process.cwd(), "test-logs");
@@ -25,6 +28,7 @@ interface LogEntry {
 
 // Store all entries for JSON output
 const logEntries: LogEntry[] = [];
+let finalized = false;
 
 /** Write a log entry to both files */
 async function log(event: string, details?: Record<string, unknown>) {
@@ -75,13 +79,15 @@ async function initializeLog() {
   Started: ${new Date().toISOString()}
   Node: ${process.version}
   Platform: ${process.platform}
+  Log Files:
+    - JSON: test-env-${timestamp}.json
+    - TXT:  test-env-${timestamp}.txt
 ═══════════════════════════════════════════════════
 
 `;
     await writeFile(TXT_LOG_FILE, txtHeader, "utf-8");
     
-    // JSON file will be written at the end with all entries
-    console.log(`📝 Logging to:\n   JSON: ${JSON_LOG_FILE}\n   TXT:  ${TXT_LOG_FILE}`);
+    console.log(`📝 Test logging initialized:\n   JSON: ${JSON_LOG_FILE}\n   TXT:  ${TXT_LOG_FILE}`);
   } catch (error) {
     console.warn("Failed to initialize log files:", error);
   }
@@ -89,6 +95,10 @@ async function initializeLog() {
 
 /** Finalize both logs with summary */
 async function finalizeLog() {
+  // Prevent multiple calls from overwriting metadata
+  if (finalized) return;
+  finalized = true;
+  
   const duration = Date.now() - startTime;
   const endTimestamp = new Date().toISOString();
   
@@ -99,6 +109,8 @@ async function finalizeLog() {
   Duration: ${duration}ms (${(duration / 1000).toFixed(2)}s)
   Ended: ${endTimestamp}
   Total Events: ${logEntries.length}
+  Container Initialized: ${isInitialized}
+  Schema Bootstrapped: ${schemaBootstrapped}
 ═══════════════════════════════════════════════════
 `;
   
@@ -117,6 +129,8 @@ async function finalizeLog() {
       node_version: process.version,
       platform: process.platform,
       total_events: logEntries.length,
+      container_initialized: isInitialized,
+      schema_bootstrapped: schemaBootstrapped,
     },
     events: logEntries,
   };
@@ -130,45 +144,138 @@ async function finalizeLog() {
 }
 
 export const getDb = () => {
-  if (!pool) throw new Error("DB pool not initialized");
+  if (!pool) {
+    const error = new Error("DB pool not initialized - did you call startPostgres()?");
+    log("ERROR: getDb called before initialization", { 
+      stack: error.stack,
+      isInitialized,
+      hasPool: !!pool,
+      hasContainer: !!container,
+    }).catch(console.error);
+    throw error;
+  }
   return pool;
 };
 
 export async function startPostgres() {
-  // Prevent duplicate initialization
-  if (initializationPromise) {
-    await initializationPromise;
-    return;
-  }
-  
-  if (container && pool) {
-    await log("PostgreSQL already running", { reused: true });
+  // If already initialized, just return
+  if (isInitialized && container && pool) {
+    await log("PostgreSQL already initialized", { 
+      reused: true,
+      port: container.getPort(),
+    });
     return;
   }
 
+  // If initialization is in progress, wait for it
+  if (initializationPromise) {
+    await log("Waiting for ongoing initialization");
+    await initializationPromise;
+    return;
+  }
+
+  // Start new initialization
   initializationPromise = (async () => {
-    await initializeLog();
-    await log("Starting PostgreSQL container");
-    
-    // ... rest of your startup code
+    try {
+      await initializeLog();
+      await log("Starting PostgreSQL container");
+      
+      const containerStartTime = Date.now();
+      
+      // Start a lightweight Postgres with explicit creds
+      container = await new PostgreSqlContainer("postgres:16-alpine")
+        .withDatabase("testdb")
+        .withUsername("testuser")
+        .withPassword("testpw")
+        .withStartupTimeout(120_000)
+        .start();
+
+      const containerDuration = Date.now() - containerStartTime;
+      const connectionString = container.getConnectionUri();
+      
+      // Log with sensitive info masked
+      await log("PostgreSQL container started", {
+        duration_ms: containerDuration,
+        host: container.getHost(),
+        port: container.getPort(),
+        database: "testdb",
+        connection_available: true,
+      });
+      
+      process.env.NODE_ENV = "test";
+      process.env.DATABASE_URL = connectionString;
+
+      pool = new pg.Pool({ connectionString });
+
+      // Quick readiness + extension
+      const client = await pool.connect();
+      try {
+        await client.query("SELECT 1");
+        await log("Database connection verified");
+        
+        await client.query("CREATE EXTENSION IF NOT EXISTS pg_trgm;");
+        await log("PostgreSQL extensions installed", {
+          extensions: ["pg_trgm"],
+        });
+      } finally {
+        client.release();
+      }
+
+      isInitialized = true;
+      await log("PostgreSQL initialization complete", {
+        success: true,
+        ready_for_tests: true,
+      });
+
+    } catch (error) {
+      await log("PostgreSQL initialization FAILED", {
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      throw error;
+    }
   })();
-  
+
   await initializationPromise;
   initializationPromise = null;
 }
 
 export async function stopPostgres() {
+  if (!container && !pool) {
+    await log("PostgreSQL already stopped or never started", {
+      skipped: true,
+    });
+    // Don't finalize here - let the global afterAll do it
+    return;
+  }
+
   await log("Stopping PostgreSQL container");
   
-  await pool?.end();
-  await container?.stop();
-  
-  pool = null;
-  container = null;
-  schemaBootstrapped = false;
-  
-  await log("PostgreSQL container stopped");
-  await finalizeLog();
+  try {
+    await pool?.end();
+    await container?.stop();
+    
+    await log("PostgreSQL container stopped", {
+      success: true,
+    });
+    
+    // Capture final state BEFORE resetting
+    await finalizeLog();
+    
+    // Now reset state
+    pool = null;
+    container = null;
+    schemaBootstrapped = false;
+    isInitialized = false;
+    
+  } catch (error) {
+    await log("Error stopping PostgreSQL", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    // Still finalize logs on error
+    await finalizeLog();
+    throw error;
+  }
 }
 
 /** Minimal schema to satisfy routes touched by tests */
@@ -177,48 +284,106 @@ export async function bootstrapMinimalSchema() {
     await log("Schema already bootstrapped", { skipped: true });
     return;
   }
+
+  if (!isInitialized || !pool) {
+    const error = new Error("Cannot bootstrap schema - database not initialized");
+    await log("ERROR: bootstrapMinimalSchema called before initialization", {
+      isInitialized,
+      hasPool: !!pool,
+      hasContainer: !!container,
+    });
+    throw error;
+  }
   
   await log("Bootstrapping minimal schema");
   const db = getDb();
   
-  await db.query(`
-    CREATE TABLE IF NOT EXISTS games (
-      id integer PRIMARY KEY,
-      name text NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS cards (
-      id integer PRIMARY KEY,
-      set_id integer NOT NULL,
-      card_number text NOT NULL,
-      finish text NOT NULL,
-      name text NOT NULL,
-      sku text UNIQUE NOT NULL
-    );
-    CREATE INDEX IF NOT EXISTS idx_cards_name_trgm ON cards USING gin (name gin_trgm_ops);
-  `);
-  
-  schemaBootstrapped = true;
-  await log("Schema bootstrap complete", {
-    tables: ["games", "cards"],
-    indexes: ["idx_cards_name_trgm"],
-  });
+  try {
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS games (
+        id integer PRIMARY KEY,
+        name text NOT NULL
+      );
+      
+      CREATE TABLE IF NOT EXISTS card_sets (
+        id integer PRIMARY KEY,
+        name text NOT NULL,
+        game_id integer NOT NULL REFERENCES games(id)
+      );
+      
+      CREATE TABLE IF NOT EXISTS cards (
+        id integer PRIMARY KEY,
+        set_id integer NOT NULL REFERENCES card_sets(id),
+        card_number text NOT NULL,
+        finish text NOT NULL,
+        name text NOT NULL,
+        sku text UNIQUE NOT NULL
+      );
+      
+      CREATE INDEX IF NOT EXISTS idx_cards_name_trgm 
+        ON cards USING gin (name gin_trgm_ops);
+    `);
+    
+    schemaBootstrapped = true;
+    await log("Schema bootstrap complete", {
+      tables: ["games", "card_sets", "cards"],
+      indexes: ["idx_cards_name_trgm"],
+      success: true,
+    });
+  } catch (error) {
+    await log("Schema bootstrap FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 }
 
 /** Optional helper to wipe between tests */
 export async function resetDb() {
+  if (!isInitialized || !pool) {
+    const error = new Error("Cannot reset database - not initialized");
+    await log("ERROR: resetDb called before initialization", {
+      isInitialized,
+      hasPool: !!pool,
+    });
+    throw error;
+  }
+
   await log("Resetting database");
   const db = getDb();
   
-  await db.query(`
-    DO $$
-    DECLARE r RECORD;
-    BEGIN
-      FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename NOT LIKE 'pg_%')
-      LOOP
-        EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' RESTART IDENTITY CASCADE';
-      END LOOP;
-    END$$;
-  `);
-  
-  await log("Database reset complete");
+  try {
+    await db.query(`
+      DO $$
+      DECLARE r RECORD;
+      BEGIN
+        FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename NOT LIKE 'pg_%')
+        LOOP
+          EXECUTE 'TRUNCATE TABLE ' || quote_ident(r.tablename) || ' RESTART IDENTITY CASCADE';
+        END LOOP;
+      END$$;
+    `);
+    
+    await log("Database reset complete", {
+      success: true,
+    });
+  } catch (error) {
+    await log("Database reset FAILED", {
+      error: error instanceof Error ? error.message : String(error),
+    });
+    throw error;
+  }
 }
+
+/** Global hooks - these run once for the entire test suite */
+beforeAll(async () => {
+  await log("Global beforeAll hook triggered");
+  await startPostgres();
+}, 120_000);
+
+afterAll(async () => {
+  await log("Global afterAll hook triggered");
+  await stopPostgres();
+  // Always finalize, even if container was already stopped
+  await finalizeLog();
+});

@@ -29,18 +29,21 @@ router.post("/admin/login", async (req: Request, res: Response): Promise<void> =
   console.log("🔑 Admin login attempt - handler entered");
 
   try {
+    // Validate request body structure
+    if (!req.body || typeof req.body !== "object") {
+      console.error("❌ Invalid request body");
+      res.status(400).json({ 
+        success: false, 
+        error: "Invalid request format. Content-Type must be application/json" 
+      });
+      return;
+    }
+
     const { username, password } = req.body;
     console.log("📋 Credentials received:", {
       username: username || "MISSING",
       hasPassword: !!password,
     });
-
-    // Validate request body structure
-    if (!req.body || typeof req.body !== "object") {
-      console.error("❌ Invalid request body");
-      res.status(400).json({ success: false, error: "Invalid request format" });
-      return;
-    }
 
     // Validate credentials presence
     if (!username || !password) {
@@ -130,9 +133,9 @@ router.post("/admin/logout", (_req: Request, res: Response): void => {
 });
 
 /**
- * GET /api/auth/admin/check
+ * GET /api/admin/check
  */
-router.get("/admin/auth/check", (req: Request, res: Response): void => {
+router.get("/admin/check", (req: Request, res: Response): void => {
   console.log("🔍 Admin auth check request");
 
   try {

@@ -6,91 +6,66 @@ C:\Git_Repos\mana_meeples_singles_market>pnpm --filter ./apps/api test
 
  DEV  v2.1.9 C:/Git_Repos/mana_meeples_singles_market/apps/api
 
-stdout | tests/integration/auth.routes.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+stdout | tests/integration/error-handling.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727199.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727199.txt
 
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
-🔐 AUTH POST /api/auth/admin/login - 2025-10-21T23:53:00.909Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'MISSING', hasPassword: false }
-
-stderr | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
-❌ Missing credentials
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
-🔐 AUTH POST /api/auth/admin/login - 2025-10-21T23:53:00.929Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
-❌ Invalid credentials
+stdout | tests/e2e/checkout.flow.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727187.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727187.txt
 
 stdout | tests/integration/cards.search.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727198.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727198.txt
+
+stdout | tests/integration/storefront.routes.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727200.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727200.txt
+
+stdout | tests/integration/auth.routes.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727207.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727207.txt
+
+stdout | tests/integration/inventory.routes.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727209.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727209.txt
+
+stdout | tests/integration/orders.routes.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727336.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727336.txt
+
+stdout | tests/integration/cards.search.test.ts
+[dotenv@17.2.3] injecting env (21) from .env -- tip: ⚙️  enable debug logging with { debug: true }
 
 stderr | tests/integration/cards.search.test.ts
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
 
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
-🔐 AUTH POST /api/auth/admin/login - 2025-10-21T23:53:02.001Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
-❌ Invalid credentials
-
-stdout | tests/e2e/checkout.flow.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
-
 stdout | tests/integration/error-handling.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/logout > clears the admin token cookie
-🔐 AUTH POST /api/auth/admin/logout - 2025-10-21T23:53:03.067Z
-🚪 Admin logout request
-
-stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns 401 when no token provided
-🔐 AUTH GET /api/auth/admin/check - 2025-10-21T23:53:03.075Z
-
-stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
-🔐 AUTH POST /api/auth/admin/login - 2025-10-21T23:53:03.084Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-
-stdout | tests/integration/orders.routes.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
-
-stdout | tests/integration/inventory.routes.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
-
-stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
-❌ Invalid credentials
-
-stdout | tests/integration/storefront.routes.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
+[dotenv@17.2.3] injecting env (21) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
 
 stdout | tests/integration/error-handling.test.ts > Error Handling > 400 Bad Request > returns 400 for malformed request body
-🔐 AUTH POST /api/auth/admin/login - 2025-10-21T23:53:03.160Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:34.992Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'MISSING', hasPassword: false }
 
 stderr | tests/integration/error-handling.test.ts > Error Handling > 400 Bad Request > returns 400 for malformed request body
 ❌ Missing credentials
 
+stdout | tests/integration/orders.routes.test.ts
+[dotenv@17.2.3] injecting env (21) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
 stderr | tests/integration/error-handling.test.ts > Error Handling > 401 Unauthorized > returns 401 for protected routes without auth
 ❌ No admin token found in cookies
 
-stdout | tests/integration/orders.routes.test.ts
-🔐 AUTH POST /api/auth/admin/login - 2025-10-21T23:53:03.174Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-
 stdout | tests/integration/error-handling.test.ts > Error Handling > Content-Type validation > requires JSON content-type for POST requests
-🔐 AUTH POST /api/auth/admin/login - 2025-10-21T23:53:03.178Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.005Z
 🔑 Admin login attempt - handler entered
 
 stderr | tests/integration/error-handling.test.ts > Error Handling > Content-Type validation > requires JSON content-type for POST requests
@@ -117,17 +92,52 @@ stderr | tests/integration/error-handling.test.ts > Error Handling > Content-Typ
     at next (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:291:5)
     at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\auth.ts:21:3
 
-stdout | tests/integration/inventory.routes.test.ts
-🔐 AUTH POST /api/auth/admin/login - 2025-10-21T23:53:03.203Z
+stdout | tests/integration/auth.routes.test.ts
+[dotenv@17.2.3] injecting env (21) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+stdout | tests/integration/orders.routes.test.ts
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.047Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
 
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.078Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'MISSING', hasPassword: false }
+
+stderr | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
+❌ Missing credentials
+
 stdout | tests/integration/orders.routes.test.ts
 ❌ Invalid credentials
 
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.088Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
+❌ Invalid credentials
+
+stdout | tests/integration/inventory.routes.test.ts
+[dotenv@17.2.3] injecting env (21) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+stdout | tests/integration/inventory.routes.test.ts
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.364Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+
+stdout | tests/integration/storefront.routes.test.ts
+[dotenv@17.2.3] injecting env (21) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
 stdout | tests/integration/inventory.routes.test.ts
 ❌ Invalid credentials
+
+stdout | tests/e2e/checkout.flow.test.ts
+[dotenv@17.2.3] injecting env (21) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
 
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > completes a full customer journey from browsing to order placement
 ❌ Database query error: relation "card_pricing" does not exist
@@ -141,6 +151,12 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > comple
    Code: 42P01
 GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
+stdout | tests/integration/cards.search.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727198.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727198.json
+
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles out-of-stock scenario gracefully
 ❌ Database query error: relation "card_pricing" does not exist
    Query:
@@ -152,6 +168,12 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handle
    Params: [100,0]
    Code: 42P01
 GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
+
+stdout | tests/integration/error-handling.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727199.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727199.json
 
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles concurrent orders for the same item
 ❌ Database query error: relation "card_pricing" does not exist
@@ -177,6 +199,12 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > allows
    Code: 42P01
 GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:36.154Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > validates customer input sanitization during checkout
 ❌ Database query error: relation "card_pricing" does not exist
    Query:
@@ -188,6 +216,9 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > valida
    Params: [100,0]
    Code: 42P01
 GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
+
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
+❌ Invalid credentials
 
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles multiple items in a single order
 ❌ Database query error: relation "card_pricing" does not exist
@@ -201,25 +232,71 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handle
    Code: 42P01
 GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
- ❯ tests/e2e/checkout.flow.test.ts (6) 16861ms
-   ❯ Complete Checkout Flow (E2E) (6) 851ms
+stdout | tests/integration/storefront.routes.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727200.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727200.json
+
+stdout | tests/integration/orders.routes.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727336.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727336.json
+
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/logout > clears the admin token cookie
+🔐 AUTH POST /api/auth/admin/logout - 2025-10-22T00:25:37.212Z
+🚪 Admin logout request
+
+stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns 401 when no token provided
+🔐 AUTH GET /api/auth/admin/check - 2025-10-22T00:25:37.217Z
+
+stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:37.220Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+
+stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
+❌ Invalid credentials
+
+stdout | tests/e2e/checkout.flow.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727187.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727187.json
+
+stdout | tests/integration/inventory.routes.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727209.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727209.json
+
+stdout | tests/integration/auth.routes.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727207.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727207.json
+
+ ❯ tests/e2e/checkout.flow.test.ts (6) 10107ms
+   ❯ Complete Checkout Flow (E2E) (6) 749ms
      × completes a full customer journey from browsing to order placement
      × handles out-of-stock scenario gracefully
      × handles concurrent orders for the same item
      × allows admin to cancel an order and restore inventory
      × validates customer input sanitization during checkout
      × handles multiple items in a single order
- ❯ tests/integration/auth.routes.test.ts (6) 17267ms
-   ❯ POST /api/auth/admin/login (3) 2187ms
+ ❯ tests/integration/auth.routes.test.ts (6) 11739ms
+   ❯ POST /api/auth/admin/login (3) 2155ms
      ✓ rejects login with missing credentials
-     ✓ rejects login with invalid credentials 1073ms
-     × accepts valid admin credentials and sets cookie 1068ms
+     ✓ rejects login with invalid credentials 1066ms
+     × accepts valid admin credentials and sets cookie 1059ms
    ✓ POST /api/auth/admin/logout (1)
-   ❯ GET /api/auth/admin/check (2) 1082ms
+   ❯ GET /api/auth/admin/check (2) 1071ms
      × returns 401 when no token provided
-     × returns authenticated status with valid token 1073ms
- ✓ tests/integration/cards.search.test.ts (1) 14721ms
- ❯ tests/integration/error-handling.test.ts (7) 16131ms
+     × returns authenticated status with valid token 1066ms
+ ✓ tests/integration/cards.search.test.ts (1) 8525ms
+ ❯ tests/integration/error-handling.test.ts (7) 8684ms
    ❯ Error Handling (7)
      ✓ 404 Not Found (2)
      ✓ 400 Bad Request (2)
@@ -228,22 +305,22 @@ GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" 
        × handles database errors gracefully
      ❯ Content-Type validation (1)
        × requires JSON content-type for POST requests
- ❯ tests/integration/inventory.routes.test.ts (16) 17625ms
-   / [ beforeAll ]
+ ❯ tests/integration/inventory.routes.test.ts (16) 10262ms
+   - [ beforeAll ]
    ↓ POST /api/admin/inventory (6) [skipped]
    ↓ GET /api/admin/inventory (3) [skipped]
    ↓ PATCH /api/admin/inventory/:id (4) [skipped]
    ↓ DELETE /api/admin/inventory/:id (3) [skipped]
- ❯ tests/integration/orders.routes.test.ts (19) 17422ms
-   / [ beforeAll ]
+ ❯ tests/integration/orders.routes.test.ts (19) 9684ms
+   | [ beforeAll ]
    ↓ POST /api/orders (6) [skipped]
    ↓ GET /api/admin/orders (5) [skipped]
    ↓ GET /api/admin/orders/:id (3) [skipped]
    ↓ PATCH /api/admin/orders/:id/status (5) [skipped]
- ❯ tests/integration/storefront.routes.test.ts (5) 16245ms
-   ❯ GET /api/storefront/cards (5) 309ms
+ ❯ tests/integration/storefront.routes.test.ts (5) 9421ms
+   ❯ GET /api/storefront/cards (5)
      × returns paginated cards with default params
-       | [ beforeEach ]
+       - [ beforeEach ]
      × filters cards by game_id
        | [ beforeEach ]
      × filters cards by search term
@@ -251,7 +328,7 @@ GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" 
      × respects pagination parameters
        \ [ beforeEach ]
      × returns 400 for invalid query parameters
-       / [ beforeEach ]
+       | [ beforeEach ]
  ✓ tests/unit/auth.validateCredentials.test.ts (4)
  ✓ tests/unit/slugify.test.ts (1)
  ❯ tests/unit/utils.test.ts (42)
@@ -524,7 +601,13 @@ Received: "caf-mnchn"
 
  Test Files  7 failed | 4 passed (11)
       Tests  17 failed | 65 passed | 35 skipped (117)
-   Start at  12:52:46
-   Duration  18.83s (transform 608ms, setup 0ms, collect 6.34s, tests 116.43s, environment 2ms, prepare 1.33s)
+   Start at  13:25:26
+   Duration  12.89s (transform 578ms, setup 0ms, collect 6.38s, tests 68.58s, environment 2ms, prepare 1.23s)
 
  FAIL  Tests failed. Watching for file changes...
+       press h to show help, press q to quit
+C:\Git_Repos\mana_meeples_singles_market\apps\api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @mana-meeples/api@ test: `vitest`
+Exit status 1
+
+C:\Git_Repos\mana_meeples_singles_market>

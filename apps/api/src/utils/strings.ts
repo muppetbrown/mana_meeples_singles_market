@@ -7,14 +7,9 @@
 export function slugify(text: string): string {
   return text
     .toLowerCase()
-    .trim()
-    // Replace spaces and underscores with hyphens
-    .replace(/[\s_]+/g, '-')
-    // Remove all non-word characters except hyphens
-    .replace(/[^\w\-]+/g, '')
-    // Replace multiple hyphens with single hyphen
-    .replace(/\-\-+/g, '-')
-    // Remove leading/trailing hyphens
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '') 
+    .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');
 }
 

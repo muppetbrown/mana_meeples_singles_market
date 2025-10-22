@@ -52,18 +52,23 @@ export const shouldRefreshToken = (decoded: DecodedJWT): boolean => {
 /**
  * Validate admin credentials using bcrypt
  */
-export const validateCredentials = async (
+export async function validateCredentials(
   username: string,
   password: string
-): Promise<boolean> => {
-  // Check username
-  if (username !== env.ADMIN_USERNAME) {
+): Promise<boolean> {
+  const adminUsername = env.ADMIN_USERNAME;
+  const adminPassword = env.ADMIN_PASSWORD || env.ADMIN_PASSWORD_HASH;
+  
+  if (username !== adminUsername) {
     return false;
   }
-
-  // Check password
-  return await bcrypt.compare(password, env.ADMIN_PASSWORD_HASH);
-};
+  // Check if password is already hashed (starts with $2a$ or $2b$)
+  if (adminPassword.startsWith("$2")) {
+    return await bcrypt.compare(password, adminPassword);
+  }
+  // Plain text comparison (dev/test only!)
+  return password === adminPassword;
+}
 
 /**
  * Get standardized cookie configuration for authentication
