@@ -8,6 +8,19 @@ import { adminAuthJWT } from "../middleware/auth.js";
 const router = express.Router();
 
 // ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const ORDER_STATUSES = [
+  'pending', 
+  'confirmed', 
+  'processing', 
+  'shipped', 
+  'completed', 
+  'cancelled'
+] as const;
+
+// ============================================================================
 // VALIDATION SCHEMAS
 // ============================================================================
 
@@ -33,14 +46,14 @@ const CreateOrderSchema = z.object({
 });
 
 const UpdateOrderStatusSchema = z.object({
-  status: z.enum(["pending", "confirmed", "completed", "cancelled"]),
+  status: z.enum(ORDER_STATUSES),
   notes: z.string().optional(),
 });
 
 const AdminOrderQuerySchema = z.object({
   limit: z.coerce.number().int().min(1).max(500).default(100),
   offset: z.coerce.number().int().min(0).default(0),
-  status: z.enum(["pending", "confirmed", "completed", "cancelled"]).optional(),
+  status: z.enum(ORDER_STATUSES).optional(),
   search: z.string().optional(),
 });
 
@@ -67,32 +80,38 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
     const { customer, items, total, currency, notes } = validation.data;
 
     // Start transaction
-    const client = await pool.connect();
+    const client = await db.getClient();
     
     try {
       await client.query("BEGIN");
 
-      // 1. Create order (matching existing schema)
+      // 1. Create order with all customer fields
       const orderResult = await client.query(
         `INSERT INTO orders (
           customer_email, 
           customer_name,
+          customer_address,
+          customer_phone,
           subtotal,
           tax,
           shipping,
           total,
+          notes,
           status,
           created_at,
           updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW()) 
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW()) 
         RETURNING id, created_at`,
         [
           customer.email,
           customer.name,
-          total, // subtotal
+          customer.address || null,
+          customer.phone || null,
+          total, // subtotal (calculate separately if needed)
           0, // tax (calculate if needed)
           0, // shipping (calculate if needed)
-          total, // total
+          total,
+          notes || null,
           "pending",
         ]
       );
@@ -100,9 +119,23 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
       const orderId = orderResult.rows[0].id;
       const createdAt = orderResult.rows[0].created_at;
 
-      // 2. Insert order items & decrement inventory (matching existing schema)
+      // 2. Insert order items & decrement inventory
       for (const item of items) {
-        // Insert order item
+        // Fetch inventory details to get quality, foil_type, language
+        const inventoryInfo = await client.query(
+          `SELECT quality, foil_type, language 
+           FROM card_inventory 
+           WHERE id = $1`,
+          [item.inventory_id]
+        );
+
+        if (inventoryInfo.rows.length === 0) {
+          throw new Error(`Inventory item not found: ${item.inventory_id}`);
+        }
+
+        const { quality, foil_type, language } = inventoryInfo.rows[0];
+
+        // Insert order item with proper inventory details
         await client.query(
           `INSERT INTO order_items (
             order_id, 
@@ -110,17 +143,21 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
             card_id,
             card_name,
             quality,
+            foil_type,
+            language,
             quantity, 
             unit_price, 
             total_price,
             created_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())`,
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
           [
             orderId,
             item.inventory_id,
             item.card_id,
             item.card_name,
-            "Near Mint", // Default quality, adjust if you pass it
+            quality || "Near Mint",
+            foil_type || "Regular",
+            language || "English",
             item.quantity,
             item.price,
             item.price * item.quantity,
@@ -188,14 +225,20 @@ router.get("/orders/:orderId", async (req: Request, res: Response): Promise<void
     const orderResult = await db.query(
       `SELECT 
         o.*,
-        json_agg(
-          json_build_object(
-            'id', oi.id,
-            'card_name', oi.card_name,
-            'quantity', oi.quantity,
-            'unit_price', oi.unit_price,
-            'total_price', oi.total_price
-          )
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', oi.id,
+              'card_name', oi.card_name,
+              'quality', oi.quality,
+              'foil_type', oi.foil_type,
+              'language', oi.language,
+              'quantity', oi.quantity,
+              'unit_price', oi.unit_price,
+              'total_price', oi.total_price
+            )
+          ) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'::json
         ) as items
       FROM orders o
       LEFT JOIN order_items oi ON o.id = oi.order_id
@@ -315,18 +358,24 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
     const orderResult = await db.query(
       `SELECT 
         o.*,
-        json_agg(
-          json_build_object(
-            'id', oi.id,
-            'card_id', oi.card_id,
-            'inventory_id', oi.inventory_id,
-            'card_name', oi.card_name,
-            'quantity', oi.quantity,
-            'unit_price', oi.unit_price,
-            'total_price', oi.total_price
-            'card_number', c.card_number,
-            'set_name', cs.name
-          )
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', oi.id,
+              'card_id', oi.card_id,
+              'inventory_id', oi.inventory_id,
+              'card_name', oi.card_name,
+              'quality', oi.quality,
+              'foil_type', oi.foil_type,
+              'language', oi.language,
+              'quantity', oi.quantity,
+              'unit_price', oi.unit_price,
+              'total_price', oi.total_price,
+              'card_number', c.card_number,
+              'set_name', cs.name
+            )
+          ) FILTER (WHERE oi.id IS NOT NULL),
+          '[]'::json
         ) as items
       FROM orders o
       LEFT JOIN order_items oi ON o.id = oi.order_id
@@ -350,23 +399,26 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
 });
 
 /**
- * PATCH /admin/orders/:orderId/status
+ * PATCH /admin/orders/:id/status
  * Update order status (admin only)
  */
 router.patch('/admin/orders/:id/status', adminAuthJWT, async (req: Request, res: Response) => {
   const orderId = parseInt(req.params.id, 10);
-  const { status, notes } = req.body;
+  
+  // Validate request body
+  const validation = UpdateOrderStatusSchema.safeParse(req.body);
+  
+  if (!validation.success) {
+    return res.status(400).json({ 
+      error: 'Invalid request data', 
+      details: validation.error.errors 
+    });
+  }
+
+  const { status, notes } = validation.data;
 
   if (isNaN(orderId)) {
     return res.status(400).json({ error: 'Invalid order ID' });
-  }
-
-  const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'completed', 'cancelled'];
-  if (!validStatuses.includes(status)) {
-    return res.status(400).json({ 
-      error: 'Invalid status', 
-      validStatuses 
-    });
   }
 
   try {
