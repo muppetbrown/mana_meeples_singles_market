@@ -34,11 +34,11 @@ export async function seedCards() {
     );
     
     const res = await client.query(
-      `INSERT INTO cards (id, set_id, card_number, finish, name, sku)
-       VALUES ($1,$2,$3,$4,$5,$6)
+      `INSERT INTO cards (id, game_id, set_id, card_number, finish, name, sku)
+       VALUES ($1,$2,$3,$4,$5,$6,$7)
        ON CONFLICT (id) DO NOTHING
        RETURNING id`,
-      [1001, 1, "001", "NONFOIL", "Lightning Bolt", "SKU-TEST-001"]
+      [1001, 1, 1, "001", "NONFOIL", "Lightning Bolt", "SKU-TEST-001"]
     );
     return res.rows[0]?.id ?? 1001;
   } finally {
@@ -69,20 +69,20 @@ export async function seedMultipleCards() {
        ON CONFLICT (id) DO NOTHING`
     );
 
-    // Seed multiple cards
+    // Seed multiple cards - now with game_id included
     const cards = [
-      [1001, 1, "001", "NONFOIL", "Lightning Bolt", "SKU-MTG-001"],
-      [1002, 1, "002", "FOIL", "Lightning Bolt", "SKU-MTG-002"],
-      [1003, 1, "003", "NONFOIL", "Black Lotus", "SKU-MTG-003"],
-      [1004, 1, "004", "NONFOIL", "Ancestral Recall", "SKU-MTG-004"],
-      [1005, 2, "001", "NONFOIL", "Pikachu", "SKU-PKM-001"],
-      [1006, 2, "002", "HOLOFOIL", "Charizard", "SKU-PKM-002"],
+      [1001, 1, 1, "001", "NONFOIL", "Lightning Bolt", "SKU-MTG-001"],
+      [1002, 1, 1, "002", "FOIL", "Lightning Bolt", "SKU-MTG-002"],
+      [1003, 1, 1, "003", "NONFOIL", "Black Lotus", "SKU-MTG-003"],
+      [1004, 1, 1, "004", "NONFOIL", "Ancestral Recall", "SKU-MTG-004"],
+      [1005, 2, 2, "001", "NONFOIL", "Pikachu", "SKU-PKM-001"],
+      [1006, 2, 2, "002", "HOLOFOIL", "Charizard", "SKU-PKM-002"],
     ];
 
     for (const card of cards) {
       await client.query(
-        `INSERT INTO cards (id, set_id, card_number, finish, name, sku)
-         VALUES ($1,$2,$3,$4,$5,$6)
+        `INSERT INTO cards (id, game_id, set_id, card_number, finish, name, sku)
+         VALUES ($1,$2,$3,$4,$5,$6,$7)
          ON CONFLICT (id) DO NOTHING`,
         card
       );

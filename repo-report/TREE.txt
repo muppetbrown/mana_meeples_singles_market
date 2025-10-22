@@ -3,6 +3,8 @@ mana_meeples_singles_market
 ├── .github/
 ├── apps/
 │ ├── api/
+│ │ ├── scripts/
+│ │ │ └── print-coverage-summary.mjs
 │ │ ├── src/
 │ │ │ ├── lib/
 │ │ │ │ ├── authUtils.ts
@@ -29,19 +31,73 @@ mana_meeples_singles_market
 │ │ │ │ ├── priceService.ts
 │ │ │ │ ├── pricing.ts
 │ │ │ │ └── variationAnalysis.ts
-│ │ │ ├── tests/
-│ │ │ │ └── testEmail.js
+│ │ │ ├── utils/
+│ │ │ │ └── strings.ts
 │ │ │ ├── app.ts
-│ │ │ ├── db.ts
 │ │ │ ├── index.ts
 │ │ │ └── server.ts
+│ │ ├── test-logs/
+│ │ │ ├── test-env-1761092727187.json
+│ │ │ ├── test-env-1761092727187.txt
+│ │ │ ├── test-env-1761092727198.json
+│ │ │ ├── test-env-1761092727198.txt
+│ │ │ ├── test-env-1761092727199.json
+│ │ │ ├── test-env-1761092727199.txt
+│ │ │ ├── test-env-1761092727200.json
+│ │ │ ├── test-env-1761092727200.txt
+│ │ │ ├── test-env-1761092727207.json
+│ │ │ ├── test-env-1761092727207.txt
+│ │ │ ├── test-env-1761092727209.json
+│ │ │ ├── test-env-1761092727209.txt
+│ │ │ ├── test-env-1761092727336.json
+│ │ │ ├── test-env-1761092727336.txt
+│ │ │ ├── test-env-1761095979787.json
+│ │ │ ├── test-env-1761095979787.txt
+│ │ │ ├── test-env-1761095979788.json
+│ │ │ ├── test-env-1761095979788.txt
+│ │ │ ├── test-env-1761095979792.json
+│ │ │ ├── test-env-1761095979792.txt
+│ │ │ ├── test-env-1761095979796.json
+│ │ │ ├── test-env-1761095979796.txt
+│ │ │ ├── test-env-1761095979798.json
+│ │ │ ├── test-env-1761095979798.txt
+│ │ │ ├── test-env-1761095979802.json
+│ │ │ ├── test-env-1761095979802.txt
+│ │ │ ├── test-env-1761154530372.json
+│ │ │ ├── test-env-1761154530372.txt
+│ │ │ ├── test-env-1761154530373.json
+│ │ │ ├── test-env-1761154530373.txt
+│ │ │ ├── test-env-1761154530374.json
+│ │ │ ├── test-env-1761154530374.txt
+│ │ │ ├── test-env-1761154530375.json
+│ │ │ └── test-env-1761154530375.txt
 │ │ ├── tests/
-│ │ │ ├── a11y/
-│ │ │ └── integration/
+│ │ │ ├── e2e/
+│ │ │ │ └── checkout.flow.test.ts
+│ │ │ ├── integration/
+│ │ │ │ ├── auth.routes.test.ts
+│ │ │ │ ├── cards.search.test.ts
+│ │ │ │ ├── error-handling.test.ts
+│ │ │ │ ├── inventory.routes.test.ts
+│ │ │ │ ├── orders.routes.test.ts
+│ │ │ │ └── storefront.routes.test.ts
+│ │ │ ├── setup/
+│ │ │ │ ├── db.ts
+│ │ │ │ └── testEnv.ts
+│ │ │ ├── unit/
+│ │ │ │ ├── auth.validateCredentials.test.ts
+│ │ │ │ ├── slugify.test.ts
+│ │ │ │ ├── utils.test.ts
+│ │ │ │ └── validation.test.ts
+│ │ │ ├── testEmail.js
+│ │ │ └── testresults.txt
 │ │ ├── .env
 │ │ ├── package-lock.json
 │ │ ├── package.json
-│ │ └── tsconfig.json
+│ │ ├── tsconfig.build.json
+│ │ ├── tsconfig.json
+│ │ ├── tsconfig.typecheck.json
+│ │ └── vitest.config.ts
 │ └── web/
 │  ├── public/
 │  │ ├── favicon.ico
@@ -114,11 +170,13 @@ mana_meeples_singles_market
 │  │ │  ├── csv.ts
 │  │ │  ├── format.ts
 │  │ │  ├── index.ts
+│  │ │  ├── sanitization.ts
 │  │ │  └── search.ts
 │  │ ├── retired/
 │  │ │ ├── AdminCardGrid.tsx
 │  │ │ ├── App.css
 │  │ │ ├── setupTests.ts
+│  │ │ ├── ShopPage.tsx
 │  │ │ ├── useEnhancedCart.test.ts
 │  │ │ ├── useRecentlyViewed.test.ts
 │  │ │ ├── VirtualCardGrid.tsx
@@ -172,6 +230,7 @@ mana_meeples_singles_market
 │  │ ├── reportWebVitals.ts
 │  │ └── vit-env.d.ts
 │  ├── .env
+│  ├── .env.local
 │  ├── index.html
 │  ├── package.json
 │  ├── postcss.config.cjs
@@ -210,8 +269,6 @@ mana_meeples_singles_market
 │ ├── test-db-connected.ts
 │ ├── test-login.sh
 │ └── test-password.ts
-├── utils/
-│ └── sanitization.ts
 ├── .env.example
 ├── .eslintrc.cjs
 ├── .gitignore
