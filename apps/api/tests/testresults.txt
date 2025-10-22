@@ -6,138 +6,293 @@ C:\Git_Repos\mana_meeples_singles_market>pnpm --filter ./apps/api test
 
  DEV  v2.1.9 C:/Git_Repos/mana_meeples_singles_market/apps/api
 
+stdout | tests/integration/cards.search.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979787.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979787.txt
+
 stdout | tests/integration/error-handling.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727199.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727199.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979798.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979798.txt
 
 stdout | tests/e2e/checkout.flow.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727187.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727187.txt
-
-stdout | tests/integration/cards.search.test.ts
-📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727198.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727198.txt
-
-stdout | tests/integration/storefront.routes.test.ts
-📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727200.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727200.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979792.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979792.txt
 
 stdout | tests/integration/auth.routes.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727207.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727207.txt
-
-stdout | tests/integration/inventory.routes.test.ts
-📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727209.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727209.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979802.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979802.txt
 
 stdout | tests/integration/orders.routes.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727336.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727336.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979796.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979796.txt
+
+stdout | tests/integration/inventory.routes.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979788.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979788.txt
+
+stdout | tests/integration/storefront.routes.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979798.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979798.txt
 
 stdout | tests/integration/cards.search.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: ⚙️  enable debug logging with { debug: true }
-
-stderr | tests/integration/cards.search.test.ts
-⚠️ Unexpected database pool error: terminating connection due to administrator command
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
 
 stdout | tests/integration/error-handling.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
+stdout | tests/integration/storefront.routes.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+stdout | tests/integration/inventory.routes.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
 
 stdout | tests/integration/error-handling.test.ts > Error Handling > 400 Bad Request > returns 400 for malformed request body
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:34.992Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T01:19:47.620Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'MISSING', hasPassword: false }
 
 stderr | tests/integration/error-handling.test.ts > Error Handling > 400 Bad Request > returns 400 for malformed request body
 ❌ Missing credentials
 
-stdout | tests/integration/orders.routes.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
-
 stderr | tests/integration/error-handling.test.ts > Error Handling > 401 Unauthorized > returns 401 for protected routes without auth
 ❌ No admin token found in cookies
 
 stdout | tests/integration/error-handling.test.ts > Error Handling > Content-Type validation > requires JSON content-type for POST requests
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.005Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T01:19:47.631Z
 🔑 Admin login attempt - handler entered
 
 stderr | tests/integration/error-handling.test.ts > Error Handling > Content-Type validation > requires JSON content-type for POST requests
-❌ Login error: TypeError: Cannot destructure property 'username' of 'req.body' as it is undefined.
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\auth.ts:32:13
-    at Layer.handleRequest (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
-    at next (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
-    at Route.dispatch (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
-    at handle (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:435:11)
-    at Layer.handleRequest (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
-    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:295:15
-    at processParams (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:582:12)
-    at next (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:291:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\auth.ts:21:3
-❌ Error stack: TypeError: Cannot destructure property 'username' of 'req.body' as it is undefined.
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\auth.ts:32:13
-    at Layer.handleRequest (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
-    at next (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
-    at Route.dispatch (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
-    at handle (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:435:11)
-    at Layer.handleRequest (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
-    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:295:15
-    at processParams (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:582:12)
-    at next (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:291:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\auth.ts:21:3
+❌ Invalid request body
 
-stdout | tests/integration/auth.routes.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+stderr | tests/integration/cards.search.test.ts
+⚠️ Unexpected database pool error: terminating connection due to administrator command
 
-stdout | tests/integration/orders.routes.test.ts
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.047Z
+stdout | tests/integration/inventory.routes.test.ts
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T01:19:47.662Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
+✅ Credentials valid, generating token...
+🎫 Token generated
+🍪 Setting cookie with config: {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict',
+  domain: '(current domain)'
+}
+📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
+✅ Response sent successfully
+
+stdout | tests/integration/auth.routes.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
 
 stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.078Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T01:19:47.858Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'MISSING', hasPassword: false }
 
 stderr | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
 ❌ Missing credentials
 
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T01:19:47.866Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+❌ Invalid credentials
+
 stdout | tests/integration/orders.routes.test.ts
-❌ Invalid credentials
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
 
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.088Z
+stderr | tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > returns paginated cards with default params
+❌ Database query error: relation "card_pricing" does not exist
+   Query:
+    WITH latest_prices AS (
+      SELECT DISTINCT ON (card_id)
+             card_id, base_price, foil_price, price_source, updated_at
+      FROM card_pricing
+      ORDER BY card_id, updated_at DESC N
+   Params: [100,0]
+   Code: 42P01
+GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
+
+stderr | tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > requires authentication
+❌ Database query error: relation "card_inventory" does not exist
+   Query:
+    INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock_quantity)
+    VALUES ($1, NULL, $2, $3, $4, $5, $6)
+    ON CONFLICT (card_id, variation_id, quality,
+   Params: [1001,"Near Mint","Regular","English",5.99]
+   Code: 42P01
+POST /admin/inventory failed {
+  code: '42P01',
+  message: 'relation "card_inventory" does not exist',
+  card_id: 1001
+}
+
+stdout | tests/integration/orders.routes.test.ts
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T01:19:47.998Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
+✅ Credentials valid, generating token...
+🎫 Token generated
+🍪 Setting cookie with config: {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict',
+  domain: '(current domain)'
+}
+📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
+✅ Response sent successfully
 
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
-❌ Invalid credentials
+stderr | tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > creates new inventory with valid data
+❌ Database query error: relation "card_inventory" does not exist
+   Query:
+    INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock_quantity)
+    VALUES ($1, NULL, $2, $3, $4, $5, $6)
+    ON CONFLICT (card_id, variation_id, quality,
+   Params: [1001,"Near Mint","Regular","English",5.99]
+   Code: 42P01
+POST /admin/inventory failed {
+  code: '42P01',
+  message: 'relation "card_inventory" does not exist',
+  card_id: 1001
+}
 
-stdout | tests/integration/inventory.routes.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+stderr | tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > filters cards by game_id
+❌ Database query error: relation "card_pricing" does not exist
+   Query:
+    WITH latest_prices AS (
+      SELECT DISTINCT ON (card_id)
+             card_id, base_price, foil_price, price_source, updated_at
+      FROM card_pricing
+      ORDER BY card_id, updated_at DESC N
+   Params: [1,100,0]
+   Code: 42P01
+GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
-stdout | tests/integration/inventory.routes.test.ts
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:35.364Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-
-stdout | tests/integration/storefront.routes.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
-
-stdout | tests/integration/inventory.routes.test.ts
-❌ Invalid credentials
+stderr | tests/integration/orders.routes.test.ts > POST /api/orders > creates a new order with valid data
+❌ Create order error: TypeError: __vite_ssr_import_2__.pool.connect is not a function
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:70:31
+    at Layer.handleRequest (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:295:15
+    at processParams (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:582:12)
+    at next (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:291:5)
+    at Function.handle (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:186:3)
 
 stdout | tests/e2e/checkout.flow.test.ts
-[dotenv@17.2.3] injecting env (21) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
+[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+stdout | tests/integration/cards.search.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979787.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979787.json
+
+stderr | tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > updates existing inventory on conflict
+❌ Database query error: relation "card_inventory" does not exist
+   Query:
+    INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock_quantity)
+    VALUES ($1, NULL, $2, $3, $4, $5, $6)
+    ON CONFLICT (card_id, variation_id, quality,
+   Params: [1001,"Near Mint","Regular","English",5.99]
+   Code: 42P01
+POST /admin/inventory failed {
+  code: '42P01',
+  message: 'relation "card_inventory" does not exist',
+  card_id: 1001
+}
+
+stderr | tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > updates existing inventory on conflict
+❌ Database query error: relation "card_inventory" does not exist
+   Query:
+    INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock_quantity)
+    VALUES ($1, NULL, $2, $3, $4, $5, $6)
+    ON CONFLICT (card_id, variation_id, quality,
+   Params: [1001,"Near Mint","Regular","English",7.99]
+   Code: 42P01
+POST /admin/inventory failed {
+  code: '42P01',
+  message: 'relation "card_inventory" does not exist',
+  card_id: 1001
+}
+
+stderr | tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > filters cards by search term
+❌ Database query error: relation "card_pricing" does not exist
+   Query:
+    WITH latest_prices AS (
+      SELECT DISTINCT ON (card_id)
+             card_id, base_price, foil_price, price_source, updated_at
+      FROM card_pricing
+      ORDER BY card_id, updated_at DESC N
+   Params: ["%Lightning%",100,0]
+   Code: 42P01
+GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
+
+stdout | tests/integration/error-handling.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979798.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979798.json
+
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T01:19:48.879Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+✅ Credentials valid, generating token...
+🎫 Token generated
+🍪 Setting cookie with config: {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict',
+  domain: '(current domain)'
+}
+📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
+✅ Response sent successfully
+
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/logout > clears the admin token cookie
+🔐 AUTH POST /api/auth/admin/logout - 2025-10-22T01:19:48.885Z
+🚪 Admin logout request
+
+stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns 401 when no token provided
+🔐 AUTH GET /api/auth/admin/check - 2025-10-22T01:19:48.889Z
+🔍 Admin auth check request
+❌ No admin token found
+
+stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T01:19:48.893Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+✅ Credentials valid, generating token...
+🎫 Token generated
+🍪 Setting cookie with config: {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict',
+  domain: '(current domain)'
+}
+📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
+✅ Response sent successfully
+
+stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
+🔐 AUTH GET /api/auth/admin/check - 2025-10-22T01:19:48.899Z
+🔍 Admin auth check request
+🔍 Verifying token...
+✅ Auth check successful for: admin
 
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > completes a full customer journey from browsing to order placement
 ❌ Database query error: relation "card_pricing" does not exist
@@ -151,11 +306,17 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > comple
    Code: 42P01
 GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
-stdout | tests/integration/cards.search.test.ts
-
-✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727198.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727198.json
+stderr | tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > respects pagination parameters
+❌ Database query error: relation "card_pricing" does not exist
+   Query:
+    WITH latest_prices AS (
+      SELECT DISTINCT ON (card_id)
+             card_id, base_price, foil_price, price_source, updated_at
+      FROM card_pricing
+      ORDER BY card_id, updated_at DESC N
+   Params: [5,0]
+   Code: 42P01
+GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles out-of-stock scenario gracefully
 ❌ Database query error: relation "card_pricing" does not exist
@@ -169,12 +330,6 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handle
    Code: 42P01
 GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
-stdout | tests/integration/error-handling.test.ts
-
-✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727199.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727199.json
-
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles concurrent orders for the same item
 ❌ Database query error: relation "card_pricing" does not exist
    Query:
@@ -187,40 +342,13 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handle
    Code: 42P01
 GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
+stdout | tests/integration/auth.routes.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979802.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979802.json
+
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > allows admin to cancel an order and restore inventory
-❌ Database query error: relation "card_pricing" does not exist
-   Query:
-    WITH latest_prices AS (
-      SELECT DISTINCT ON (card_id)
-             card_id, base_price, foil_price, price_source, updated_at
-      FROM card_pricing
-      ORDER BY card_id, updated_at DESC N
-   Params: [100,0]
-   Code: 42P01
-GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:36.154Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-
-stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > validates customer input sanitization during checkout
-❌ Database query error: relation "card_pricing" does not exist
-   Query:
-    WITH latest_prices AS (
-      SELECT DISTINCT ON (card_id)
-             card_id, base_price, foil_price, price_source, updated_at
-      FROM card_pricing
-      ORDER BY card_id, updated_at DESC N
-   Params: [100,0]
-   Code: 42P01
-GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
-❌ Invalid credentials
-
-stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles multiple items in a single order
 ❌ Database query error: relation "card_pricing" does not exist
    Query:
     WITH latest_prices AS (
@@ -235,100 +363,456 @@ GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" 
 stdout | tests/integration/storefront.routes.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727200.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727200.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979798.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979798.json
 
-stdout | tests/integration/orders.routes.test.ts
+stderr | tests/integration/orders.routes.test.ts > POST /api/orders > handles transaction rollback on inventory update failure
+❌ Create order error: TypeError: __vite_ssr_import_2__.pool.connect is not a function
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:70:31
+    at Layer.handleRequest (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at next (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:157:13)
+    at Route.dispatch (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\route.js:117:3)
+    at handle (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:435:11)
+    at Layer.handleRequest (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\lib\layer.js:152:17)
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:295:15
+    at processParams (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:582:12)
+    at next (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:291:5)
+    at Function.handle (C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\router@2.2.0\node_modules\router\index.js:186:3)
 
-✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727336.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727336.json
+stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > validates customer input sanitization during checkout
+❌ Database query error: relation "card_pricing" does not exist
+   Query:
+    WITH latest_prices AS (
+      SELECT DISTINCT ON (card_id)
+             card_id, base_price, foil_price, price_source, updated_at
+      FROM card_pricing
+      ORDER BY card_id, updated_at DESC N
+   Params: [100,0]
+   Code: 42P01
+GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/logout > clears the admin token cookie
-🔐 AUTH POST /api/auth/admin/logout - 2025-10-22T00:25:37.212Z
-🚪 Admin logout request
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders > requires authentication
+❌ No admin token found in cookies
 
-stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns 401 when no token provided
-🔐 AUTH GET /api/auth/admin/check - 2025-10-22T00:25:37.217Z
+stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles multiple items in a single order
+❌ Database query error: relation "card_pricing" does not exist
+   Query:
+    WITH latest_prices AS (
+      SELECT DISTINCT ON (card_id)
+             card_id, base_price, foil_price, price_source, updated_at
+      FROM card_pricing
+      ORDER BY card_id, updated_at DESC N
+   Params: [100,0]
+   Code: 42P01
+GET /storefront/cards failed { code: '42P01', message: 'relation "card_pricing" does not exist' }
 
-stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T00:25:37.220Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders > returns paginated orders list
+❌ Database query error: relation "order_items" does not exist
+   Query: SELECT
+        o.*,
+        COUNT(oi.id) as item_count,
+        SUM(oi.quantity) as total_items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
 
-stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
-❌ Invalid credentials
+      GROUP BY o.id
+
+   Params: [100,0]
+   Code: 42P01
+❌ List orders error: error: relation "order_items" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:272:26 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '134',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders > filters orders by status
+❌ Database query error: relation "order_items" does not exist
+   Query: SELECT
+        o.*,
+        COUNT(oi.id) as item_count,
+        SUM(oi.quantity) as total_items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      WHERE o.status = $1
+
+   Params: ["pending",100,0]
+   Code: 42P01
+❌ List orders error: error: relation "order_items" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:272:26 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '134',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
 
 stdout | tests/e2e/checkout.flow.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727187.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727187.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979792.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979792.json
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders > supports pagination
+❌ Database query error: relation "order_items" does not exist
+   Query: SELECT
+        o.*,
+        COUNT(oi.id) as item_count,
+        SUM(oi.quantity) as total_items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+
+      GROUP BY o.id
+
+   Params: [1,0]
+   Code: 42P01
+❌ List orders error: error: relation "order_items" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:272:26 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '134',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders > searches orders by customer email
+❌ Database query error: relation "order_items" does not exist
+   Query: SELECT
+        o.*,
+        COUNT(oi.id) as item_count,
+        SUM(oi.quantity) as total_items
+      FROM orders o
+      LEFT JOIN order_items oi ON o.id = oi.order_id
+      WHERE (
+        o.custom
+   Params: ["%test@example.com%",100,0]
+   Code: 42P01
+❌ List orders error: error: relation "order_items" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:272:26 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '134',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > requires authentication
+❌ No admin token found in cookies
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > returns order details
+❌ Database query error: relation "order_items" does not exist
+   Query: SELECT
+        o.*,
+        json_agg(
+          json_build_object(
+            'id', oi.id,
+            'card_id', oi.card_id,
+            'inventory_id', oi.inventory_id,
+            'card_name', oi
+   Params: [1]
+   Code: 42P01
+❌ Get admin order error: error: relation "order_items" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:315:25 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '474',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > returns 404 for non-existent order
+❌ Database query error: relation "order_items" does not exist
+   Query: SELECT
+        o.*,
+        json_agg(
+          json_build_object(
+            'id', oi.id,
+            'card_id', oi.card_id,
+            'inventory_id', oi.inventory_id,
+            'card_name', oi
+   Params: [999999]
+   Code: 42P01
+❌ Get admin order error: error: relation "order_items" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:315:25 {
+  length: 111,
+  severity: 'ERROR',
+  code: '42P01',
+  detail: undefined,
+  hint: undefined,
+  position: '474',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '1449',
+  routine: 'parserOpenTable'
+}
+
+stderr | tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > requires authentication
+❌ No admin token found in cookies
+
+stderr | tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > updates order status
+❌ Database query error: column "notes" does not exist
+   Query: UPDATE orders
+       SET status = $1,
+           notes = COALESCE($2, notes),
+           updated_at = NOW()
+       WHERE id = $3
+       RETURNING *
+   Params: ["confirmed",null,1]
+   Code: 42703
+❌ Update order status error: error: column "notes" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:378:26 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '73',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
 
 stdout | tests/integration/inventory.routes.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727209.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727209.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979788.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979788.json
 
-stdout | tests/integration/auth.routes.test.ts
+stderr | tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > allows adding notes when updating status
+❌ Database query error: column "notes" does not exist
+   Query: UPDATE orders
+       SET status = $1,
+           notes = COALESCE($2, notes),
+           updated_at = NOW()
+       WHERE id = $3
+       RETURNING *
+   Params: ["completed","Order shipped successfully",1]
+   Code: 42703
+❌ Update order status error: error: column "notes" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:378:26 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '73',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+
+stderr | tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > returns 404 for non-existent order
+❌ Database query error: column "notes" does not exist
+   Query: UPDATE orders
+       SET status = $1,
+           notes = COALESCE($2, notes),
+           updated_at = NOW()
+       WHERE id = $3
+       RETURNING *
+   Params: ["confirmed",null,999999]
+   Code: 42703
+❌ Update order status error: error: column "notes" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:378:26 {
+  length: 105,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '73',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3722',
+  routine: 'errorMissingColumn'
+}
+
+stdout | tests/integration/orders.routes.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727207.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761092727207.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979796.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761095979796.json
 
- ❯ tests/e2e/checkout.flow.test.ts (6) 10107ms
-   ❯ Complete Checkout Flow (E2E) (6) 749ms
-     × completes a full customer journey from browsing to order placement
-     × handles out-of-stock scenario gracefully
-     × handles concurrent orders for the same item
-     × allows admin to cancel an order and restore inventory
-     × validates customer input sanitization during checkout
-     × handles multiple items in a single order
- ❯ tests/integration/auth.routes.test.ts (6) 11739ms
-   ❯ POST /api/auth/admin/login (3) 2155ms
-     ✓ rejects login with missing credentials
-     ✓ rejects login with invalid credentials 1066ms
-     × accepts valid admin credentials and sets cookie 1059ms
-   ✓ POST /api/auth/admin/logout (1)
-   ❯ GET /api/auth/admin/check (2) 1071ms
-     × returns 401 when no token provided
-     × returns authenticated status with valid token 1066ms
- ✓ tests/integration/cards.search.test.ts (1) 8525ms
- ❯ tests/integration/error-handling.test.ts (7) 8684ms
-   ❯ Error Handling (7)
-     ✓ 404 Not Found (2)
-     ✓ 400 Bad Request (2)
-     ✓ 401 Unauthorized (1)
-     ❯ 500 Internal Server Error (1)
-       × handles database errors gracefully
-     ❯ Content-Type validation (1)
-       × requires JSON content-type for POST requests
- ❯ tests/integration/inventory.routes.test.ts (16) 10262ms
-   - [ beforeAll ]
-   ↓ POST /api/admin/inventory (6) [skipped]
-   ↓ GET /api/admin/inventory (3) [skipped]
-   ↓ PATCH /api/admin/inventory/:id (4) [skipped]
-   ↓ DELETE /api/admin/inventory/:id (3) [skipped]
- ❯ tests/integration/orders.routes.test.ts (19) 9684ms
-   | [ beforeAll ]
-   ↓ POST /api/orders (6) [skipped]
-   ↓ GET /api/admin/orders (5) [skipped]
-   ↓ GET /api/admin/orders/:id (3) [skipped]
-   ↓ PATCH /api/admin/orders/:id/status (5) [skipped]
- ❯ tests/integration/storefront.routes.test.ts (5) 9421ms
-   ❯ GET /api/storefront/cards (5)
-     × returns paginated cards with default params
-       - [ beforeEach ]
-     × filters cards by game_id
-       | [ beforeEach ]
-     × filters cards by search term
-       / [ beforeEach ]
-     × respects pagination parameters
-       \ [ beforeEach ]
-     × returns 400 for invalid query parameters
-       | [ beforeEach ]
+ ❯ tests/e2e/checkout.flow.test.ts (6) 11448ms
+   ❯ Complete Checkout Flow (E2E) (6) 2064ms
+     × completes a full customer journey from browsing to order placement 407ms
+     × handles out-of-stock scenario gracefully 374ms
+     × handles concurrent orders for the same item 311ms
+     × allows admin to cancel an order and restore inventory 339ms
+     × validates customer input sanitization during checkout 331ms
+     × handles multiple items in a single order 302ms
+ ✓ tests/integration/auth.routes.test.ts (6) 10047ms
+ ✓ tests/integration/cards.search.test.ts (1) 8693ms
+ ✓ tests/integration/error-handling.test.ts (7) 8914ms
+ ❯ tests/integration/inventory.routes.test.ts (16) 13356ms
+   ❯ POST /api/admin/inventory (6) 1886ms
+     × requires authentication
+     × creates new inventory with valid data
+     × updates existing inventory on conflict 372ms
+     ✓ rejects invalid card_id 340ms
+     ✓ rejects negative stock quantity 312ms
+     ✓ rejects missing required fields
+   ❯ GET /api/admin/inventory (3) 1038ms
+     × requires authentication 362ms
+     × returns paginated inventory list 347ms
+     × filters inventory by card_id 329ms
+   ❯ PATCH /api/admin/inventory/:id (4) 1208ms
+     × requires authentication
+     × updates inventory stock quantity
+     × updates inventory price
+     ✓ returns 404 for non-existent inventory 465ms
+   ❯ DELETE /api/admin/inventory/:id (3) 668ms
+     × requires authentication
+     × deletes inventory item
+     ✓ returns 404 for non-existent inventory
+ ❯ tests/integration/orders.routes.test.ts (19) 14276ms
+   ❯ POST /api/orders (6) 2156ms
+     × creates a new order with valid data 354ms
+     × validates required customer fields 419ms
+     ✓ validates items array is not empty 366ms
+     ✓ validates item quantity limits 344ms
+     ✓ validates email format 324ms
+     × handles transaction rollback on inventory update failure 347ms
+   ❯ GET /api/admin/orders (5) 1694ms
+     ✓ requires authentication 314ms
+     × returns paginated orders list
+     × filters orders by status
+     × supports pagination 319ms
+     × searches orders by customer email 499ms
+   ❯ GET /api/admin/orders/:id (3) 730ms
+     ✓ requires authentication
+     × returns order details
+     × returns 404 for non-existent order
+   ❯ PATCH /api/admin/orders/:id/status (5) 883ms
+     ✓ requires authentication
+     × updates order status
+     ✓ validates status enum values
+     × allows adding notes when updating status
+     × returns 404 for non-existent order
+ ❯ tests/integration/storefront.routes.test.ts (5) 10278ms
+   ❯ GET /api/storefront/cards (5) 1727ms
+     × returns paginated cards with default params 356ms
+     × filters cards by game_id 318ms
+     × filters cards by search term 360ms
+     × respects pagination parameters 361ms
+     ✓ returns 400 for invalid query parameters 332ms
  ✓ tests/unit/auth.validateCredentials.test.ts (4)
  ✓ tests/unit/slugify.test.ts (1)
  ❯ tests/unit/utils.test.ts (42)
@@ -336,7 +820,7 @@ stdout | tests/integration/auth.routes.test.ts
      ❯ slugify (10)
        ✓ converts text to lowercase
        ✓ replaces spaces with hyphens
-       ✓ removes special characters
+       × removes special characters
        × handles unicode characters
        ✓ removes leading and trailing hyphens
        ✓ collapses multiple hyphens to single hyphen
@@ -353,33 +837,7 @@ stdout | tests/integration/auth.routes.test.ts
    ✓ Array Utilities (8)
  ✓ tests/unit/validation.test.ts (10)
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Suites 2 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
-
- FAIL  tests/integration/inventory.routes.test.ts [ tests/integration/inventory.routes.test.ts ]
-TypeError: Cannot read properties of undefined (reading '0')
- ❯ tests/integration/inventory.routes.test.ts:27:44
-     25|     });
-     26|
-     27|   authToken = loginRes.headers["set-cookie"][0];
-       |                                            ^
-     28| }, 60_000);
-     29|
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/19]⎯
-
- FAIL  tests/integration/orders.routes.test.ts [ tests/integration/orders.routes.test.ts ]
-TypeError: Cannot read properties of undefined (reading '0')
- ❯ tests/integration/orders.routes.test.ts:27:44
-     25|     });
-     26|
-     27|   authToken = loginRes.headers["set-cookie"][0];
-       |                                            ^
-     28| }, 60_000);
-     29|
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/19]⎯
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 17 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 35 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > completes a full customer journey from browsing to order placement
 Error: expected 200 "OK", got 500 "Internal Server Error"
@@ -397,7 +855,7 @@ Error: expected 200 "OK", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/35]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles out-of-stock scenario gracefully
 Error: expected 200 "OK", got 500 "Internal Server Error"
@@ -415,7 +873,7 @@ Error: expected 200 "OK", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/35]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles concurrent orders for the same item
 Error: expected 200 "OK", got 500 "Internal Server Error"
@@ -433,7 +891,7 @@ Error: expected 200 "OK", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/35]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > allows admin to cancel an order and restore inventory
 Error: expected 200 "OK", got 500 "Internal Server Error"
@@ -451,7 +909,7 @@ Error: expected 200 "OK", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/35]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > validates customer input sanitization during checkout
 Error: expected 200 "OK", got 500 "Internal Server Error"
@@ -469,7 +927,7 @@ Error: expected 200 "OK", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/35]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles multiple items in a single order
 Error: expected 200 "OK", got 500 "Internal Server Error"
@@ -487,17 +945,17 @@ Error: expected 200 "OK", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/35]⎯
 
- FAIL  tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
-Error: expected 200 "OK", got 401 "Unauthorized"
- ❯ tests/integration/auth.routes.test.ts:51:8
-     49|         password: process.env.ADMIN_PASSWORD || "your_test_password"
+ FAIL  tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > requires authentication
+Error: expected 401 "Unauthorized", got 500 "Internal Server Error"
+ ❯ tests/integration/inventory.routes.test.ts:51:8
+     49|         language: "English"
      50|       })
-     51|       .expect(200);
+     51|       .expect(401);
        |        ^
      52|
-     53|     expect(res.body.success).toBe(true);
+     53|     expect(res.body).toHaveProperty("error");
  ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
  ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
  ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
@@ -505,17 +963,17 @@ Error: expected 200 "OK", got 401 "Unauthorized"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/35]⎯
 
- FAIL  tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns 401 when no token provided
-Error: expected 401 "Unauthorized", got 404 "Not Found"
- ❯ tests/integration/auth.routes.test.ts:75:8
-     73|     const res = await request(app)
-     74|       .get("/api/auth/admin/check")
-     75|       .expect(401);
+ FAIL  tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > creates new inventory with valid data
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/inventory.routes.test.ts:68:8
+     66|         language: "English"
+     67|       })
+     68|       .expect(200);
        |        ^
-     76|
-     77|     expect(res.body.authenticated).toBe(false);
+     69|
+     70|     expect(res.body).toHaveProperty("inventory");
  ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
  ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
  ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
@@ -523,39 +981,213 @@ Error: expected 401 "Unauthorized", got 404 "Not Found"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/35]⎯
 
- FAIL  tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
-TypeError: Invalid value "undefined" for header "Cookie"
- ❯ Test.request ../../node_modules/.pnpm/superagent@10.2.3/node_modules/superagent/src/node/index.js:830:39
- ❯ Test.Request.end ../../node_modules/.pnpm/superagent@10.2.3/node_modules/superagent/src/node/index.js:965:8
- ❯ Test.end ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:136:11
- ❯ ../../node_modules/.pnpm/superagent@10.2.3/node_modules/superagent/src/request-base.js:283:12
- ❯ Test.RequestBase.then ../../node_modules/.pnpm/superagent@10.2.3/node_modules/superagent/src/request-base.js:265:31
+ FAIL  tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > updates existing inventory on conflict
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/inventory.routes.test.ts:102:8
+    100|         language: "English"
+    101|       })
+    102|       .expect(200);
+       |        ^
+    103|
+    104|     expect(res.body.inventory.price).toBe(7.99);
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/35]⎯
 
- FAIL  tests/integration/error-handling.test.ts > Error Handling > 500 Internal Server Error > handles database errors gracefully
-AssertionError: expected undefined to be defined
- ❯ tests/integration/error-handling.test.ts:76:27
-     74|       // This would require mocking the database to fail
-     75|       // For now, we can test the error handler is in place
-     76|       expect(app._router).toBeDefined();
-       |                           ^
-     77|     });
-     78|   });
+ FAIL  tests/integration/inventory.routes.test.ts > GET /api/admin/inventory > requires authentication
+Error: expected 401 "Unauthorized", got 404 "Not Found"
+ ❯ tests/integration/inventory.routes.test.ts:167:8
+    165|     const res = await request(app)
+    166|       .get("/api/admin/inventory")
+    167|       .expect(401);
+       |        ^
+    168|
+    169|     expect(res.body).toHaveProperty("error");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/35]⎯
 
- FAIL  tests/integration/error-handling.test.ts > Error Handling > Content-Type validation > requires JSON content-type for POST requests
+ FAIL  tests/integration/inventory.routes.test.ts > GET /api/admin/inventory > returns paginated inventory list
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/inventory.routes.test.ts:176:8
+    174|       .get("/api/admin/inventory")
+    175|       .set("Cookie", authToken)
+    176|       .expect(200);
+       |        ^
+    177|
+    178|     expect(res.body).toHaveProperty("inventory");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/35]⎯
+
+ FAIL  tests/integration/inventory.routes.test.ts > GET /api/admin/inventory > filters inventory by card_id
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/inventory.routes.test.ts:187:8
+    185|       .set("Cookie", authToken)
+    186|       .query({ card_id: 1001 })
+    187|       .expect(200);
+       |        ^
+    188|
+    189|     expect(res.body.inventory).toBeDefined();
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/35]⎯
+
+ FAIL  tests/integration/inventory.routes.test.ts > PATCH /api/admin/inventory/:id > requires authentication
+Error: expected 401 "Unauthorized", got 404 "Not Found"
+ ❯ tests/integration/inventory.routes.test.ts:207:8
+    205|       .patch(`/api/admin/inventory/${inventoryId}`)
+    206|       .send({ stock_quantity: 20 })
+    207|       .expect(401);
+       |        ^
+    208|
+    209|     expect(res.body).toHaveProperty("error");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/35]⎯
+
+ FAIL  tests/integration/inventory.routes.test.ts > PATCH /api/admin/inventory/:id > updates inventory stock quantity
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/inventory.routes.test.ts:217:8
+    215|       .set("Cookie", authToken)
+    216|       .send({ stock_quantity: 25 })
+    217|       .expect(200);
+       |        ^
+    218|
+    219|     expect(res.body.inventory.stock_quantity).toBe(25);
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/35]⎯
+
+ FAIL  tests/integration/inventory.routes.test.ts > PATCH /api/admin/inventory/:id > updates inventory price
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/inventory.routes.test.ts:227:8
+    225|       .set("Cookie", authToken)
+    226|       .send({ price: 9.99 })
+    227|       .expect(200);
+       |        ^
+    228|
+    229|     expect(res.body.inventory.price).toBe(9.99);
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/35]⎯
+
+ FAIL  tests/integration/inventory.routes.test.ts > DELETE /api/admin/inventory/:id > requires authentication
+Error: expected 401 "Unauthorized", got 404 "Not Found"
+ ❯ tests/integration/inventory.routes.test.ts:253:8
+    251|     const res = await request(app)
+    252|       .delete(`/api/admin/inventory/${inventoryId}`)
+    253|       .expect(401);
+       |        ^
+    254|
+    255|     expect(res.body).toHaveProperty("error");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/35]⎯
+
+ FAIL  tests/integration/inventory.routes.test.ts > DELETE /api/admin/inventory/:id > deletes inventory item
+Error: expected 200 "OK", got 404 "Not Found"
+ ❯ tests/integration/inventory.routes.test.ts:262:8
+    260|       .delete(`/api/admin/inventory/${inventoryId}`)
+    261|       .set("Cookie", authToken)
+    262|       .expect(200);
+       |        ^
+    263|
+    264|     expect(res.body).toHaveProperty("success");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > POST /api/orders > creates a new order with valid data
+Error: expected 201 "Created", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:69:8
+     67|       .post("/api/orders")
+     68|       .send(orderData)
+     69|       .expect(201);
+       |        ^
+     70|
+     71|     expect(res.body).toHaveProperty("order");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > POST /api/orders > validates required customer fields
+AssertionError: expected 'Invalid order data' to contain 'email'
+
+Expected: "email"
+Received: "Invalid order data"
+
+ ❯ tests/integration/orders.routes.test.ts:101:28
+     99|
+    100|     expect(res.body).toHaveProperty("error");
+    101|     expect(res.body.error).toContain("email");
+       |                            ^
+    102|   });
+    103|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > POST /api/orders > handles transaction rollback on inventory update failure
 Error: expected 400 "Bad Request", got 500 "Internal Server Error"
- ❯ tests/integration/error-handling.test.ts:85:10
-     83|         .post("/api/auth/admin/login")
-     84|         .send("not-json-data")
-     85|         .expect(400);
-       |          ^
-     86|
-     87|       // Should fail to parse as JSON
+ ❯ tests/integration/orders.routes.test.ts:195:8
+    193|       .post("/api/orders")
+    194|       .send(orderData)
+    195|       .expect(400);
+       |        ^
+    196|
+    197|     expect(res.body).toHaveProperty("error");
  ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
  ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
  ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
@@ -563,31 +1195,263 @@ Error: expected 400 "Bad Request", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders > returns paginated orders list
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:219:8
+    217|       .get("/api/admin/orders")
+    218|       .set("Cookie", authToken)
+    219|       .expect(200);
+       |        ^
+    220|
+    221|     expect(res.body).toHaveProperty("orders");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders > filters orders by status
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:231:8
+    229|       .set("Cookie", authToken)
+    230|       .query({ status: "pending" })
+    231|       .expect(200);
+       |        ^
+    232|
+    233|     expect(res.body.orders).toBeDefined();
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders > supports pagination
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:244:8
+    242|       .set("Cookie", authToken)
+    243|       .query({ limit: 1, offset: 0 })
+    244|       .expect(200);
+       |        ^
+    245|
+    246|     expect(res.body.orders.length).toBeLessThanOrEqual(1);
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[23/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders > searches orders by customer email
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:254:8
+    252|       .set("Cookie", authToken)
+    253|       .query({ search: "test@example.com" })
+    254|       .expect(200);
+       |        ^
+    255|
+    256|     expect(res.body.orders).toBeDefined();
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[24/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > returns order details
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:279:8
+    277|       .get(`/api/admin/orders/${orderId}`)
+    278|       .set("Cookie", authToken)
+    279|       .expect(200);
+       |        ^
+    280|
+    281|     expect(res.body).toHaveProperty("order");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[25/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > returns 404 for non-existent order
+Error: expected 404 "Not Found", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:290:8
+    288|       .get("/api/admin/orders/999999")
+    289|       .set("Cookie", authToken)
+    290|       .expect(404);
+       |        ^
+    291|
+    292|     expect(res.body).toHaveProperty("error");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[26/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > updates order status
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:317:8
+    315|       .set("Cookie", authToken)
+    316|       .send({ status: "confirmed" })
+    317|       .expect(200);
+       |        ^
+    318|
+    319|     expect(res.body.order.status).toBe("confirmed");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[27/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > allows adding notes when updating status
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:340:8
+    338|         notes: "Order shipped successfully"
+    339|       })
+    340|       .expect(200);
+       |        ^
+    341|
+    342|     expect(res.body.order.status).toBe("completed");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[28/35]⎯
+
+ FAIL  tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > returns 404 for non-existent order
+Error: expected 404 "Not Found", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:350:8
+    348|       .set("Cookie", authToken)
+    349|       .send({ status: "confirmed" })
+    350|       .expect(404);
+       |        ^
+    351|
+    352|     expect(res.body).toHaveProperty("error");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[29/35]⎯
 
  FAIL  tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > returns paginated cards with default params
- FAIL  tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > filters cards by game_id
- FAIL  tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > filters cards by search term
- FAIL  tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > respects pagination parameters
- FAIL  tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > returns 400 for invalid query parameters
-error: relation "card_sets" does not exist
- ❯ ../../node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js:545:17
- ❯ Module.seedMultipleCards tests/setup/db.ts:65:5
-     63|
-     64|     // Seed card sets
-     65|     await client.query(
-       |     ^
-     66|       `INSERT INTO card_sets (id, name, game_id) VALUES
-     67|        (1, 'Alpha', 1),
- ❯ tests/integration/storefront.routes.test.ts:26:5
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/storefront.routes.test.ts:32:8
+     30|     const res = await request(app)
+     31|       .get("/api/storefront/cards")
+     32|       .expect(200);
+       |        ^
+     33|
+     34|     expect(res.body).toHaveProperty("cards");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[30/35]⎯
+
+ FAIL  tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > filters cards by game_id
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/storefront.routes.test.ts:42:8
+     40|       .get("/api/storefront/cards")
+     41|       .query({ game_id: 1 })
+     42|       .expect(200);
+       |        ^
+     43|
+     44|     expect(res.body.cards).toBeDefined();
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[31/35]⎯
+
+ FAIL  tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > filters cards by search term
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/storefront.routes.test.ts:55:8
+     53|       .get("/api/storefront/cards")
+     54|       .query({ search: "Lightning" })
+     55|       .expect(200);
+       |        ^
+     56|
+     57|     expect(res.body.cards).toBeDefined();
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[32/35]⎯
+
+ FAIL  tests/integration/storefront.routes.test.ts > GET /api/storefront/cards > respects pagination parameters
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/storefront.routes.test.ts:66:8
+     64|       .get("/api/storefront/cards")
+     65|       .query({ page: 1, per_page: 5 })
+     66|       .expect(200);
+       |        ^
+     67|
+     68|     expect(res.body.cards).toBeDefined();
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[33/35]⎯
+
+ FAIL  tests/unit/utils.test.ts > String Utilities > slugify > removes special characters
+AssertionError: expected 'black-lotus-2023' to be 'blacklotus2023' // Object.is equality
+
+Expected: "blacklotus2023"
+Received: "black-lotus-2023"
+
+ ❯ tests/unit/utils.test.ts:18:43
+     16|     it("removes special characters", () => {
+     17|       expect(slugify("Lightning Bolt!")).toBe("lightning-bolt");
+     18|       expect(slugify("Black@Lotus#2023")).toBe("blacklotus2023");
+       |                                           ^
+     19|     });
+     20|
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[34/35]⎯
 
  FAIL  tests/unit/utils.test.ts > String Utilities > slugify > handles unicode characters
-AssertionError: expected 'caf-mnchn' to be 'caf-mnchen' // Object.is equality
+AssertionError: expected 'cafe-munchen' to be 'caf-mnchen' // Object.is equality
 
 Expected: "caf-mnchen"
-Received: "caf-mnchn"
+Received: "cafe-munchen"
 
  ❯ tests/unit/utils.test.ts:22:39
      20|
@@ -597,17 +1461,11 @@ Received: "caf-mnchn"
      23|     });
      24|
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/19]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[35/35]⎯
 
- Test Files  7 failed | 4 passed (11)
-      Tests  17 failed | 65 passed | 35 skipped (117)
-   Start at  13:25:26
-   Duration  12.89s (transform 578ms, setup 0ms, collect 6.38s, tests 68.58s, environment 2ms, prepare 1.23s)
+ Test Files  5 failed | 6 passed (11)
+      Tests  35 failed | 82 passed (117)
+   Start at  14:19:38
+   Duration  15.44s (transform 512ms, setup 0ms, collect 6.25s, tests 77.17s, environment 2ms, prepare 1.32s)
 
  FAIL  Tests failed. Watching for file changes...
-       press h to show help, press q to quit
-C:\Git_Repos\mana_meeples_singles_market\apps\api:
- ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @mana-meeples/api@ test: `vitest`
-Exit status 1
-
-C:\Git_Repos\mana_meeples_singles_market>

@@ -160,80 +160,82 @@ const FiltersQuery = z.object({
 });
 
 router.get('/filters', async (req: Request, res: Response) => {
-  const parsed = FiltersQuery.safeParse(req.query);
+  const parsed = CardFiltersQuery.safeParse(req.query);
   if (!parsed.success) {
-    return res.status(400).json({ error: 'Invalid query parameters', details: parsed.error.flatten() });
+    return res.status(400).json({
+      error: 'Invalid query',
+      details: parsed.error.flatten(),
+    });
   }
-  const { game, game_id, set_id, set_name, search } = parsed.data;
 
-  const where: string[] = [];
-  const params: any[] = [];
-
-  if (typeof game_id === 'number') { params.push(game_id); where.push(`c.game_id = $${params.length}`); }
-  if (game)                         { params.push(game);    where.push(`g.code = $${params.length}`); }
-  if (typeof set_id === 'number')   { params.push(set_id);  where.push(`c.set_id = $${params.length}`); }
-  if (set_name)                     { params.push(set_name);where.push(`c.set_name = $${params.length}`); }
-  if (search && search.length > 1) {
-    params.push(search, `%${search}%`);
-    where.push(`(c.search_tsv @@ plainto_tsquery('simple', $${params.length-1}) OR c.name ILIKE $${params.length})`);
-  }
+  const { where, joins, params } = buildFilterSQL('c', parsed.data);
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
   const sql = `
-    WITH latest_prices AS (
-      SELECT DISTINCT ON (card_id)
-             card_id, base_price, foil_price
-      FROM card_pricing
-      ORDER BY card_id, updated_at DESC NULLS LAST, created_at DESC NULLS LAST
-    ),
-    base AS (
+    WITH base AS (
       SELECT
         c.id,
-        c.set_id
+        c.set_id,
+        c.treatment
       FROM cards c
       JOIN games g ON g.id = c.game_id
       ${whereSql}
-    ),
-    inv AS (
-      SELECT
-        ci.card_id,
-        ci.quality,
-        COALESCE(ci.foil_type,'Regular') AS foil_type,
-        COALESCE(ci.language,'English')  AS language,
-        ci.stock_quantity,
-        -- compute a price per inventory row from latest_prices
-        CASE WHEN COALESCE(ci.foil_type,'Regular') ILIKE 'foil'
-             THEN lp.foil_price ELSE lp.base_price END AS price
-      FROM base b
-      JOIN card_inventory ci ON ci.card_id = b.id
-      LEFT JOIN latest_prices lp ON lp.card_id = ci.card_id
     )
     SELECT
-      -- Distinct sets of each facet (flatten in app)
-      ARRAY(SELECT DISTINCT c.treatment FROM cards c WHERE c.id IN (SELECT id FROM base) AND c.treatment IS NOT NULL) AS treatments,
-      ARRAY(SELECT DISTINCT inv.language FROM inv WHERE inv.language IS NOT NULL) AS languages,
-      ARRAY(SELECT DISTINCT inv.quality  FROM inv WHERE inv.quality  IS NOT NULL) AS qualities,
-      ARRAY(SELECT DISTINCT inv.foil_type FROM inv WHERE inv.foil_type IS NOT NULL) AS foilTypes,
+      COALESCE(ARRAY_AGG(DISTINCT c.treatment) FILTER (WHERE c.treatment IS NOT NULL), ARRAY[]::text[]) AS treatments,
+      COALESCE(ARRAY_AGG(DISTINCT inv.language) FILTER (WHERE inv.language IS NOT NULL), ARRAY[]::text[]) AS languages,
+      COALESCE(ARRAY_AGG(DISTINCT inv.quality) FILTER (WHERE inv.quality IS NOT NULL), ARRAY[]::text[]) AS qualities,
+      COALESCE(ARRAY_AGG(DISTINCT inv.foil_type) FILTER (WHERE inv.foil_type IS NOT NULL), ARRAY[]::text[]) AS foilTypes,
       MIN(inv.price) AS priceMin,
       MAX(inv.price) AS priceMax,
-      SUM(CASE WHEN inv.stock_quantity > 0 THEN 1 ELSE 0 END)::int AS inStockCount
-    ;
+      COUNT(DISTINCT CASE WHEN inv.stock_quantity > 0 THEN inv.id END)::int AS inStockCount
+    FROM base b
+    LEFT JOIN cards c ON c.id = b.id
+    LEFT JOIN (
+      SELECT
+        ci.card_id,
+        ci.id,
+        ci.quality,
+        COALESCE(ci.foil_type, 'Regular') AS foil_type,
+        COALESCE(ci.language, 'English') AS language,
+        ci.stock_quantity,
+        COALESCE(
+          CASE 
+            WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil' 
+            THEN lp.foil_price 
+            ELSE lp.base_price 
+          END,
+          ci.price
+        ) AS price
+      FROM card_inventory ci
+      LEFT JOIN (
+        SELECT DISTINCT ON (card_id)
+               card_id, base_price, foil_price
+        FROM card_pricing
+        ORDER BY card_id, updated_at DESC NULLS LAST
+      ) lp ON lp.card_id = ci.card_id
+    ) inv ON inv.card_id = b.id
   `;
 
   try {
     const [row] = await db.query(sql, params);
+    
     const out = {
-      treatments: (row?.treatments ?? []).filter(Boolean),
-      languages: (row?.languages ?? []).filter(Boolean),
-      qualities: (row?.qualities ?? []).filter(Boolean),
-      foilTypes: (row?.foiltypes ?? row?.foilTypes ?? []).filter(Boolean),
+      treatments: row?.treatments ?? [],
+      languages: row?.languages ?? [],
+      qualities: row?.qualities ?? [],
+      foilTypes: row?.foiltypes ?? row?.foilTypes ?? [],
       priceMin: row?.pricemin ?? null,
       priceMax: row?.pricemax ?? null,
       inStockCount: row?.instockcount ?? 0,
     };
+    
     return res.json(out);
   } catch (err: any) {
-    console.error('GET /cards/filters failed', { code: err?.code, message: err?.message });
+    console.error('GET /cards/filters failed', { 
+      code: err?.code, 
+      message: err?.message 
+    });
     return res.status(500).json({ error: 'Failed to fetch card filters' });
   }
 });

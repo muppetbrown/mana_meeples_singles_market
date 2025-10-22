@@ -300,40 +300,123 @@ export async function bootstrapMinimalSchema() {
   
   try {
     await db.query(`
+      -- Core tables
       CREATE TABLE IF NOT EXISTS games (
         id integer PRIMARY KEY,
-        name text NOT NULL
+        name text NOT NULL,
+        code text
       );
       
       CREATE TABLE IF NOT EXISTS card_sets (
         id integer PRIMARY KEY,
         name text NOT NULL,
+        code text,
         game_id integer NOT NULL REFERENCES games(id)
       );
       
       CREATE TABLE IF NOT EXISTS cards (
         id integer PRIMARY KEY,
         set_id integer NOT NULL REFERENCES card_sets(id),
+        game_id integer NOT NULL REFERENCES games(id),
         card_number text NOT NULL,
-        finish text NOT NULL,
+        finish text,
         name text NOT NULL,
+        rarity text,
+        image_url text,
+        treatment text,
         sku text UNIQUE NOT NULL
       );
       
+      -- Pricing table (critical for storefront queries)
+      CREATE TABLE IF NOT EXISTS card_pricing (
+        id SERIAL PRIMARY KEY,
+        card_id integer NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+        base_price numeric(10,2) NOT NULL DEFAULT 0,
+        foil_price numeric(10,2) NOT NULL DEFAULT 0,
+        price_source varchar(50) DEFAULT 'manual',
+        updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
+        created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(card_id)
+      );
+      
+      -- Inventory table (critical for stock management)
+      CREATE TABLE IF NOT EXISTS card_inventory (
+        id SERIAL PRIMARY KEY,
+        card_id integer NOT NULL REFERENCES cards(id) ON DELETE CASCADE,
+        variation_id integer,
+        quality text NOT NULL,
+        foil_type text DEFAULT 'Regular',
+        language text DEFAULT 'English',
+        price numeric(10,2) NOT NULL,
+        stock_quantity integer NOT NULL DEFAULT 0,
+        price_source text DEFAULT 'manual',
+        sku text UNIQUE,
+        created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+        updated_at timestamp DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(card_id, variation_id, quality, foil_type, language)
+      );
+      
+      -- Orders table (for checkout flow)
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        customer_email text NOT NULL,
+        customer_name text NOT NULL,
+        customer_address text,
+        customer_phone text,
+        total numeric(10,2) NOT NULL,
+        currency text DEFAULT 'NZD',
+        status text NOT NULL DEFAULT 'pending',
+        notes text,
+        created_at timestamp DEFAULT CURRENT_TIMESTAMP,
+        updated_at timestamp DEFAULT CURRENT_TIMESTAMP
+      );
+      
+      -- Order items table
+      CREATE TABLE IF NOT EXISTS order_items (
+        id SERIAL PRIMARY KEY,
+        order_id integer NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+        inventory_id integer NOT NULL REFERENCES card_inventory(id),
+        card_id integer NOT NULL REFERENCES cards(id),
+        card_name text NOT NULL,
+        quantity integer NOT NULL,
+        price numeric(10,2) NOT NULL,
+        created_at timestamp DEFAULT CURRENT_TIMESTAMP
+      );
+      
+      -- Indexes
       CREATE INDEX IF NOT EXISTS idx_cards_name_trgm 
         ON cards USING gin (name gin_trgm_ops);
+      CREATE INDEX IF NOT EXISTS idx_card_pricing_card_id 
+        ON card_pricing(card_id);
+      CREATE INDEX IF NOT EXISTS idx_inventory_card_id 
+        ON card_inventory(card_id);
+      CREATE INDEX IF NOT EXISTS idx_inventory_stock 
+        ON card_inventory(stock_quantity);
+      CREATE INDEX IF NOT EXISTS idx_orders_status 
+        ON orders(status);
+      CREATE INDEX IF NOT EXISTS idx_order_items_order_id 
+        ON order_items(order_id);
     `);
     
     schemaBootstrapped = true;
     await log("Schema bootstrap complete", {
-      tables: ["games", "card_sets", "cards"],
-      indexes: ["idx_cards_name_trgm"],
+      tables: ["games", "card_sets", "cards", "card_pricing", "card_inventory", "orders", "order_items"],
+      indexes: [
+        "idx_cards_name_trgm", 
+        "idx_card_pricing_card_id", 
+        "idx_inventory_card_id", 
+        "idx_inventory_stock", 
+        "idx_orders_status", 
+        "idx_order_items_order_id"
+      ],
       success: true,
     });
   } catch (error) {
     await log("Schema bootstrap FAILED", {
       error: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack : undefined,
     });
+    schemaBootstrapped = false;
     throw error;
   }
 }

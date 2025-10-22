@@ -37,7 +37,7 @@ router.get('/cards', async (req: Request, res: Response) => {
   const params: any[] = [];
 
   if (typeof game_id === 'number') { params.push(game_id); where.push(`c.game_id = $${params.length}`); }
-  if (typeof set_id === 'number')  { params.push(set_id);  where.push(`c.set_id = $${params.length}`); } // FIXED: Use set_id
+  if (typeof set_id === 'number')  { params.push(set_id);  where.push(`c.set_id = $${params.length}`); }
   if (rarity)                      { params.push(rarity);  where.push(`c.rarity = $${params.length}`); }
   if (search && search.length > 1) {
     params.push(`%${search}%`);
@@ -49,17 +49,11 @@ router.get('/cards', async (req: Request, res: Response) => {
   const offset     = (page - 1) * per_page;
 
   const sql = `
-    WITH latest_prices AS (
-      SELECT DISTINCT ON (card_id)
-             card_id, base_price, foil_price, price_source, updated_at
-      FROM card_pricing
-      ORDER BY card_id, updated_at DESC NULLS LAST, created_at DESC NULLS LAST
-    )
     SELECT
       c.id,
       c.name,
       c.card_number,
-      cs.name AS set_name,  -- FIXED: Join to card_sets to get set_name
+      cs.name AS set_name,
       c.rarity,
       c.image_url,
       g.name AS game_name,
@@ -74,7 +68,7 @@ router.get('/cards', async (req: Request, res: Response) => {
       LIMIT $${params.push(per_page)} OFFSET $${params.push(offset)}
     ) c
     JOIN games g ON g.id = c.game_id
-    JOIN card_sets cs ON cs.id = c.set_id  -- ADDED: Join to get set name
+    JOIN card_sets cs ON cs.id = c.set_id
     LEFT JOIN LATERAL (
       SELECT
         COUNT(ci.id)::int AS variation_count,
@@ -86,29 +80,44 @@ router.get('/cards', async (req: Request, res: Response) => {
               'quality', ci.quality,
               'foil_type', COALESCE(ci.foil_type, 'Regular'),
               'language', COALESCE(ci.language, 'English'),
-              'price',
-                CASE WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil'
-                     THEN lp.foil_price ELSE lp.base_price END,
+              'price', COALESCE(
+                CASE 
+                  WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil' 
+                  THEN lp.foil_price 
+                  ELSE lp.base_price 
+                END,
+                ci.price
+              ),
               'stock', ci.stock_quantity,
               'variation_key',
                 CONCAT(ci.quality,'-',COALESCE(ci.foil_type,'Regular'),'-',COALESCE(ci.language,'English')),
-              'price_source', lp.price_source,
+              'price_source', COALESCE(lp.price_source, ci.price_source),
               'price_updated_at', lp.updated_at
             )
           ) FILTER (WHERE ci.id IS NOT NULL),
           '[]'::jsonb
         ) AS variations
       FROM card_inventory ci
-      LEFT JOIN latest_prices lp ON lp.card_id = c.id
+      LEFT JOIN (
+        SELECT DISTINCT ON (card_id)
+               card_id, base_price, foil_price, price_source, updated_at
+        FROM card_pricing
+        WHERE card_id = c.id
+        ORDER BY card_id, updated_at DESC NULLS LAST, created_at DESC NULLS LAST
+      ) lp ON lp.card_id = ci.card_id
       WHERE ci.card_id = c.id
     ) inv ON TRUE
   `;
 
   try {
     const rows = await db.query(sql, params);
-    return res.json({ cards: rows });
+    return res.json({ cards: rows || [] });
   } catch (err: any) {
-    console.error('GET /storefront/cards failed', { code: err?.code, message: err?.message });
+    console.error('GET /storefront/cards failed', { 
+      code: err?.code, 
+      message: err?.message,
+      detail: err?.detail 
+    });
     return res.status(500).json({ error: 'Failed to fetch storefront cards' });
   }
 });

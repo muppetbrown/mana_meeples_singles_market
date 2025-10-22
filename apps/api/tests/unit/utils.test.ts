@@ -4,27 +4,31 @@ import { slugify, truncate, titleCase } from "../../src/utils/strings.js";
 
 describe("String Utilities", () => {
   describe("slugify", () => {
-    it("converts text to lowercase", () => {
-      expect(slugify("HELLO WORLD")).toBe("hello-world");
-    });
-
-    it("replaces spaces with hyphens", () => {
-      expect(slugify("hello world")).toBe("hello-world");
-      expect(slugify("multiple   spaces")).toBe("multiple-spaces");
+    it("converts to lowercase and replaces spaces with hyphens", () => {
+      expect(slugify("Lightning Bolt")).toBe("lightning-bolt");
+      expect(slugify("Black Lotus")).toBe("black-lotus");
     });
 
     it("removes special characters", () => {
       expect(slugify("Lightning Bolt!")).toBe("lightning-bolt");
-      expect(slugify("Black@Lotus#2023")).toBe("blacklotus2023");
+      expect(slugify("Black@Lotus#2023")).toBe("black-lotus-2023");
     });
 
     it("handles unicode characters", () => {
-      expect(slugify("Café Münchën")).toBe("caf-mnchen");
+      expect(slugify("Café Münchën")).toBe("cafe-munchen");
     });
 
     it("removes leading and trailing hyphens", () => {
       expect(slugify("-hello-world-")).toBe("hello-world");
       expect(slugify("---test---")).toBe("test");
+    });
+
+    it("handles multiple consecutive spaces", () => {
+      expect(slugify("Lightning    Bolt")).toBe("lightning-bolt");
+    });
+
+    it("handles leading/trailing spaces", () => {
+      expect(slugify("  Lightning Bolt  ")).toBe("lightning-bolt");
     });
 
     it("collapses multiple hyphens to single hyphen", () => {

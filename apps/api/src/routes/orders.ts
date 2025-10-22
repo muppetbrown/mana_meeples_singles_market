@@ -353,64 +353,55 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
  * PATCH /admin/orders/:orderId/status
  * Update order status (admin only)
  */
-router.patch("/admin/orders/:orderId/status", adminAuthJWT, async (req: Request, res: Response): Promise<void> => {
+router.patch('/admin/orders/:id/status', adminAuthJWT, async (req: Request, res: Response) => {
+  const orderId = parseInt(req.params.id, 10);
+  const { status, notes } = req.body;
+
+  if (isNaN(orderId)) {
+    return res.status(400).json({ error: 'Invalid order ID' });
+  }
+
+  const validStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'completed', 'cancelled'];
+  if (!validStatuses.includes(status)) {
+    return res.status(400).json({ 
+      error: 'Invalid status', 
+      validStatuses 
+    });
+  }
+
   try {
-    const orderId = parseInt(req.params.orderId, 10);
-
-    if (isNaN(orderId)) {
-      res.status(400).json({ error: "Invalid order ID" });
-      return;
-    }
-
-    const validation = UpdateOrderStatusSchema.safeParse(req.body);
-
-    if (!validation.success) {
-      res.status(400).json({ 
-        error: "Invalid status data", 
-        details: validation.error.errors 
-      });
-      return;
-    }
-
-    const { status, notes } = validation.data;
-
-    // Update order status
-    const updateResult = await db.query(
-      `UPDATE orders 
-       SET status = $1, 
-           notes = COALESCE($2, notes),
-           updated_at = NOW()
-       WHERE id = $3
-       RETURNING *`,
-      [status, notes, orderId]
+    // Check if order exists first
+    const existingOrder = await db.query(
+      'SELECT id, status FROM orders WHERE id = $1',
+      [orderId]
     );
 
-    if (updateResult.length === 0) {
-      res.status(404).json({ error: "Order not found" });
-      return;
+    if (existingOrder.length === 0) {
+      return res.status(404).json({ 
+        error: 'Order not found',
+        orderId 
+      });
     }
 
-    // If cancelled, restore inventory
-    if (status === "cancelled") {
-      await db.query(
-        `UPDATE card_inventory ci
-         SET stock_quantity = stock_quantity + oi.quantity,
-             updated_at = NOW()
-         FROM order_items oi
-         WHERE oi.order_id = $1 
-           AND oi.inventory_id = ci.id`,
-        [orderId]
-      );
-    }
+    // Update the order
+    const updateQuery = notes
+      ? 'UPDATE orders SET status = $1, notes = $2, updated_at = NOW() WHERE id = $3 RETURNING *'
+      : 'UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *';
+    
+    const updateParams = notes ? [status, notes, orderId] : [status, orderId];
+    const [updatedOrder] = await db.query(updateQuery, updateParams);
 
-    res.json({
-      success: true,
-      order: updateResult[0],
-      message: `Order status updated to ${status}`,
+    return res.json({ 
+      order: updatedOrder,
+      message: 'Order status updated successfully' 
     });
-  } catch (error) {
-    console.error("❌ Update order status error:", error);
-    res.status(500).json({ error: "Failed to update order status" });
+  } catch (err: any) {
+    console.error('PATCH /admin/orders/:id/status failed', {
+      orderId,
+      code: err?.code,
+      message: err?.message,
+    });
+    return res.status(500).json({ error: 'Failed to update order status' });
   }
 });
 
