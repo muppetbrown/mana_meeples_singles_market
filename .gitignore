@@ -8,6 +8,10 @@ node_modules/
 npm-debug.log*
 logs
 Thumbs.db
+# Test logs
+test-logs/
+/apps/api/test-logs/
+/apps/web/test-logs/
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
