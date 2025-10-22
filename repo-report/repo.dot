@@ -100,9 +100,9 @@ digraph repo {
   nd513984f [label="./additional.js", shape=box];
   ncb4962ee [label="./storefront.js", shape=box];
   n7c151ceb [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts", shape=box];
+  n3851d481 [label="../middleware/auth.js", shape=box];
   na7c32e8a [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/off-filters.ts", shape=box];
   nbd6d3fce [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts", shape=box];
-  n3851d481 [label="../middleware/auth.js", shape=box];
   n8fb012eb [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/storefront.ts", shape=box];
   n72492d13 [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/variations.ts", shape=box];
   n4f2a8c8e [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/emailService.ts", shape=box];
@@ -401,6 +401,7 @@ digraph repo {
   n7c151ceb -> nb1fa8f70;
   n7c151ceb -> n1d7cf;
   n7c151ceb -> nbabebf20;
+  n7c151ceb -> n3851d481;
   na7c32e8a -> n1d522875;
   na7c32e8a -> n1d522875;
   nbd6d3fce -> nb1fa8f70;

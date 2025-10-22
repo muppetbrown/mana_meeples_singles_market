@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-10-22T17:38:01.169Z",
+  "generatedAt": "2025-10-22T18:29:46.225Z",
   "root": "C:\\Git_Repos\\mana_meeples_singles_market",
   "files": [
     {
@@ -960,31 +960,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts",
       "isExternal": true,
-      "lines": 53,
-      "sizeBytes": 2160,
-      "onlyReExports": false,
-      "exports": [
-        {
-          "name": "default",
-          "kind": "default"
-        }
-      ],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/off-filters.ts",
-      "isExternal": true,
-      "lines": 12,
-      "sizeBytes": 310,
-      "onlyReExports": true,
-      "exports": [],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts",
-      "isExternal": true,
-      "lines": 460,
-      "sizeBytes": 13335,
+      "lines": 326,
+      "sizeBytes": 10587,
       "onlyReExports": false,
       "exports": [
         {
@@ -999,6 +976,29 @@
       "isExternal": true,
       "onlyReExports": false,
       "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/off-filters.ts",
+      "isExternal": true,
+      "lines": 12,
+      "sizeBytes": 310,
+      "onlyReExports": true,
+      "exports": [],
+      "isTest": false
+    },
+    {
+      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts",
+      "isExternal": true,
+      "lines": 450,
+      "sizeBytes": 12944,
+      "onlyReExports": false,
+      "exports": [
+        {
+          "name": "default",
+          "kind": "default"
+        }
+      ],
       "isTest": false
     },
     {
@@ -1220,7 +1220,7 @@
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/tests/setup/db.ts",
       "isExternal": true,
       "lines": 197,
-      "sizeBytes": 5659,
+      "sizeBytes": 5713,
       "onlyReExports": false,
       "exports": [
         {
@@ -1253,8 +1253,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/tests/setup/testEnv.ts",
       "isExternal": true,
-      "lines": 472,
-      "sizeBytes": 14961,
+      "lines": 475,
+      "sizeBytes": 15112,
       "onlyReExports": false,
       "exports": [
         {
@@ -3574,6 +3574,11 @@
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts",
       "to": "../lib/db.js",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts",
+      "to": "../middleware/auth.js",
       "kind": "import"
     },
     {
