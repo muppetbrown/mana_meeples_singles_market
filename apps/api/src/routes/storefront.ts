@@ -1,8 +1,10 @@
-import express, { type Request, type Response } from 'express';
-import { z } from 'zod';
-import { db } from '../lib/db.js';
+import express, { type Request, type Response } from "express";
+import { z } from "zod";
+import { db } from "../lib/db.js";
 
 const router = express.Router();
+
+const IdSchema = z.object({ id: z.string().regex(/^\d+$/, "id must be numeric") });
 
 const StorefrontQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -119,6 +121,43 @@ router.get('/cards', async (req: Request, res: Response) => {
       detail: err?.detail 
     });
     return res.status(500).json({ error: 'Failed to fetch storefront cards' });
+  }
+});
+
+/**
+ * GET /storefront/cards/:id
+ * Returns a card with all inventory variations (if any).
+ */
+router.get("/cards/:id", async (req: Request, res: Response) => {
+  const parsed = IdSchema.safeParse(req.params);
+  if (!parsed.success) {
+    return res.status(400).json({ error: "Invalid card id" });
+  }
+  const id = Number(parsed.data.id);
+  const client = await db.getClient();
+  try {
+    const cardRes = await client.query(
+      `SELECT c.*
+       FROM cards c
+       WHERE c.id = $1`,
+      [id]
+    );
+    if (cardRes.rowCount === 0) return res.status(404).json({ error: "Card not found" });
+
+    const invRes = await client.query(
+      `SELECT id, quality, foil_type, language, stock_quantity, price
+       FROM card_inventory
+       WHERE card_id = $1
+       ORDER BY id ASC`,
+      [id]
+    );
+
+    return res.json({ card: { ...cardRes.rows[0], variations: invRes.rows } });
+  } catch (err) {
+    console.error("GET /storefront/cards/:id failed", { id, err });
+    return res.status(500).json({ error: "Failed to fetch card" });
+  } finally {
+    client.release();
   }
 });
 

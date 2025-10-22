@@ -1,8 +1,9 @@
 // apps/api/src/lib/db.ts
-import { Pool } from "pg";
+import { Pool, types } from "pg";
 import type { PoolClient, QueryResultRow } from "pg";
 
 let pool: Pool | null = null;
+try { types.setTypeParser(1700, (v) => (v === null ? null : parseFloat(v))); } catch {}
 
 /**
  * Get or create the connection pool

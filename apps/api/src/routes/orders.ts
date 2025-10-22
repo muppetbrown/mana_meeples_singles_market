@@ -2,6 +2,8 @@
 import express from "express";
 import type { Request, Response } from "express";
 import { z } from "zod";
+
+function stripTags(input: string): string { return input.replace(/<\/?[^>]+(>|$)/g, ""); }
 import { db, pool } from "../lib/db.js";
 import { adminAuthJWT } from "../middleware/auth.js";
 
@@ -79,7 +81,8 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const { customer, items, total, currency, notes } = validation.data;
+    let { customer, items, total, currency, notes } = validation.data;
+customer = { ...customer, name: stripTags(customer.name), address: customer.address ? stripTags(customer.address) : null, email: customer.email?.toLowerCase?.() ?? customer.email };
 
     // Start transaction
     const client = await db.getClient();
@@ -185,17 +188,23 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
       await client.query("COMMIT");
 
       // Return success
-      res.status(201).json({
-        success: true,
-        order: {
-          id: orderId,
-          status: "pending",
-          total: total,
-          currency: currency,
-          created_at: createdAt,
-        },
-        message: "Order created successfully",
-      });
+      const itemsRows = await client.query(
+  `SELECT id, order_id, inventory_id, card_id, quantity, unit_price, total_price FROM order_items WHERE order_id = $1 ORDER BY id`,
+  [orderId]
+);
+res.status(201).json({
+  success: true,
+  order: {
+    id: orderId,
+    status: "pending",
+    total: total,
+    currency: currency,
+    created_at: createdAt,
+    customer_email: customer.email,
+    items: itemsRows.rows,
+  },
+  message: "Order created successfully",
+});
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;
@@ -204,9 +213,11 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
     }
   } catch (error) {
     console.error("❌ Create order error:", error);
-    res.status(500).json({
-      error: error instanceof Error ? error.message : "Failed to create order",
-    });
+    const msg = String(error?.message || "Failed to create order");
+if (msg.includes("Insufficient stock") || msg.includes("Inventory item not found")) {
+  return res.status(400).json({ error: msg });
+}
+return res.status(500).json({ error: msg });
   }
 });
 
