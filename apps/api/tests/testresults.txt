@@ -6,49 +6,49 @@ C:\Git_Repos\mana_meeples_singles_market>pnpm --filter ./apps/api test
 
  DEV  v2.1.9 C:/Git_Repos/mana_meeples_singles_market/apps/api
 
-stdout | tests/integration/error-handling.test.ts
-📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232224.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232224.txt
-
 stdout | tests/integration/auth.routes.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232222.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232222.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668235.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668235.txt
 
 stdout | tests/integration/cards.search.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232228.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232228.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668223.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668223.txt
+
+stdout | tests/integration/error-handling.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668246.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668246.txt
+
+stdout | tests/integration/inventory.routes.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668236.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668236.txt
 
 stdout | tests/e2e/checkout.flow.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232227.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232227.txt
-
-stdout | tests/integration/storefront.routes.test.ts
-📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232241.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232241.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668240.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668240.txt
 
 stdout | tests/integration/orders.routes.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232242.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232242.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668249.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668249.txt
 
-stdout | tests/integration/inventory.routes.test.ts
+stdout | tests/integration/storefront.routes.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232240.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232240.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668255.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668255.txt
 
 stdout | tests/integration/inventory.routes.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 📡 add observability to secrets: https://dotenvx.com/ops
 
-stdout | tests/e2e/checkout.flow.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+stdout | tests/integration/orders.routes.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
 
 stdout | tests/integration/inventory.routes.test.ts
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:47:20.327Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:54:36.043Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
@@ -63,44 +63,30 @@ stdout | tests/integration/inventory.routes.test.ts
 📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
 ✅ Response sent successfully
 
-stdout | tests/integration/cards.search.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
-
-stderr | tests/integration/cards.search.test.ts
-⚠️ Unexpected database pool error: terminating connection due to administrator command
-
-stdout | tests/integration/auth.routes.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  enable debug logging with { debug: true }
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:47:21.094Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'MISSING', hasPassword: false }
-
-stderr | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
-❌ Missing credentials
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:47:21.108Z
+stdout | tests/integration/orders.routes.test.ts
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:54:36.047Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
-❌ Invalid credentials
+✅ Credentials valid, generating token...
+🎫 Token generated
+🍪 Setting cookie with config: {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict',
+  domain: '(current domain)'
+}
+📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
+✅ Response sent successfully
 
 stdout | tests/integration/storefront.routes.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
-
-stdout | tests/integration/cards.search.test.ts
-
-✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232228.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232228.json
-
-stdout | tests/integration/error-handling.test.ts
 [dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
 
+stdout | tests/integration/error-handling.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+
 stdout | tests/integration/error-handling.test.ts > Error Handling > 400 Bad Request > returns 400 for malformed request body
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:47:22.069Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:54:36.899Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'MISSING', hasPassword: false }
 
@@ -111,14 +97,80 @@ stderr | tests/integration/error-handling.test.ts > Error Handling > 401 Unautho
 ❌ No admin token found in cookies
 
 stdout | tests/integration/error-handling.test.ts > Error Handling > Content-Type validation > requires JSON content-type for POST requests
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:47:22.085Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:54:36.910Z
 🔑 Admin login attempt - handler entered
 
 stderr | tests/integration/error-handling.test.ts > Error Handling > Content-Type validation > requires JSON content-type for POST requests
 ❌ Invalid request body
 
+stdout | tests/e2e/checkout.flow.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  enable debug logging with { debug: true }
+
+stderr | tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > requires authentication
+❌ No admin token found in cookies
+
+stderr | tests/integration/orders.routes.test.ts > POST /api/orders > creates a new order with valid data
+❌ Create order error: error: column "quality" of relation "order_items" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:139:9 {
+  length: 132,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '132',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1066',
+  routine: 'checkInsertTargets'
+}
+
+stdout | tests/integration/error-handling.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668246.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668246.json
+
+stdout | tests/integration/cards.search.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
+
+stderr | tests/integration/cards.search.test.ts
+⚠️ Unexpected database pool error: terminating connection due to administrator command
+
+stdout | tests/integration/auth.routes.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🛠️  run anywhere with `dotenvx run -- yourcommand`
+
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:54:38.980Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'MISSING', hasPassword: false }
+
+stderr | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
+❌ Missing credentials
+
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:54:38.987Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+❌ Invalid credentials
+
+stdout | tests/integration/cards.search.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668223.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668223.json
+
 stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:47:22.129Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:54:39.993Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
@@ -134,16 +186,16 @@ stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > ac
 ✅ Response sent successfully
 
 stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/logout > clears the admin token cookie
-🔐 AUTH POST /api/auth/admin/logout - 2025-10-22T17:47:22.135Z
+🔐 AUTH POST /api/auth/admin/logout - 2025-10-22T17:54:39.999Z
 🚪 Admin logout request
 
 stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns 401 when no token provided
-🔐 AUTH GET /api/auth/admin/check - 2025-10-22T17:47:22.139Z
+🔐 AUTH GET /api/auth/admin/check - 2025-10-22T17:54:40.002Z
 🔍 Admin auth check request
 ❌ No admin token found
 
 stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:47:22.146Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:54:40.006Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
@@ -159,77 +211,52 @@ stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > ret
 ✅ Response sent successfully
 
 stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
-🔐 AUTH GET /api/auth/admin/check - 2025-10-22T17:47:22.153Z
+🔐 AUTH GET /api/auth/admin/check - 2025-10-22T17:54:40.011Z
 🔍 Admin auth check request
 🔍 Verifying token...
 ✅ Auth check successful for: admin
 
-stdout | tests/integration/orders.routes.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
-
-stdout | tests/integration/orders.routes.test.ts
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T17:47:22.325Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-✅ Credentials valid, generating token...
-🎫 Token generated
-🍪 Setting cookie with config: {
-  httpOnly: true,
-  secure: false,
-  sameSite: 'strict',
-  domain: '(current domain)'
+stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles out-of-stock scenario gracefully
+❌ Create order error: error: column "quality" of relation "order_items" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:139:9 {
+  length: 132,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '132',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1066',
+  routine: 'checkInsertTargets'
 }
-📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
-✅ Response sent successfully
-
-stdout | tests/integration/error-handling.test.ts
-
-✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232224.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232224.json
 
 stdout | tests/integration/auth.routes.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232222.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232222.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668235.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668235.json
 
-stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles out-of-stock scenario gracefully
-❌ Create order error: error: column "subtotal" of relation "orders" does not exist
+stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles concurrent orders for the same item
+❌ Create order error: error: column "quality" of relation "order_items" does not exist
     at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:89:27 {
-  length: 128,
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:139:9 {
+  length: 132,
   severity: 'ERROR',
   code: '42703',
   detail: undefined,
   hint: undefined,
-  position: '138',
-  internalPosition: undefined,
-  internalQuery: undefined,
-  where: undefined,
-  schema: undefined,
-  table: undefined,
-  column: undefined,
-  dataType: undefined,
-  constraint: undefined,
-  file: 'parse_target.c',
-  line: '1066',
-  routine: 'checkInsertTargets'
-}
-
-stderr | tests/integration/orders.routes.test.ts > POST /api/orders > creates a new order with valid data
-❌ Create order error: error: column "subtotal" of relation "orders" does not exist
-    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:89:27 {
-  length: 128,
-  severity: 'ERROR',
-  code: '42703',
-  detail: undefined,
-  hint: undefined,
-  position: '138',
+  position: '132',
   internalPosition: undefined,
   internalQuery: undefined,
   where: undefined,
@@ -244,40 +271,16 @@ stderr | tests/integration/orders.routes.test.ts > POST /api/orders > creates a 
 }
 
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles concurrent orders for the same item
-❌ Create order error: error: column "subtotal" of relation "orders" does not exist
+❌ Create order error: error: column "quality" of relation "order_items" does not exist
     at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:89:27 {
-  length: 128,
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:139:9 {
+  length: 132,
   severity: 'ERROR',
   code: '42703',
   detail: undefined,
   hint: undefined,
-  position: '138',
-  internalPosition: undefined,
-  internalQuery: undefined,
-  where: undefined,
-  schema: undefined,
-  table: undefined,
-  column: undefined,
-  dataType: undefined,
-  constraint: undefined,
-  file: 'parse_target.c',
-  line: '1066',
-  routine: 'checkInsertTargets'
-}
-
-stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles concurrent orders for the same item
-❌ Create order error: error: column "subtotal" of relation "orders" does not exist
-    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:89:27 {
-  length: 128,
-  severity: 'ERROR',
-  code: '42703',
-  detail: undefined,
-  hint: undefined,
-  position: '138',
+  position: '132',
   internalPosition: undefined,
   internalQuery: undefined,
   where: undefined,
@@ -292,40 +295,16 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handle
 }
 
 stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > allows admin to cancel an order and restore inventory
-❌ Create order error: error: column "subtotal" of relation "orders" does not exist
+❌ Create order error: error: column "quality" of relation "order_items" does not exist
     at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:89:27 {
-  length: 128,
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:139:9 {
+  length: 132,
   severity: 'ERROR',
   code: '42703',
   detail: undefined,
   hint: undefined,
-  position: '138',
-  internalPosition: undefined,
-  internalQuery: undefined,
-  where: undefined,
-  schema: undefined,
-  table: undefined,
-  column: undefined,
-  dataType: undefined,
-  constraint: undefined,
-  file: 'parse_target.c',
-  line: '1066',
-  routine: 'checkInsertTargets'
-}
-
-stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > validates customer input sanitization during checkout
-❌ Create order error: error: column "subtotal" of relation "orders" does not exist
-    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:89:27 {
-  length: 128,
-  severity: 'ERROR',
-  code: '42703',
-  detail: undefined,
-  hint: undefined,
-  position: '138',
+  position: '132',
   internalPosition: undefined,
   internalQuery: undefined,
   where: undefined,
@@ -342,17 +321,28 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > valida
 stderr | tests/integration/storefront.routes.test.ts
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
 
-stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles multiple items in a single order
-❌ Create order error: error: column "subtotal" of relation "orders" does not exist
+stdout | tests/integration/storefront.routes.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668255.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668255.json
+
+stderr | tests/integration/orders.routes.test.ts > POST /api/orders > handles transaction rollback on inventory update failure
+❌ Create order error: Error: Inventory item not found: 999999
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:133:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > validates customer input sanitization during checkout
+❌ Create order error: error: column "quality" of relation "order_items" does not exist
     at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:89:27 {
-  length: 128,
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:139:9 {
+  length: 132,
   severity: 'ERROR',
   code: '42703',
   detail: undefined,
   hint: undefined,
-  position: '138',
+  position: '132',
   internalPosition: undefined,
   internalQuery: undefined,
   where: undefined,
@@ -366,35 +356,75 @@ stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handle
   routine: 'checkInsertTargets'
 }
 
-stderr | tests/e2e/checkout.flow.test.ts
-⚠️ Unexpected database pool error: terminating connection due to administrator command
+stderr | tests/integration/inventory.routes.test.ts > GET /api/admin/inventory > requires authentication
+❌ No admin token found in cookies
+
+stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles multiple items in a single order
+❌ Create order error: error: column "quality" of relation "order_items" does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:139:9 {
+  length: 132,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: undefined,
+  position: '132',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_target.c',
+  line: '1066',
+  routine: 'checkInsertTargets'
+}
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders > requires authentication
+❌ No admin token found in cookies
 
 stderr | tests/e2e/checkout.flow.test.ts
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
-
-stdout | tests/integration/storefront.routes.test.ts
-
-✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232241.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232241.json
+⚠️ Unexpected database pool error: terminating connection due to administrator command
 
 stdout | tests/e2e/checkout.flow.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232227.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232227.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668240.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668240.json
 
-stderr | tests/integration/orders.routes.test.ts > POST /api/orders > handles transaction rollback on inventory update failure
-❌ Create order error: error: column "subtotal" of relation "orders" does not exist
-    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg@8.16.3\node_modules\pg\lib\client.js:545:17
+stderr | tests/integration/inventory.routes.test.ts > PATCH /api/admin/inventory/:id > requires authentication
+❌ No admin token found in cookies
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > requires authentication
+❌ No admin token found in cookies
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > returns order details
+❌ Database query error: column oi.quality does not exist
+   Query: SELECT
+        o.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', oi.id,
+              'card_id', oi.card_id,
+              'inventory_id', oi.inventory_id,
+   Params: [1]
+   Code: 42703
+❌ Get admin order error: error: column oi.quality does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:89:27 {
-  length: 128,
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:358:25 {
+  length: 167,
   severity: 'ERROR',
   code: '42703',
   detail: undefined,
-  hint: undefined,
-  position: '138',
+  hint: 'Perhaps you meant to reference the column "oi.quantity".',
+  position: '268',
   internalPosition: undefined,
   internalQuery: undefined,
   where: undefined,
@@ -403,10 +433,52 @@ stderr | tests/integration/orders.routes.test.ts > POST /api/orders > handles tr
   column: undefined,
   dataType: undefined,
   constraint: undefined,
-  file: 'parse_target.c',
-  line: '1066',
-  routine: 'checkInsertTargets'
+  file: 'parse_relation.c',
+  line: '3729',
+  routine: 'errorMissingColumn'
 }
+
+stderr | tests/integration/inventory.routes.test.ts > DELETE /api/admin/inventory/:id > requires authentication
+❌ No admin token found in cookies
+
+stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > returns 404 for non-existent order
+❌ Database query error: column oi.quality does not exist
+   Query: SELECT
+        o.*,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', oi.id,
+              'card_id', oi.card_id,
+              'inventory_id', oi.inventory_id,
+   Params: [999999]
+   Code: 42703
+❌ Get admin order error: error: column oi.quality does not exist
+    at C:\Git_Repos\mana_meeples_singles_market\node_modules\.pnpm\pg-pool@3.10.1_pg@8.16.3\node_modules\pg-pool\index.js:45:11
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+    at Object.query (C:\Git_Repos\mana_meeples_singles_market\apps\api\src\lib\db.ts:68:22)
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:358:25 {
+  length: 167,
+  severity: 'ERROR',
+  code: '42703',
+  detail: undefined,
+  hint: 'Perhaps you meant to reference the column "oi.quantity".',
+  position: '268',
+  internalPosition: undefined,
+  internalQuery: undefined,
+  where: undefined,
+  schema: undefined,
+  table: undefined,
+  column: undefined,
+  dataType: undefined,
+  constraint: undefined,
+  file: 'parse_relation.c',
+  line: '3729',
+  routine: 'errorMissingColumn'
+}
+
+stderr | tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > requires authentication
+❌ No admin token found in cookies
 
 stderr | tests/integration/inventory.routes.test.ts
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
@@ -414,8 +486,8 @@ stderr | tests/integration/inventory.routes.test.ts
 stdout | tests/integration/inventory.routes.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232240.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232240.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668236.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668236.json
 
 stderr | tests/integration/orders.routes.test.ts
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
@@ -423,85 +495,56 @@ stderr | tests/integration/orders.routes.test.ts
 stdout | tests/integration/orders.routes.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232242.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155232242.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668249.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761155668249.json
 
- ❯ tests/e2e/checkout.flow.test.ts (6) 17138ms
-   ❯ Complete Checkout Flow (E2E) (6) 8213ms
-     × completes a full customer journey from browsing to order placement 1594ms
-     × handles out-of-stock scenario gracefully 1389ms
-     × handles concurrent orders for the same item 1348ms
-     × allows admin to cancel an order and restore inventory 1344ms
-     × validates customer input sanitization during checkout 1268ms
-     × handles multiple items in a single order 1270ms
- ✓ tests/integration/auth.routes.test.ts (6) 11062ms
- ✓ tests/integration/cards.search.test.ts (1) 9094ms
- ✓ tests/integration/error-handling.test.ts (7) 10843ms
- ❯ tests/integration/inventory.routes.test.ts (16) 25780ms
-   ❯ POST /api/admin/inventory (6) 7976ms
-     × requires authentication 1541ms
-     ✓ creates new inventory with valid data 1299ms
-     × updates existing inventory on conflict 1315ms
-     ✓ rejects invalid card_id 1324ms
-     ✓ rejects negative stock quantity 1231ms
-     ✓ rejects missing required fields 1265ms
-   ❯ GET /api/admin/inventory (3) 2886ms
-     × requires authentication 1003ms
-     × returns paginated inventory list 921ms
-     × filters inventory by card_id 962ms
-   ❯ PATCH /api/admin/inventory/:id (4) 3518ms
-     × requires authentication 878ms
-     × updates inventory stock quantity 870ms
-     × updates inventory price 880ms
-     ✓ returns 404 for non-existent inventory 891ms
-   ❯ DELETE /api/admin/inventory/:id (3) 2667ms
-     × requires authentication 893ms
-     × deletes inventory item 896ms
-     ✓ returns 404 for non-existent inventory 878ms
- ❯ tests/integration/orders.routes.test.ts (19) 28133ms
-   ❯ POST /api/orders (6) 7438ms
-     × creates a new order with valid data 1385ms
-     × validates required customer fields 1274ms
-     ✓ validates items array is not empty 1327ms
-     ✓ validates item quantity limits 1277ms
-     ✓ validates email format 1217ms
-     × handles transaction rollback on inventory update failure 959ms
-   ❯ GET /api/admin/orders (5) 4495ms
-     × requires authentication 874ms
-       - [ beforeEach ]
-     × returns paginated orders list 944ms
-       | [ beforeEach ]
-     × filters orders by status 904ms
-       \ [ beforeEach ]
-     × supports pagination 877ms
-       | [ beforeEach ]
-     × searches orders by customer email 896ms
-       | [ beforeEach ]
-   ❯ GET /api/admin/orders/:id (3) 2653ms
-     × requires authentication 876ms
-       - [ beforeEach ]
-     × returns order details 902ms
-       \ [ beforeEach ]
-     × returns 404 for non-existent order 875ms
-       / [ beforeEach ]
-   ❯ PATCH /api/admin/orders/:id/status (5) 2845ms
-     × requires authentication 735ms
-       \ [ beforeEach ]
-     × updates order status 574ms
-       / [ beforeEach ]
-     × validates status enum values 521ms
-       - [ beforeEach ]
-     × allows adding notes when updating status 496ms
-       | [ beforeEach ]
-     × returns 404 for non-existent order 517ms
-       - [ beforeEach ]
- ✓ tests/integration/storefront.routes.test.ts (5) 16374ms
+ ❯ tests/e2e/checkout.flow.test.ts (6) 18254ms
+   ❯ Complete Checkout Flow (E2E) (6) 7997ms
+     × completes a full customer journey from browsing to order placement 1547ms
+     × handles out-of-stock scenario gracefully 1350ms
+     × handles concurrent orders for the same item 1326ms
+     × allows admin to cancel an order and restore inventory 1330ms
+     × validates customer input sanitization during checkout 1328ms
+     × handles multiple items in a single order 1117ms
+ ✓ tests/integration/auth.routes.test.ts (6) 12558ms
+ ✓ tests/integration/cards.search.test.ts (1) 10916ms
+ ✓ tests/integration/error-handling.test.ts (7) 9591ms
+ ❯ tests/integration/inventory.routes.test.ts (16) 26056ms
+   ❯ POST /api/admin/inventory (6) 8403ms
+     ✓ requires authentication 1708ms
+     ✓ creates new inventory with valid data 1505ms
+     × updates existing inventory on conflict 1326ms
+     ✓ rejects invalid card_id 1296ms
+     ✓ rejects negative stock quantity 1285ms
+     ✓ rejects missing required fields 1282ms
+   ✓ GET /api/admin/inventory (3) 2977ms
+   ❯ PATCH /api/admin/inventory/:id (4) 3551ms
+     ✓ requires authentication 876ms
+     ✓ updates inventory stock quantity 879ms
+     × updates inventory price 901ms
+     ✓ returns 404 for non-existent inventory 894ms
+   ✓ DELETE /api/admin/inventory/:id (3) 2694ms
+ ❯ tests/integration/orders.routes.test.ts (19) 27940ms
+   ❯ POST /api/orders (6) 8569ms
+     × creates a new order with valid data 1761ms
+     × validates required customer fields 1493ms
+     ✓ validates items array is not empty 1332ms
+     ✓ validates item quantity limits 1321ms
+     ✓ validates email format 1318ms
+     × handles transaction rollback on inventory update failure 1343ms
+   ✓ GET /api/admin/orders (5) 4796ms
+   ❯ GET /api/admin/orders/:id (3) 2745ms
+     ✓ requires authentication 925ms
+     × returns order details 886ms
+     × returns 404 for non-existent order 934ms
+   ✓ PATCH /api/admin/orders/:id/status (5) 3408ms
+ ✓ tests/integration/storefront.routes.test.ts (5) 16296ms
  ✓ tests/unit/auth.validateCredentials.test.ts (4)
  ✓ tests/unit/slugify.test.ts (1)
  ✓ tests/unit/utils.test.ts (43)
  ✓ tests/unit/validation.test.ts (10)
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 32 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 13 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > completes a full customer journey from browsing to order placement
 Error: expected 200 "OK", got 404 "Not Found"
@@ -519,7 +562,7 @@ Error: expected 200 "OK", got 404 "Not Found"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/13]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles out-of-stock scenario gracefully
 Error: expected 400 "Bad Request", got 500 "Internal Server Error"
@@ -537,7 +580,7 @@ Error: expected 400 "Bad Request", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/13]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles concurrent orders for the same item
 AssertionError: expected +0 to be 1 // Object.is equality
@@ -556,7 +599,7 @@ AssertionError: expected +0 to be 1 // Object.is equality
     247|     expect(failed.length).toBe(1);
     248|     expect(failed[0].body.error).toMatch(/stock|inventory/i);
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/13]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > allows admin to cancel an order and restore inventory
 Error: expected 201 "Created", got 500 "Internal Server Error"
@@ -574,7 +617,7 @@ Error: expected 201 "Created", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/13]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > validates customer input sanitization during checkout
 Error: expected 201 "Created", got 500 "Internal Server Error"
@@ -592,7 +635,7 @@ Error: expected 201 "Created", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[5/13]⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles multiple items in a single order
 Error: expected 201 "Created", got 500 "Internal Server Error"
@@ -610,25 +653,7 @@ Error: expected 201 "Created", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/32]⎯
-
- FAIL  tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > requires authentication
-Error: expected 401 "Unauthorized", got 200 "OK"
- ❯ tests/integration/inventory.routes.test.ts:51:8
-     49|         language: "English"
-     50|       })
-     51|       .expect(401);
-       |        ^
-     52|
-     53|     expect(res.body).toHaveProperty("error");
- ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
- ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
- ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
- ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
- ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
- ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[6/13]⎯
 
  FAIL  tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > updates existing inventory on conflict
 AssertionError: expected '7.99' to be 7.99 // Object.is equality
@@ -647,151 +672,26 @@ AssertionError: expected '7.99' to be 7.99 // Object.is equality
     105|     expect(res.body.inventory.stock_quantity).toBe(20);
     106|   });
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/32]⎯
-
- FAIL  tests/integration/inventory.routes.test.ts > GET /api/admin/inventory > requires authentication
-Error: expected 401 "Unauthorized", got 404 "Not Found"
- ❯ tests/integration/inventory.routes.test.ts:167:8
-    165|     const res = await request(app)
-    166|       .get("/api/admin/inventory")
-    167|       .expect(401);
-       |        ^
-    168|
-    169|     expect(res.body).toHaveProperty("error");
- ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
- ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
- ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
- ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
- ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
- ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/32]⎯
-
- FAIL  tests/integration/inventory.routes.test.ts > GET /api/admin/inventory > returns paginated inventory list
-Error: expected 200 "OK", got 404 "Not Found"
- ❯ tests/integration/inventory.routes.test.ts:176:8
-    174|       .get("/api/admin/inventory")
-    175|       .set("Cookie", authToken)
-    176|       .expect(200);
-       |        ^
-    177|
-    178|     expect(res.body).toHaveProperty("inventory");
- ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
- ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
- ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
- ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
- ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
- ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/32]⎯
-
- FAIL  tests/integration/inventory.routes.test.ts > GET /api/admin/inventory > filters inventory by card_id
-Error: expected 200 "OK", got 404 "Not Found"
- ❯ tests/integration/inventory.routes.test.ts:187:8
-    185|       .set("Cookie", authToken)
-    186|       .query({ card_id: 1001 })
-    187|       .expect(200);
-       |        ^
-    188|
-    189|     expect(res.body.inventory).toBeDefined();
- ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
- ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
- ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
- ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
- ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
- ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/32]⎯
-
- FAIL  tests/integration/inventory.routes.test.ts > PATCH /api/admin/inventory/:id > requires authentication
-Error: expected 401 "Unauthorized", got 404 "Not Found"
- ❯ tests/integration/inventory.routes.test.ts:207:8
-    205|       .patch(`/api/admin/inventory/${inventoryId}`)
-    206|       .send({ stock_quantity: 20 })
-    207|       .expect(401);
-       |        ^
-    208|
-    209|     expect(res.body).toHaveProperty("error");
- ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
- ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
- ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
- ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
- ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
- ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/32]⎯
-
- FAIL  tests/integration/inventory.routes.test.ts > PATCH /api/admin/inventory/:id > updates inventory stock quantity
-Error: expected 200 "OK", got 404 "Not Found"
- ❯ tests/integration/inventory.routes.test.ts:217:8
-    215|       .set("Cookie", authToken)
-    216|       .send({ stock_quantity: 25 })
-    217|       .expect(200);
-       |        ^
-    218|
-    219|     expect(res.body.inventory.stock_quantity).toBe(25);
- ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
- ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
- ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
- ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
- ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
- ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[7/13]⎯
 
  FAIL  tests/integration/inventory.routes.test.ts > PATCH /api/admin/inventory/:id > updates inventory price
-Error: expected 200 "OK", got 404 "Not Found"
- ❯ tests/integration/inventory.routes.test.ts:227:8
-    225|       .set("Cookie", authToken)
-    226|       .send({ price: 9.99 })
+AssertionError: expected '9.99' to be 9.99 // Object.is equality
+
+- Expected:
+9.99
+
++ Received:
+"9.99"
+
+ ❯ tests/integration/inventory.routes.test.ts:229:38
     227|       .expect(200);
-       |        ^
     228|
     229|     expect(res.body.inventory.price).toBe(9.99);
- ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
- ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
- ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
- ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
- ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
- ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+       |                                      ^
+    230|   });
+    231|
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[14/32]⎯
-
- FAIL  tests/integration/inventory.routes.test.ts > DELETE /api/admin/inventory/:id > requires authentication
-Error: expected 401 "Unauthorized", got 404 "Not Found"
- ❯ tests/integration/inventory.routes.test.ts:253:8
-    251|     const res = await request(app)
-    252|       .delete(`/api/admin/inventory/${inventoryId}`)
-    253|       .expect(401);
-       |        ^
-    254|
-    255|     expect(res.body).toHaveProperty("error");
- ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
- ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
- ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
- ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
- ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
- ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[15/32]⎯
-
- FAIL  tests/integration/inventory.routes.test.ts > DELETE /api/admin/inventory/:id > deletes inventory item
-Error: expected 200 "OK", got 404 "Not Found"
- ❯ tests/integration/inventory.routes.test.ts:262:8
-    260|       .delete(`/api/admin/inventory/${inventoryId}`)
-    261|       .set("Cookie", authToken)
-    262|       .expect(200);
-       |        ^
-    263|
-    264|     expect(res.body).toHaveProperty("success");
- ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
- ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
- ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
- ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
- ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
- ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[16/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[8/13]⎯
 
  FAIL  tests/integration/orders.routes.test.ts > POST /api/orders > creates a new order with valid data
 Error: expected 201 "Created", got 500 "Internal Server Error"
@@ -809,7 +709,7 @@ Error: expected 201 "Created", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[17/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[9/13]⎯
 
  FAIL  tests/integration/orders.routes.test.ts > POST /api/orders > validates required customer fields
 AssertionError: expected 'Invalid order data' to contain 'email'
@@ -825,7 +725,7 @@ Received: "Invalid order data"
     102|   });
     103|
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[18/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[10/13]⎯
 
  FAIL  tests/integration/orders.routes.test.ts > POST /api/orders > handles transaction rollback on inventory update failure
 Error: expected 400 "Bad Request", got 500 "Internal Server Error"
@@ -843,64 +743,48 @@ Error: expected 400 "Bad Request", got 500 "Internal Server Error"
  ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
  ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[19/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[11/13]⎯
 
- FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders > requires authentication
- FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders > returns paginated orders list
- FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders > filters orders by status
- FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders > supports pagination
- FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders > searches orders by customer email
-error: column "subtotal" of relation "orders" does not exist
- ❯ ../../node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js:545:17
- ❯ Module.createTestOrder tests/setup/db.ts:156:17
-    154|     `);
-    155|
-    156|     const res = await client.query(
-       |                 ^
-    157|       `INSERT INTO orders (customer_email, customer_name, subtotal, tax, shipping, total, status)
-    158|        VALUES ($1, $2, $3, $4, $5, $6, $7)
- ❯ tests/integration/orders.routes.test.ts:203:5
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[20/32]⎯
-
- FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > requires authentication
  FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > returns order details
+Error: expected 200 "OK", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:279:8
+    277|       .get(`/api/admin/orders/${orderId}`)
+    278|       .set("Cookie", authToken)
+    279|       .expect(200);
+       |        ^
+    280|
+    281|     expect(res.body).toHaveProperty("order");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
+
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[12/13]⎯
+
  FAIL  tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > returns 404 for non-existent order
-error: column "subtotal" of relation "orders" does not exist
- ❯ ../../node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js:545:17
- ❯ Module.createTestOrder tests/setup/db.ts:156:17
-    154|     `);
-    155|
-    156|     const res = await client.query(
-       |                 ^
-    157|       `INSERT INTO orders (customer_email, customer_name, subtotal, tax, shipping, total, status)
-    158|        VALUES ($1, $2, $3, $4, $5, $6, $7)
- ❯ tests/integration/orders.routes.test.ts:264:15
+Error: expected 404 "Not Found", got 500 "Internal Server Error"
+ ❯ tests/integration/orders.routes.test.ts:290:8
+    288|       .get("/api/admin/orders/999999")
+    289|       .set("Cookie", authToken)
+    290|       .expect(404);
+       |        ^
+    291|
+    292|     expect(res.body).toHaveProperty("error");
+ ❯ Test._assertStatus ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:309:14
+ ❯ ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:365:13
+ ❯ Test._assertFunction ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:342:13
+ ❯ Test.assert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:195:23
+ ❯ localAssert ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:138:14
+ ❯ Server.<anonymous> ../../node_modules/.pnpm/supertest@7.1.4/node_modules/supertest/lib/test.js:152:11
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[21/32]⎯
-
- FAIL  tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > requires authentication
- FAIL  tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > updates order status
- FAIL  tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > validates status enum values
- FAIL  tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > allows adding notes when updating status
- FAIL  tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > returns 404 for non-existent order
-error: column "subtotal" of relation "orders" does not exist
- ❯ ../../node_modules/.pnpm/pg@8.16.3/node_modules/pg/lib/client.js:545:17
- ❯ Module.createTestOrder tests/setup/db.ts:156:17
-    154|     `);
-    155|
-    156|     const res = await client.query(
-       |                 ^
-    157|       `INSERT INTO orders (customer_email, customer_name, subtotal, tax, shipping, total, status)
-    158|        VALUES ($1, $2, $3, $4, $5, $6, $7)
- ❯ tests/integration/orders.routes.test.ts:300:15
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[22/32]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[13/13]⎯
 
  Test Files  3 failed | 8 passed (11)
-      Tests  32 failed | 86 passed (118)
-   Start at  06:47:11
-   Duration  29.29s (transform 609ms, setup 0ms, collect 6.17s, tests 118.57s, environment 2ms, prepare 1.33s)
+      Tests  13 failed | 105 passed (118)
+   Start at  06:54:27
+   Duration  29.09s (transform 561ms, setup 0ms, collect 6.02s, tests 121.77s, environment 2ms, prepare 1.34s)
 
  FAIL  Tests failed. Watching for file changes...
        press h to show help, press q to quit

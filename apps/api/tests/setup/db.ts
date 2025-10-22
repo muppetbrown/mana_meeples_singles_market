@@ -154,10 +154,10 @@ export async function createTestOrder(customerId: number = 1) {
     `);
     
     const res = await client.query(
-      `INSERT INTO orders (customer_email, customer_name, subtotal, tax, shipping, total, status)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO orders (customer_email, customer_name, total, status, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, NOW(), NOW())
        RETURNING id`,
-      ['test@example.com', 'Test Customer', 50.00, 5.00, 10.00, 65.00, 'pending']
+      ['test@example.com', 'Test Customer', 65.00, 'pending']
     );
     return res.rows[0]?.id;
   } finally {

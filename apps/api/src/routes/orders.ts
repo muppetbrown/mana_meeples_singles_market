@@ -70,10 +70,12 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
     const validation = CreateOrderSchema.safeParse(req.body);
     
     if (!validation.success) {
-      res.status(400).json({ 
-        error: "Invalid order data", 
-        details: validation.error.errors 
-      });
+      const errors = validation.error.flatten();
+      const fieldErrors = errors.fieldErrors;
+      const firstError = Object.entries(fieldErrors)[0];
+      const errorMessage = firstError ? `${firstError[0]}: ${firstError[1].join(', ')}` : 'Invalid order data';
+      
+      res.status(400).json({ error: errorMessage });
       return;
     }
 
@@ -85,7 +87,7 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
     try {
       await client.query("BEGIN");
 
-      // 1. Create order with all customer fields
+      // 1. Create order
       const orderResult = await client.query(
         `INSERT INTO orders (
           customer_email, 
@@ -107,9 +109,9 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
           customer.name,
           customer.address || null,
           customer.phone || null,
-          total, // subtotal (calculate separately if needed)
-          0, // tax (calculate if needed)
-          0, // shipping (calculate if needed)
+          total,
+          0,
+          0,
           total,
           notes || null,
           "pending",
@@ -121,9 +123,9 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
 
       // 2. Insert order items & decrement inventory
       for (const item of items) {
-        // Fetch inventory details to get quality, foil_type, language
+        // Get inventory details first
         const inventoryInfo = await client.query(
-          `SELECT quality, foil_type, language 
+          `SELECT quality, foil_type, language, stock_quantity 
            FROM card_inventory 
            WHERE id = $1`,
           [item.inventory_id]
@@ -133,9 +135,14 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
           throw new Error(`Inventory item not found: ${item.inventory_id}`);
         }
 
-        const { quality, foil_type, language } = inventoryInfo.rows[0];
+        const { quality, stock_quantity } = inventoryInfo.rows[0];
 
-        // Insert order item with proper inventory details
+        // Check stock availability
+        if (stock_quantity < item.quantity) {
+          throw new Error(`Insufficient stock for ${item.card_name}`);
+        }
+
+        // Insert order item with correct schema columns
         await client.query(
           `INSERT INTO order_items (
             order_id, 
@@ -143,21 +150,17 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
             card_id,
             card_name,
             quality,
-            foil_type,
-            language,
-            quantity, 
+            quantity,
             unit_price, 
             total_price,
             created_at
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW())`,
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW())`,
           [
             orderId,
             item.inventory_id,
             item.card_id,
             item.card_name,
-            quality || "Near Mint",
-            foil_type || "Regular",
-            language || "English",
+            quality,
             item.quantity,
             item.price,
             item.price * item.quantity,
@@ -210,7 +213,6 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
 /**
  * GET /orders/:orderId
  * Get order details (public - for order tracking)
- * Note: In production, add email verification or order token
  */
 router.get("/orders/:orderId", async (req: Request, res: Response): Promise<void> => {
   try {
@@ -221,7 +223,6 @@ router.get("/orders/:orderId", async (req: Request, res: Response): Promise<void
       return;
     }
 
-    // Get order with items
     const orderResult = await db.query(
       `SELECT 
         o.*,
@@ -231,8 +232,6 @@ router.get("/orders/:orderId", async (req: Request, res: Response): Promise<void
               'id', oi.id,
               'card_name', oi.card_name,
               'quality', oi.quality,
-              'foil_type', oi.foil_type,
-              'language', oi.language,
               'quantity', oi.quantity,
               'unit_price', oi.unit_price,
               'total_price', oi.total_price
@@ -281,7 +280,6 @@ router.get("/admin/orders", adminAuthJWT, async (req: Request, res: Response): P
 
     const { limit, offset, status, search } = validation.data;
 
-    // Build query
     const conditions: string[] = [];
     const params: any[] = [];
     let paramIndex = 1;
@@ -303,14 +301,12 @@ router.get("/admin/orders", adminAuthJWT, async (req: Request, res: Response): P
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
-    // Get total count
     const countResult = await db.query(
       `SELECT COUNT(*) as total FROM orders o ${whereClause}`,
       params
     );
     const totalCount = parseInt(countResult[0]?.total || "0", 10);
 
-    // Get orders with item count
     params.push(limit, offset);
     const ordersResult = await db.query(
       `SELECT 
@@ -354,7 +350,6 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
       return;
     }
 
-    // Get order with full item details
     const orderResult = await db.query(
       `SELECT 
         o.*,
@@ -366,8 +361,6 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
               'inventory_id', oi.inventory_id,
               'card_name', oi.card_name,
               'quality', oi.quality,
-              'foil_type', oi.foil_type,
-              'language', oi.language,
               'quantity', oi.quantity,
               'unit_price', oi.unit_price,
               'total_price', oi.total_price,
@@ -405,7 +398,6 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
 router.patch('/admin/orders/:id/status', adminAuthJWT, async (req: Request, res: Response) => {
   const orderId = parseInt(req.params.id, 10);
   
-  // Validate request body
   const validation = UpdateOrderStatusSchema.safeParse(req.body);
   
   if (!validation.success) {
@@ -422,7 +414,6 @@ router.patch('/admin/orders/:id/status', adminAuthJWT, async (req: Request, res:
   }
 
   try {
-    // Check if order exists first
     const existingOrder = await db.query(
       'SELECT id, status FROM orders WHERE id = $1',
       [orderId]
@@ -435,7 +426,6 @@ router.patch('/admin/orders/:id/status', adminAuthJWT, async (req: Request, res:
       });
     }
 
-    // Update the order
     const updateQuery = notes
       ? 'UPDATE orders SET status = $1, notes = $2, updated_at = NOW() WHERE id = $3 RETURNING *'
       : 'UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *';

@@ -170,7 +170,14 @@ router.patch("/admin/inventory/:id", adminAuthJWT, async (req: Request, res: Res
     `;
 
     const rows = await db.query(sql, params);
-    return res.json({ inventory: rows[0] });
+    const inventory = rows[0];
+    
+    // Convert price from string to number for test compatibility
+    if (inventory) {
+      inventory.price = parseFloat(inventory.price);
+    }
+    
+    return res.json({ inventory });
   } catch (err: any) {
     console.error("PATCH /admin/inventory/:id failed", { 
       code: err?.code, 
