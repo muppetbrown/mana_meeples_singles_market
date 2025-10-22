@@ -381,8 +381,10 @@ export async function bootstrapMinimalSchema() {
         inventory_id integer NOT NULL REFERENCES card_inventory(id),
         card_id integer NOT NULL REFERENCES cards(id),
         card_name text NOT NULL,
+        quality varchar(50) NOT NULL,        
         quantity integer NOT NULL,
-        price numeric(10,2) NOT NULL,
+        unit_price numeric(10,2) NOT NULL,   
+        total_price numeric(10,2) NOT NULL,  
         created_at timestamp DEFAULT CURRENT_TIMESTAMP
       );
       
