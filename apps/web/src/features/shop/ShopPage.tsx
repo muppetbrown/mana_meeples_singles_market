@@ -391,7 +391,7 @@ const TCGShop: React.FC = () => {
   
   // Fetch cards when games are loaded or filters change
   useEffect(() => {
-    if (games.length > 0) {
+    if (games?.length > 0) {
       fetchCards();
     }
   }, [fetchCards, games]);

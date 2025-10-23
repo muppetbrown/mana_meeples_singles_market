@@ -3,6 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { api, ENDPOINTS } from '@/lib/api';
 import type { SearchFilters } from '@/types';
 
+// ============================================================================
+// Types
+// ============================================================================
+
 interface Game {
   id: number;
   name: string;
@@ -16,100 +20,232 @@ interface Set {
   count?: number;
 }
 
+interface FilterOption {
+  value: string;
+  label: string;
+  count: number;
+}
+
 interface FilterOptions {
   games: Game[];
   sets: Set[];
-  rarities: Array<{ value: string; label: string; count: number }>;
-  qualities: Array<{ value: string; label: string; count: number }>;
-  foilTypes: Array<{ value: string; label: string; count: number }>;
-  treatments: Array<{ value: string; label: string; count: number }>;
+  rarities: FilterOption[];
+  qualities: FilterOption[];
+  foilTypes: FilterOption[];
+  treatments: FilterOption[];
 }
 
-export function useShopFilters() {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    games: [],
-    sets: [],
-    rarities: [],
-    qualities: [],
-    foilTypes: [],
-    treatments: []
-  });
+// ============================================================================
+// Constants
+// ============================================================================
 
-  // Parse filters from URL
-  const filters: SearchFilters = useMemo(() => ({
+const EMPTY_FILTER_OPTIONS: FilterOptions = {
+  games: [],
+  sets: [],
+  rarities: [],
+  qualities: [],
+  foilTypes: [],
+  treatments: []
+};
+
+const BOOLEAN_TRUE = 'true';
+
+// ============================================================================
+// Helper Functions
+// ============================================================================
+
+/**
+ * Parse search params into typed SearchFilters object
+ */
+function parseFiltersFromParams(searchParams: URLSearchParams): SearchFilters {
+  return {
     game: searchParams.get('game') || undefined,
     set: searchParams.get('set') || undefined,
     rarity: searchParams.getAll('rarity'),
     quality: searchParams.getAll('quality'),
     foilType: searchParams.getAll('foilType'),
-    minPrice: searchParams.get('minPrice') ? Number(searchParams.get('minPrice')) : undefined,
-    maxPrice: searchParams.get('maxPrice') ? Number(searchParams.get('maxPrice')) : undefined,
-    inStockOnly: searchParams.get('inStockOnly') === 'true'
-  }), [searchParams]);
+    minPrice: parseOptionalNumber(searchParams.get('minPrice')),
+    maxPrice: parseOptionalNumber(searchParams.get('maxPrice')),
+    inStockOnly: searchParams.get('inStockOnly') === BOOLEAN_TRUE
+  };
+}
 
-  // Load filter options on mount
+/**
+ * Parse string to number, returning undefined if invalid
+ */
+function parseOptionalNumber(value: string | null): number | undefined {
+  if (!value) return undefined;
+  const parsed = Number(value);
+  return isNaN(parsed) ? undefined : parsed;
+}
+
+/**
+ * Convert filter value to URL parameter format
+ */
+function serializeFilterValue(value: unknown): string | null {
+  if (value === undefined || value === null || value === '') {
+    return null;
+  }
+  return String(value);
+}
+
+// ============================================================================
+// Hook
+// ============================================================================
+
+export function useShopFilters() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [filterOptions, setFilterOptions] = useState<FilterOptions>(EMPTY_FILTER_OPTIONS);
+
+  // --------------------------------------------------------------------------
+  // Derived State
+  // --------------------------------------------------------------------------
+
+  const filters = useMemo(
+    () => parseFiltersFromParams(searchParams),
+    [searchParams]
+  );
+
+  // --------------------------------------------------------------------------
+  // Effects
+  // --------------------------------------------------------------------------
+
+  /**
+   * Load available filter options from API on mount
+   */
   useEffect(() => {
+    let isCancelled = false;
+
     const loadOptions = async () => {
       setIsLoading(true);
+      setError(null);
+
       try {
         const options = await api.get<FilterOptions>(ENDPOINTS.CARDS.FILTERS);
-        setFilterOptions(options);
-      } catch (err: any) {
-        setError(err.message || 'Failed to load filters');
+        
+        // Prevent state update if component unmounted
+        if (isCancelled) return;
+
+        // Validate response structure
+        if (!options || typeof options !== 'object') {
+          throw new Error('Invalid filter options response');
+        }
+
+        setFilterOptions({
+          games: options.games ?? [],
+          sets: options.sets ?? [],
+          rarities: options.rarities ?? [],
+          qualities: options.qualities ?? [],
+          foilTypes: options.foilTypes ?? [],
+          treatments: options.treatments ?? []
+        });
+      } catch (err) {
+        if (isCancelled) return;
+
+        const errorMessage = err instanceof Error 
+          ? err.message 
+          : 'Failed to load filters';
+        
+        setError(errorMessage);
         console.error('Filter loading error:', err);
+        
+        // Keep empty arrays on error - component remains functional
+        setFilterOptions(EMPTY_FILTER_OPTIONS);
       } finally {
-        setIsLoading(false);
+        if (!isCancelled) {
+          setIsLoading(false);
+        }
       }
     };
+
     loadOptions();
+
+    // Cleanup: prevent state updates after unmount
+    return () => {
+      isCancelled = true;
+    };
   }, []);
 
+  // --------------------------------------------------------------------------
+  // Actions
+  // --------------------------------------------------------------------------
+
+  /**
+   * Update one or more filters in the URL
+   * Preserves existing filters not included in updates
+   */
   const updateFilters = useCallback((updates: Partial<SearchFilters>) => {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev);
+
       Object.entries(updates).forEach(([key, value]) => {
+        // Remove existing values for this key
         next.delete(key);
-        if (value !== undefined && value !== null && value !== '') {
-          if (Array.isArray(value)) {
-            value.forEach(v => next.append(key, String(v)));
-          } else {
-            next.set(key, String(value));
+
+        // Add new value(s) if present
+        if (Array.isArray(value)) {
+          // Handle multi-select filters (rarity, quality, etc.)
+          value.forEach(v => {
+            const serialized = serializeFilterValue(v);
+            if (serialized !== null) {
+              next.append(key, serialized);
+            }
+          });
+        } else {
+          // Handle single-value filters
+          const serialized = serializeFilterValue(value);
+          if (serialized !== null) {
+            next.set(key, serialized);
           }
         }
       });
+
       return next;
     });
   }, [setSearchParams]);
 
+  /**
+   * Remove all active filters, resetting to default state
+   */
   const clearFilters = useCallback(() => {
     setSearchParams({});
   }, [setSearchParams]);
 
-  const searchCards = useCallback(async (searchTerm?: string) => {
-    // This method can be implemented if needed
-    // For now, returning empty array
-    return [];
-  }, []);
-
-  const getFilterOptions = useCallback(async () => {
+  /**
+   * Get current filter options (memoized)
+   * Useful for components that need the full options object
+   */
+  const getFilterOptions = useCallback(() => {
     return filterOptions;
   }, [filterOptions]);
 
+  // --------------------------------------------------------------------------
+  // Return API
+  // --------------------------------------------------------------------------
+
   return {
+    // Current active filters
     filters,
+    
+    // Filter manipulation
     updateFilters,
     clearFilters,
-    searchCards,
-    getFilterOptions,
-    isLoading,
-    error,
-    // Expose these for components that need them directly:
+    
+    // Filter options data
     games: filterOptions.games,
     sets: filterOptions.sets,
+    rarities: filterOptions.rarities,
+    qualities: filterOptions.qualities,
+    foilTypes: filterOptions.foilTypes,
+    treatments: filterOptions.treatments,
     filterOptions,
-    loading: isLoading
+    getFilterOptions,
+    
+    // Loading state
+    isLoading,
+    loading: isLoading, // Alias for backward compatibility
+    error
   };
 }

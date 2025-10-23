@@ -83,9 +83,13 @@ class ApiClient {
         credentials: 'include' // Include cookies for sessions
       });
 
+      // Clone the response BEFORE any reads, so we can read it multiple times
+      const responseClone = response.clone();
+
       // Handle non-OK responses
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
+        // Use the cloned response for error handling
+        const errorData = await responseClone.json().catch(() => ({}));
         throw {
           status: response.status,
           message: errorData.error || errorData.message || response.statusText,
@@ -93,7 +97,7 @@ class ApiClient {
         };
       }
 
-      // Parse response
+      // Parse response (using original, not clone)
       const data = await response.json();
 
       // Validate with schema if provided
