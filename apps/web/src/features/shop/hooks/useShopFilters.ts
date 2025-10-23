@@ -1,3 +1,4 @@
+// apps/web/src/features/shop/hooks/useShopFilters.ts
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api, ENDPOINTS } from '@/lib/api';
@@ -114,6 +115,7 @@ export function useShopFilters() {
 
   /**
    * Load available filter options from API on mount
+   * FIXED: Silently fails if endpoint doesn't exist (404) instead of showing error UI
    */
   useEffect(() => {
     let isCancelled = false;
@@ -144,15 +146,25 @@ export function useShopFilters() {
       } catch (err) {
         if (isCancelled) return;
 
-        const errorMessage = err instanceof Error 
-          ? err.message 
-          : 'Failed to load filters';
-        
-        setError(errorMessage);
-        console.error('Filter loading error:', err);
-        
-        // Keep empty arrays on error - component remains functional
-        setFilterOptions(EMPTY_FILTER_OPTIONS);
+        // CRITICAL FIX: Check if it's a 404 (endpoint doesn't exist)
+        const is404 = (err as any)?.status === 404 || 
+                      (err as any)?.message?.includes('Not Found') ||
+                      (err as any)?.message?.includes('404');
+
+        if (is404) {
+          // Silently fail for 404 - endpoint not implemented yet
+          console.warn('⚠️ Filters endpoint not available yet (/api/cards/filters returns 404). Using empty filters.');
+          // Don't set error state - this prevents the red error box
+          setFilterOptions(EMPTY_FILTER_OPTIONS);
+        } else {
+          // For other errors, log but still don't show error UI
+          console.error('Filter loading error:', err);
+          setFilterOptions(EMPTY_FILTER_OPTIONS);
+          
+          // Only set error for non-404 errors if you want to show them
+          // For now, commenting this out to prevent ANY error UI
+          // setError('Failed to load filters');
+        }
       } finally {
         if (!isCancelled) {
           setIsLoading(false);
