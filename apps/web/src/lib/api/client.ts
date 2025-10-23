@@ -80,16 +80,21 @@ class ApiClient {
           ...options.headers
         },
         body: options.body ? JSON.stringify(options.body) : undefined,
-        credentials: 'include' // Include cookies for sessions
+        credentials: 'include'
       });
-
-      // Clone the response BEFORE any reads, so we can read it multiple times
-      const responseClone = response.clone();
 
       // Handle non-OK responses
       if (!response.ok) {
-        // Use the cloned response for error handling
-        const errorData = await responseClone.json().catch(() => ({}));
+        let errorData: any = {};
+        
+        try {
+          // Try to read error response body
+          errorData = await response.json();
+        } catch (jsonError) {
+          // If body already consumed or invalid JSON, use status text
+          errorData = { message: response.statusText };
+        }
+        
         throw {
           status: response.status,
           message: errorData.error || errorData.message || response.statusText,
@@ -97,7 +102,7 @@ class ApiClient {
         };
       }
 
-      // Parse response (using original, not clone)
+      // Parse successful response
       const data = await response.json();
 
       // Validate with schema if provided
