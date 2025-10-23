@@ -23,7 +23,7 @@ import type {
 } from '@/types';
 
 // Lazy load VirtualCardGrid for code splitting
-const VirtualCardGrid = React.lazy(() => import('./components/CardDisplay/CardGrid.js'));
+import CardGrid from './components/CardDisplay/CardGrid.js';
 
 // ============================================================================
 // LOCAL TYPE DEFINITIONS (not exported elsewhere)
@@ -965,21 +965,15 @@ const TCGShop: React.FC = () => {
                 /* Grid View */
                 cards.length > VIRTUAL_SCROLL_CONFIG.INITIAL_BATCH_SIZE ? (
                   <ErrorBoundary>
-                    <Suspense fallback={
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
-                        {Array.from({ length: 12 }, (_, i) => <CardSkeleton key={i} />)}
-                      </div>
-                    }>
-                      <VirtualCardGrid
-                        cards={cards as any}
-                        cardProps={{
-                          currency,
-                          selectedVariations,
-                          onVariationChange: handleVariationChange,
-                          onAddToCart: handleAddToCart
-                        }}
-                      />
-                    </Suspense>
+                    <CardGrid
+                      cards={cards as any}
+                      cardProps={{
+                        currency,
+                        selectedVariations,
+                        onVariationChange: handleVariationChange,
+                        onAddToCart: handleAddToCart
+                      }}
+                    />
                   </ErrorBoundary>
                 ) : (
                   <div>
