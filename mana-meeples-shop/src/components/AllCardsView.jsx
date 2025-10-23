@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { Package, Search, RefreshCw, Filter, Sparkles } from 'lucide-react';
-
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+import { Package, Search, RefreshCw, Filter, Sparkles, AlertTriangle } from 'lucide-react';
+import { ENDPOINTS, withQuery } from '@/lib/api/endpoints';
+import { api } from '@/lib/api';
 
 const AllCardsView = () => {
   const [cards, setCards] = useState([]);
@@ -13,48 +13,60 @@ const AllCardsView = () => {
   const [filterGame, setFilterGame] = useState('all');
   const [filterSet, setFilterSet] = useState('all');
   const [expandedCards, setExpandedCards] = useState(new Set());
+  const [totalCount, setTotalCount] = useState(0);
+  const [showingTruncatedWarning, setShowingTruncatedWarning] = useState(false);
 
   // DEFINE ALL FUNCTIONS FIRST, BEFORE useEffect CALLS THEM
 
   const fetchGames = useCallback(async () => {
     try {
-      const response = await fetch(`${API_URL}/games`);
-      if (!response.ok) throw new Error('Failed to fetch games');
-      const data = await response.json();
+      const data = await api.get(ENDPOINTS.GAMES);
       setGames(data.games || []);
     } catch (error) {
       console.error('Error fetching games:', error);
     }
-  }, []); // No dependencies - API_URL is constant
+  }, []);
 
   const fetchSets = useCallback(async (gameId) => {
     try {
-      const response = await fetch(`${API_URL}/games/${gameId}/sets`);
-      if (!response.ok) throw new Error('Failed to fetch sets');
-      const data = await response.json();
-      setSets(data.sets || []);
+      const data = await api.get(withQuery(ENDPOINTS.SETS, { game_id: gameId }));
+      setSets(data || []);
     } catch (error) {
       console.error('Error fetching sets:', error);
     }
-  }, []); // No dependencies
+  }, []);
+
+  const fetchCardCount = useCallback(async () => {
+    try {
+      const params = {};
+      if (filterGame !== 'all') params.game_id = filterGame;
+      if (filterSet !== 'all') params.set_id = filterSet;
+      if (searchTerm) params.search = searchTerm;
+
+      const data = await api.get(withQuery(ENDPOINTS.CARD_COUNT, params));
+      setTotalCount(data.count || 0);
+      
+      // Show warning if we'll be truncating results
+      setShowingTruncatedWarning(data.count > 1000);
+    } catch (error) {
+      console.error('Error fetching card count:', error);
+      setTotalCount(0);
+    }
+  }, [filterGame, filterSet, searchTerm]);
 
   const fetchCards = useCallback(async () => {
     setLoading(true);
     try {
-      const params = new URLSearchParams({ limit: 1000 });
-      if (filterGame !== 'all') params.append('game_id', filterGame);
-      if (filterSet !== 'all') params.append('set_id', filterSet);
-      if (searchTerm) params.append('search', searchTerm);
+      // First get the total count
+      await fetchCardCount();
 
-      const response = await fetch(`${API_URL}/admin/all-cards?${params}`, {
-        credentials: 'include'
-      });
+      // Then fetch cards with limit
+      const params = { limit: 1000 };
+      if (filterGame !== 'all') params.game_id = filterGame;
+      if (filterSet !== 'all') params.set_id = filterSet;
+      if (searchTerm) params.search = searchTerm;
 
-      if (!response.ok) {
-        throw new Error(`Failed to fetch cards: ${response.statusText}`);
-      }
-
-      const data = await response.json();
+      const data = await api.get(withQuery(ENDPOINTS.CARDS, params));
       setCards(data.cards || []);
       setError(null);
     } catch (error) {
@@ -63,7 +75,7 @@ const AllCardsView = () => {
     } finally {
       setLoading(false);
     }
-  }, [filterGame, filterSet, searchTerm]);
+  }, [filterGame, filterSet, searchTerm, fetchCardCount]);
 
   // NOW USE EFFECTS - AFTER ALL FUNCTIONS ARE DEFINED
 
@@ -83,7 +95,7 @@ const AllCardsView = () => {
     }
   }, [filterGame, fetchSets]);
 
-  // Filter cards by search term
+  // Filter cards by search term (client-side filtering of already loaded cards)
   const filteredCards = useMemo(() => {
     if (!searchTerm) return cards;
     const search = searchTerm.toLowerCase();
@@ -122,8 +134,6 @@ const AllCardsView = () => {
       : 'bg-slate-50 text-slate-600 border border-slate-200';
   };
 
-  // ... rest of your component (the JSX return statement stays the same)
-
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -155,7 +165,12 @@ const AllCardsView = () => {
         <div>
           <h2 className="text-2xl font-bold text-slate-900">All Cards Database</h2>
           <p className="text-slate-600 mt-1">
-            {filteredCards.length} cards • {filteredCards.reduce((sum, c) => sum + c.variation_count, 0)} variations
+            {totalCount > 0 && (
+              <>
+                {totalCount.toLocaleString()} total cards • 
+                {filteredCards.reduce((sum, c) => sum + (c.variation_count || 0), 0).toLocaleString()} variations
+              </>
+            )}
           </p>
         </div>
         <button
@@ -166,6 +181,21 @@ const AllCardsView = () => {
           Refresh
         </button>
       </div>
+
+      {/* Truncation Warning */}
+      {showingTruncatedWarning && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+          <div>
+            <p className="text-amber-900 font-medium">
+              Showing first 1,000 of {totalCount.toLocaleString()} cards
+            </p>
+            <p className="text-amber-700 text-sm mt-1">
+              Use filters to narrow results, or contact support for bulk operations.
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="bg-white rounded-lg border border-slate-200 p-4 space-y-4">
@@ -253,11 +283,11 @@ const AllCardsView = () => {
                     <div className="flex items-center gap-3 flex-shrink-0">
                       <div className="text-right">
                         <div className="text-sm font-medium text-slate-900">
-                          {card.variation_count} {card.variation_count === 1 ? 'variation' : 'variations'}
+                          {card.variation_count || 0} {card.variation_count === 1 ? 'variation' : 'variations'}
                         </div>
                         {card.has_inventory && (
                           <div className="text-xs text-green-600 font-medium">
-                            {card.total_stock} in stock
+                            {card.total_stock || 0} in stock
                           </div>
                         )}
                       </div>
@@ -267,7 +297,7 @@ const AllCardsView = () => {
                 </div>
               </button>
 
-              {isExpanded && (
+              {isExpanded && card.variations && Array.isArray(card.variations) && (
                 <div className="border-t border-slate-200 bg-slate-50 p-4">
                   <div className="space-y-2">
                     {card.variations.map((variation, idx) => (
@@ -277,24 +307,23 @@ const AllCardsView = () => {
                       >
                         <div className="flex items-center gap-3">
                           <div className="font-medium text-slate-900">
-                            {variation.variation_label}
+                            {variation.quality} - {variation.foil_type || 'Regular'} - {variation.language || 'English'}
                           </div>
 
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-1 rounded text-xs font-medium ${getTreatmentColor(variation.treatment)}`}>
-                              {variation.treatment}
-                            </span>
+                          {variation.finish && (
                             <span className={`px-2 py-1 rounded text-xs font-medium ${getFinishColor(variation.finish)}`}>
                               {variation.finish}
                             </span>
-                          </div>
+                          )}
                         </div>
 
                         <div className="flex items-center gap-4">
-                          {variation.inventory_count > 0 ? (
+                          {variation.stock > 0 ? (
                             <div className="text-sm">
                               <span className="text-green-600 font-medium">{variation.stock} in stock</span>
-                              <span className="text-slate-500 ml-2">({variation.inventory_count} entries)</span>
+                              {variation.price && (
+                                <span className="text-slate-500 ml-2">${Number(variation.price).toFixed(2)}</span>
+                              )}
                             </div>
                           ) : (
                             <span className="text-sm text-slate-500">Not in inventory</span>
