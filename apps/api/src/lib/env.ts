@@ -18,7 +18,7 @@ const EnvSchema = z.object({
   // Admin authentication
   ADMIN_USERNAME: z.string().min(1, "ADMIN_USERNAME is required"),
   ADMIN_PASSWORD_HASH: z.string().min(1, "ADMIN_PASSWORD_HASH is required"),
-  ADMIN_PASSWORD: z.string().min(1, "ADMIN_PASSWORD is required"),
+  ADMIN_PASSWORD: z.string().optional(), // Optional for production
 
   // CORS settings
   ALLOWED_ORIGINS: z.string().default("http://localhost:5173"),

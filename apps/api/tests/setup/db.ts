@@ -116,15 +116,29 @@ export async function seedInventory(cardId: number, quantity: number = 10) {
       )
     `);
     
-    const res = await client.query(
-      `INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock_quantity)
-       VALUES ($1, NULL, 'Near Mint', 'Regular', 'English', 5.99, $2)
-       ON CONFLICT (card_id, variation_id, quality, foil_type, language) 
-       DO UPDATE SET stock_quantity = EXCLUDED.stock_quantity
-       RETURNING id`,
-      [cardId, quantity]
-    );
-    return res.rows[0]?.id;
+    // Create MULTIPLE variations to support tests that need 2+ variations
+    const variations = [
+      { quality: 'Near Mint', foil_type: 'Regular', language: 'English', price: 5.99 },
+      { quality: 'Near Mint', foil_type: 'Foil', language: 'English', price: 12.99 },
+      { quality: 'Lightly Played', foil_type: 'Regular', language: 'English', price: 4.99 },
+    ];
+
+    const insertedIds = [];
+    
+    for (const variation of variations) {
+      const res = await client.query(
+        `INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock_quantity)
+         VALUES ($1, NULL, $2, $3, $4, $5, $6)
+         ON CONFLICT (card_id, variation_id, quality, foil_type, language) 
+         DO UPDATE SET stock_quantity = EXCLUDED.stock_quantity
+         RETURNING id`,
+        [cardId, variation.quality, variation.foil_type, variation.language, variation.price, quantity]
+      );
+      insertedIds.push(res.rows[0]?.id);
+    }
+    
+    // Return the first ID for backward compatibility
+    return insertedIds[0];
   } finally {
     await client.end();
   }
