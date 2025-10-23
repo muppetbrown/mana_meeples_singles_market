@@ -1,77 +1,98 @@
-// ============================================================================
-// lib/api/endpoints.ts - Centralized endpoint definitions
-// ============================================================================
-
 /**
- * API endpoint paths
- * Single source of truth for all API routes
- * 
- * IMPORTANT: All endpoints include the /api prefix because the backend
- * mounts all routes at app.use("/api", routes)
+ * API Endpoint Constants
+ * All endpoints include the /api prefix as that's how they're mounted in Express
  */
+
 export const ENDPOINTS = {
-  // Health checks (no /api prefix - mounted at root)
-  HEALTH: '/health',
-  
-  // Authentication - CORRECTED PATHS
+  // ============================================================================
+  // AUTHENTICATION
+  // ============================================================================
   AUTH: {
-    LOGIN: '/api/auth/admin/login',      // ✅ Full path with /api prefix
-    LOGOUT: '/api/auth/admin/logout',    // ✅ Full path with /api prefix
-    CHECK: '/api/auth/admin/check'       // ✅ Full path with /api prefix (was VERIFY)
+    ADMIN_LOGIN: '/api/auth/admin/login',
+    ADMIN_LOGOUT: '/api/auth/admin/logout',
+    ADMIN_CHECK: '/api/auth/admin/check',
   },
 
-  // Cards
-  CARDS: {
-    LIST: '/api/cards',
-    COUNT: '/api/cards/count',
-    FILTERS: '/api/cards/filters',
-    BY_ID: (id: number) => `/api/cards/${id}`
+  // ============================================================================
+  // PUBLIC STOREFRONT ENDPOINTS
+  // ============================================================================
+  CARDS: '/api/cards',
+  CARD_DETAIL: (id: string | number) => `/api/cards/${id}`,
+  GAMES: '/api/games',
+  SETS: '/api/sets',
+  FILTERS: '/api/filters',
+  ORDERS: '/api/orders',
+  
+  // Card Variations
+  VARIATIONS: (cardId: string | number) => `/api/variations/${cardId}`,
+
+  // ============================================================================
+  // ADMIN ENDPOINTS (Require Authentication)
+  // ============================================================================
+  ADMIN: {
+    // Order Management
+    ORDERS: '/api/admin/orders',
+    ORDER_DETAIL: (id: string | number) => `/api/admin/orders/${id}`,
+    UPDATE_ORDER_STATUS: (id: string | number) => `/api/admin/orders/${id}/status`,
+
+    // Card Management
+    CARDS: '/api/admin/cards',
+    ALL_CARDS: '/api/admin/all-cards',
+    CARD_DETAIL: (id: string | number) => `/api/admin/cards/${id}`,
+
+    // Inventory Management
+    INVENTORY: '/api/admin/inventory',
+    INVENTORY_ITEM: (id: string | number) => `/api/admin/inventory/${id}`,
+
+    // Analytics
+    ANALYTICS: '/api/admin/analytics',
+
+    // Bulk Operations
+    IMPORT_CARDS: '/api/admin/import-card-data',
+    REFRESH_PRICES: '/api/admin/refresh-prices',
+    BULK_CREATE_FOILS: '/api/admin/bulk-create-foils',
+    BULK_CREATE_VARIATIONS: '/api/admin/bulk-create-variations',
+
+    // Variations Management
+    VARIATIONS: (cardId: string | number) => `/api/admin/variations/${cardId}`,
   },
 
-  // Storefront
-  STOREFRONT: {
-    CARDS: '/api/storefront/cards',
-    FILTERS: '/api/storefront/filters'
-  },
-
-  // Orders
-  ORDERS: {
-    LIST: '/api/admin/orders',
-    BY_ID: (id: number) => `/api/admin/orders/${id}`,
-    STATUS: (id: number) => `/api/admin/orders/${id}/status`,
-    CREATE: '/api/orders'
-  },
-
-  // Inventory
-  INVENTORY: {
-    LIST: '/api/admin/inventory',
-    UPDATE: '/api/admin/inventory/update',
-    BULK: '/api/admin/inventory/bulk'
-  },
-
-  // Analytics
-  ANALYTICS: {
-    OVERVIEW: '/api/admin/analytics/overview',
-    SALES: '/api/admin/analytics/sales'
-  }
+  // ============================================================================
+  // HEALTH CHECK (No /api prefix)
+  // ============================================================================
+  HEALTH: '/health',
 } as const;
 
 /**
- * Build query string from params
+ * Helper function to build query strings
  */
 export function buildQueryString(params: Record<string, any>): string {
   const searchParams = new URLSearchParams();
   
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
+      // Handle arrays
       if (Array.isArray(value)) {
-        value.forEach(v => searchParams.append(key, String(value)));
+        value.forEach(item => searchParams.append(key, String(item)));
       } else {
         searchParams.append(key, String(value));
       }
     }
   });
-
+  
   const query = searchParams.toString();
   return query ? `?${query}` : '';
 }
+
+/**
+ * Helper to add query params to an endpoint
+ */
+export function withQuery(endpoint: string, params?: Record<string, any>): string {
+  if (!params || Object.keys(params).length === 0) {
+    return endpoint;
+  }
+  return endpoint + buildQueryString(params);
+}
+
+// Type exports for better type safety
+export type Endpoint = typeof ENDPOINTS;

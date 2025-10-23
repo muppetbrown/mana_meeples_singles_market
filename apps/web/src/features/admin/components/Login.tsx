@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Lock, User, AlertCircle } from 'lucide-react';
 import { api } from '@/lib/api';
+import { ENDPOINTS } from '@/lib/api/endpoints';
 
 
 const AdminLogin = () => {
@@ -22,20 +23,16 @@ const AdminLogin = () => {
         hasPassword: !!credentials.password
       });
 
-      const data = await api.post<{ success: boolean; message: string }>('/auth/admin/login', credentials);
+      // ✅ Use endpoint constant instead of hardcoded string
+      const data = await api.post<{ success: boolean; message: string }>(
+        ENDPOINTS.AUTH.ADMIN_LOGIN,  // ← Changed this line
+        credentials
+      );
 
       console.log('Login response:', data);
-      console.log('Response type:', typeof data);
-      console.log('Response keys:', data ? Object.keys(data) : 'No keys (data is null/undefined)');
 
-      // Handle the case where data is undefined or null
       if (!data) {
         throw new Error('Login failed: Received empty response from server');
-      }
-
-      // Check if the response has the expected structure
-      if (typeof data !== 'object') {
-        throw new Error(`Login failed: Invalid response type (${typeof data})`);
       }
 
       if (data.success) {
@@ -49,10 +46,8 @@ const AdminLogin = () => {
         message: err.message,
         status: err.status,
         info: err.info,
-        stack: err.stack
       });
 
-      // Provide more specific error messages based on the error type
       let errorMessage = 'Login failed. Please try again.';
 
       if (err.status === 400) {
@@ -65,8 +60,6 @@ const AdminLogin = () => {
         errorMessage = 'Login request timed out. Please try again.';
       } else if (err.message?.includes('NetworkError') || err.message?.includes('fetch')) {
         errorMessage = 'Network error. Please check your connection and try again.';
-      } else if (err.message?.includes('JSON') || err.message?.includes('parse')) {
-        errorMessage = 'Server response error. Please try again or contact administrator.';
       }
 
       setError(errorMessage);
