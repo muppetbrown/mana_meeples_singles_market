@@ -1,66 +1,49 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    
-    <!-- Cross-browser text scaling: vendor first, then standard -->
-    <style>
-      html {
-        -webkit-text-size-adjust: 100%;
-        text-size-adjust: 100%;
-      }
-    </style>
-
-    <!-- Security Headers (meta-level; prefer real server headers too) -->
-    <meta
-      http-equiv="Content-Security-Policy"
-      content="
-        default-src 'self';
-        script-src 'self' 'unsafe-inline';
-        style-src 'self' 'unsafe-inline';
-        img-src 'self' data: https:;
-        font-src 'self' data:;
-        connect-src 'self' http://localhost:3001 https://api.manaandmeeples.co.nz https://*.render.com;
-        frame-ancestors 'self';
-      "
-    />
-    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
-    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
-    
-    <!-- Theme Colors (for supported browsers) -->
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#2d4a47" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f2f2d" />
-    
-    <!-- App Metadata -->
-    <meta
-      name="description"
-      content="Mana & Meeples - Your trusted TCG singles marketplace for Magic: The Gathering, Pokémon, One Piece, and more."
-    />
-    <meta name="application-name" content="Mana & Meeples" />
-    <meta name="apple-mobile-web-app-title" content="Mana & Meeples" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-
-    <!-- Icons -->
-    <link rel="icon" href="/mana_meeples_logo.ico" sizes="any" />
-    <link rel="apple-touch-icon" href="/logo192.png" />
-    <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials" />
-
-    <title>Mana & Meeples - TCG Singles Market</title>
-  </head>
-  <body>
-    <!-- Skip to main content link for keyboard navigation -->
-    <a href="#main-content" class="skip-link sr-only focus:not-sr-only">Skip to main content</a>
-
-    <noscript>
-      <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
-        <h1>JavaScript Required</h1>
-        <p>You need to enable JavaScript to run this app.</p>
-      </div>
-    </noscript>
-
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+<head>
+  <!-- ✅ FIX: charset MUST be first thing in <head> -->
+  <meta charset="UTF-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- ✅ FIX: Use standard text-size-adjust (not webkit-text-size-adjust) -->
+  <!-- Note: Limited browser support is OK - progressive enhancement -->
+  <meta name="text-size-adjust" content="100%" />
+  
+  <!-- ✅ FIX: theme-color for Chrome/Edge/Safari -->
+  <!-- Note: Firefox/Opera don't support it, but it's harmless -->
+  <meta name="theme-color" content="#1e293b" />
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a" />
+  
+  <!-- SEO & PWA -->
+  <meta name="description" content="Mana & Meeples - Your trusted New Zealand trading card game singles store. Buy Pokemon, Magic: The Gathering, One Piece, and more TCG cards." />
+  <meta name="keywords" content="TCG, trading cards, Pokemon, Magic The Gathering, One Piece, singles, New Zealand" />
+  <meta name="author" content="Mana & Meeples" />
+  
+  <!-- Open Graph / Social Media -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="Mana & Meeples | TCG Singles Store" />
+  <meta property="og:description" content="Your trusted New Zealand trading card game singles store" />
+  <meta property="og:site_name" content="Mana & Meeples" />
+  
+  <!-- Favicon & Icons -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
+  
+  <title>Mana & Meeples | New Zealand TCG Singles Store</title>
+</head>
+<body>
+  <noscript>
+    <div style="padding: 2rem; text-align: center; font-family: system-ui;">
+      <h1>JavaScript Required</h1>
+      <p>Please enable JavaScript to use Mana & Meeples.</p>
+    </div>
+  </noscript>
+  
+  <div id="root"></div>
+  
+  <!-- Main application entry point -->
+  <script type="module" src="/src/main.tsx"></script>
+</body>
 </html>

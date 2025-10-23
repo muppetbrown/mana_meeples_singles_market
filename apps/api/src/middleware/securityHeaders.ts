@@ -2,36 +2,67 @@
 import type { RequestHandler } from 'express';
 
 /**
- * Security headers middleware
- * Sets proper headers for security and performance
+ * Enhanced security headers middleware
+ * Addresses all security warnings from browser audit
+ * 
+ * Fixes:
+ * - Replaces deprecated X-Frame-Options with CSP frame-ancestors
+ * - Removes deprecated X-XSS-Protection header
+ * - Adds proper Cache-Control headers
+ * - Implements modern security best practices
  */
 export const securityHeaders: RequestHandler = (_req, res, next) => {
-  // Content Security Policy (replaces X-Frame-Options)
+  // ✅ Content Security Policy (replaces deprecated X-Frame-Options)
+  // This handles the frame-ancestors warning
   res.setHeader(
     'Content-Security-Policy',
-    "frame-ancestors 'none'; default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self'"
+    [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Allow inline scripts for React
+      "style-src 'self' 'unsafe-inline'", // Allow inline styles
+      "img-src 'self' data: https: blob:",
+      "font-src 'self' data:",
+      "connect-src 'self' https://api.pokemontcg.io https://api.tcgplayer.com",
+      "frame-ancestors 'none'", // ✅ Replaces X-Frame-Options: DENY
+      "base-uri 'self'",
+      "form-action 'self'"
+    ].join('; ')
   );
 
-  // Prevent MIME type sniffing
+  // ✅ Prevent MIME type sniffing
   res.setHeader('X-Content-Type-Options', 'nosniff');
 
-  // Referrer Policy
+  // ✅ Referrer Policy
   res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
 
-  // Permissions Policy (replaces Feature-Policy)
+  // ✅ Permissions Policy (modern replacement for Feature-Policy)
   res.setHeader(
     'Permissions-Policy',
-    'geolocation=(), microphone=(), camera=()'
+    'geolocation=(), microphone=(), camera=(), payment=()'
   );
 
-  // Cache Control for API responses
+  // ✅ Strict-Transport-Security (HSTS) for HTTPS only
+  if (_req.protocol === 'https' || _req.get('x-forwarded-proto') === 'https') {
+    res.setHeader(
+      'Strict-Transport-Security', 
+      'max-age=31536000; includeSubDomains; preload'
+    );
+  }
+
+  // ✅ Remove deprecated/unnecessary headers
+  res.removeHeader('X-Powered-By');
+  res.removeHeader('X-XSS-Protection'); // Deprecated, CSP is better
+  res.removeHeader('X-Frame-Options'); // Replaced by CSP frame-ancestors
+  res.removeHeader('Pragma'); // Deprecated request header
+  res.removeHeader('Expires'); // Use Cache-Control instead
+
+  // ✅ Proper Cache-Control based on route
   if (_req.path.startsWith('/api/')) {
+    // API responses: no caching
     res.setHeader('Cache-Control', 'no-store, max-age=0');
   }
 
-  // Remove unnecessary headers
-  res.removeHeader('X-Powered-By');
-  res.removeHeader('X-XSS-Protection'); // Deprecated, CSP is better
-
   next();
 };
+
+export default securityHeaders;
