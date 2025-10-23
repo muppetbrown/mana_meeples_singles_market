@@ -3,11 +3,43 @@ import express from "express";
 import type { Request, Response } from "express";
 import { z } from "zod";
 
-function stripTags(input: string): string { return input.replace(/<\/?[^>]+(>|$)/g, ""); }
 import { db, pool } from "../lib/db.js";
 import { adminAuthJWT } from "../middleware/auth.js";
 
 const router = express.Router();
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Strips HTML tags from input string for security
+ */
+function stripTags(input: string): string { 
+  return input.replace(/<\/?[^>]+(>|$)/g, ""); 
+}
+
+/**
+ * Formats Zod validation errors into user-friendly messages
+ * Handles nested field errors (e.g., customer.email)
+ */
+function formatValidationError(error: z.ZodError): string {
+  const issues = error.issues;
+  
+  if (issues.length === 0) {
+    return 'Invalid request data';
+  }
+
+  // Get the first error
+  const firstIssue = issues[0];
+  
+  // Build the field path (e.g., ["customer", "email"] -> "customer.email")
+  const fieldPath = firstIssue.path.join('.');
+  const message = firstIssue.message;
+  
+  // Return formatted error with field path and message
+  return fieldPath ? `${fieldPath}: ${message}` : message;
+}
 
 // ============================================================================
 // CONSTANTS
@@ -28,27 +60,29 @@ const ORDER_STATUSES = [
 
 const CreateOrderSchema = z.object({
   customer: z.object({
-    email: z.string().email(),
-    name: z.string().min(1),
+    email: z.string().email("Invalid email address"),
+    name: z.string().min(1, "Name is required"),
     address: z.string().optional(),
     phone: z.string().optional(),
   }),
   items: z.array(
     z.object({
-      inventory_id: z.number().int().positive(),
-      card_id: z.number().int().positive(),
-      card_name: z.string(),
-      quantity: z.number().int().min(1).max(10),
-      price: z.number().positive(),
+      inventory_id: z.number().int().positive("Invalid inventory ID"),
+      card_id: z.number().int().positive("Invalid card ID"),
+      card_name: z.string().min(1, "Card name is required"),
+      quantity: z.number().int().min(1, "Quantity must be at least 1").max(10, "Quantity cannot exceed 10"),
+      price: z.number().positive("Price must be positive"),
     })
-  ).min(1),
-  total: z.number().positive(),
+  ).min(1, "Order must contain at least one item"),
+  total: z.number().positive("Total must be positive"),
   currency: z.string().default("NZD"),
   notes: z.string().optional(),
 });
 
 const UpdateOrderStatusSchema = z.object({
-  status: z.enum(ORDER_STATUSES),
+  status: z.enum(ORDER_STATUSES, {
+    errorMap: () => ({ message: `Status must be one of: ${ORDER_STATUSES.join(', ')}` })
+  }),
   notes: z.string().optional(),
 });
 
@@ -59,6 +93,10 @@ const AdminOrderQuerySchema = z.object({
   search: z.string().optional(),
 });
 
+const OrderIdSchema = z.object({
+  orderId: z.string().regex(/^\d+$/, "Order ID must be numeric"),
+});
+
 // ============================================================================
 // PUBLIC ENDPOINTS
 // ============================================================================
@@ -66,31 +104,39 @@ const AdminOrderQuerySchema = z.object({
 /**
  * POST /orders
  * Create a new order (public - for checkout)
+ * 
+ * Features:
+ * - Input sanitization (HTML tag stripping)
+ * - Email normalization (lowercase)
+ * - Transaction safety (rollback on any error)
+ * - Stock validation and decrement
+ * - Complete order response with items
  */
 router.post("/orders", async (req: Request, res: Response): Promise<void> => {
   try {
     const validation = CreateOrderSchema.safeParse(req.body);
     
     if (!validation.success) {
-      const errors = validation.error.flatten();
-      const fieldErrors = errors.fieldErrors;
-      const firstError = Object.entries(fieldErrors)[0];
-      const errorMessage = firstError ? `${firstError[0]}: ${firstError[1].join(', ')}` : 'Invalid order data';
-      
-      res.status(400).json({ error: errorMessage });
+      res.status(400).json({ error: formatValidationError(validation.error) });
       return;
     }
 
     let { customer, items, total, currency, notes } = validation.data;
-customer = { ...customer, name: stripTags(customer.name), address: customer.address ? stripTags(customer.address) : null, email: customer.email?.toLowerCase?.() ?? customer.email };
+    
+    // Sanitize customer input
+    customer = {
+      ...customer,
+      name: stripTags(customer.name),
+      address: customer.address ? stripTags(customer.address) : undefined,
+      email: customer.email.toLowerCase(),
+    };
 
-    // Start transaction
     const client = await db.getClient();
     
     try {
       await client.query("BEGIN");
 
-      // 1. Create order
+      // 1. Create order record
       const orderResult = await client.query(
         `INSERT INTO orders (
           customer_email, 
@@ -113,8 +159,8 @@ customer = { ...customer, name: stripTags(customer.name), address: customer.addr
           customer.address || null,
           customer.phone || null,
           total,
-          0,
-          0,
+          0, // tax
+          0, // shipping
           total,
           notes || null,
           "pending",
@@ -124,9 +170,9 @@ customer = { ...customer, name: stripTags(customer.name), address: customer.addr
       const orderId = orderResult.rows[0].id;
       const createdAt = orderResult.rows[0].created_at;
 
-      // 2. Insert order items & decrement inventory
+      // 2. Process each order item
       for (const item of items) {
-        // Get inventory details first
+        // Get current inventory details
         const inventoryInfo = await client.query(
           `SELECT quality, foil_type, language, stock_quantity 
            FROM card_inventory 
@@ -140,12 +186,12 @@ customer = { ...customer, name: stripTags(customer.name), address: customer.addr
 
         const { quality, stock_quantity } = inventoryInfo.rows[0];
 
-        // Check stock availability
+        // Validate stock availability
         if (stock_quantity < item.quantity) {
           throw new Error(`Insufficient stock for ${item.card_name}`);
         }
 
-        // Insert order item with correct schema columns
+        // Insert order item
         await client.query(
           `INSERT INTO order_items (
             order_id, 
@@ -170,7 +216,7 @@ customer = { ...customer, name: stripTags(customer.name), address: customer.addr
           ]
         );
 
-        // Decrement inventory
+        // Decrement inventory with atomic check
         const inventoryUpdate = await client.query(
           `UPDATE card_inventory 
            SET stock_quantity = stock_quantity - $1,
@@ -181,58 +227,81 @@ customer = { ...customer, name: stripTags(customer.name), address: customer.addr
         );
 
         if (inventoryUpdate.rows.length === 0) {
-          throw new Error(`Insufficient stock for item: ${item.card_name}`);
+          throw new Error(`Insufficient stock for ${item.card_name}`);
         }
       }
 
       await client.query("COMMIT");
 
-      // Return success
-      const itemsRows = await client.query(
-  `SELECT id, order_id, inventory_id, card_id, quantity, unit_price, total_price FROM order_items WHERE order_id = $1 ORDER BY id`,
-  [orderId]
-);
-res.status(201).json({
-  success: true,
-  order: {
-    id: orderId,
-    status: "pending",
-    total: total,
-    currency: currency,
-    created_at: createdAt,
-    customer_email: customer.email,
-    items: itemsRows.rows,
-  },
-  message: "Order created successfully",
-});
+      // 3. Fetch complete order with items for response
+      const itemsResult = await client.query(
+        `SELECT 
+          id, 
+          inventory_id,
+          card_id,
+          card_name,
+          quality,
+          quantity, 
+          unit_price, 
+          total_price 
+         FROM order_items 
+         WHERE order_id = $1 
+         ORDER BY id`,
+        [orderId]
+      );
+
+      res.status(201).json({
+        success: true,
+        order: {
+          id: orderId,
+          status: "pending",
+          total: total,
+          currency: currency || "NZD",
+          created_at: createdAt,
+          customer_email: customer.email,
+          customer_name: customer.name,
+          items: itemsResult.rows,
+        },
+        message: "Order created successfully",
+      });
+      
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;
     } finally {
       client.release();
     }
-  } catch (error) {
+    
+  } catch (error: any) {
     console.error("❌ Create order error:", error);
-    const msg = String(error?.message || "Failed to create order");
-if (msg.includes("Insufficient stock") || msg.includes("Inventory item not found")) {
-  return res.status(400).json({ error: msg });
-}
-return res.status(500).json({ error: msg });
+    
+    const errorMessage = error?.message || "Failed to create order";
+    
+    // Return appropriate status codes
+    if (errorMessage.includes("Insufficient stock") || 
+        errorMessage.includes("Inventory item not found")) {
+      res.status(400).json({ error: errorMessage });
+      return;
+    }
+    
+    res.status(500).json({ error: errorMessage });
   }
 });
 
 /**
  * GET /orders/:orderId
- * Get order details (public - for order tracking)
+ * Get order details by ID (public - for order tracking)
  */
 router.get("/orders/:orderId", async (req: Request, res: Response): Promise<void> => {
   try {
-    const orderId = parseInt(req.params.orderId, 10);
-
-    if (isNaN(orderId)) {
-      res.status(400).json({ error: "Invalid order ID" });
+    const validation = OrderIdSchema.safeParse(req.params);
+    
+    if (!validation.success) {
+      res.status(400).json({ error: "Invalid order ID format" });
       return;
     }
+
+    const orderId = parseInt(validation.data.orderId, 10);
 
     const orderResult = await db.query(
       `SELECT 
@@ -241,12 +310,14 @@ router.get("/orders/:orderId", async (req: Request, res: Response): Promise<void
           json_agg(
             json_build_object(
               'id', oi.id,
+              'inventory_id', oi.inventory_id,
+              'card_id', oi.card_id,
               'card_name', oi.card_name,
               'quality', oi.quality,
               'quantity', oi.quantity,
               'unit_price', oi.unit_price,
               'total_price', oi.total_price
-            )
+            ) ORDER BY oi.id
           ) FILTER (WHERE oi.id IS NOT NULL),
           '[]'::json
         ) as items
@@ -263,6 +334,7 @@ router.get("/orders/:orderId", async (req: Request, res: Response): Promise<void
     }
 
     res.json({ order: orderResult[0] });
+    
   } catch (error) {
     console.error("❌ Get order error:", error);
     res.status(500).json({ error: "Failed to retrieve order" });
@@ -275,7 +347,7 @@ router.get("/orders/:orderId", async (req: Request, res: Response): Promise<void
 
 /**
  * GET /admin/orders
- * List all orders with filtering (admin only)
+ * List all orders with filtering and pagination (admin only)
  */
 router.get("/admin/orders", adminAuthJWT, async (req: Request, res: Response): Promise<void> => {
   try {
@@ -283,8 +355,7 @@ router.get("/admin/orders", adminAuthJWT, async (req: Request, res: Response): P
 
     if (!validation.success) {
       res.status(400).json({ 
-        error: "Invalid query parameters", 
-        details: validation.error.errors 
+        error: formatValidationError(validation.error)
       });
       return;
     }
@@ -312,18 +383,20 @@ router.get("/admin/orders", adminAuthJWT, async (req: Request, res: Response): P
 
     const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(" AND ")}` : "";
 
+    // Get total count
     const countResult = await db.query(
       `SELECT COUNT(*) as total FROM orders o ${whereClause}`,
       params
     );
     const totalCount = parseInt(countResult[0]?.total || "0", 10);
 
+    // Get paginated orders
     params.push(limit, offset);
     const ordersResult = await db.query(
       `SELECT 
         o.*,
-        COUNT(oi.id) as item_count,
-        SUM(oi.quantity) as total_items
+        COUNT(oi.id)::int as item_count,
+        SUM(oi.quantity)::int as total_items
       FROM orders o
       LEFT JOIN order_items oi ON o.id = oi.order_id
       ${whereClause}
@@ -342,6 +415,7 @@ router.get("/admin/orders", adminAuthJWT, async (req: Request, res: Response): P
         hasMore: offset + limit < totalCount,
       },
     });
+    
   } catch (error) {
     console.error("❌ List orders error:", error);
     res.status(500).json({ error: "Failed to retrieve orders" });
@@ -350,16 +424,18 @@ router.get("/admin/orders", adminAuthJWT, async (req: Request, res: Response): P
 
 /**
  * GET /admin/orders/:orderId
- * Get detailed order information (admin only)
+ * Get detailed order information including card details (admin only)
  */
 router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Response): Promise<void> => {
   try {
-    const orderId = parseInt(req.params.orderId, 10);
-
-    if (isNaN(orderId)) {
-      res.status(400).json({ error: "Invalid order ID" });
+    const validation = OrderIdSchema.safeParse(req.params);
+    
+    if (!validation.success) {
+      res.status(400).json({ error: "Invalid order ID format" });
       return;
     }
+
+    const orderId = parseInt(validation.data.orderId, 10);
 
     const orderResult = await db.query(
       `SELECT 
@@ -377,7 +453,7 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
               'total_price', oi.total_price,
               'card_number', c.card_number,
               'set_name', cs.name
-            )
+            ) ORDER BY oi.id
           ) FILTER (WHERE oi.id IS NOT NULL),
           '[]'::json
         ) as items
@@ -396,6 +472,7 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
     }
 
     res.json({ order: orderResult[0] });
+    
   } catch (error) {
     console.error("❌ Get admin order error:", error);
     res.status(500).json({ error: "Failed to retrieve order" });
@@ -404,57 +481,131 @@ router.get("/admin/orders/:orderId", adminAuthJWT, async (req: Request, res: Res
 
 /**
  * PATCH /admin/orders/:id/status
- * Update order status (admin only)
+ * Update order status with automatic inventory restoration on cancellation (admin only)
+ * 
+ * Features:
+ * - Restores inventory when order is cancelled
+ * - Prevents double restoration
+ * - Transaction safety
+ * - Audit trail via notes
  */
-router.patch('/admin/orders/:id/status', adminAuthJWT, async (req: Request, res: Response) => {
-  const orderId = parseInt(req.params.id, 10);
-  
-  const validation = UpdateOrderStatusSchema.safeParse(req.body);
-  
-  if (!validation.success) {
-    return res.status(400).json({ 
-      error: 'Invalid request data', 
-      details: validation.error.errors 
-    });
-  }
-
-  const { status, notes } = validation.data;
-
-  if (isNaN(orderId)) {
-    return res.status(400).json({ error: 'Invalid order ID' });
-  }
-
+router.patch("/admin/orders/:id/status", adminAuthJWT, async (req: Request, res: Response): Promise<void> => {
   try {
-    const existingOrder = await db.query(
-      'SELECT id, status FROM orders WHERE id = $1',
-      [orderId]
-    );
-
-    if (existingOrder.length === 0) {
-      return res.status(404).json({ 
-        error: 'Order not found',
-        orderId 
-      });
+    const orderId = parseInt(req.params.id, 10);
+    
+    if (isNaN(orderId)) {
+      res.status(400).json({ error: "Invalid order ID" });
+      return;
     }
 
-    const updateQuery = notes
-      ? 'UPDATE orders SET status = $1, notes = $2, updated_at = NOW() WHERE id = $3 RETURNING *'
-      : 'UPDATE orders SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *';
+    const validation = UpdateOrderStatusSchema.safeParse(req.body);
     
-    const updateParams = notes ? [status, notes, orderId] : [status, orderId];
-    const [updatedOrder] = await db.query(updateQuery, updateParams);
+    if (!validation.success) {
+      res.status(400).json({ 
+        error: formatValidationError(validation.error)
+      });
+      return;
+    }
 
-    return res.json({ 
-      order: updatedOrder,
-      message: 'Order status updated successfully' 
-    });
-  } catch (err: any) {
-    console.error('PATCH /admin/orders/:id/status failed', {
-      orderId,
-      code: err?.code,
-      message: err?.message,
-    });
-    return res.status(500).json({ error: 'Failed to update order status' });
+    const { status, notes } = validation.data;
+
+    const client = await db.getClient();
+    
+    try {
+      await client.query("BEGIN");
+
+      // Get current order status and items
+      const orderCheck = await client.query(
+        `SELECT o.status
+         FROM orders o
+         WHERE o.id = $1`,
+        [orderId]
+      );
+
+      if (orderCheck.rows.length === 0) {
+        await client.query("ROLLBACK");
+        res.status(404).json({ error: "Order not found" });
+        return;
+      }
+
+      const currentStatus = orderCheck.rows[0].status;
+
+      // If changing TO cancelled from a non-cancelled status, restore inventory
+      if (status === 'cancelled' && currentStatus !== 'cancelled') {
+        const orderItems = await client.query(
+          `SELECT inventory_id, quantity
+           FROM order_items
+           WHERE order_id = $1`,
+          [orderId]
+        );
+
+        // Restore inventory for each item
+        for (const item of orderItems.rows) {
+          await client.query(
+            `UPDATE card_inventory 
+             SET stock_quantity = stock_quantity + $1,
+                 updated_at = NOW()
+             WHERE id = $2`,
+            [item.quantity, item.inventory_id]
+          );
+        }
+      }
+
+      // Update order status
+      const updateQuery = notes
+        ? `UPDATE orders 
+           SET status = $1, notes = $2, updated_at = NOW() 
+           WHERE id = $3 
+           RETURNING *`
+        : `UPDATE orders 
+           SET status = $1, updated_at = NOW() 
+           WHERE id = $2 
+           RETURNING *`;
+      
+      const updateParams = notes ? [status, notes, orderId] : [status, orderId];
+      const updateResult = await client.query(updateQuery, updateParams);
+
+      await client.query("COMMIT");
+
+      // Fetch complete order with items for response
+      const finalOrder = await db.query(
+        `SELECT
+          o.*,
+          COALESCE(
+            json_agg(
+              json_build_object(
+                'id', oi.id,
+                'card_name', oi.card_name,
+                'quality', oi.quality,
+                'quantity', oi.quantity,
+                'unit_price', oi.unit_price,
+                'total_price', oi.total_price
+              ) ORDER BY oi.id
+            ) FILTER (WHERE oi.id IS NOT NULL),
+            '[]'::json
+          ) as items
+        FROM orders o
+        LEFT JOIN order_items oi ON o.id = oi.order_id
+        WHERE o.id = $1
+        GROUP BY o.id`,
+        [orderId]
+      );
+
+      res.json({ 
+        order: finalOrder[0],
+        message: `Order status updated to ${status}${status === 'cancelled' && currentStatus !== 'cancelled' ? ' (inventory restored)' : ''}` 
+      });
+      
+    } catch (error) {
+      await client.query("ROLLBACK");
+      throw error;
+    } finally {
+      client.release();
+    }
+    
+  } catch (error: any) {
+    console.error("❌ Update order status error:", error);
+    res.status(500).json({ error: "Failed to update order status" });
   }
 });
 

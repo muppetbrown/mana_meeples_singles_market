@@ -1,10 +1,17 @@
+// apps/api/src/routes/storefront.ts
 import express, { type Request, type Response } from "express";
 import { z } from "zod";
 import { db } from "../lib/db.js";
 
 const router = express.Router();
 
-const IdSchema = z.object({ id: z.string().regex(/^\d+$/, "id must be numeric") });
+// ============================================================================
+// VALIDATION SCHEMAS
+// ============================================================================
+
+const IdSchema = z.object({ 
+  id: z.string().regex(/^\d+$/, "id must be numeric") 
+});
 
 const StorefrontQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
@@ -13,42 +20,84 @@ const StorefrontQuery = z.object({
   order: z.enum(['asc', 'desc']).default('asc'),
   search: z.string().trim().max(200).optional(),
   game_id: z.coerce.number().int().optional(),
-  set_id: z.coerce.number().int().optional(),  // CHANGED: Use set_id instead of set_name
+  set_id: z.coerce.number().int().optional(),
   rarity: z.string().trim().max(50).optional(),
 });
 
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
+
+/**
+ * Converts sort field and order into SQL ORDER BY clause
+ */
 function sortToSql(alias: string, sort: string, order: 'asc' | 'desc'): string {
   switch (sort) {
-    case 'number':     return `ORDER BY ${alias}.card_number ${order}, ${alias}.name ${order}`;
-    case 'rarity':     return `ORDER BY ${alias}.rarity ${order}, ${alias}.name ASC`;
+    case 'number':     
+      return `ORDER BY ${alias}.card_number ${order}, ${alias}.name ${order}`;
+    case 'rarity':     
+      return `ORDER BY ${alias}.rarity ${order}, ${alias}.name ASC`;
     case 'created_at': 
       return `ORDER BY ${alias}.created_at ${order}, ${alias}.name ASC`;
     case 'name':
-    default:           return `ORDER BY ${alias}.name ${order}, ${alias}.card_number ASC`;
+    default:           
+      return `ORDER BY ${alias}.name ${order}, ${alias}.card_number ASC`;
   }
 }
 
+// ============================================================================
+// PUBLIC ENDPOINTS
+// ============================================================================
+
+/**
+ * GET /storefront/cards
+ * Returns paginated list of cards with inventory variations
+ * 
+ * Features:
+ * - Filtering by game, set, rarity, search term
+ * - Sorting and pagination
+ * - Aggregated inventory data with pricing
+ * - Consistent CardVariation format (inventory_id, stock)
+ */
 router.get('/cards', async (req: Request, res: Response) => {
   const parsed = StorefrontQuery.safeParse(req.query);
+  
   if (!parsed.success) {
-    return res.status(400).json({ error: 'Invalid query', details: parsed.error.flatten() });
+    return res.status(400).json({ 
+      error: 'Invalid query parameters', 
+      details: parsed.error.flatten() 
+    });
   }
+
   const { page, per_page, sort, order, search, game_id, set_id, rarity } = parsed.data;
 
   const where: string[] = [];
   const params: any[] = [];
 
-  if (typeof game_id === 'number') { params.push(game_id); where.push(`c.game_id = $${params.length}`); }
-  if (typeof set_id === 'number')  { params.push(set_id);  where.push(`c.set_id = $${params.length}`); }
-  if (rarity)                      { params.push(rarity);  where.push(`c.rarity = $${params.length}`); }
+  // Build WHERE conditions
+  if (typeof game_id === 'number') {
+    params.push(game_id);
+    where.push(`c.game_id = $${params.length}`);
+  }
+
+  if (typeof set_id === 'number') {
+    params.push(set_id);
+    where.push(`c.set_id = $${params.length}`);
+  }
+
+  if (rarity) {
+    params.push(rarity);
+    where.push(`c.rarity = $${params.length}`);
+  }
+
   if (search && search.length > 1) {
     params.push(`%${search}%`);
     where.push(`(c.name ILIKE $${params.length} OR c.card_number ILIKE $${params.length})`);
   }
 
-  const whereSql   = where.length ? `WHERE ${where.join(' AND ')}` : '';
+  const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const orderByOut = sortToSql('c', sort, order);
-  const offset     = (page - 1) * per_page;
+  const offset = (page - 1) * per_page;
 
   const sql = `
     SELECT
@@ -126,33 +175,58 @@ router.get('/cards', async (req: Request, res: Response) => {
 
 /**
  * GET /storefront/cards/:id
- * Returns a card with all inventory variations (if any).
+ * Returns a single card with all inventory variations
+ * 
+ * CRITICAL: Returns variations with inventory_id and stock fields
+ * to match CardVariation interface and frontend expectations
  */
 router.get("/cards/:id", async (req: Request, res: Response) => {
   const parsed = IdSchema.safeParse(req.params);
+  
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid card id" });
   }
+
   const id = Number(parsed.data.id);
   const client = await db.getClient();
+  
   try {
+    // Get card details
     const cardRes = await client.query(
       `SELECT c.*
        FROM cards c
        WHERE c.id = $1`,
       [id]
     );
-    if (cardRes.rowCount === 0) return res.status(404).json({ error: "Card not found" });
+    
+    if (cardRes.rowCount === 0) {
+      return res.status(404).json({ error: "Card not found" });
+    }
 
+    // Get inventory variations with proper field aliases
+    // IMPORTANT: Alias 'id' as 'inventory_id' and 'stock_quantity' as 'stock'
+    // to match the CardVariation interface used throughout the app
     const invRes = await client.query(
-      `SELECT id, quality, foil_type, language, stock_quantity, price
+      `SELECT 
+        id AS inventory_id,
+        quality, 
+        foil_type, 
+        language, 
+        stock_quantity AS stock,
+        price
        FROM card_inventory
        WHERE card_id = $1
        ORDER BY id ASC`,
       [id]
     );
 
-    return res.json({ card: { ...cardRes.rows[0], variations: invRes.rows } });
+    return res.json({ 
+      card: { 
+        ...cardRes.rows[0], 
+        variations: invRes.rows 
+      } 
+    });
+    
   } catch (err) {
     console.error("GET /storefront/cards/:id failed", { id, err });
     return res.status(500).json({ error: "Failed to fetch card" });
