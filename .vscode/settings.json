@@ -1,0 +1,19 @@
+{
+  "css.lint.unknownAtRules": "ignore",
+  "scss.lint.unknownAtRules": "ignore",
+  "less.lint.unknownAtRules": "ignore",
+  
+  // Recommended: Install Tailwind CSS IntelliSense extension for autocomplete
+  "tailwindCSS.experimental.classRegex": [
+    ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
+    ["cx\\(([^)]*)\\)", "(?:'|\"|`)([^']*)(?:'|\"|`)"]
+  ],
+  
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  
+  "files.associations": {
+    "*.css": "tailwindcss"
+  }
+}
