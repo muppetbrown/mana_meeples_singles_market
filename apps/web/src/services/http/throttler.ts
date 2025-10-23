@@ -72,11 +72,18 @@ export const defaultThrottler = new RequestThrottler(100);
 
 /**
  * Throttled fetch wrapper
+ * CRITICAL: Clones response to prevent "body stream already read" errors
+ * when React Strict Mode or multiple consumers try to read the same response
  */
 export async function throttledFetch(
   url: string,
   options?: RequestInit
 ): Promise<Response> {
   const key = `${options?.method || 'GET'}:${url}`;
-  return defaultThrottler.throttle(key, () => fetch(url, options));
+  
+  const response = await defaultThrottler.throttle(key, () => fetch(url, options));
+  
+  // ✅ Clone the response before returning
+  // This allows multiple callers to read the body independently
+  return response.clone();
 }
