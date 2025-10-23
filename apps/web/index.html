@@ -4,8 +4,27 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     
-    <!-- Security Headers -->
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:3001 https://api.manaandmeeples.co.nz https://*.render.com;">
+    <!-- Cross-browser text scaling: vendor first, then standard -->
+    <style>
+      html {
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
+      }
+    </style>
+
+    <!-- Security Headers (meta-level; prefer real server headers too) -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="
+        default-src 'self';
+        script-src 'self' 'unsafe-inline';
+        style-src 'self' 'unsafe-inline';
+        img-src 'self' data: https:;
+        font-src 'self' data:;
+        connect-src 'self' http://localhost:3001 https://api.manaandmeeples.co.nz https://*.render.com;
+        frame-ancestors 'self';
+      "
+    />
     <meta http-equiv="X-Content-Type-Options" content="nosniff" />
     <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
     
@@ -14,32 +33,34 @@
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f2f2d" />
     
     <!-- App Metadata -->
-    <meta name="description" content="Mana & Meeples - Your trusted TCG singles marketplace for Magic: The Gathering, Pokémon, One Piece, and more." />
+    <meta
+      name="description"
+      content="Mana & Meeples - Your trusted TCG singles marketplace for Magic: The Gathering, Pokémon, One Piece, and more."
+    />
     <meta name="application-name" content="Mana & Meeples" />
     <meta name="apple-mobile-web-app-title" content="Mana & Meeples" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    
+
     <!-- Icons -->
     <link rel="icon" href="/mana_meeples_logo.ico" sizes="any" />
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials" />
-    
+
     <title>Mana & Meeples - TCG Singles Market</title>
   </head>
   <body>
     <!-- Skip to main content link for keyboard navigation -->
     <a href="#main-content" class="skip-link sr-only focus:not-sr-only">Skip to main content</a>
-    
+
     <noscript>
       <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
         <h1>JavaScript Required</h1>
         <p>You need to enable JavaScript to run this app.</p>
       </div>
     </noscript>
-    
+
     <div id="root"></div>
-    
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

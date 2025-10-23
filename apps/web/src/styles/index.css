@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 :root {
-  /* ✅ Both standard and webkit for broader support */
-  text-size-adjust: 100%;
+  /* Cross-browser text scaling: vendor first, then standard */
   -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -24,8 +24,9 @@ h1, h2, h3, h4, h5, h6 {
 @layer components {
   /* M&M Button Styles */
   .btn-mm-primary {
-    @apply bg-mm-gold text-white border-2 border-mm-gold rounded-mm-sm px-6 py-3 font-bold transition-all duration-300;
-  }
+    /* Limit transitions to colors/border to avoid paint on unrelated props */
+    @apply bg-mm-gold text-white border-2 border-mm-gold rounded-mm-sm px-6 py-3 font-bold transition-colors duration-300;
+   }
 
   .btn-mm-primary:hover,
   .btn-mm-primary:focus {
@@ -35,8 +36,8 @@ h1, h2, h3, h4, h5, h6 {
   }
 
   .btn-mm-secondary {
-    @apply bg-transparent text-mm-forest border-2 border-mm-forest rounded-mm-md px-4 py-2 font-semibold transition-all duration-300;
-  }
+    @apply bg-transparent text-mm-forest border-2 border-mm-forest rounded-mm-md px-4 py-2 font-semibold transition-colors duration-300;
+   }
 
   .btn-mm-secondary:hover,
   .btn-mm-secondary:focus {
@@ -47,24 +48,28 @@ h1, h2, h3, h4, h5, h6 {
 
   /* M&M Card Styles */
   .card-mm {
-    @apply bg-white border-2 border-mm-warmAccent rounded-mm-md p-6 transition-all duration-300 shadow-mm-card;
-  }
+    /* Restrict to transform & box-shadow transitions to stay on compositor */
+    @apply bg-white border-2 border-mm-warmAccent rounded-mm-md p-6 shadow-mm-card duration-300;
+    transition: transform 300ms, box-shadow 300ms, border-color 300ms;
+   }
 
   .card-mm:hover,
   .card-mm:focus-within {
     @apply border-mm-tealBright shadow-mm-card-hover;
-    /* ✅ Use will-change instead of direct transform for better performance */
-    will-change: transform;
-  }
+    /* Use sparingly; it’s fine on hover/focus */
+     will-change: transform;
+   }
 
   .card-mm:hover {
-    transform: translateY(-2px);
-  }
+    /* Promote to GPU to avoid paint on some stacks */
+    transform: translate3d(0, -2px, 0);
+   }
 
   /* M&M Input Styles */
   .input-mm {
-    @apply border-2 border-mm-warmAccent rounded-mm-sm px-3 py-2 bg-white text-mm-darkForest transition-all duration-300;
-  }
+    @apply border-2 border-mm-warmAccent rounded-mm-sm px-3 py-2 bg-white text-mm-darkForest duration-300;
+    transition: border-color 300ms, box-shadow 300ms, background-color 300ms, color 300ms;
+   }
 
   .input-mm:focus {
     @apply border-mm-tealBright bg-white;
