@@ -1,4 +1,4 @@
-// apps/web/src/components/AdminDashboard.tsx
+// apps/web/src/features/admin/components/Dashboard.tsx
 import { useState, useEffect } from 'react';
 import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -12,12 +12,12 @@ const AdminDashboard = () => {
   const [authChecking, setAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'all-cards' | 'analytics' | 'orders'>('inventory');
-  const [currency, setCurrency] = useState<'USD' | 'CAD'>('USD');
+  const [currency, setCurrency] = useState<'USD' | 'CAD'>('USD'); // Currently unused, kept for future
 
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const auth = await api.get<{ authenticated?: boolean; user?: unknown }>('/auth/admin/auth/check');
+        const auth = await api.get<{ authenticated?: boolean; user?: unknown }>('/auth/admin/check');
         if (auth?.authenticated === true || auth?.user) {
           setIsAuthenticated(true);
         } else {
@@ -61,7 +61,6 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      {/* Header */}
       <header className="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
@@ -95,8 +94,8 @@ const AdminDashboard = () => {
               aria-label="Inventory tab"
               aria-current={activeTab === 'inventory' ? 'page' : undefined}
             >
-              <Package className="w-5 h-5" />
-              Inventory
+              <Package className="w-4 h-4" />
+              Inventory Management
             </button>
 
             <button
@@ -106,11 +105,11 @@ const AdminDashboard = () => {
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
-              aria-label="All Cards tab"
+              aria-label="All cards tab"
               aria-current={activeTab === 'all-cards' ? 'page' : undefined}
             >
-              <Package className="w-5 h-5" />
-              All Cards
+              <Package className="w-4 h-4" />
+              All Cards Database
             </button>
 
             <button
@@ -123,7 +122,7 @@ const AdminDashboard = () => {
               aria-label="Analytics tab"
               aria-current={activeTab === 'analytics' ? 'page' : undefined}
             >
-              <DollarSign className="w-5 h-5" />
+              <DollarSign className="w-4 h-4" />
               Analytics
             </button>
 
@@ -137,14 +136,14 @@ const AdminDashboard = () => {
               aria-label="Orders tab"
               aria-current={activeTab === 'orders' ? 'page' : undefined}
             >
-              <ShoppingCart className="w-5 h-5" />
+              <ShoppingCart className="w-4 h-4" />
               Orders
             </button>
           </div>
         </div>
       </header>
 
-      {/* Tab Content */}
+      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {activeTab === 'inventory' && <UnifiedCardsTab mode="inventory" />}
         {activeTab === 'all-cards' && <UnifiedCardsTab mode="all" />}
