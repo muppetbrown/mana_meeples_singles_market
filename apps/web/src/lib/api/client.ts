@@ -9,7 +9,7 @@ import { logError } from '@/services/error/handler';
 /**
  * API Client Configuration
  */
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5173';
 
 /**
  * Type-safe API client
