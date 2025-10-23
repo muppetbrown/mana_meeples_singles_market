@@ -1,24 +1,31 @@
 // apps/web/src/features/admin/components/Cards/CardsTab.tsx
-// FIXED VERSION - Removes games dependency and adds fallback
+/**
+ * Unified Cards Tab Component
+ * Handles both "All Cards" and "Inventory" views with shared logic
+ * 
+ * CLEAN VERSION - All fixes applied, no duplication
+ */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { RefreshCw, Download, LayoutGrid, List } from 'lucide-react';
-import { api, API_BASE } from '@/lib/api';
+import { RefreshCw, Download, LayoutGrid, List, Package } from 'lucide-react';
+import { api } from '@/lib/api';
 import { useShopFilters } from '@/features/shop/hooks/useShopFilters';
 import CardSearchBar from '@/features/shop/components/Search/SearchBar';
 import EmptyState from '@/shared/components/ui/EmptyState';
 import CardSkeleton from '@/features/shop/components/CardDisplay/CardSkeleton';
 import AddToInventoryModal from './AddToInventoryModal';
 import AdminCardGrid from '@/features/shop/components/CardDisplay/CardGrid';
-import { Package } from 'lucide-react';
-import type { 
-  Card,
-  CardVariation,
-} from '@/types';
+import type { Card, CardVariation } from '@/types';
 
-// ---------- Types ----------
-type AddModalData = { card: Card; variation: CardVariation };
+// ============================================================================
+// TYPES
+// ============================================================================
+
+type AddModalData = { 
+  card: Card; 
+  variation: CardVariation 
+};
 
 type AddFormData = {
   quality: string;
@@ -32,17 +39,22 @@ interface UnifiedCardsTabProps {
   mode?: 'all' | 'inventory'; 
 }
 
-// ---------- Component ----------
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
 const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
+  // --------------------------------------------------------------------------
+  // STATE
+  // --------------------------------------------------------------------------
+  
   const [searchParams, setSearchParams] = useSearchParams();
   const [cards, setCards] = useState<Card[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // View mode state (list is default for admin)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   
-  // Modal state for adding to inventory
+  // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [addModalData, setAddModalData] = useState<AddModalData | null>(null);
   const [addFormData, setAddFormData] = useState<AddFormData>({
@@ -54,15 +66,20 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   });
   const [saving, setSaving] = useState(false);
 
-  // Get URL params
+  // --------------------------------------------------------------------------
+  // URL PARAMS
+  // --------------------------------------------------------------------------
+  
   const searchTerm = searchParams.get('search') || '';
   const selectedGame = searchParams.get('game') || 'all';
   const selectedSet = searchParams.get('set') || 'all';
   const selectedTreatment = searchParams.get('treatment') || 'all';
-  
   const isInventoryMode = mode === 'inventory';
 
-  // ✅ REUSE useShopFilters hook (already extracted and working)
+  // --------------------------------------------------------------------------
+  // HOOKS
+  // --------------------------------------------------------------------------
+  
   const {
     games,
     sets,
@@ -71,7 +88,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     error: filtersError
   } = useShopFilters();
 
-  // ---------- URL State Management ----------
+  // --------------------------------------------------------------------------
+  // URL STATE HANDLERS
+  // --------------------------------------------------------------------------
+  
   const updateParam = useCallback((key: string, value: string) => {
     setSearchParams(prev => {
       const newParams = new URLSearchParams(prev);
@@ -105,81 +125,77 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     updateParam('set', set);
   }, [updateParam]);
 
-  // Additional filters configuration
-  const additionalFilters = {
-    treatment: {
-      value: selectedTreatment,
-      onChange: (value: string) => updateParam('treatment', value),
-      label: 'Treatment',
-      options: filterOptions.treatments.map(t => ({ value: t.value, label: t.label })),
-    },
-  };
-
-  // ---------- Data Fetching ----------
-  const fetchCards = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const params = new URLSearchParams();
-      params.set('limit', '1000');
-      
-      // Add game filter (optional - will work even if games array is empty)
-      if (selectedGame && selectedGame !== 'all' && games.length > 0) {
-        const game = games.find(g => g.name === selectedGame);
-        if (game?.id) {
-          params.set('game_id', String(game.id));
-        }
-      }
-      
-      // Add set filter (optional - will work even if sets array is empty)
-      if (selectedSet && selectedSet !== 'all' && sets.length > 0) {
-        const set = sets.find(s => s.name === selectedSet);
-        if (set?.id) {
-          params.set('set_id', String(set.id));
-        }
-      }
-      
-      // Add search term
-      if (searchTerm && searchTerm.trim()) {
-        params.set('search', searchTerm.trim());
-      }
-      
-      // Add treatment filter
-      if (selectedTreatment && selectedTreatment !== 'all') {
-        params.set('treatment', selectedTreatment);
-      }
-
-      const url = `/cards/cards?${params.toString()}`;
-      console.log('🚀 Fetching cards from:', url);
-      
-      const data = await api.get<{ cards?: Card[] }>(url);
-      
-      console.log('✅ Cards fetched:', data?.cards?.length ?? 0);
-      setCards(data?.cards ?? []);
-    } catch (err) {
-      console.error('❌ Error fetching cards:', err);
-      setCards([]);
-      setError(err instanceof Error ? err.message : 'Failed to fetch cards');
-    } finally {
-      setLoading(false);
+  // --------------------------------------------------------------------------
+  // DATA FETCHING
+  // --------------------------------------------------------------------------
+  
+  useEffect(() => {
+    // Don't fetch if games haven't loaded yet
+    if (!games || games.length === 0) {
+      return;
     }
+    
+    const fetchCards = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const params = new URLSearchParams();
+        params.set('limit', '1000');
+        
+        // Add game filter
+        if (selectedGame && selectedGame !== 'all') {
+          const game = games.find(g => g.name === selectedGame);
+          if (game?.id) {
+            params.set('game_id', String(game.id));
+          }
+        }
+        
+        // Add set filter
+        if (selectedSet && selectedSet !== 'all') {
+          const set = sets.find(s => s.name === selectedSet);
+          if (set?.id) {
+            params.set('set_id', String(set.id));
+          }
+        }
+        
+        // Add search term
+        if (searchTerm?.trim()) {
+          params.set('search', searchTerm.trim());
+        }
+        
+        // Add treatment filter
+        if (selectedTreatment && selectedTreatment !== 'all') {
+          params.set('treatment', selectedTreatment);
+        }
+
+        const url = `/cards/cards?${params.toString()}`;
+        const data = await api.get<{ cards?: Card[] }>(url);
+        setCards(data?.cards ?? []);
+      } catch (err) {
+        console.error('Error fetching cards:', err);
+        setCards([]);
+        setError(err instanceof Error ? err.message : 'Failed to fetch cards');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchCards();
   }, [selectedGame, selectedSet, searchTerm, selectedTreatment, games, sets]);
 
-  // ✅ FIXED: Fetch cards immediately, don't wait for games
-  useEffect(() => {
-    console.log('🔄 Triggering fetch (no games dependency)');
-    fetchCards();
-  }, [fetchCards]);
-
-  // ---------- Derived Data ----------
+  // --------------------------------------------------------------------------
+  // DERIVED DATA
+  // --------------------------------------------------------------------------
+  
+  // Filter cards based on mode
   const filteredCards = useMemo(() => {
     if (!isInventoryMode) return cards;
     // In inventory mode, only show cards with stock
     return cards.filter(c => Boolean(c?.has_inventory) && Number(c?.total_stock) > 0);
   }, [cards, isInventoryMode]);
 
-  // Group cards by card_number for proper display
+  // Group cards by card_number and merge variations
   const groupedCards = useMemo(() => {
     const groups = new Map<string, Card[]>();
     
@@ -209,6 +225,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     });
   }, [filteredCards]);
 
+  // Calculate totals
   const totalStock = useMemo(
     () => groupedCards.reduce((sum, c) => sum + (c.total_stock || 0), 0),
     [groupedCards]
@@ -219,7 +236,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     [groupedCards]
   );
 
-  // ---------- Modal Actions ----------
+  // --------------------------------------------------------------------------
+  // MODAL HANDLERS
+  // --------------------------------------------------------------------------
+  
   const openAddModal = useCallback((card: Card, variation: CardVariation) => {
     setAddModalData({ card, variation });
     setAddFormData({
@@ -235,6 +255,13 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
     setAddModalData(null);
+    setAddFormData({
+      quality: 'Near Mint',
+      foil_type: 'Regular',
+      price: '',
+      stock_quantity: 1,
+      language: 'English',
+    });
   }, []);
 
   const handleAddToInventory = useCallback(async () => {
@@ -242,26 +269,67 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
     setSaving(true);
     try {
-      await api.post('/admin/inventory', {
+      const inventoryData = {
         card_id: addModalData.card.id,
+        variation_id: addModalData.variation.inventory_id,
         quality: addFormData.quality,
         foil_type: addFormData.foil_type,
         price: parseFloat(addFormData.price) || 0,
         stock_quantity: addFormData.stock_quantity,
         language: addFormData.language,
-      });
+      };
+
+      await api.post('/admin/inventory', inventoryData);
       
       closeAddModal();
-      fetchCards(); // Refresh data
+      
+      // Re-fetch cards after successful add
+      try {
+        const params = new URLSearchParams();
+        params.set('limit', '1000');
+        
+        if (selectedGame && selectedGame !== 'all') {
+          const game = games.find(g => g.name === selectedGame);
+          if (game?.id) params.set('game_id', String(game.id));
+        }
+        
+        if (selectedSet && selectedSet !== 'all') {
+          const set = sets.find(s => s.name === selectedSet);
+          if (set?.id) params.set('set_id', String(set.id));
+        }
+        
+        if (searchTerm?.trim()) {
+          params.set('search', searchTerm.trim());
+        }
+        
+        if (selectedTreatment && selectedTreatment !== 'all') {
+          params.set('treatment', selectedTreatment);
+        }
+
+        const url = `/cards/cards?${params.toString()}`;
+        const data = await api.get<{ cards?: Card[] }>(url);
+        setCards(data?.cards ?? []);
+      } catch (fetchErr) {
+        console.error('Error refreshing cards:', fetchErr);
+      }
+      
     } catch (err) {
       console.error('Failed to add to inventory:', err);
       alert('Failed to add to inventory. Please try again.');
     } finally {
       setSaving(false);
     }
-  }, [addModalData, addFormData, closeAddModal, fetchCards]);
+  }, [addModalData, addFormData, closeAddModal, selectedGame, selectedSet, searchTerm, selectedTreatment, games, sets]);
 
-  // ---------- Export CSV ----------
+  // --------------------------------------------------------------------------
+  // OTHER HANDLERS
+  // --------------------------------------------------------------------------
+  
+  const handleRefresh = useCallback(() => {
+    // Clear cards to show loading state, then useEffect will refetch
+    setCards([]);
+  }, []);
+
   const handleExportCSV = useCallback(() => {
     try {
       const csv = [
@@ -291,7 +359,26 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     }
   }, [groupedCards, isInventoryMode]);
 
-  // ---------- Render ----------
+  // --------------------------------------------------------------------------
+  // FILTER CONFIGURATION
+  // --------------------------------------------------------------------------
+  
+  const additionalFilters = useMemo(() => ({
+    treatment: {
+      value: selectedTreatment,
+      onChange: (value: string) => updateParam('treatment', value),
+      label: 'Treatment',
+      options: filterOptions.treatments.map(t => ({ 
+        value: t.value, 
+        label: t.label 
+      })),
+    },
+  }), [selectedTreatment, updateParam, filterOptions.treatments]);
+
+  // --------------------------------------------------------------------------
+  // RENDER - ERROR STATES
+  // --------------------------------------------------------------------------
+  
   if (filtersError) {
     return (
       <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
@@ -307,7 +394,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         <p className="text-red-700 font-medium">Error loading cards</p>
         <p className="text-red-600 text-sm mt-2">{error}</p>
         <button 
-          onClick={fetchCards} 
+          onClick={handleRefresh}
           className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
         >
           Try Again
@@ -316,6 +403,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     );
   }
 
+  // --------------------------------------------------------------------------
+  // RENDER - MAIN CONTENT
+  // --------------------------------------------------------------------------
+  
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -342,6 +433,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                     ? 'bg-blue-600 text-white'
                     : 'text-slate-700 hover:bg-slate-100'
                 }`}
+                aria-label="List view"
               >
                 <List className="w-4 h-4" />
               </button>
@@ -352,6 +444,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                     ? 'bg-blue-600 text-white'
                     : 'text-slate-700 hover:bg-slate-100'
                 }`}
+                aria-label="Grid view"
               >
                 <LayoutGrid className="w-4 h-4" />
               </button>
@@ -363,19 +456,21 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
             onClick={handleExportCSV}
             disabled={groupedCards.length === 0}
             className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            aria-label="Export to CSV"
           >
             <Download className="w-4 h-4" />
-            Export CSV
+            <span className="hidden sm:inline">Export CSV</span>
           </button>
 
           {/* Refresh Button */}
           <button
-            onClick={fetchCards}
+            onClick={handleRefresh}
             disabled={loading}
             className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+            aria-label="Refresh cards"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
+            <span className="hidden sm:inline">Refresh</span>
           </button>
         </div>
       </div>

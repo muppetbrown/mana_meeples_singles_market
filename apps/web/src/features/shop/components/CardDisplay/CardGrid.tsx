@@ -112,9 +112,8 @@ export const CardGrid = <T extends Card = Card>({
 
   // ✅ FIX: Proper default card renderer with variation selection
   const defaultRenderCard = (card: T) => {
-    // Ensure card has variations array
+    // Silently skip cards without variations (common in "All Cards" mode)
     if (!card.variations || card.variations.length === 0) {
-      console.warn(`Card ${card.id} has no variations, skipping render`);
       return null;
     }
 
@@ -128,7 +127,10 @@ export const CardGrid = <T extends Card = Card>({
 
     // ✅ CRITICAL FIX: Ensure selectedVariation exists before rendering
     if (!selectedVariation) {
-      console.warn(`No valid variation found for card ${card.id}`);
+      // Only warn in development mode for debugging
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Card ${card.id} "${card.name}" has variations array but no valid variation found`);
+      }
       return null;
     }
 
