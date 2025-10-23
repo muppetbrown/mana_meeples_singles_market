@@ -51,23 +51,68 @@ export const shouldRefreshToken = (decoded: DecodedJWT): boolean => {
 
 /**
  * Validate admin credentials using bcrypt
+ * FIXED: Added comprehensive error handling to prevent server crashes
  */
 export async function validateCredentials(
   username: string,
   password: string
 ): Promise<boolean> {
-  const adminUsername = env.ADMIN_USERNAME;
-  const adminPassword = env.ADMIN_PASSWORD || env.ADMIN_PASSWORD_HASH;
-  
-  if (username !== adminUsername) {
+  try {
+    // Validate inputs
+    if (!username || !password) {
+      console.error("❌ validateCredentials: Missing username or password");
+      return false;
+    }
+
+    if (typeof username !== 'string' || typeof password !== 'string') {
+      console.error("❌ validateCredentials: Invalid input types");
+      return false;
+    }
+
+    const adminUsername = env.ADMIN_USERNAME;
+    const adminPasswordHash = env.ADMIN_PASSWORD_HASH;
+    
+    // Validate environment variables are set
+    if (!adminUsername || !adminPasswordHash) {
+      console.error("❌ validateCredentials: Missing ADMIN_USERNAME or ADMIN_PASSWORD_HASH in environment");
+      return false;
+    }
+
+    // Check username first (fast fail)
+    if (username !== adminUsername) {
+      console.log(`❌ validateCredentials: Username mismatch (expected: ${adminUsername}, got: ${username})`);
+      return false;
+    }
+
+    // Validate hash format
+    if (!adminPasswordHash.startsWith("$2a$") && !adminPasswordHash.startsWith("$2b$")) {
+      console.error("❌ validateCredentials: ADMIN_PASSWORD_HASH is not a valid bcrypt hash");
+      console.error(`   Hash starts with: ${adminPasswordHash.substring(0, 10)}`);
+      return false;
+    }
+
+    // Compare password with hash
+    console.log("🔍 validateCredentials: Comparing password with hash...");
+    const isMatch = await bcrypt.compare(password, adminPasswordHash);
+    
+    if (isMatch) {
+      console.log("✅ validateCredentials: Password matches!");
+    } else {
+      console.log("❌ validateCredentials: Password does not match");
+    }
+
+    return isMatch;
+
+  } catch (error) {
+    // Critical: Catch ALL errors to prevent server crash
+    console.error("❌ validateCredentials: Unexpected error:", error);
+    console.error("   Error name:", error instanceof Error ? error.name : 'Unknown');
+    console.error("   Error message:", error instanceof Error ? error.message : String(error));
+    console.error("   Error stack:", error instanceof Error ? error.stack : 'No stack');
+    
+    // Return false instead of throwing - don't crash the server!
     return false;
   }
-  // Check if password is already hashed (starts with $2a$ or $2b$)
-  if (adminPassword.startsWith("$2")) {
-    return await bcrypt.compare(password, adminPassword);
-  }
-  // Plain text comparison (dev/test only!)
-  return password === adminPassword;
 }
 
 /**
