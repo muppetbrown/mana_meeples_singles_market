@@ -1,4 +1,6 @@
-// apps/api/src/routes/cards.ts
+// apps/api/src/routes/cards.ts - COMPLETE FIX
+// This version adds variations to the /cards endpoint like storefront does
+
 import express, { type Request, type Response } from "express";
 import { z } from "zod";
 import { db } from "../lib/db.js";
@@ -22,6 +24,7 @@ export const CardsIndexQuery = CardFiltersQuery.extend({
   per_page: z.coerce.number().int().min(1).max(1000).default(50),
   sort: z.enum(["name", "number", "rarity", "created_at"]).default("name"),
   order: z.enum(["asc", "desc"]).default("asc"),
+  limit: z.coerce.number().int().min(1).max(1000).optional(), // Allow limit param
 });
 
 type CardFilters = z.infer<typeof CardFiltersQuery>;
@@ -84,9 +87,12 @@ function buildPagingSQL(
 }
 
 /* ──────────────────────────────────────────────────────────────
-   GET /cards  → list (mounted under /cards so path is /cards)
-   Your router is mounted at "/cards", and you call "/cards/cards"
-   from the frontend. We keep that stable here.
+   GET /cards  → list with variations (UPDATED TO MATCH STOREFRONT)
+   
+   CRITICAL FIX: Now includes variations array so frontend can:
+   1. Display cards properly
+   2. Calculate variation_count correctly  
+   3. Show stock information
    ────────────────────────────────────────────────────────────── */
 
 router.get("/cards", async (req: Request, res: Response) => {
@@ -94,23 +100,116 @@ router.get("/cards", async (req: Request, res: Response) => {
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid query", details: parsed.error.flatten() });
   }
-  const { page, per_page, sort, order, ...filters } = parsed.data;
+  
+  const { page, per_page, sort, order, limit, ...filters } = parsed.data;
 
   const { where, joins, params } = buildFilterSQL("c", filters);
-  const { orderBy, limitOffset, extraJoins } = buildPagingSQL("c", { page, per_page, sort, order });
+  const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : '';
+  
+  // Use limit if provided, otherwise use per_page with pagination
+  const limitSql = limit 
+    ? `LIMIT ${limit}` 
+    : `LIMIT ${per_page} OFFSET ${(page - 1) * per_page}`;
 
-  let sql = `SELECT c.*
-             FROM cards c
-             ${[...joins, ...extraJoins].join(" ")}`;
-  if (where.length) sql += ` WHERE ${where.join(" AND ")}`;
-  sql += ` ${orderBy} ${limitOffset}`;
+  const sortMap: Record<string, string> = {
+    name: `c.name`,
+    number: `c.card_number`,
+    rarity: `c.rarity`,
+    created_at: `c.created_at`,
+  };
+  const col = sortMap[sort] ?? `c.name`;
+  const safeOrder = order.toLowerCase() === "desc" ? "DESC" : "ASC";
+  const orderBy = `ORDER BY ${col} ${safeOrder}`;
+
+  // ============================================================================
+  // QUERY WITH VARIATIONS - Similar to storefront endpoint
+  // ============================================================================
+  const sql = `
+    SELECT
+      c.id,
+      c.name,
+      c.card_number,
+      cs.name AS set_name,
+      c.rarity,
+      c.image_url,
+      c.treatment,
+      c.border_color,
+      c.finish,
+      g.name AS game_name,
+      c.game_id,
+      c.set_id,
+      COALESCE(inv.total_stock, 0)::int AS total_stock,
+      COALESCE(inv.variation_count, 0)::int AS variation_count,
+      COALESCE(inv.has_inventory, false) AS has_inventory,
+      COALESCE(inv.variations, '[]'::jsonb) AS variations
+    FROM (
+      SELECT c.*
+      FROM cards c
+      ${joins.join(" ")}
+      ${whereSql}
+      ${orderBy}
+      ${limitSql}
+    ) c
+    JOIN games g ON g.id = c.game_id
+    JOIN card_sets cs ON cs.id = c.set_id
+    LEFT JOIN LATERAL (
+      SELECT
+        COUNT(ci.id)::int AS variation_count,
+        COALESCE(SUM(ci.stock_quantity), 0)::int AS total_stock,
+        BOOL_OR(ci.stock_quantity > 0) AS has_inventory,
+        COALESCE(
+          JSONB_AGG(
+            JSONB_BUILD_OBJECT(
+              'inventory_id', ci.id,
+              'quality', ci.quality,
+              'foil_type', COALESCE(ci.foil_type, 'Regular'),
+              'language', COALESCE(ci.language, 'English'),
+              'finish', COALESCE(ci.foil_type, 'Regular'),
+              'price', COALESCE(
+                CASE 
+                  WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil' 
+                  THEN lp.foil_price 
+                  ELSE lp.base_price 
+                END,
+                ci.price
+              ),
+              'stock', ci.stock_quantity,
+              'variation_key',
+                CONCAT(ci.quality,'-',COALESCE(ci.foil_type,'Regular'),'-',COALESCE(ci.language,'English'))
+            )
+          ) FILTER (WHERE ci.id IS NOT NULL),
+          '[]'::jsonb
+        ) AS variations
+      FROM card_inventory ci
+      LEFT JOIN (
+        SELECT DISTINCT ON (card_id)
+               card_id, base_price, foil_price
+        FROM card_pricing
+        WHERE card_id = c.id
+        ORDER BY card_id, updated_at DESC NULLS LAST, created_at DESC NULLS LAST
+      ) lp ON lp.card_id = ci.card_id
+      WHERE ci.card_id = c.id
+    ) inv ON TRUE
+  `;
 
   try {
     const rows = await db.query<any>(sql, params);
-    // Frontend expects { cards: [...] }
-    return res.json({ cards: rows });
+    
+    // Convert JSONB variations to proper array
+    const cardsWithVariations = rows.map(row => ({
+      ...row,
+      variations: Array.isArray(row.variations) ? row.variations : 
+                  typeof row.variations === 'string' ? JSON.parse(row.variations) : []
+    }));
+    
+    return res.json({ cards: cardsWithVariations });
   } catch (err: any) {
-    console.error("GET /cards failed", { code: err?.code, message: err?.message });
+    console.error("GET /cards failed", { 
+      code: err?.code, 
+      message: err?.message,
+      detail: err?.detail,
+      stack: err?.stack 
+    });
     return res.status(500).json({ error: "Failed to fetch cards" });
   }
 });
