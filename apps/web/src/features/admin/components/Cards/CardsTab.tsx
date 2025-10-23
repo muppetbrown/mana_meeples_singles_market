@@ -486,6 +486,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         onGameChange={handleGameChange}
         onSetChange={handleSetChange}
         additionalFilters={additionalFilters}
+        isAdminMode={true}
       />
 
       {/* Cards Display */}

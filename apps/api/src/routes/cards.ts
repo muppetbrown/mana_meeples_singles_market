@@ -147,8 +147,10 @@ router.get("/count", async (req: Request, res: Response) => {
 });
 
 /* ──────────────────────────────────────────────────────────────
-   GET /filters  → facet options (resilient to empty inventory/pricing)
+   GET /filters  → facet options + games + sets (UPDATED)
    Mounted under /cards → final path /cards/filters
+   
+   CRITICAL FIX: Now returns games and sets arrays that frontend needs
    ────────────────────────────────────────────────────────────── */
 
 const FiltersQuery = z.object({
@@ -171,7 +173,52 @@ router.get('/filters', async (req: Request, res: Response) => {
   const { where, joins, params } = buildFilterSQL('c', parsed.data);
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
-  const sql = `
+  // ============================================================================
+  // QUERY 1: Get all games with card counts
+  // ============================================================================
+  const gamesSql = `
+    SELECT 
+      g.id,
+      g.name,
+      g.code,
+      COUNT(DISTINCT c.id)::int AS card_count
+    FROM games g
+    LEFT JOIN cards c ON c.game_id = g.id
+    WHERE g.active = true
+    GROUP BY g.id, g.name, g.code
+    ORDER BY g.name
+  `;
+
+  // ============================================================================
+  // QUERY 2: Get sets (optionally filtered by game_id)
+  // ============================================================================
+  const setsSqlParams: any[] = [];
+  let setsSql = `
+    SELECT 
+      s.id,
+      s.name,
+      s.code,
+      s.game_id,
+      COUNT(DISTINCT c.id)::int AS card_count
+    FROM card_sets s
+    LEFT JOIN cards c ON c.set_id = s.id
+  `;
+  
+  // If game_id provided, filter sets to that game
+  if (parsed.data.game_id) {
+    setsSqlParams.push(parsed.data.game_id);
+    setsSql += ` WHERE s.game_id = $1`;
+  }
+  
+  setsSql += `
+    GROUP BY s.id, s.name, s.code, s.game_id
+    ORDER BY s.name
+  `;
+
+  // ============================================================================
+  // QUERY 3: Get filter facets (treatments, qualities, foilTypes, etc.)
+  // ============================================================================
+  const filtersSql = `
     WITH base AS (
       SELECT
         c.id,
@@ -218,23 +265,57 @@ router.get('/filters', async (req: Request, res: Response) => {
   `;
 
   try {
-    const [row] = await db.query(sql, params);
+    // ============================================================================
+    // Execute all three queries in parallel for performance
+    // ============================================================================
+    const [gamesResult, setsResult, filtersResult] = await Promise.all([
+      db.query(gamesSql),
+      db.query(setsSql, setsSqlParams),
+      db.query(filtersSql, params)
+    ]);
+
+    const filterRow = filtersResult?.[0];
     
-    const out = {
-      treatments: row?.treatments ?? [],
-      languages: row?.languages ?? [],
-      qualities: row?.qualities ?? [],
-      foilTypes: row?.foiltypes ?? row?.foilTypes ?? [],
-      priceMin: row?.pricemin ?? null,
-      priceMax: row?.pricemax ?? null,
-      inStockCount: row?.instockcount ?? 0,
+    // ============================================================================
+    // RETURN COMPLETE FILTER OPTIONS INCLUDING GAMES AND SETS
+    // This is what the frontend useShopFilters hook expects!
+    // ============================================================================
+    const response = {
+      // Games and Sets - CRITICAL: These were missing before!
+      games: gamesResult.map(g => ({
+        id: g.id,
+        name: g.name,
+        code: g.code,
+        card_count: g.card_count || 0
+      })),
+      sets: setsResult.map(s => ({
+        id: s.id,
+        name: s.name,
+        code: s.code,
+        game_id: s.game_id,
+        card_count: s.card_count || 0
+      })),
+      
+      // Filter facets
+      treatments: filterRow?.treatments ?? [],
+      languages: filterRow?.languages ?? [],
+      qualities: filterRow?.qualities ?? [],
+      foilTypes: filterRow?.foiltypes ?? filterRow?.foilTypes ?? [],
+      
+      // Price range
+      priceMin: filterRow?.pricemin ?? null,
+      priceMax: filterRow?.pricemax ?? null,
+      
+      // Stock info
+      inStockCount: filterRow?.instockcount ?? 0,
     };
     
-    return res.json(out);
+    return res.json(response);
   } catch (err: any) {
     console.error('GET /cards/filters failed', { 
       code: err?.code, 
-      message: err?.message 
+      message: err?.message,
+      stack: err?.stack 
     });
     return res.status(500).json({ error: 'Failed to fetch card filters' });
   }
