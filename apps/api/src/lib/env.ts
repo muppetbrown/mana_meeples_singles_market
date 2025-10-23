@@ -1,3 +1,4 @@
+// apps/api/src/lib/env.ts
 import * as dotenv from "dotenv";
 import { z } from "zod";
 

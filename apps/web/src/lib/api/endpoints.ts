@@ -5,51 +5,54 @@
 /**
  * API endpoint paths
  * Single source of truth for all API routes
+ * 
+ * IMPORTANT: All endpoints include the /api prefix because the backend
+ * mounts all routes at app.use("/api", routes)
  */
 export const ENDPOINTS = {
-  // Health checks
+  // Health checks (no /api prefix - mounted at root)
   HEALTH: '/health',
   
-  // Authentication
+  // Authentication - CORRECTED PATHS
   AUTH: {
-    LOGIN: '/auth/login',
-    LOGOUT: '/auth/logout',
-    VERIFY: '/auth/verify'
+    LOGIN: '/api/auth/admin/login',      // ✅ Full path with /api prefix
+    LOGOUT: '/api/auth/admin/logout',    // ✅ Full path with /api prefix
+    CHECK: '/api/auth/admin/check'       // ✅ Full path with /api prefix (was VERIFY)
   },
 
   // Cards
   CARDS: {
-    LIST: '/cards/cards',
-    COUNT: '/cards/count',
-    FILTERS: '/cards/filters',
-    BY_ID: (id: number) => `/cards/${id}`
+    LIST: '/api/cards',
+    COUNT: '/api/cards/count',
+    FILTERS: '/api/cards/filters',
+    BY_ID: (id: number) => `/api/cards/${id}`
   },
 
   // Storefront
   STOREFRONT: {
-    CARDS: '/storefront/cards',
-    FILTERS: '/storefront/filters'
+    CARDS: '/api/storefront/cards',
+    FILTERS: '/api/storefront/filters'
   },
 
   // Orders
   ORDERS: {
-    LIST: '/admin/orders',
-    BY_ID: (id: number) => `/admin/orders/${id}`,
-    STATUS: (id: number) => `/admin/orders/${id}/status`,
-    CREATE: '/orders'
+    LIST: '/api/admin/orders',
+    BY_ID: (id: number) => `/api/admin/orders/${id}`,
+    STATUS: (id: number) => `/api/admin/orders/${id}/status`,
+    CREATE: '/api/orders'
   },
 
   // Inventory
   INVENTORY: {
-    LIST: '/admin/inventory',
-    UPDATE: '/admin/inventory/update',
-    BULK: '/admin/inventory/bulk'
+    LIST: '/api/admin/inventory',
+    UPDATE: '/api/admin/inventory/update',
+    BULK: '/api/admin/inventory/bulk'
   },
 
   // Analytics
   ANALYTICS: {
-    OVERVIEW: '/admin/analytics/overview',
-    SALES: '/admin/analytics/sales'
+    OVERVIEW: '/api/admin/analytics/overview',
+    SALES: '/api/admin/analytics/sales'
   }
 } as const;
 
@@ -62,7 +65,7 @@ export function buildQueryString(params: Record<string, any>): string {
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== null) {
       if (Array.isArray(value)) {
-        value.forEach(v => searchParams.append(key, String(v)));
+        value.forEach(v => searchParams.append(key, String(value)));
       } else {
         searchParams.append(key, String(value));
       }
@@ -72,57 +75,3 @@ export function buildQueryString(params: Record<string, any>): string {
   const query = searchParams.toString();
   return query ? `?${query}` : '';
 }
-
-// ============================================================================
-// USAGE EXAMPLES
-// ============================================================================
-
-/*
-// Using the API client
-import { api, ENDPOINTS } from '@/lib/api';
-import { StorefrontCard } from '@/types';
-
-// Simple GET
-const cards = await api.get<StorefrontCard[]>(ENDPOINTS.STOREFRONT.CARDS);
-
-// GET with params
-const filteredCards = await api.get<StorefrontCard[]>(
-  ENDPOINTS.STOREFRONT.CARDS,
-  { game: 'mtg', inStockOnly: true }
-);
-
-// POST with body
-const order = await api.post(ENDPOINTS.ORDERS.CREATE, {
-  items: cartItems,
-  customer: customerData
-});
-
-// PATCH
-await api.patch(ENDPOINTS.ORDERS.STATUS(orderId), {
-  status: 'confirmed'
-});
-
-// With Zod validation
-const CardsSchema = z.array(z.object({
-  id: z.number(),
-  name: z.string()
-}));
-
-const validatedCards = await api.get(
-  ENDPOINTS.CARDS.LIST,
-  undefined,
-  CardsSchema
-);
-
-// Error handling
-import { useErrorHandler } from '@/services/error/handler';
-
-const { handleError } = useErrorHandler();
-
-try {
-  await api.get(ENDPOINTS.CARDS.LIST);
-} catch (error) {
-  const formattedError = handleError(error);
-  showToast(formattedError.title, formattedError.message);
-}
-*/
