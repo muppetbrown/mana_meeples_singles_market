@@ -1,6 +1,7 @@
 mana_meeples_singles_market
 ├── .git/
 ├── .github/
+├── .vscode/
 ├── apps/
 │ ├── api/
 │ │ ├── scripts/
@@ -15,14 +16,14 @@ mana_meeples_singles_market
 │ │ │ │ ├── auth.ts
 │ │ │ │ ├── error.ts
 │ │ │ │ ├── rateLimit.ts
-│ │ │ │ └── requestLog.ts
+│ │ │ │ ├── requestLog.ts
+│ │ │ │ └── securityHeaders.ts
 │ │ │ ├── routes/
 │ │ │ │ ├── additional.ts
 │ │ │ │ ├── auth.ts
 │ │ │ │ ├── cards.ts
 │ │ │ │ ├── index.ts
 │ │ │ │ ├── inventory.ts
-│ │ │ │ ├── off-filters.ts
 │ │ │ │ ├── orders.ts
 │ │ │ │ ├── storefront.ts
 │ │ │ │ └── variations.ts
@@ -250,7 +251,211 @@ mana_meeples_singles_market
 │ │ │ ├── test-env-1761157694574.json
 │ │ │ ├── test-env-1761157694574.txt
 │ │ │ ├── test-env-1761157694576.json
-│ │ │ └── test-env-1761157694576.txt
+│ │ │ ├── test-env-1761157694576.txt
+│ │ │ ├── test-env-1761159453687.json
+│ │ │ ├── test-env-1761159453687.txt
+│ │ │ ├── test-env-1761159453689.json
+│ │ │ ├── test-env-1761159453689.txt
+│ │ │ ├── test-env-1761159453691.json
+│ │ │ ├── test-env-1761159453691.txt
+│ │ │ ├── test-env-1761159453692.json
+│ │ │ ├── test-env-1761159453692.txt
+│ │ │ ├── test-env-1761159453696.json
+│ │ │ ├── test-env-1761159453696.txt
+│ │ │ ├── test-env-1761161227657.json
+│ │ │ ├── test-env-1761161227657.txt
+│ │ │ ├── test-env-1761161227658.json
+│ │ │ ├── test-env-1761161227658.txt
+│ │ │ ├── test-env-1761161227661.json
+│ │ │ ├── test-env-1761161227661.txt
+│ │ │ ├── test-env-1761161227664.json
+│ │ │ ├── test-env-1761161227664.txt
+│ │ │ ├── test-env-1761161227667.json
+│ │ │ ├── test-env-1761161227667.txt
+│ │ │ ├── test-env-1761161227675.json
+│ │ │ ├── test-env-1761161227675.txt
+│ │ │ ├── test-env-1761161313863.json
+│ │ │ ├── test-env-1761161313863.txt
+│ │ │ ├── test-env-1761161313864.json
+│ │ │ ├── test-env-1761161313864.txt
+│ │ │ ├── test-env-1761161313878.json
+│ │ │ ├── test-env-1761161313878.txt
+│ │ │ ├── test-env-1761161313880.json
+│ │ │ ├── test-env-1761161313880.txt
+│ │ │ ├── test-env-1761161313892.json
+│ │ │ ├── test-env-1761161313892.txt
+│ │ │ ├── test-env-1761161663494.json
+│ │ │ ├── test-env-1761161663494.txt
+│ │ │ ├── test-env-1761161663497.json
+│ │ │ ├── test-env-1761161663497.txt
+│ │ │ ├── test-env-1761161663498.json
+│ │ │ ├── test-env-1761161663498.txt
+│ │ │ ├── test-env-1761161663500.json
+│ │ │ ├── test-env-1761161663500.txt
+│ │ │ ├── test-env-1761161663504.json
+│ │ │ ├── test-env-1761161663504.txt
+│ │ │ ├── test-env-1761161663507.json
+│ │ │ ├── test-env-1761161663507.txt
+│ │ │ ├── test-env-1761161663511.json
+│ │ │ ├── test-env-1761161663511.txt
+│ │ │ ├── test-env-1761161871283.json
+│ │ │ ├── test-env-1761161871283.txt
+│ │ │ ├── test-env-1761161871286.json
+│ │ │ ├── test-env-1761161871286.txt
+│ │ │ ├── test-env-1761161871292.json
+│ │ │ ├── test-env-1761161871292.txt
+│ │ │ ├── test-env-1761161871295.json
+│ │ │ ├── test-env-1761161871295.txt
+│ │ │ ├── test-env-1761161871303.json
+│ │ │ ├── test-env-1761161871303.txt
+│ │ │ ├── test-env-1761161871308.json
+│ │ │ ├── test-env-1761161871308.txt
+│ │ │ ├── test-env-1761161908797.json
+│ │ │ ├── test-env-1761161908797.txt
+│ │ │ ├── test-env-1761161908798.json
+│ │ │ ├── test-env-1761161908798.txt
+│ │ │ ├── test-env-1761161908801.json
+│ │ │ ├── test-env-1761161908801.txt
+│ │ │ ├── test-env-1761161908803.json
+│ │ │ ├── test-env-1761161908803.txt
+│ │ │ ├── test-env-1761161908806.json
+│ │ │ ├── test-env-1761161908806.txt
+│ │ │ ├── test-env-1761183664725.json
+│ │ │ ├── test-env-1761183664725.txt
+│ │ │ ├── test-env-1761183664726.json
+│ │ │ ├── test-env-1761183664726.txt
+│ │ │ ├── test-env-1761183664727.json
+│ │ │ ├── test-env-1761183664727.txt
+│ │ │ ├── test-env-1761183664740.json
+│ │ │ ├── test-env-1761183664740.txt
+│ │ │ ├── test-env-1761186438308.json
+│ │ │ ├── test-env-1761186438308.txt
+│ │ │ ├── test-env-1761186438314.json
+│ │ │ ├── test-env-1761186438314.txt
+│ │ │ ├── test-env-1761186438317.json
+│ │ │ ├── test-env-1761186438317.txt
+│ │ │ ├── test-env-1761186438321.json
+│ │ │ ├── test-env-1761186438321.txt
+│ │ │ ├── test-env-1761186438325.json
+│ │ │ ├── test-env-1761186438325.txt
+│ │ │ ├── test-env-1761186438326.json
+│ │ │ ├── test-env-1761186438326.txt
+│ │ │ ├── test-env-1761186477446.json
+│ │ │ ├── test-env-1761186477446.txt
+│ │ │ ├── test-env-1761186477447.json
+│ │ │ ├── test-env-1761186477447.txt
+│ │ │ ├── test-env-1761186477449.json
+│ │ │ ├── test-env-1761186477449.txt
+│ │ │ ├── test-env-1761186477453.json
+│ │ │ ├── test-env-1761186477453.txt
+│ │ │ ├── test-env-1761186477459.json
+│ │ │ ├── test-env-1761186477459.txt
+│ │ │ ├── test-env-1761186477460.json
+│ │ │ ├── test-env-1761186477460.txt
+│ │ │ ├── test-env-1761186477461.json
+│ │ │ ├── test-env-1761186477461.txt
+│ │ │ ├── test-env-1761186589581.json
+│ │ │ ├── test-env-1761186589581.txt
+│ │ │ ├── test-env-1761186589583.json
+│ │ │ ├── test-env-1761186589583.txt
+│ │ │ ├── test-env-1761186589586.json
+│ │ │ ├── test-env-1761186589586.txt
+│ │ │ ├── test-env-1761186589587.json
+│ │ │ ├── test-env-1761186589587.txt
+│ │ │ ├── test-env-1761186589593.json
+│ │ │ ├── test-env-1761186589593.txt
+│ │ │ ├── test-env-1761186589594.json
+│ │ │ ├── test-env-1761186589594.txt
+│ │ │ ├── test-env-1761186710030.json
+│ │ │ ├── test-env-1761186710030.txt
+│ │ │ ├── test-env-1761186710034.json
+│ │ │ ├── test-env-1761186710034.txt
+│ │ │ ├── test-env-1761186710039.json
+│ │ │ ├── test-env-1761186710039.txt
+│ │ │ ├── test-env-1761186710044.json
+│ │ │ ├── test-env-1761186710044.txt
+│ │ │ ├── test-env-1761186710046.json
+│ │ │ ├── test-env-1761186710046.txt
+│ │ │ ├── test-env-1761186710052.json
+│ │ │ ├── test-env-1761186710052.txt
+│ │ │ ├── test-env-1761186740189.json
+│ │ │ ├── test-env-1761186740189.txt
+│ │ │ ├── test-env-1761186740192.json
+│ │ │ ├── test-env-1761186740192.txt
+│ │ │ ├── test-env-1761186740197.json
+│ │ │ ├── test-env-1761186740197.txt
+│ │ │ ├── test-env-1761186740200.json
+│ │ │ ├── test-env-1761186740200.txt
+│ │ │ ├── test-env-1761186740205.json
+│ │ │ ├── test-env-1761186740205.txt
+│ │ │ ├── test-env-1761186740206.json
+│ │ │ ├── test-env-1761186740206.txt
+│ │ │ ├── test-env-1761186740210.json
+│ │ │ ├── test-env-1761186740210.txt
+│ │ │ ├── test-env-1761186848691.json
+│ │ │ ├── test-env-1761186848691.txt
+│ │ │ ├── test-env-1761186848692.json
+│ │ │ ├── test-env-1761186848692.txt
+│ │ │ ├── test-env-1761186848706.json
+│ │ │ ├── test-env-1761186848706.txt
+│ │ │ ├── test-env-1761186848707.json
+│ │ │ ├── test-env-1761186848707.txt
+│ │ │ ├── test-env-1761186848715.json
+│ │ │ ├── test-env-1761186848715.txt
+│ │ │ ├── test-env-1761186885666.json
+│ │ │ ├── test-env-1761186885666.txt
+│ │ │ ├── test-env-1761186885667.json
+│ │ │ ├── test-env-1761186885667.txt
+│ │ │ ├── test-env-1761186885668.json
+│ │ │ ├── test-env-1761186885668.txt
+│ │ │ ├── test-env-1761186885670.json
+│ │ │ ├── test-env-1761186885670.txt
+│ │ │ ├── test-env-1761186885684.json
+│ │ │ ├── test-env-1761186885684.txt
+│ │ │ ├── test-env-1761186885689.json
+│ │ │ ├── test-env-1761186885689.txt
+│ │ │ ├── test-env-1761187200890.json
+│ │ │ ├── test-env-1761187200890.txt
+│ │ │ ├── test-env-1761187200894.json
+│ │ │ ├── test-env-1761187200894.txt
+│ │ │ ├── test-env-1761187200896.json
+│ │ │ ├── test-env-1761187200896.txt
+│ │ │ ├── test-env-1761187200900.json
+│ │ │ ├── test-env-1761187200900.txt
+│ │ │ ├── test-env-1761187200901.json
+│ │ │ ├── test-env-1761187200901.txt
+│ │ │ ├── test-env-1761187200908.json
+│ │ │ ├── test-env-1761187200908.txt
+│ │ │ ├── test-env-1761187200909.json
+│ │ │ ├── test-env-1761187200909.txt
+│ │ │ ├── test-env-1761187569448.json
+│ │ │ ├── test-env-1761187569448.txt
+│ │ │ ├── test-env-1761187569449.json
+│ │ │ ├── test-env-1761187569449.txt
+│ │ │ ├── test-env-1761187569458.json
+│ │ │ ├── test-env-1761187569458.txt
+│ │ │ ├── test-env-1761187569459.json
+│ │ │ ├── test-env-1761187569459.txt
+│ │ │ ├── test-env-1761187766320.json
+│ │ │ ├── test-env-1761187766320.txt
+│ │ │ ├── test-env-1761187766333.json
+│ │ │ ├── test-env-1761187766333.txt
+│ │ │ ├── test-env-1761187766336.json
+│ │ │ ├── test-env-1761187766336.txt
+│ │ │ ├── test-env-1761187766337.json
+│ │ │ ├── test-env-1761187766337.txt
+│ │ │ ├── test-env-1761187766344.json
+│ │ │ ├── test-env-1761187766344.txt
+│ │ │ ├── test-env-1761187800604.json
+│ │ │ ├── test-env-1761187800604.txt
+│ │ │ ├── test-env-1761187800618.json
+│ │ │ ├── test-env-1761187800618.txt
+│ │ │ ├── test-env-1761187800620.json
+│ │ │ ├── test-env-1761187800620.txt
+│ │ │ ├── test-env-1761187800621.json
+│ │ │ ├── test-env-1761187800621.txt
+│ │ │ ├── test-env-1761187800626.json
+│ │ │ └── test-env-1761187800626.txt
 │ │ ├── tests/
 │ │ │ ├── e2e/
 │ │ │ │ └── checkout.flow.test.ts
@@ -272,6 +477,7 @@ mana_meeples_singles_market
 │ │ │ ├── testEmail.js
 │ │ │ └── testresults.txt
 │ │ ├── .env
+│ │ ├── .env.example
 │ │ ├── package-lock.json
 │ │ ├── package.json
 │ │ ├── tsconfig.build.json
@@ -353,14 +559,7 @@ mana_meeples_singles_market
 │  │ │  ├── sanitization.ts
 │  │ │  └── search.ts
 │  │ ├── retired/
-│  │ │ ├── AdminCardGrid.tsx
-│  │ │ ├── App.css
-│  │ │ ├── setupTests.ts
-│  │ │ ├── ShopPage.tsx
-│  │ │ ├── useEnhancedCart.test.ts
-│  │ │ ├── useRecentlyViewed.test.ts
-│  │ │ ├── VirtualCardGrid.tsx
-│  │ │ └── vite-env.d.ts
+│  │ │ └── App.css
 │  │ ├── services/
 │  │ │ ├── error/
 │  │ │ │ ├── handler.ts
@@ -406,11 +605,10 @@ mana_meeples_singles_market
 │  │ │ └── index.ts
 │  │ ├── App.tsx
 │  │ ├── main.tsx
-│  │ ├── pnpm typecheck.txt
 │  │ ├── reportWebVitals.ts
 │  │ └── vit-env.d.ts
-│  ├── .env
 │  ├── .env.local
+│  ├── .env.local.example
 │  ├── index.html
 │  ├── package.json
 │  ├── postcss.config.cjs
@@ -466,6 +664,7 @@ mana_meeples_singles_market
 ├── repo-tree.txt
 ├── route-analysis-report.json
 ├── scan-routes.js
+├── test-render-backend.sh
 ├── tsconfig.base.json
 ├── tsconfig.json
 ├── typecheck_errors.txt
