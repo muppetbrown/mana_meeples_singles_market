@@ -2,20 +2,44 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="/mana_meeples_logo.ico" sizes="any" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0f172a" />
-    <meta name="theme-color" media="(prefers-color-scheme: dark)"  content="#0b1220" />
-    <meta name="description" content="TCG Singles Shop - Mana & Meeples" />
-    <link rel="apple-touch-icon" href="./logo192.png" />
+    
+    <!-- Security Headers -->
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' http://localhost:3001 https://api.render.com;">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="Permissions-Policy" content="geolocation=(), microphone=(), camera=()" />
+    
+    <!-- Theme Colors (for supported browsers) -->
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#2d4a47" />
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1f2f2d" />
+    
+    <!-- App Metadata -->
+    <meta name="description" content="Mana & Meeples - Your trusted TCG singles marketplace for Magic: The Gathering, Pokémon, One Piece, and more." />
+    <meta name="application-name" content="Mana & Meeples" />
+    <meta name="apple-mobile-web-app-title" content="Mana & Meeples" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    
+    <!-- Icons -->
+    <link rel="icon" href="/mana_meeples_logo.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.webmanifest" crossorigin="use-credentials" />
-    <title>Mana & Meeples - TCG Singles</title>
+    
+    <title>Mana & Meeples - TCG Singles Market</title>
   </head>
   <body>
-    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <!-- Skip to main content link for keyboard navigation -->
+    <a href="#main-content" class="skip-link sr-only focus:not-sr-only">Skip to main content</a>
+    
+    <noscript>
+      <div style="padding: 2rem; text-align: center; font-family: system-ui, sans-serif;">
+        <h1>JavaScript Required</h1>
+        <p>You need to enable JavaScript to run this app.</p>
+      </div>
+    </noscript>
+    
     <div id="root"></div>
-    <!-- IMPORTANT: point to your actual entry file -->
-    <script type="module" src="./src/main.tsx"></script>
-    <!-- If your entry is main.tsx, change to: /src/main.tsx -->
+    
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

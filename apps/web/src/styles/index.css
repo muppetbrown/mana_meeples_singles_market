@@ -3,22 +3,22 @@
 @tailwind utilities;
 
 :root {
-  /* ✅ Support all engines: */
-  -webkit-text-size-adjust: 100%;
+  /* ✅ Both standard and webkit for broader support */
   text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+}
 
-  body {
-    @apply bg-mm-cream text-mm-darkForest;
-    font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+body {
+  @apply bg-mm-cream text-mm-darkForest;
+  font-family: 'Segoe UI', 'Tahoma', 'Geneva', 'Verdana', sans-serif;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
-  h1, h2, h3, h4, h5, h6 {
-    @apply text-mm-forest;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
-  }
+h1, h2, h3, h4, h5, h6 {
+  @apply text-mm-forest;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
 }
 
 @layer components {
@@ -53,6 +53,11 @@
   .card-mm:hover,
   .card-mm:focus-within {
     @apply border-mm-tealBright shadow-mm-card-hover;
+    /* ✅ Use will-change instead of direct transform for better performance */
+    will-change: transform;
+  }
+
+  .card-mm:hover {
     transform: translateY(-2px);
   }
 
@@ -81,37 +86,49 @@
 
 /* Accessibility - Enhanced Focus States */
 @layer utilities {
-  *:focus {
+  *:focus-visible {
     outline: 3px solid theme('colors.mm.forest');
     outline-offset: 2px;
   }
 
   /* Reduced Motion Support */
   @media (prefers-reduced-motion: reduce) {
-    * {
+    *,
+    *::before,
+    *::after {
       animation-duration: 0.01ms !important;
       animation-iteration-count: 1 !important;
       transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
     }
   }
 }
 
+/* Custom Scrollbars */
 @supports (scrollbar-width: thin) {
   * {
-    scrollbar-width: thin;        /* Firefox */
-    scrollbar-color: auto auto;
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.mm.teal') theme('colors.mm.cream');
   }
 }
 
-/* ✅ Safari/Chromium webkit fallback */
 *::-webkit-scrollbar {
   width: 12px;
   height: 12px;
 }
+
+*::-webkit-scrollbar-track {
+  background: theme('colors.mm.cream');
+}
+
 *::-webkit-scrollbar-thumb {
+  background: theme('colors.mm.teal');
   border-radius: 6px;
 }
 
+*::-webkit-scrollbar-thumb:hover {
+  background: theme('colors.mm.forest');
+}
 
 /* M&M Global Styles */
 @layer base {
@@ -132,5 +149,21 @@
     clip: rect(0, 0, 0, 0);
     white-space: nowrap;
     border: 0;
+  }
+
+  /* Skip to main content link */
+  .skip-link {
+    position: absolute;
+    top: -40px;
+    left: 0;
+    background: theme('colors.mm.forest');
+    color: white;
+    padding: 8px;
+    text-decoration: none;
+    z-index: 100;
+  }
+
+  .skip-link:focus {
+    top: 0;
   }
 }
