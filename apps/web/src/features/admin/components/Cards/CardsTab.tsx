@@ -1,4 +1,6 @@
-// apps/web/src/components/admin/UnifiedCardsTab.tsx
+// apps/web/src/features/admin/components/Cards/CardsTab.tsx
+// FIXED VERSION - Removes games dependency and adds fallback
+
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download, LayoutGrid, List } from 'lucide-react';
@@ -69,7 +71,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     error: filtersError
   } = useShopFilters();
 
-  // ---------- URL State Management (copied from TCGShop) ----------
+  // ---------- URL State Management ----------
   const updateParam = useCallback((key: string, value: string) => {
     setSearchParams(prev => {
       const newParams = new URLSearchParams(prev);
@@ -103,7 +105,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     updateParam('set', set);
   }, [updateParam]);
 
-  // Additional filters configuration (following TCGShop pattern)
+  // Additional filters configuration
   const additionalFilters = {
     treatment: {
       value: selectedTreatment,
@@ -122,16 +124,16 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       const params = new URLSearchParams();
       params.set('limit', '1000');
       
-      // Add game filter
-      if (selectedGame && selectedGame !== 'all') {
+      // Add game filter (optional - will work even if games array is empty)
+      if (selectedGame && selectedGame !== 'all' && games.length > 0) {
         const game = games.find(g => g.name === selectedGame);
         if (game?.id) {
           params.set('game_id', String(game.id));
         }
       }
       
-      // Add set filter
-      if (selectedSet && selectedSet !== 'all') {
+      // Add set filter (optional - will work even if sets array is empty)
+      if (selectedSet && selectedSet !== 'all' && sets.length > 0) {
         const set = sets.find(s => s.name === selectedSet);
         if (set?.id) {
           params.set('set_id', String(set.id));
@@ -149,10 +151,14 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       }
 
       const url = `/cards/cards?${params.toString()}`;
+      console.log('🚀 Fetching cards from:', url);
+      
       const data = await api.get<{ cards?: Card[] }>(url);
+      
+      console.log('✅ Cards fetched:', data?.cards?.length ?? 0);
       setCards(data?.cards ?? []);
     } catch (err) {
-      console.error('Error fetching cards:', err);
+      console.error('❌ Error fetching cards:', err);
       setCards([]);
       setError(err instanceof Error ? err.message : 'Failed to fetch cards');
     } finally {
@@ -160,12 +166,11 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     }
   }, [selectedGame, selectedSet, searchTerm, selectedTreatment, games, sets]);
 
-  // Fetch cards when dependencies change
+  // ✅ FIXED: Fetch cards immediately, don't wait for games
   useEffect(() => {
-    if (games.length > 0) {
-      fetchCards();
-    }
-  }, [fetchCards, games]);
+    console.log('🔄 Triggering fetch (no games dependency)');
+    fetchCards();
+  }, [fetchCards]);
 
   // ---------- Derived Data ----------
   const filteredCards = useMemo(() => {
@@ -220,9 +225,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setAddFormData({
       quality: 'Near Mint',
       foil_type: variation.finish === 'foil' ? 'Foil' : 'Regular',
-      price: '',
+      price: String(variation.price || ''),
       stock_quantity: 1,
-      language: 'English',
+      language: variation.language || 'English',
     });
     setShowAddModal(true);
   }, []);
@@ -230,58 +235,44 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
     setAddModalData(null);
-    setAddFormData({
-      quality: 'Near Mint',
-      foil_type: 'Regular',
-      price: '',
-      stock_quantity: 1,
-      language: 'English',
-    });
   }, []);
 
   const handleAddToInventory = useCallback(async () => {
     if (!addModalData) return;
-    
+
     setSaving(true);
     try {
       await api.post('/admin/inventory', {
-        card_id: addModalData.variation.card_id,
+        card_id: addModalData.card.id,
         quality: addFormData.quality,
         foil_type: addFormData.foil_type,
         price: parseFloat(addFormData.price) || 0,
-        stock_quantity: Number(addFormData.stock_quantity) || 0,
+        stock_quantity: addFormData.stock_quantity,
         language: addFormData.language,
       });
       
-      await fetchCards();
       closeAddModal();
-      alert(`✅ ${addModalData.card.name} added to inventory successfully!`);
-    } catch (e) {
-      console.error('Error adding to inventory:', e);
-      alert(`❌ Error: ${e instanceof Error ? e.message : 'Failed to add to inventory'}`);
+      fetchCards(); // Refresh data
+    } catch (err) {
+      console.error('Failed to add to inventory:', err);
+      alert('Failed to add to inventory. Please try again.');
     } finally {
       setSaving(false);
     }
-  }, [addModalData, addFormData, fetchCards, closeAddModal]);
+  }, [addModalData, addFormData, closeAddModal, fetchCards]);
 
-  // ---------- CSV Export ----------
-  const handleExport = useCallback(() => {
+  // ---------- Export CSV ----------
+  const handleExportCSV = useCallback(() => {
     try {
-      const getUniqueTreatments = (variations: CardVariation[]) =>
-        Array.from(new Set((variations ?? []).map(v => v.treatment)));
-      
-      const getUniqueFinishes = (variations: CardVariation[]) =>
-        Array.from(new Set((variations ?? []).map(v => v.finish)));
-
       const csv = [
-        ['Card Name', 'Number', 'Set', 'Rarity', 'Treatments', 'Finishes', 'Stock', 'Variations'].join(','),
+        ['Name', 'Set', 'Number', 'Game', 'Rarity', 'Variations', 'Total Stock', 'Variation Count'].join(','),
         ...groupedCards.map(c => [
-          `"${(c.name || '').replace(/"/g, '""')}"`, // Proper CSV escaping
-          c.card_number || '',
-          `"${(c.set_name || '').replace(/"/g, '""')}"`,
-          c.rarity || '',
-          getUniqueTreatments(c.variations ?? []).join(';'),
-          getUniqueFinishes(c.variations ?? []).join(';'),
+          `"${c.name}"`,
+          `"${c.set_name}"`,
+          `"${c.card_number}"`,
+          `"${c.game_name}"`,
+          `"${c.rarity || ''}"`,
+          `"${(c.variations || []).map(v => `${v.quality} ${v.foil_type} (${v.stock})`).join(';')}"`,
           c.total_stock || 0,
           c.variation_count || 0,
         ].join(',')),
@@ -348,81 +339,68 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                 onClick={() => setViewMode('list')}
                 className={`px-3 py-2 rounded-md transition-colors ${
                   viewMode === 'list'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-700 hover:bg-slate-100'
                 }`}
-                aria-pressed={viewMode === 'list'}
-                aria-label="Switch to list view"
               >
-                <List className="w-5 h-5" />
+                <List className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('grid')}
                 className={`px-3 py-2 rounded-md transition-colors ${
                   viewMode === 'grid'
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                    ? 'bg-blue-600 text-white'
+                    : 'text-slate-700 hover:bg-slate-100'
                 }`}
-                aria-pressed={viewMode === 'grid'}
-                aria-label="Switch to grid view"
               >
-                <LayoutGrid className="w-5 h-5" />
+                <LayoutGrid className="w-4 h-4" />
               </button>
             </div>
           </div>
-          
-          <button 
-            onClick={fetchCards}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Refresh cards"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
-          
+
+          {/* Export Button */}
           <button
-            onClick={handleExport}
-            disabled={filteredCards.length === 0}
-            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Export to CSV"
+            onClick={handleExportCSV}
+            disabled={groupedCards.length === 0}
+            className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <Download className="w-4 h-4" />
             Export CSV
           </button>
+
+          {/* Refresh Button */}
+          <button
+            onClick={fetchCards}
+            disabled={loading}
+            className="inline-flex items-center gap-2 px-4 py-2 border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-50 transition-colors"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
         </div>
       </div>
 
-      {/* ✅ REUSE CardSearchBar Component */}
-      <div className="bg-white rounded-lg border border-slate-200 p-4">
-        <CardSearchBar
-          searchTerm={searchTerm}
-          onSearchChange={handleSearchChange}
-          selectedGame={selectedGame}
-          onGameChange={handleGameChange}
-          selectedSet={selectedSet}
-          onSetChange={handleSetChange}
-          games={games}
-          sets={sets}
-          additionalFilters={additionalFilters}
-          apiUrl={API_BASE}
-          debounceMs={300}
-          minSearchLength={2}
-          showAutocomplete={false} // Disable for admin simplicity
-        />
-      </div>
+      {/* Search and Filters */}
+      <CardSearchBar
+        searchTerm={searchTerm}
+        selectedGame={selectedGame}
+        selectedSet={selectedSet}
+        games={games}
+        sets={sets}
+        onSearchChange={handleSearchChange}
+        onGameChange={handleGameChange}
+        onSetChange={handleSetChange}
+        additionalFilters={additionalFilters}
+      />
 
-      {/* Loading State */}
-      {(loading || filtersLoading) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {/* Cards Display */}
+      {loading || filtersLoading ? (
+        <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {Array.from({ length: 8 }).map((_, i) => (
             <CardSkeleton key={i} />
           ))}
         </div>
-      )}
-
-      {/* Cards Display */}
-      {!loading && !filtersLoading && (
+      ) : (
         <>
           {groupedCards.length > 0 ? (
             <AdminCardGrid
