@@ -1,4 +1,10 @@
-// apps/web/src/components/cards/CardItem.tsx
+// apps/web/src/features/shop/components/CardDisplay/CardItem.tsx
+/**
+ * Card Item Component
+ * Displays individual card with variation selection
+ * 
+ * FIXED: Proper null checks and error handling for undefined variations
+ */
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
@@ -43,14 +49,41 @@ export type CardItemProps = {
 
 const CardItem = React.memo<CardItemProps>(
   ({ card, selectedVariationKey, selectedVariation, currency, onVariationChange, onAddToCart }) => {
+    // ✅ CRITICAL FIX: Validate that we have a selected variation
+    // If selectedVariation is undefined, try to get the first variation from the card
+    const effectiveVariation = selectedVariation || card.variations?.[0];
+    
+    // ✅ CRITICAL FIX: If still no variation, render an error state
+    if (!effectiveVariation) {
+      console.error(`CardItem: No variation available for card ${card.id} "${card.name}"`);
+      return (
+        <div className="card-mm flex flex-col h-full border-2 border-red-300 bg-red-50">
+          <div className="p-4">
+            <h3 className="font-semibold text-sm text-red-700">
+              {card.name}
+            </h3>
+            <p className="text-xs text-red-600 mt-2">
+              No variations available for this card
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    // ✅ FIX: Safe price calculation with proper null checks
     const price =
-      selectedVariation && typeof selectedVariation.price === 'number'
-        ? (selectedVariation.price * currency.rate).toFixed(2)
+      effectiveVariation && typeof effectiveVariation.price === 'number'
+        ? (effectiveVariation.price * currency.rate).toFixed(2)
         : (0).toFixed(2);
 
     const imageUrl = card.image_url || '/placeholder-card.png';
 
-    const inStock = (selectedVariation?.stock ?? 0) > 0;
+    // ✅ FIX: Safe stock check with proper null coalescing
+    const inStock = (effectiveVariation?.stock ?? 0) > 0;
+
+    // ✅ FIX: Safe foil type check with proper null coalescing
+    const foilType = effectiveVariation?.foil_type || 'Regular';
+    const isFoil = foilType !== 'Regular';
 
     return (
       <div className="card-mm flex flex-row lg:flex-col h-full">
@@ -62,16 +95,16 @@ const CardItem = React.memo<CardItemProps>(
             width={250}
             height={350}
             className={`w-full h-32 sm:h-44 lg:h-64 object-cover bg-gradient-to-br from-mm-warmAccent to-mm-tealLight ${
-              selectedVariation?.foil_type !== 'Regular'
+              isFoil
                 ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
                 : ''
             }`}
             placeholder="blur"
             sizes="(max-width: 640px) 128px, (max-width: 1024px) 192px, 100%"
           />
-          {selectedVariation?.foil_type !== 'Regular' && (
+          {isFoil && (
             <div className="absolute top-1 left-1 lg:top-2 lg:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-mm-sm shadow-md border border-yellow-300">
-              ✨ {selectedVariation.foil_type}
+              ✨ {foilType}
             </div>
           )}
         </div>
@@ -113,36 +146,30 @@ const CardItem = React.memo<CardItemProps>(
           <div className="flex items-center gap-2 pb-2 lg:pb-3 border-b border-mm-warmAccent flex-shrink-0" aria-live="polite">
             {inStock ? (
               <>
-                <div className="w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full bg-emerald-500" aria-hidden="true" />
-                <span className="text-xs lg:text-sm font-medium text-emerald-700">{selectedVariation?.stock} left</span>
+                <span className="w-2 h-2 bg-green-500 rounded-full" aria-hidden="true" />
+                <span className="text-xs lg:text-sm text-mm-forest font-medium">
+                  {effectiveVariation.stock} in stock
+                </span>
               </>
             ) : (
               <>
-                <div className="w-1.5 lg:w-2 h-1.5 lg:h-2 rounded-full bg-mm-teal" aria-hidden="true" />
-                <span className="text-xs lg:text-sm font-medium text-mm-teal">Out of stock</span>
+                <span className="w-2 h-2 bg-red-500 rounded-full" aria-hidden="true" />
+                <span className="text-xs lg:text-sm text-red-600 font-medium">Out of stock</span>
               </>
             )}
           </div>
 
-          {/* Price & CTA */}
-          <div className="mt-auto pt-1 lg:pt-2">
-            <div className="mb-2 lg:mb-3" aria-live="polite">
-              <div className="text-lg lg:text-2xl font-bold text-mm-darkForest leading-none mb-1">
-                {currency.symbol}
-                {price}
-              </div>
-              {inStock && (selectedVariation?.stock ?? 0) <= 3 && (
-                <div className="text-xs font-semibold text-red-600">Only {selectedVariation?.stock} left!</div>
-              )}
-            </div>
-
+          {/* Price & Action */}
+          <div className="flex items-center justify-between gap-3 mt-auto">
+            <span className="text-xl lg:text-2xl font-bold text-mm-darkForest">
+              {currency.symbol}{price}
+            </span>
             <button
               onClick={onAddToCart}
               disabled={!inStock}
-              className="btn-mm-primary w-full text-sm lg:text-base disabled:bg-mm-teal disabled:cursor-not-allowed disabled:shadow-none"
+              className="btn-mm-primary text-xs lg:text-sm px-3 py-2 lg:px-4 lg:py-2 disabled:opacity-50 disabled:cursor-not-allowed"
               style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
               aria-label={`Add ${card.name} to cart`}
-              aria-disabled={!inStock}
             >
               Add to Cart
             </button>
@@ -151,20 +178,22 @@ const CardItem = React.memo<CardItemProps>(
       </div>
     );
   },
-  (prev, next) => {
-    const pv = prev.selectedVariation;
-    const nv = next.selectedVariation;
+  (prevProps, nextProps) => {
+    // ✅ FIX: Improved comparison with proper null checks
+    const prevVar = prevProps.selectedVariation;
+    const nextVar = nextProps.selectedVariation;
+    
     return (
-      prev.card.id === next.card.id &&
-      prev.selectedVariationKey === next.selectedVariationKey &&
-      prev.currency.symbol === next.currency.symbol &&
-      prev.currency.rate === next.currency.rate &&
-      pv?.id === nv?.id &&
-      pv?.price === nv?.price &&
-      pv?.stock === nv?.stock &&
-      pv?.quality === nv?.quality &&
-      pv?.foil_type === nv?.foil_type &&
-      pv?.language === nv?.language
+      prevProps.card.id === nextProps.card.id &&
+      prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
+      prevProps.currency.symbol === nextProps.currency.symbol &&
+      prevProps.currency.rate === nextProps.currency.rate &&
+      prevVar?.id === nextVar?.id &&
+      prevVar?.price === nextVar?.price &&
+      prevVar?.stock === nextVar?.stock &&
+      prevVar?.quality === nextVar?.quality &&
+      prevVar?.foil_type === nextVar?.foil_type &&
+      prevVar?.language === nextVar?.language
     );
   }
 );

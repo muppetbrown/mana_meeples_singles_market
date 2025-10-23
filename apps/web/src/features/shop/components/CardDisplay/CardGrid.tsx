@@ -3,12 +3,13 @@
  * Unified Card Grid Component
  * Consolidates CardGrid.tsx and VirtualCardGrid.tsx
  * Automatically uses virtual scrolling for large datasets
+ * 
+ * FIXED: Proper variation selection to prevent undefined errors
  */
-import React, { useRef, useMemo } from 'react';
+import React, { useRef, useMemo, useState } from 'react';
 import { useVirtualScroll } from '@/shared/hooks';
-import { Card } from '@/types';
+import { Card, CardVariation } from '@/types';
 import CardItem from './CardItem';
-//import ListCardItem from './ListCardItem';
 import CardSkeleton from './CardSkeleton';
 import { ChevronDown } from 'lucide-react';
 
@@ -56,9 +57,14 @@ export const CardGrid = <T extends Card = Card>({
   enableVirtualScroll: enableVirtualScrollProp,
   onCardClick,
   renderCard,
-  cardProps = {}
+  cardProps = {},
+  mode = 'all',
+  onAddToInventory
 }: CardGridProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // ✅ FIX: Track selected variations per card
+  const [selectedVariations, setSelectedVariations] = useState<Record<number, string>>({});
 
   // Determine if virtual scrolling should be enabled
   const shouldUseVirtualScroll = useMemo(() => {
@@ -96,22 +102,54 @@ export const CardGrid = <T extends Card = Card>({
     }
   };
 
-// Default card renderer
-const defaultRenderCard = (card: T) => {
-  // For now, always use CardItem (list view coming later)
-  return (
-    <CardItem
-      key={card.id}
-      card={card as any} // Type assertion - CardItem has its own Card type
-      selectedVariationKey={cardProps?.selectedVariationKey || ''}
-      selectedVariation={cardProps?.selectedVariation}
-      currency={cardProps?.currency || { symbol: '$', rate: 1 }}
-      onVariationChange={cardProps?.onVariationChange || (() => {})}
-      onAddToCart={cardProps?.onAddToCart || (() => {})}
-      {...cardProps}
-    />
-  );
-};
+  // ✅ FIX: Proper variation selection handler
+  const handleVariationChange = (cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedVariations(prev => ({
+      ...prev,
+      [cardId]: e.target.value
+    }));
+  };
+
+  // ✅ FIX: Proper default card renderer with variation selection
+  const defaultRenderCard = (card: T) => {
+    // Ensure card has variations array
+    if (!card.variations || card.variations.length === 0) {
+      console.warn(`Card ${card.id} has no variations, skipping render`);
+      return null;
+    }
+
+    // Get selected variation key for this card, or default to first variation
+    const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
+    
+    // Find the selected variation object
+    const selectedVariation = card.variations.find(
+      (v: CardVariation) => v.variation_key === selectedVariationKey
+    ) || card.variations[0];
+
+    // ✅ CRITICAL FIX: Ensure selectedVariation exists before rendering
+    if (!selectedVariation) {
+      console.warn(`No valid variation found for card ${card.id}`);
+      return null;
+    }
+
+    // For admin mode, we need a different interaction model
+    const isAdminMode = mode === 'all' || mode === 'inventory';
+    
+    return (
+      <CardItem
+        key={card.id}
+        card={card as any}
+        selectedVariationKey={selectedVariationKey}
+        selectedVariation={selectedVariation}
+        currency={cardProps?.currency || { symbol: '$', rate: 1 }}
+        onVariationChange={handleVariationChange(card.id)}
+        onAddToCart={isAdminMode 
+          ? () => onAddToInventory?.(card, selectedVariation)
+          : cardProps?.onAddToCart?.(card, selectedVariation) || (() => {})
+        }
+      />
+    );
+  };
 
   const cardRenderer = renderCard || defaultRenderCard;
 
@@ -122,119 +160,78 @@ const defaultRenderCard = (card: T) => {
   if (isLoading) {
     return (
       <div 
-        className={`grid ${getGridClasses()} gap-4 sm:gap-6`}
+        className={`grid ${getGridClasses()} gap-4 sm:gap-5 lg:gap-6`}
         role="status"
         aria-label="Loading cards"
       >
-        {Array.from({ length: 12 }, (_, i) => (
-          <CardSkeleton key={i} viewMode={viewMode} />
+        {Array.from({ length: 12 }).map((_, i) => (
+          <CardSkeleton key={i} />
         ))}
       </div>
     );
   }
 
   // ========================================================================
-  // EMPTY STATE
+  // VIRTUAL SCROLL RENDERING
   // ========================================================================
 
-  if (cards.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <p className="text-slate-500 text-lg">No cards found</p>
-      </div>
-    );
-  }
+  if (shouldUseVirtualScroll) {
+    const {
+      visibleItems,
+      totalHeight,
+      offsetY,
+      handleScroll,
+      visibleRange
+    } = virtualScroll;
 
-  // ========================================================================
-  // SIMPLE GRID (Non-virtual)
-  // ========================================================================
-
-  if (!shouldUseVirtualScroll) {
     return (
       <div 
-        className={`grid ${getGridClasses()} gap-4 sm:gap-6`}
-        role="region"
-        aria-label="Card grid"
-      >
-        {cards.map(cardRenderer)}
-      </div>
-    );
-  }
-
-  // ========================================================================
-  // VIRTUAL SCROLLING GRID
-  // ========================================================================
-
-  const {
-    visibleItems,
-    totalHeight,
-    offsetY,
-    handleScroll,
-    visibleRange
-  } = virtualScroll;
-
-  return (
-    <div className="space-y-4">
-      <div
         ref={containerRef}
-        className="relative overflow-y-auto scrollbar-thin scrollbar-thumb-slate-300 scrollbar-track-slate-100"
-        style={{
-          height: `${Math.min(totalHeight, containerHeight)}px`,
-          maxHeight: '80vh'
-        }}
+        className="relative overflow-auto"
+        style={{ height: `${containerHeight}px` }}
         onScroll={handleScroll}
-        role="region"
-        aria-label="Virtual card grid"
-        aria-live="polite"
-        aria-rowcount={cards.length}
       >
-        {/* Spacer for total height */}
-        <div style={{ height: `${totalHeight}px`, position: 'relative' }}>
-          {/* Visible items container */}
+        <div
+          style={{
+            height: `${totalHeight}px`,
+            position: 'relative'
+          }}
+        >
           <div
             style={{
               transform: `translateY(${offsetY}px)`,
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              right: 0
+              willChange: 'transform'
             }}
           >
-            <div className={`grid ${getGridClasses()} gap-4 sm:gap-6`}>
-              {visibleItems.map((card, index) => (
-                <div
-                  key={card.id}
-                  style={{
-                    minHeight: `${effectiveCardHeight - 24}px`
-                  }}
-                  aria-rowindex={visibleRange.startIndex + index + 1}
-                >
-                  {cardRenderer(card)}
-                </div>
-              ))}
+            <div className={`grid ${getGridClasses()} gap-4 sm:gap-5 lg:gap-6`}>
+              {visibleItems.map((card) => cardRenderer(card))}
             </div>
           </div>
         </div>
+        
+        {/* Scroll indicator - show if not at end */}
+        {visibleRange.endIndex < cards.length - 1 && (
+          <div className="flex justify-center py-4">
+            <ChevronDown className="w-6 h-6 text-slate-400 animate-bounce" />
+          </div>
+        )}
       </div>
+    );
+  }
 
-      {/* Performance indicator (dev only) */}
-      {process.env.NODE_ENV === 'development' && shouldUseVirtualScroll && (
-        <div className="text-xs text-slate-500 bg-slate-50 p-2 rounded">
-          Virtual Scrolling: Showing {visibleItems.length} of {cards.length} cards
-          | Range: {visibleRange.startIndex}-{visibleRange.endIndex}
-          | Columns: {responsiveColumns}
-        </div>
-      )}
+  // ========================================================================
+  // STANDARD RENDERING (no virtual scroll)
+  // ========================================================================
+
+  return (
+    <div 
+      ref={containerRef}
+      className={`grid ${getGridClasses()} gap-4 sm:gap-5 lg:gap-6`}
+    >
+      {cards.map((card) => cardRenderer(card))}
     </div>
   );
 };
 
-// ============================================================================
-// EXPORTS
-// ============================================================================
-
+// Export as default for compatibility
 export default CardGrid;
-
-// Also export compound components for flexibility
-//export { CardItem, ListCardItem, CardSkeleton };
-export { CardItem, CardSkeleton };
