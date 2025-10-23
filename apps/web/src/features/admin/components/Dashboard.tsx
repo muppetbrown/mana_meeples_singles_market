@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
 import { api } from '@/lib/api';
-
+import { ENDPOINTS } from '@/lib/api';
 import CurrencySelector from '@/shared/components/forms/CurrencySelector';
 import UnifiedCardsTab from './Cards/CardsTab';
 import OrdersTab from './Orders/OrdersTab';
@@ -17,7 +17,7 @@ const AdminDashboard = () => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const auth = await api.get<{ authenticated?: boolean; user?: unknown }>('/auth/admin/check');
+        const auth = await api.get<{ authenticated?: boolean; user?: unknown }>(ENDPOINTS.AUTH.ADMIN_CHECK);
         if (auth?.authenticated === true || auth?.user) {
           setIsAuthenticated(true);
         } else {
