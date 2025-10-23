@@ -16,15 +16,15 @@ export const ENDPOINTS = {
   // ============================================================================
   // PUBLIC STOREFRONT ENDPOINTS
   // ============================================================================
-  CARDS: '/api/cards',
-  CARD_DETAIL: (id: string | number) => `/api/cards/${id}`,
-  GAMES: '/api/games',
-  SETS: '/api/sets',
-  FILTERS: '/api/filters',
-  ORDERS: '/api/orders',
+  CARDS: '/api/cards/cards',
+  CARD_DETAIL: (id: string | number) => `/api/cards/cards/${id}`,
+  GAMES: '/api/cards/games',
+  SETS: '/api/cards/sets',
+  FILTERS: '/api/cards/filters',
+  ORDERS: '/api/cards/orders',
   
   // Card Variations
-  VARIATIONS: (cardId: string | number) => `/api/variations/${cardId}`,
+  VARIATIONS: (cardId: string | number) => `/api/variations/variations/${cardId}`,
 
   // ============================================================================
   // ADMIN ENDPOINTS (Require Authentication)
