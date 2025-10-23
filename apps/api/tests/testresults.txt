@@ -6,117 +6,46 @@ C:\Git_Repos\mana_meeples_singles_market>pnpm --filter ./apps/api test
 
  DEV  v2.1.9 C:/Git_Repos/mana_meeples_singles_market/apps/api
 
-stdout | tests/integration/auth.routes.test.ts
-📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908806.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908806.txt
-
-stdout | tests/integration/inventory.routes.test.ts
-📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908801.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908801.txt
-
-stdout | tests/integration/cards.search.test.ts
-📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908803.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908803.txt
-
-stdout | tests/integration/error-handling.test.ts
-📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908806.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908806.txt
-
 stdout | tests/integration/orders.routes.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908801.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908801.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200890.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200890.txt
 
 stdout | tests/e2e/checkout.flow.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908798.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908798.txt
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200901.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200901.txt
 
 stdout | tests/integration/storefront.routes.test.ts
 📝 Test logging initialized:
-   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908797.json
-   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908797.txt
-
-stdout | tests/integration/auth.routes.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T19:38:34.939Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'MISSING', hasPassword: false }
-
-stderr | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
-❌ Missing credentials
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T19:38:34.951Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-❌ Invalid credentials
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T19:38:35.963Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-✅ Credentials valid, generating token...
-🎫 Token generated
-🍪 Setting cookie with config: {
-  httpOnly: true,
-  secure: false,
-  sameSite: 'strict',
-  domain: '(current domain)'
-}
-📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
-✅ Response sent successfully
-
-stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/logout > clears the admin token cookie
-🔐 AUTH POST /api/auth/admin/logout - 2025-10-22T19:38:35.976Z
-🚪 Admin logout request
-
-stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns 401 when no token provided
-🔐 AUTH GET /api/auth/admin/check - 2025-10-22T19:38:35.982Z
-🔍 Admin auth check request
-❌ No admin token found
-
-stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T19:38:35.989Z
-🔑 Admin login attempt - handler entered
-📋 Credentials received: { username: 'admin', hasPassword: true }
-🔍 Validating credentials...
-✅ Credentials valid, generating token...
-🎫 Token generated
-🍪 Setting cookie with config: {
-  httpOnly: true,
-  secure: false,
-  sameSite: 'strict',
-  domain: '(current domain)'
-}
-📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
-✅ Response sent successfully
-
-stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
-🔐 AUTH GET /api/auth/admin/check - 2025-10-22T19:38:35.998Z
-🔍 Admin auth check request
-🔍 Verifying token...
-✅ Auth check successful for: admin
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200908.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200908.txt
 
 stdout | tests/integration/cards.search.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔐 prevent building .env in docker: https://dotenvx.com/prebuild
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200894.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200894.txt
+
+stdout | tests/integration/inventory.routes.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200896.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200896.txt
 
 stdout | tests/integration/error-handling.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200900.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200900.txt
 
-stderr | tests/integration/cards.search.test.ts
-⚠️ Unexpected database pool error: terminating connection due to administrator command
+stdout | tests/integration/auth.routes.test.ts
+📝 Test logging initialized:
+   JSON: C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200909.json
+   TXT:  C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200909.txt
+
+stdout | tests/integration/error-handling.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
 
 stdout | tests/integration/error-handling.test.ts > Error Handling > 400 Bad Request > returns 400 for malformed request body
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T19:38:36.670Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:07.567Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'MISSING', hasPassword: false }
 
@@ -127,17 +56,17 @@ stderr | tests/integration/error-handling.test.ts > Error Handling > 401 Unautho
 ❌ No admin token found in cookies
 
 stdout | tests/integration/error-handling.test.ts > Error Handling > Content-Type validation > requires JSON content-type for POST requests
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T19:38:36.681Z
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:07.580Z
 🔑 Admin login attempt - handler entered
 
 stderr | tests/integration/error-handling.test.ts > Error Handling > Content-Type validation > requires JSON content-type for POST requests
 ❌ Invalid request body
 
-stdout | tests/integration/orders.routes.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+stdout | tests/integration/inventory.routes.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
 
-stdout | tests/integration/orders.routes.test.ts
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T19:38:36.784Z
+stdout | tests/integration/inventory.routes.test.ts
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:08.468Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
@@ -152,35 +81,35 @@ stdout | tests/integration/orders.routes.test.ts
 📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
 ✅ Response sent successfully
 
-stdout | tests/e2e/checkout.flow.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  suppress all logs with { quiet: true }
-
-stdout | tests/integration/auth.routes.test.ts
+stdout | tests/integration/error-handling.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908806.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908806.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200900.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200900.json
+
+stdout | tests/integration/cards.search.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+stderr | tests/integration/cards.search.test.ts
+⚠️ Unexpected database pool error: terminating connection due to administrator command
+
+stdout | tests/integration/storefront.routes.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+stdout | tests/e2e/checkout.flow.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  write to custom object with { processEnv: myObject }
+
+stdout | tests/integration/orders.routes.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: ✅ audit secrets and track compliance: https://dotenvx.com/ops
 
 stdout | tests/integration/cards.search.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908803.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908803.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200894.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200894.json
 
-stdout | tests/integration/error-handling.test.ts
-
-✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908806.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908806.json
-
-stdout | tests/integration/storefront.routes.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔐 encrypt with Dotenvx: https://dotenvx.com
-
-stdout | tests/integration/inventory.routes.test.ts
-[dotenv@17.2.3] injecting env (22) from .env -- tip: ⚙️  enable debug logging with { debug: true }
-
-stdout | tests/integration/inventory.routes.test.ts
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T19:38:38.122Z
+stdout | tests/integration/orders.routes.test.ts
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:10.023Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
@@ -198,18 +127,26 @@ stdout | tests/integration/inventory.routes.test.ts
 stderr | tests/integration/inventory.routes.test.ts > POST /api/admin/inventory > requires authentication
 ❌ No admin token found in cookies
 
-stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles out-of-stock scenario gracefully
-❌ Create order error: Error: Insufficient stock for Lightning Bolt
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:145:17
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+stdout | tests/integration/auth.routes.test.ts
+[dotenv@17.2.3] injecting env (22) from .env -- tip: 🔑 add access controls to secrets: https://dotenvx.com/ops
 
-stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles concurrent orders for the same item
-❌ Create order error: Error: Insufficient stock for Lightning Bolt
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:145:17
-    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:10.921Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'MISSING', hasPassword: false }
 
-stdout | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > validates customer input sanitization during checkout
-🔐 AUTH POST /api/auth/admin/login - 2025-10-22T19:38:43.542Z
+stderr | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with missing credentials
+❌ Missing credentials
+
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > rejects login with invalid credentials
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:10.932Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+❌ Invalid credentials
+
+stdout | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > completes a full customer journey from browsing to order placement
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:11.404Z
 🔑 Admin login attempt - handler entered
 📋 Credentials received: { username: 'admin', hasPassword: true }
 🔍 Validating credentials...
@@ -224,34 +161,129 @@ stdout | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > valida
 📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
 ✅ Response sent successfully
 
-stderr | tests/integration/orders.routes.test.ts > POST /api/orders > handles transaction rollback on inventory update failure
-❌ Create order error: Error: Inventory item not found: 999999
-    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:138:17
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/login > accepts valid admin credentials and sets cookie
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:11.939Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+✅ Credentials valid, generating token...
+🎫 Token generated
+🍪 Setting cookie with config: {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict',
+  domain: '(current domain)'
+}
+📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
+✅ Response sent successfully
+
+stdout | tests/integration/auth.routes.test.ts > POST /api/auth/admin/logout > clears the admin token cookie
+🔐 AUTH POST /api/auth/admin/logout - 2025-10-23T02:40:11.944Z
+🚪 Admin logout request
+
+stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns 401 when no token provided
+🔐 AUTH GET /api/auth/admin/check - 2025-10-23T02:40:11.947Z
+🔍 Admin auth check request
+❌ No admin token found
+
+stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:11.950Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+✅ Credentials valid, generating token...
+🎫 Token generated
+🍪 Setting cookie with config: {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict',
+  domain: '(current domain)'
+}
+📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
+✅ Response sent successfully
+
+stdout | tests/integration/auth.routes.test.ts > GET /api/auth/admin/check > returns authenticated status with valid token
+🔐 AUTH GET /api/auth/admin/check - 2025-10-23T02:40:11.954Z
+🔍 Admin auth check request
+🔍 Verifying token...
+✅ Auth check successful for: admin
+
+stdout | tests/integration/auth.routes.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200909.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200909.json
+
+stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles out-of-stock scenario gracefully
+❌ Create order error: Error: Insufficient stock for Lightning Bolt
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:191:17
     at processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+stderr | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles concurrent orders for the same item
+❌ Create order error: Error: Insufficient stock for Lightning Bolt
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:230:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
+
+stdout | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > allows admin to cancel an order and restore inventory
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:15.599Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+✅ Credentials valid, generating token...
+🎫 Token generated
+🍪 Setting cookie with config: {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict',
+  domain: '(current domain)'
+}
+📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
+✅ Response sent successfully
 
 stderr | tests/integration/storefront.routes.test.ts
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
+
+stdout | tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > validates customer input sanitization during checkout
+🔐 AUTH POST /api/auth/admin/login - 2025-10-23T02:40:16.910Z
+🔑 Admin login attempt - handler entered
+📋 Credentials received: { username: 'admin', hasPassword: true }
+🔍 Validating credentials...
+✅ Credentials valid, generating token...
+🎫 Token generated
+🍪 Setting cookie with config: {
+  httpOnly: true,
+  secure: false,
+  sameSite: 'strict',
+  domain: '(current domain)'
+}
+📤 Sending response: { success: true, message: 'Login successful', expiresIn: '24h' }
+✅ Response sent successfully
+
+stdout | tests/integration/storefront.routes.test.ts
+
+✅ Test environment logs written:
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200908.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200908.json
+
+stderr | tests/integration/inventory.routes.test.ts > GET /api/admin/inventory > requires authentication
+❌ No admin token found in cookies
+
+stderr | tests/integration/orders.routes.test.ts > POST /api/orders > handles transaction rollback on inventory update failure
+❌ Create order error: Error: Inventory item not found: 999999
+    at C:\Git_Repos\mana_meeples_singles_market\apps\api\src\routes\orders.ts:184:17
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)
 
 stderr | tests/e2e/checkout.flow.test.ts
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
 
-stdout | tests/integration/storefront.routes.test.ts
-
-✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908797.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908797.json
-
 stdout | tests/e2e/checkout.flow.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908798.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908798.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200901.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200901.json
 
 stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders > requires authentication
-❌ No admin token found in cookies
-
-stderr | tests/integration/inventory.routes.test.ts > GET /api/admin/inventory > requires authentication
 ❌ No admin token found in cookies
 
 stderr | tests/integration/inventory.routes.test.ts > PATCH /api/admin/inventory/:id > requires authentication
@@ -263,88 +295,48 @@ stderr | tests/integration/orders.routes.test.ts > GET /api/admin/orders/:id > r
 stderr | tests/integration/inventory.routes.test.ts > DELETE /api/admin/inventory/:id > requires authentication
 ❌ No admin token found in cookies
 
-stderr | tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > requires authentication
-❌ No admin token found in cookies
-
 stderr | tests/integration/inventory.routes.test.ts
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
+
+stderr | tests/integration/orders.routes.test.ts > PATCH /api/admin/orders/:id/status > requires authentication
+❌ No admin token found in cookies
 
 stdout | tests/integration/inventory.routes.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908801.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908801.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200896.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200896.json
 
 stderr | tests/integration/orders.routes.test.ts
+⚠️ Unexpected database pool error: terminating connection due to administrator command
 ⚠️ Unexpected database pool error: terminating connection due to administrator command
 
 stdout | tests/integration/orders.routes.test.ts
 
 ✅ Test environment logs written:
-   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908801.txt
-   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761161908801.json
+   📄 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200890.txt
+   📊 C:\Git_Repos\mana_meeples_singles_market\apps\api\test-logs\test-env-1761187200890.json
 
- ❯ tests/e2e/checkout.flow.test.ts (6) 17030ms
-   ❯ Complete Checkout Flow (E2E) (6) 8106ms
-     × completes a full customer journey from browsing to order placement 1234ms
-     ✓ handles out-of-stock scenario gracefully 1323ms
-     ✓ handles concurrent orders for the same item 1404ms
-     × allows admin to cancel an order and restore inventory 1347ms
-     ✓ validates customer input sanitization during checkout 1362ms
-     × handles multiple items in a single order 1436ms
- ✓ tests/integration/auth.routes.test.ts (6) 8107ms
- ✓ tests/integration/cards.search.test.ts (1) 8723ms
- ✓ tests/integration/error-handling.test.ts (7) 8918ms
- ✓ tests/integration/inventory.routes.test.ts (16) 27078ms
- ❯ tests/integration/orders.routes.test.ts (19) 28134ms
-   ❯ POST /api/orders (6) 8022ms
-     ✓ creates a new order with valid data 1268ms
-     × validates required customer fields 1272ms
-     ✓ validates items array is not empty 1298ms
-     ✓ validates item quantity limits 1414ms
-     ✓ validates email format 1344ms
-     ✓ handles transaction rollback on inventory update failure 1425ms
-   ✓ GET /api/admin/orders (5) 4802ms
-   ✓ GET /api/admin/orders/:id (3) 2840ms
-   ✓ PATCH /api/admin/orders/:id/status (5) 3866ms
- ✓ tests/integration/storefront.routes.test.ts (5) 16850ms
+ ❯ tests/e2e/checkout.flow.test.ts (6) 17980ms
+   ❯ Complete Checkout Flow (E2E) (6) 8126ms
+     ✓ completes a full customer journey from browsing to order placement 1512ms
+     ✓ handles out-of-stock scenario gracefully 1401ms
+     ✓ handles concurrent orders for the same item 1420ms
+     ✓ allows admin to cancel an order and restore inventory 1325ms
+     ✓ validates customer input sanitization during checkout 1301ms
+     × handles multiple items in a single order 1165ms
+ ✓ tests/integration/auth.routes.test.ts (6) 11953ms
+ ✓ tests/integration/cards.search.test.ts (1) 9103ms
+ ✓ tests/integration/error-handling.test.ts (7) 7604ms
+ ✓ tests/integration/inventory.routes.test.ts (16) 25900ms
+ ✓ tests/integration/orders.routes.test.ts (19) 28097ms
+ ✓ tests/integration/storefront.routes.test.ts (5) 16308ms
  ✓ tests/unit/auth.validateCredentials.test.ts (4)
  ✓ tests/unit/slugify.test.ts (1)
  ✓ tests/unit/utils.test.ts (43)
  ✓ tests/unit/validation.test.ts (10)
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 4 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
-
- FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > completes a full customer journey from browsing to order placement
-AssertionError: expected { id: 1, quality: 'Near Mint', …(4) } to have property "inventory_id"
- ❯ tests/e2e/checkout.flow.test.ts:55:23
-     53|
-     54|     const variation = cardDetailsRes.body.card.variations[0];
-     55|     expect(variation).toHaveProperty("inventory_id");
-       |                       ^
-     56|     expect(variation).toHaveProperty("price");
-     57|     expect(variation.stock).toBeGreaterThan(0);
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/4]⎯
-
- FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > allows admin to cancel an order and restore inventory
-AssertionError: expected undefined to be 7 // Object.is equality
-
-- Expected:
-7
-
-+ Received:
-undefined
-
- ❯ tests/e2e/checkout.flow.test.ts:292:39
-    290|
-    291|     const afterOrderVariation = afterOrderRes.body.card.variations[0];
-    292|     expect(afterOrderVariation.stock).toBe(initialStock - 3);
-       |                                       ^
-    293|
-    294|     // Step 2: Admin cancels the order
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[2/4]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯
 
  FAIL  tests/e2e/checkout.flow.test.ts > Complete Checkout Flow (E2E) > handles multiple items in a single order
 AssertionError: expected 1 to be 2 // Object.is equality
@@ -363,28 +355,17 @@ AssertionError: expected 1 to be 2 // Object.is equality
     416|   });
     417| });
 
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[3/4]⎯
+⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯
 
- FAIL  tests/integration/orders.routes.test.ts > POST /api/orders > validates required customer fields
-AssertionError: expected 'customer: Required' to contain 'email'
-
-Expected: "email"
-Received: "customer: Required"
-
- ❯ tests/integration/orders.routes.test.ts:101:28
-     99|
-    100|     expect(res.body).toHaveProperty("error");
-    101|     expect(res.body.error).toContain("email");
-       |                            ^
-    102|   });
-    103|
-
-⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[4/4]⎯
-
- Test Files  2 failed | 9 passed (11)
-      Tests  4 failed | 114 passed (118)
-   Start at  08:38:27
-   Duration  29.38s (transform 712ms, setup 0ms, collect 6.29s, tests 114.99s, environment 2ms, prepare 1.87s)
+ Test Files  1 failed | 10 passed (11)
+      Tests  1 failed | 117 passed (118)
+   Start at  15:39:59
+   Duration  29.33s (transform 682ms, setup 0ms, collect 6.08s, tests 117.09s, environment 2ms, prepare 2.18s)
 
  FAIL  Tests failed. Watching for file changes...
        press h to show help, press q to quit
+C:\Git_Repos\mana_meeples_singles_market\apps\api:
+ ERR_PNPM_RECURSIVE_RUN_FIRST_FAIL  @mana-meeples/api@ test: `vitest`
+Exit status 1
+
+C:\Git_Repos\mana_meeples_singles_market>

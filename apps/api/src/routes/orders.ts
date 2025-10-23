@@ -233,7 +233,7 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
 
       await client.query("COMMIT");
 
-      // 3. Fetch complete order with items for response
+      // 3. Fetch complete order with ALL items for response (before releasing client)
       const itemsResult = await client.query(
         `SELECT 
           id, 
@@ -250,6 +250,9 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
         [orderId]
       );
 
+      // Release client before sending response
+      client.release();
+
       res.status(201).json({
         success: true,
         order: {
@@ -264,12 +267,20 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
         },
         message: "Order created successfully",
       });
+      return;
       
     } catch (err) {
       await client.query("ROLLBACK");
       throw err;
     } finally {
-      client.release();
+      // Only release if not already released
+      if (client) {
+        try {
+          client.release();
+        } catch (e) {
+          // Client already released, ignore
+        }
+      }
     }
     
   } catch (error: any) {
