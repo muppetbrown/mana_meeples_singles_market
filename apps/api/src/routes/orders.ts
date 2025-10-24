@@ -139,31 +139,27 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
       // 1. Create order record
       const orderResult = await client.query(
         `INSERT INTO orders (
-          customer_email, 
+          customer_email,
           customer_name,
-          customer_address,
-          customer_phone,
           subtotal,
           tax,
           shipping,
           total,
-          notes,
           status,
+          payment_intent_id,
           created_at,
           updated_at
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW()) 
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, NOW(), NOW())
         RETURNING id, created_at`,
         [
           customer.email,
           customer.name,
-          customer.address || null,
-          customer.phone || null,
           total,
           0, // tax
           0, // shipping
           total,
-          notes || null,
           "pending",
+          null, // payment_intent_id - to be set when payment is processed
         ]
       );
 

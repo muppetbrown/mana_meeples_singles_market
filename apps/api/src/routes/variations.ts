@@ -44,25 +44,35 @@ router.get("/variations", async (req: Request, res: Response) => {
 
   let sql = `
     SELECT
-      COALESCE(array_agg(DISTINCT unnest(treatments)) FILTER (WHERE treatments IS NOT NULL), '{}') AS treatments,
-      COALESCE(array_agg(DISTINCT unnest(border_colors)) FILTER (WHERE border_colors IS NOT NULL), '{}') AS border_colors,
-      COALESCE(array_agg(DISTINCT unnest(finishes)) FILTER (WHERE finishes IS NOT NULL), '{}') AS finishes,
-      COALESCE(array_agg(DISTINCT unnest(promo_types)) FILTER (WHERE promo_types IS NOT NULL), '{}') AS promo_types,
-      COALESCE(array_agg(DISTINCT unnest(frame_effects)) FILTER (WHERE frame_effects IS NOT NULL), '{}') AS frame_effects
-    FROM mv_set_variation_filters
+      COALESCE(
+        CASE
+          WHEN $1::int IS NOT NULL THEN (SELECT treatment_codes FROM set_variations_metadata WHERE set_id = $1 LIMIT 1)
+          ELSE (SELECT treatment_codes FROM game_variations_metadata WHERE game_id = $2 LIMIT 1)
+        END, '[]'::jsonb
+      ) AS treatments,
+      COALESCE(
+        CASE
+          WHEN $1::int IS NOT NULL THEN (SELECT border_colors FROM set_variations_metadata WHERE set_id = $1 LIMIT 1)
+          ELSE (SELECT border_colors FROM game_variations_metadata WHERE game_id = $2 LIMIT 1)
+        END, '[]'::jsonb
+      ) AS border_colors,
+      COALESCE(
+        CASE
+          WHEN $1::int IS NOT NULL THEN (SELECT special_foils FROM set_variations_metadata WHERE set_id = $1 LIMIT 1)
+          ELSE (SELECT special_foils FROM game_variations_metadata WHERE game_id = $2 LIMIT 1)
+        END, '[]'::jsonb
+      ) AS finishes,
+      '[]'::jsonb AS promo_types,
+      COALESCE(
+        CASE
+          WHEN $1::int IS NOT NULL THEN (SELECT frame_effects FROM set_variations_metadata WHERE set_id = $1 LIMIT 1)
+          ELSE (SELECT frame_effects FROM game_variations_metadata WHERE game_id = $2 LIMIT 1)
+        END, '[]'::jsonb
+      ) AS frame_effects
   `;
-  const where: string[] = [];
-  const params: any[] = [];
 
-  if (set_id != null) {
-    params.push(set_id);
-    where.push(`set_id = $${params.length}`);
-  } else if (game_id != null) {
-    params.push(game_id);
-    where.push(`game_id = $${params.length}`);
-  }
-
-  if (where.length) sql += ` WHERE ${where.join(" AND ")}`;
+  // Parameters are: $1 = set_id, $2 = game_id
+  const params = [set_id || null, game_id || null];
 
   try {
     const result = await db.query<any>(sql, params);
