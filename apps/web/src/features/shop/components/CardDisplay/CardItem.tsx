@@ -11,44 +11,18 @@
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
-import { formatTreatment, formatFinish, isFoilCard, hasSpecialTreatment } from '@/types';
+import { 
+  Card, 
+  CardVariation,
+  formatTreatment, 
+  formatFinish, 
+  isFoilCard, 
+  hasSpecialTreatment 
+} from '@/types';
 
 // ============================================================================
 // TYPES
 // ============================================================================
-
-type Variation = {
-  variation_key: string;
-  quality: string;
-  foil_type: string;
-  language?: string;
-  price: number;
-  stock: number;
-  id?: string | number;
-};
-
-type Card = {
-  id: string | number;
-  name: string;
-  image_url?: string;
-  set_name: string;
-  card_number?: string;
-  
-  // NEW: Variation metadata directly on card (for admin mode)
-  treatment?: string;
-  border_color?: string;
-  finish?: string;
-  frame_effect?: string;
-  promo_type?: string;
-  
-  // For storefront mode
-  variations?: Variation[];
-  
-  // Stock aggregates
-  total_stock?: number;
-  variation_count?: number;
-  has_inventory?: boolean;
-};
 
 type Currency = {
   symbol: string;
@@ -58,7 +32,7 @@ type Currency = {
 export type CardItemProps = {
   card: Card;
   selectedVariationKey: string | null;
-  selectedVariation?: Variation | null;
+  selectedVariation?: CardVariation | null;
   currency: Currency;
   onVariationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onAddToCart: () => void;
@@ -217,7 +191,9 @@ const CardItem = React.memo<CardItemProps>(
     
     // If no variation in storefront mode, show error
     if (!effectiveVariation || !card.variations || card.variations.length === 0) {
-      console.error(`CardItem: No variation available for card ${card.id} "${card.name}"`);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`CardItem: No variation available for card ${card.id} "${card.name}"`);
+      }
       return (
         <div className="card-mm flex flex-col h-full border-2 border-red-300 bg-red-50">
           <div className="p-4">

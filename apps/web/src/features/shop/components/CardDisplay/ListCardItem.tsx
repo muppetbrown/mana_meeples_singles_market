@@ -8,29 +8,11 @@
  */
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
+import { Card, CardVariation } from '@/types';
 
 // ============================================================================
 // TYPES
 // ============================================================================
-
-type Variation = {
-  variation_key: string;
-  quality: string;
-  foil_type: string;
-  language?: string;
-  price: number;
-  stock: number;
-  id?: string | number;
-};
-
-type Card = {
-  id: string | number;
-  name: string;
-  image_url: string;
-  set_name: string;
-  card_number?: string;
-  variations: Variation[];
-};
 
 type Currency = {
   symbol: string;
@@ -40,7 +22,7 @@ type Currency = {
 type Props = {
   card: Card;
   selectedVariationKey: string;
-  selectedVariation?: Variation;
+  selectedVariation?: CardVariation;
   currency: Currency;
   onVariationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onAddToCart: () => void;
@@ -54,7 +36,9 @@ const ListCardItem = React.memo<Props>(
   ({ card, selectedVariationKey, selectedVariation, currency, onVariationChange, onAddToCart }) => {
     // Validate we have variations (required for storefront)
     if (!card.variations || card.variations.length === 0) {
-      console.error(`ListCardItem: No variations for card ${card.id} "${card.name}"`);
+      if (process.env.NODE_ENV === 'development') {
+        console.error(`ListCardItem: No variations for card ${card.id} "${card.name}"`);
+      }
       return (
         <div className="card-mm p-4 border-2 border-red-300 bg-red-50">
           <p className="text-xs text-red-600">
