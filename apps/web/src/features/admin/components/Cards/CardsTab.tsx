@@ -1,12 +1,14 @@
 // apps/web/src/features/admin/components/Cards/CardsTab.tsx
 /**
- * Unified Cards Tab Component - FIXED VERSION
+ * Unified Cards Tab Component - REFACTORED FOR NEW ARCHITECTURE
  * Handles both "All Cards" and "Inventory" views
  * 
- * KEY FIXES:
- * 1. Properly fetches filter options from /api/cards/filters
- * 2. Resolves game/set names to IDs before API calls
- * 3. Shows treatments dropdown with actual data
+ * NEW ARCHITECTURE:
+ * - Variation metadata (treatment, border_color, finish, frame_effect, promo_type) 
+ *   is stored directly on the cards table
+ * - Each card row represents a unique variation
+ * - No more card_variations table or variations array for "All Cards" view
+ * - Inventory mode filters cards by has_inventory/total_stock from card_inventory aggregation
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -18,7 +20,7 @@ import EmptyState from '@/shared/components/ui/EmptyState';
 import CardSkeleton from '@/features/shop/components/CardDisplay/CardSkeleton';
 import AddToInventoryModal from './AddToInventoryModal';
 import AdminCardGrid from '@/features/shop/components/CardDisplay/CardGrid';
-import type { Card, CardVariation } from '@/types';
+import type { Card } from '@/types';
 
 // ============================================================================
 // TYPES
@@ -32,11 +34,6 @@ interface FilterOptions {
   qualities: string[];
   foilTypes: string[];
 }
-
-type AddModalData = { 
-  card: Card; 
-  variation: CardVariation 
-};
 
 type AddFormData = {
   quality: string;
@@ -76,7 +73,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addModalData, setAddModalData] = useState<AddModalData | null>(null);
+  const [addModalCard, setAddModalCard] = useState<Card | null>(null);
   const [addFormData, setAddFormData] = useState<AddFormData>({
     quality: 'Near Mint',
     foil_type: 'Regular',
@@ -191,7 +188,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         const params = new URLSearchParams();
         params.set('limit', '1000');
         
-        // CRITICAL FIX: Resolve game NAME to game ID
+        // Resolve game NAME to game ID
         if (selectedGame && selectedGame !== 'all') {
           const game = filterOptions.games.find(g => g.name === selectedGame);
           if (game?.id) {
@@ -200,7 +197,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           }
         }
         
-        // CRITICAL FIX: Resolve set NAME to set ID
+        // Resolve set NAME to set ID
         if (selectedSet && selectedSet !== 'all') {
           const set = filterOptions.sets.find(s => s.name === selectedSet);
           if (set?.id) {
@@ -239,81 +236,46 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, [selectedGame, selectedSet, searchTerm, selectedTreatment, filtersLoading, filterOptions]);
 
   // --------------------------------------------------------------------------
-  // DERIVED DATA
+  // DERIVED DATA - SIMPLIFIED!
   // --------------------------------------------------------------------------
   
   // Filter cards based on mode
-  const filteredCards = useMemo(() => {
-    if (!isInventoryMode) return cards;
-    // In inventory mode, only show cards with stock
+  const displayCards = useMemo(() => {
+    if (!isInventoryMode) {
+      // "All Cards" mode: Show all cards
+      return cards;
+    }
+    // "Inventory" mode: Only show cards with stock
     return cards.filter(c => Boolean(c?.has_inventory) && Number(c?.total_stock) > 0);
   }, [cards, isInventoryMode]);
 
-  // Group cards by card_number and merge variations
-  const groupedCards = useMemo(() => {
-    const groups = new Map<string, Card[]>();
-    
-    filteredCards.forEach(card => {
-      const key = `${card.set_name}-${card.card_number}`;
-      if (!groups.has(key)) {
-        groups.set(key, []);
-      }
-      groups.get(key)!.push(card);
-    });
-    
-    // Convert to array and merge cards with same card_number
-    return Array.from(groups.values()).map(cardGroup => {
-      if (cardGroup.length === 1) return cardGroup[0];
-      
-      // Merge multiple cards into one with combined variations
-      const baseCard = cardGroup[0];
-      const allVariations = cardGroup.flatMap(c => c.variations || []);
-      
-      return {
-        ...baseCard,
-        variations: allVariations,
-        variation_count: allVariations.length,
-        total_stock: allVariations.reduce((sum, v) => sum + (v.stock || 0), 0),
-        has_inventory: allVariations.some(v => (v.stock || 0) > 0),
-      };
-    });
-  }, [filteredCards]);
-
   // Calculate totals
   const totalStock = useMemo(
-    () => groupedCards.reduce((sum, c) => sum + (c.total_stock || 0), 0),
-    [groupedCards]
+    () => displayCards.reduce((sum, c) => sum + (c.total_stock || 0), 0),
+    [displayCards]
   );
   
-  const totalVariations = useMemo(
-    () => groupedCards.reduce((sum, c) => sum + (c.variation_count || 0), 0),
-    [groupedCards]
-  );
+  const uniqueCards = useMemo(() => {
+    // Count unique card_number + set_name combinations
+    const unique = new Set(displayCards.map(c => `${c.set_name}-${c.card_number}`));
+    return unique.size;
+  }, [displayCards]);
 
   // --------------------------------------------------------------------------
   // ADDITIONAL FILTERS (for SearchBar component)
   // --------------------------------------------------------------------------
   
-  const additionalFilters = useMemo(() => (
-    <div>
-      <label htmlFor="treatment" className="block text-sm font-medium text-slate-700 mb-2">
-        Treatment
-      </label>
-      <select
-        id="treatment"
-        value={selectedTreatment}
-        onChange={(e) => handleTreatmentChange(e.target.value)}
-        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-      >
-        <option value="all">All Treatments</option>
-        {filterOptions.treatments.map(treatment => (
-          <option key={treatment} value={treatment}>
-            {treatment.replace(/_/g, ' ')}
-          </option>
-        ))}
-      </select>
-    </div>
-  ), [selectedTreatment, handleTreatmentChange, filterOptions.treatments]);
+  const additionalFilters = useMemo(() => ({
+    treatment: {
+      value: selectedTreatment,
+      onChange: handleTreatmentChange,
+      label: 'Treatment',
+      options: filterOptions.treatments.map(treatment => ({
+        value: treatment,
+        label: treatment.replace(/_/g, ' ')
+      }))
+    }
+  }), [selectedTreatment, handleTreatmentChange, filterOptions.treatments]);
 
   // --------------------------------------------------------------------------
   // ACTIONS
@@ -330,24 +292,24 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, []);
 
   // --------------------------------------------------------------------------
-  // MODAL HANDLERS
+  // MODAL HANDLERS - SIMPLIFIED!
   // --------------------------------------------------------------------------
   
-  const openAddModal = useCallback((card: Card, variation: CardVariation) => {
-    setAddModalData({ card, variation });
+  const openAddModal = useCallback((card: Card) => {
+    setAddModalCard(card);
     setAddFormData({
       quality: 'Near Mint',
-      foil_type: variation.finish === 'foil' ? 'Foil' : 'Regular',
-      price: String(variation.price || ''),
+      foil_type: card.finish === 'foil' ? 'Foil' : 'Regular',
+      price: '',
       stock_quantity: 1,
-      language: variation.language || 'English',
+      language: 'English',
     });
     setShowAddModal(true);
   }, []);
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
-    setAddModalData(null);
+    setAddModalCard(null);
     setAddFormData({
       quality: 'Near Mint',
       foil_type: 'Regular',
@@ -358,12 +320,12 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, []);
 
   const handleAddToInventory = useCallback(async () => {
-    if (!addModalData) return;
+    if (!addModalCard) return;
 
     setSaving(true);
     try {
       const inventoryData = {
-        card_id: addModalData.card.id,
+        card_id: addModalCard.id,
         quality: addFormData.quality,
         foil_type: addFormData.foil_type,
         price: parseFloat(addFormData.price) || 0,
@@ -382,7 +344,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     } finally {
       setSaving(false);
     }
-  }, [addModalData, addFormData, closeAddModal, handleRefresh]);
+  }, [addModalCard, addFormData, closeAddModal, handleRefresh]);
 
   // --------------------------------------------------------------------------
   // RENDER
@@ -397,7 +359,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
             {isInventoryMode ? 'Inventory Management' : 'All Cards Database'}
           </h2>
           <p className="text-slate-600 mt-1">
-            {groupedCards.length} cards • {totalVariations} variations
+            {displayCards.length} card variations • {uniqueCards} unique cards
             {isInventoryMode && ` • ${totalStock} in stock`}
           </p>
         </div>
@@ -455,7 +417,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         onSearchChange={handleSearchChange}
         onGameChange={handleGameChange}
         onSetChange={handleSetChange}
-        additionalFilters={additionalFilters as unknown as Record<string, any>} //TEMP FIX
+        additionalFilters={additionalFilters}
         isAdminMode={true}
       />
 
@@ -468,9 +430,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         </div>
       ) : (
         <>
-          {groupedCards.length > 0 ? (
+          {displayCards.length > 0 ? (
             <AdminCardGrid
-              cards={groupedCards}
+              cards={displayCards}
               mode={mode}
               viewMode={viewMode}
               onAddToInventory={isInventoryMode ? undefined : openAddModal}
@@ -488,10 +450,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       )}
 
       {/* Add to Inventory Modal */}
-      {showAddModal && addModalData && (
+      {showAddModal && addModalCard && (
         <AddToInventoryModal
-          card={addModalData.card}
-          variation={addModalData.variation}
+          card={addModalCard}
           formData={addFormData}
           onFormChange={setAddFormData}
           onSave={handleAddToInventory}

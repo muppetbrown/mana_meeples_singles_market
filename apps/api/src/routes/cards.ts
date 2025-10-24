@@ -1,5 +1,16 @@
-// apps/api/src/routes/cards.ts - COMPLETE FIX
-// This version adds variations to the /cards endpoint like storefront does
+// apps/api/src/routes/cards.ts - REFACTORED FOR NEW ARCHITECTURE
+/**
+ * Cards API Routes
+ * 
+ * NEW ARCHITECTURE:
+ * - Variation metadata (treatment, finish, border_color, frame_effect, promo_type) 
+ *   is stored directly on cards table
+ * - Each card row represents a unique variation
+ * - For ADMIN: Return cards without variations array (just metadata + stock aggregates)
+ * - For STOREFRONT: Still build variations array from card_inventory
+ * 
+ * This endpoint is for ADMIN use - returns card metadata without variations array
+ */
 
 import express, { type Request, type Response } from "express";
 import { z } from "zod";
@@ -13,6 +24,7 @@ const router = express.Router();
 
 export const CardFiltersQuery = z.object({
   game_id: z.coerce.number().int().positive().optional(),
+  set_id: z.coerce.number().int().positive().optional(),
   set_name: z.string().trim().min(1).optional(),
   treatment: z.string().trim().optional(), // expect canonical UPPERCASE (STANDARD, BORDERLESS, etc.)
   rarity: z.string().trim().optional(),
@@ -39,10 +51,14 @@ function buildFilterSQL(alias: string, f: CardFilters) {
     where.push(`${alias}.game_id = $${params.length}`);
   }
 
+  if (f.set_id) {
+    params.push(f.set_id);
+    where.push(`${alias}.set_id = $${params.length}`);
+  }
+
   if (f.set_name) {
     joins.push(`JOIN card_sets cs ON cs.id = ${alias}.set_id`);
     params.push(f.set_name);
-    // ILIKE with pg_trgm index on cs.name if present; otherwise keep exact match if preferred
     where.push(`cs.name ILIKE $${params.length}`);
   }
 
@@ -59,7 +75,6 @@ function buildFilterSQL(alias: string, f: CardFilters) {
   if (f.search) {
     const term = `%${f.search}%`;
     params.push(term, term);
-    // Leverage pg_trgm GIN on c.name / c.card_number if available
     where.push(`(${alias}.name ILIKE $${params.length - 1} OR ${alias}.card_number ILIKE $${params.length})`);
   }
 
@@ -87,12 +102,13 @@ function buildPagingSQL(
 }
 
 /* ──────────────────────────────────────────────────────────────
-   GET /cards  → list with variations (UPDATED TO MATCH STOREFRONT)
+   GET /cards  → list cards WITHOUT variations array (ADMIN MODE)
    
-   CRITICAL FIX: Now includes variations array so frontend can:
-   1. Display cards properly
-   2. Calculate variation_count correctly  
-   3. Show stock information
+   REFACTORED FOR NEW ARCHITECTURE:
+   - Returns card metadata (treatment, finish, border_color, etc.) directly
+   - NO variations array (each card IS a variation)
+   - Includes stock aggregates (total_stock, variation_count, has_inventory)
+   - Frontend displays cards as-is without grouping
    ────────────────────────────────────────────────────────────── */
 
 router.get("/cards", async (req: Request, res: Response) => {
@@ -122,7 +138,8 @@ router.get("/cards", async (req: Request, res: Response) => {
   const orderBy = `ORDER BY ${col} ${safeOrder}`;
 
   // ============================================================================
-  // QUERY WITH VARIATIONS - Similar to storefront endpoint
+  // SIMPLIFIED QUERY - NO VARIATIONS ARRAY
+  // Returns card metadata + stock aggregates only
   // ============================================================================
   const sql = `
     SELECT
@@ -132,16 +149,22 @@ router.get("/cards", async (req: Request, res: Response) => {
       cs.name AS set_name,
       c.rarity,
       c.image_url,
+      
+      -- NEW: Return variation metadata directly from cards table
       c.treatment,
       c.border_color,
       c.finish,
+      c.frame_effect,
+      c.promo_type,
+      
       g.name AS game_name,
       c.game_id,
       c.set_id,
+      
+      -- Stock aggregates from card_inventory (but NO variations array)
       COALESCE(inv.total_stock, 0)::int AS total_stock,
       COALESCE(inv.variation_count, 0)::int AS variation_count,
-      COALESCE(inv.has_inventory, false) AS has_inventory,
-      COALESCE(inv.variations, '[]'::jsonb) AS variations
+      COALESCE(inv.has_inventory, false) AS has_inventory
     FROM (
       SELECT c.*
       FROM cards c
@@ -156,38 +179,8 @@ router.get("/cards", async (req: Request, res: Response) => {
       SELECT
         COUNT(ci.id)::int AS variation_count,
         COALESCE(SUM(ci.stock_quantity), 0)::int AS total_stock,
-        BOOL_OR(ci.stock_quantity > 0) AS has_inventory,
-        COALESCE(
-          JSONB_AGG(
-            JSONB_BUILD_OBJECT(
-              'inventory_id', ci.id,
-              'quality', ci.quality,
-              'foil_type', COALESCE(ci.foil_type, 'Regular'),
-              'language', COALESCE(ci.language, 'English'),
-              'finish', COALESCE(ci.foil_type, 'Regular'),
-              'price', COALESCE(
-                CASE 
-                  WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil' 
-                  THEN lp.foil_price 
-                  ELSE lp.base_price 
-                END,
-                ci.price
-              ),
-              'stock', ci.stock_quantity,
-              'variation_key',
-                CONCAT(ci.quality,'-',COALESCE(ci.foil_type,'Regular'),'-',COALESCE(ci.language,'English'))
-            )
-          ) FILTER (WHERE ci.id IS NOT NULL),
-          '[]'::jsonb
-        ) AS variations
+        BOOL_OR(ci.stock_quantity > 0) AS has_inventory
       FROM card_inventory ci
-      LEFT JOIN (
-        SELECT DISTINCT ON (card_id)
-               card_id, base_price, foil_price
-        FROM card_pricing
-        WHERE card_id = c.id
-        ORDER BY card_id, updated_at DESC NULLS LAST, created_at DESC NULLS LAST
-      ) lp ON lp.card_id = ci.card_id
       WHERE ci.card_id = c.id
     ) inv ON TRUE
   `;
@@ -195,14 +188,7 @@ router.get("/cards", async (req: Request, res: Response) => {
   try {
     const rows = await db.query<any>(sql, params);
     
-    // Convert JSONB variations to proper array
-    const cardsWithVariations = rows.map(row => ({
-      ...row,
-      variations: Array.isArray(row.variations) ? row.variations : 
-                  typeof row.variations === 'string' ? JSON.parse(row.variations) : []
-    }));
-    
-    return res.json({ cards: cardsWithVariations });
+    return res.json({ cards: rows });
   } catch (err: any) {
     console.error("GET /cards failed", { 
       code: err?.code, 
@@ -246,10 +232,10 @@ router.get("/count", async (req: Request, res: Response) => {
 });
 
 /* ──────────────────────────────────────────────────────────────
-   GET /filters  → facet options + games + sets (UPDATED)
+   GET /filters  → facet options + games + sets
    Mounted under /cards → final path /cards/filters
    
-   CRITICAL FIX: Now returns games and sets arrays that frontend needs
+   Returns filter options for admin UI
    ────────────────────────────────────────────────────────────── */
 
 const FiltersQuery = z.object({
@@ -377,10 +363,9 @@ router.get('/filters', async (req: Request, res: Response) => {
     
     // ============================================================================
     // RETURN COMPLETE FILTER OPTIONS INCLUDING GAMES AND SETS
-    // This is what the frontend useShopFilters hook expects!
     // ============================================================================
     const response = {
-      // Games and Sets - CRITICAL: These were missing before!
+      // Games and Sets
       games: gamesResult.map(g => ({
         id: g.id,
         name: g.name,
