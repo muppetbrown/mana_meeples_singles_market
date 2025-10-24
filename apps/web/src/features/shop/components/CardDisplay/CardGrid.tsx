@@ -1,14 +1,17 @@
 // features/shop/components/CardDisplay/CardGrid.tsx
 /**
- * Unified Card Grid Component
+ * Unified Card Grid Component - REFACTORED FOR NEW ARCHITECTURE
  * Consolidates CardGrid.tsx and VirtualCardGrid.tsx
  * Automatically uses virtual scrolling for large datasets
  * 
- * FIXED: Proper variation selection to prevent undefined errors
+ * NEW ARCHITECTURE:
+ * - Admin mode: Cards have variation metadata directly (no variations array)
+ * - Storefront mode: Cards have variations array for purchase options
+ * - Adapts rendering based on card structure
  */
 import React, { useRef, useMemo, useState } from 'react';
 import { useVirtualScroll } from '@/shared/hooks';
-import { Card, CardVariation } from '@/types';
+import { Card, CardVariation, isStorefrontCard } from '@/types';
 import CardItem from './CardItem';
 import CardSkeleton from './CardSkeleton';
 import { ChevronDown } from 'lucide-react';
@@ -29,7 +32,7 @@ interface CardGridProps<T extends Card = Card> {
   renderCard?: (card: T) => React.ReactNode;
   cardProps?: Record<string, any>;
   mode?: 'all' | 'inventory';
-  onAddToInventory?: (card: T, variation: any) => void;
+  onAddToInventory?: (card: T) => void;
 }
 
 // ============================================================================
@@ -63,7 +66,7 @@ export const CardGrid = <T extends Card = Card>({
 }: CardGridProps<T>) => {
   const containerRef = useRef<HTMLDivElement>(null);
   
-  // ✅ FIX: Track selected variations per card
+  // Track selected variations per card (for storefront mode)
   const [selectedVariations, setSelectedVariations] = useState<Record<number, string>>({});
 
   // Determine if virtual scrolling should be enabled
@@ -102,7 +105,7 @@ export const CardGrid = <T extends Card = Card>({
     }
   };
 
-  // ✅ FIX: Proper variation selection handler
+  // Variation selection handler (for storefront mode)
   const handleVariationChange = (cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelectedVariations(prev => ({
       ...prev,
@@ -110,10 +113,42 @@ export const CardGrid = <T extends Card = Card>({
     }));
   };
 
-  // ✅ FIX: Proper default card renderer with variation selection
+  // ============================================================================
+  // DEFAULT CARD RENDERER - HANDLES BOTH ADMIN AND STOREFRONT
+  // ============================================================================
+  
   const defaultRenderCard = (card: T) => {
-    // Silently skip cards without variations (common in "All Cards" mode)
-    if (!card.variations || card.variations.length === 0) {
+    const isAdminMode = mode === 'all' || mode === 'inventory';
+    
+    // ========================================================================
+    // ADMIN MODE: Cards have variation metadata directly (no variations array)
+    // ========================================================================
+    if (isAdminMode) {
+      // In admin mode, cards don't have variations array
+      // Each card IS a variation, with metadata directly on it
+      return (
+        <CardItem
+          key={card.id}
+          card={card as any}
+          selectedVariationKey={null} // Not used in admin mode
+          selectedVariation={null}     // Not used in admin mode
+          currency={cardProps?.currency || { symbol: '$', rate: 1 }}
+          onVariationChange={() => {}} // No-op in admin mode
+          onAddToCart={() => onAddToInventory?.(card)}
+          isAdminMode={true}
+        />
+      );
+    }
+    
+    // ========================================================================
+    // STOREFRONT MODE: Cards have variations array for purchase options
+    // ========================================================================
+    
+    // Skip cards without variations in storefront mode
+    if (!isStorefrontCard(card)) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`Storefront card ${card.id} "${card.name}" has no variations array`);
+      }
       return null;
     }
 
@@ -125,17 +160,13 @@ export const CardGrid = <T extends Card = Card>({
       (v: CardVariation) => v.variation_key === selectedVariationKey
     ) || card.variations[0];
 
-    // ✅ CRITICAL FIX: Ensure selectedVariation exists before rendering
+    // Safety check (should never happen with type guard above)
     if (!selectedVariation) {
-      // Only warn in development mode for debugging
       if (process.env.NODE_ENV === 'development') {
         console.warn(`Card ${card.id} "${card.name}" has variations array but no valid variation found`);
       }
       return null;
     }
-
-    // For admin mode, we need a different interaction model
-    const isAdminMode = mode === 'all' || mode === 'inventory';
     
     return (
       <CardItem
@@ -145,10 +176,8 @@ export const CardGrid = <T extends Card = Card>({
         selectedVariation={selectedVariation}
         currency={cardProps?.currency || { symbol: '$', rate: 1 }}
         onVariationChange={handleVariationChange(card.id)}
-        onAddToCart={isAdminMode 
-          ? () => onAddToInventory?.(card, selectedVariation)
-          : cardProps?.onAddToCart?.(card, selectedVariation) || (() => {})
-        }
+        onAddToCart={cardProps?.onAddToCart?.(card, selectedVariation) || (() => {})}
+        isAdminMode={false}
       />
     );
   };

@@ -1,13 +1,21 @@
 // apps/web/src/features/shop/components/CardDisplay/CardItem.tsx
 /**
- * Card Item Component
+ * Card Item Component - REFACTORED FOR NEW ARCHITECTURE
  * Displays individual card with variation selection
  * 
- * FIXED: Proper null checks and error handling for undefined variations
+ * NEW ARCHITECTURE:
+ * - Admin mode: Cards have metadata directly, no variation selector needed
+ * - Storefront mode: Cards have variations array for quality/foil/language selection
+ * - Adapts display based on isAdminMode prop
  */
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
+import { formatTreatment, formatFinish, isFoilCard, hasSpecialTreatment } from '@/types';
+
+// ============================================================================
+// TYPES
+// ============================================================================
 
 type Variation = {
   variation_key: string;
@@ -25,13 +33,22 @@ type Card = {
   image_url?: string;
   set_name: string;
   card_number?: string;
-  variations: Variation[];
+  
+  // NEW: Variation metadata directly on card (for admin mode)
+  treatment?: string;
+  border_color?: string;
+  finish?: string;
+  frame_effect?: string;
+  promo_type?: string;
+  
+  // For storefront mode
+  variations?: Variation[];
+  
+  // Stock aggregates
+  total_stock?: number;
+  variation_count?: number;
+  has_inventory?: boolean;
 };
-
-interface CardWithVariations extends Card {
-  variations: Variation[];
-  image_url?: string;
-}
 
 type Currency = {
   symbol: string;
@@ -40,21 +57,166 @@ type Currency = {
 
 export type CardItemProps = {
   card: Card;
-  selectedVariationKey: string;
-  selectedVariation?: Variation;
+  selectedVariationKey: string | null;
+  selectedVariation?: Variation | null;
   currency: Currency;
   onVariationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onAddToCart: () => void;
+  isAdminMode?: boolean;  // NEW: Determines rendering mode
 };
 
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
 const CardItem = React.memo<CardItemProps>(
-  ({ card, selectedVariationKey, selectedVariation, currency, onVariationChange, onAddToCart }) => {
-    // ✅ CRITICAL FIX: Validate that we have a selected variation
-    // If selectedVariation is undefined, try to get the first variation from the card
+  ({ 
+    card, 
+    selectedVariationKey, 
+    selectedVariation, 
+    currency, 
+    onVariationChange, 
+    onAddToCart,
+    isAdminMode = false 
+  }) => {
+    const imageUrl = card.image_url || '/placeholder-card.png';
+    
+    // ========================================================================
+    // ADMIN MODE RENDERING
+    // ========================================================================
+    if (isAdminMode) {
+      // Admin cards have metadata directly, no variation selector
+      const isCardFoil = isFoilCard(card);
+      const hasSpecial = hasSpecialTreatment(card);
+      const totalStock = card.total_stock || 0;
+      const hasStock = totalStock > 0;
+
+      return (
+        <div className="card-mm flex flex-row lg:flex-col h-full">
+          {/* Image */}
+          <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full">
+            <OptimizedImage
+              src={imageUrl}
+              alt={card.name}
+              width={250}
+              height={350}
+              className={`w-full h-32 sm:h-44 lg:h-64 object-cover bg-gradient-to-br from-mm-warmAccent to-mm-tealLight ${
+                isCardFoil
+                  ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
+                  : ''
+              }`}
+              placeholder="blur"
+              sizes="(max-width: 640px) 128px, (max-width: 1024px) 192px, 100%"
+            />
+            {/* Foil badge */}
+            {isCardFoil && (
+              <div className="absolute top-1 left-1 lg:top-2 lg:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-mm-sm shadow-md border border-yellow-300">
+                ✨ {formatFinish(card.finish)}
+              </div>
+            )}
+            {/* Special treatment badge */}
+            {hasSpecial && (
+              <div className="absolute top-1 right-1 lg:top-2 lg:right-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-mm-sm shadow-md border border-purple-400">
+                {formatTreatment(card.treatment)}
+              </div>
+            )}
+          </div>
+
+          {/* Content */}
+          <div className="p-4 sm:p-5 lg:p-5 flex flex-col gap-3 lg:gap-3 flex-grow min-w-0">
+            <div className="flex-shrink-0">
+              <h3 className="font-semibold text-sm lg:text-lg leading-tight text-mm-darkForest mb-1 lg:mb-2 line-clamp-2">
+                {card.name}
+              </h3>
+              <p className="text-xs lg:text-sm text-mm-teal pb-2 lg:pb-3 border-b border-mm-warmAccent">
+                {card.set_name} • #{card.card_number}
+              </p>
+            </div>
+
+            {/* Variation Metadata */}
+            <div className="space-y-1 lg:space-y-2 flex-shrink-0">
+              <h4 className="block text-xs font-semibold text-mm-forest uppercase tracking-wide">
+                Card Details
+              </h4>
+              <div className="flex flex-wrap gap-1">
+                {card.treatment && (
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    hasSpecial 
+                      ? 'bg-purple-100 text-purple-700' 
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {formatTreatment(card.treatment)}
+                  </span>
+                )}
+                {card.finish && (
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    isCardFoil 
+                      ? 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-800' 
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {formatFinish(card.finish)}
+                  </span>
+                )}
+                {card.border_color && card.border_color !== 'black' && (
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                    {card.border_color.charAt(0).toUpperCase() + card.border_color.slice(1)} Border
+                  </span>
+                )}
+                {card.promo_type && (
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-pink-100 text-pink-700">
+                    🎁 Promo
+                  </span>
+                )}
+              </div>
+            </div>
+
+            {/* Stock Info */}
+            <div className="flex items-center gap-2 pb-2 lg:pb-3 border-b border-mm-warmAccent flex-shrink-0" aria-live="polite">
+              {hasStock ? (
+                <>
+                  <span className="w-2 h-2 bg-green-500 rounded-full" aria-hidden="true" />
+                  <span className="text-xs lg:text-sm text-mm-forest font-medium">
+                    {totalStock} in stock
+                    {card.variation_count && card.variation_count > 1 && (
+                      <span className="text-mm-teal ml-1">
+                        ({card.variation_count} variations)
+                      </span>
+                    )}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="w-2 h-2 bg-gray-400 rounded-full" aria-hidden="true" />
+                  <span className="text-xs lg:text-sm text-gray-600 font-medium">No inventory</span>
+                </>
+              )}
+            </div>
+
+            {/* Action */}
+            <div className="flex items-center justify-end gap-3 mt-auto">
+              <button
+                onClick={onAddToCart}
+                className="btn-mm-primary text-xs lg:text-sm px-3 py-2 lg:px-4 lg:py-2"
+                style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
+                aria-label={`Add ${card.name} to inventory`}
+              >
+                Add to Inventory
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // ========================================================================
+    // STOREFRONT MODE RENDERING
+    // ========================================================================
+    
+    // Validate that we have a selected variation for storefront mode
     const effectiveVariation = selectedVariation || card.variations?.[0];
     
-    // ✅ CRITICAL FIX: If still no variation, render an error state
-    if (!effectiveVariation) {
+    // If no variation in storefront mode, show error
+    if (!effectiveVariation || !card.variations || card.variations.length === 0) {
       console.error(`CardItem: No variation available for card ${card.id} "${card.name}"`);
       return (
         <div className="card-mm flex flex-col h-full border-2 border-red-300 bg-red-50">
@@ -70,20 +232,18 @@ const CardItem = React.memo<CardItemProps>(
       );
     }
 
-    // ✅ FIX: Safe price calculation with proper null checks
+    // Safe price calculation
     const price =
       effectiveVariation && typeof effectiveVariation.price === 'number'
         ? (effectiveVariation.price * currency.rate).toFixed(2)
         : (0).toFixed(2);
 
-    const imageUrl = card.image_url || '/placeholder-card.png';
-
-    // ✅ FIX: Safe stock check with proper null coalescing
+    // Safe stock check
     const inStock = (effectiveVariation?.stock ?? 0) > 0;
 
-    // ✅ FIX: Safe foil type check with proper null coalescing
+    // Safe foil type check
     const foilType = effectiveVariation?.foil_type || 'Regular';
-    const isFoil = foilType !== 'Regular';
+    const isVariationFoil = foilType !== 'Regular';
 
     return (
       <div className="card-mm flex flex-row lg:flex-col h-full">
@@ -95,14 +255,14 @@ const CardItem = React.memo<CardItemProps>(
             width={250}
             height={350}
             className={`w-full h-32 sm:h-44 lg:h-64 object-cover bg-gradient-to-br from-mm-warmAccent to-mm-tealLight ${
-              isFoil
+              isVariationFoil
                 ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
                 : ''
             }`}
             placeholder="blur"
             sizes="(max-width: 640px) 128px, (max-width: 1024px) 192px, 100%"
           />
-          {isFoil && (
+          {isVariationFoil && (
             <div className="absolute top-1 left-1 lg:top-2 lg:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-mm-sm shadow-md border border-yellow-300">
               ✨ {foilType}
             </div>
@@ -120,14 +280,14 @@ const CardItem = React.memo<CardItemProps>(
             </p>
           </div>
 
-          {/* Condition */}
+          {/* Condition Selector */}
           <div className="space-y-1 lg:space-y-2 flex-shrink-0">
             <label htmlFor={`condition-${card.id}`} className="block text-xs font-semibold text-mm-forest uppercase tracking-wide">
               Condition
             </label>
             <select
               id={`condition-${card.id}`}
-              value={selectedVariationKey}
+              value={selectedVariationKey || ''}
               onChange={onVariationChange}
               className="input-mm w-full text-sm lg:text-sm"
               style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
@@ -179,7 +339,7 @@ const CardItem = React.memo<CardItemProps>(
     );
   },
   (prevProps, nextProps) => {
-    // ✅ FIX: Improved comparison with proper null checks
+    // Memoization comparison
     const prevVar = prevProps.selectedVariation;
     const nextVar = nextProps.selectedVariation;
     
@@ -188,6 +348,7 @@ const CardItem = React.memo<CardItemProps>(
       prevProps.selectedVariationKey === nextProps.selectedVariationKey &&
       prevProps.currency.symbol === nextProps.currency.symbol &&
       prevProps.currency.rate === nextProps.currency.rate &&
+      prevProps.isAdminMode === nextProps.isAdminMode &&
       prevVar?.id === nextVar?.id &&
       prevVar?.price === nextVar?.price &&
       prevVar?.stock === nextVar?.stock &&

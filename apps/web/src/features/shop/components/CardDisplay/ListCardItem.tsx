@@ -1,6 +1,17 @@
 // apps/web/src/components/cards/ListCardItem.tsx
+/**
+ * List Card Item Component - REFACTORED FOR NEW ARCHITECTURE
+ * Displays card in list view with variation selection
+ * 
+ * This component is primarily for storefront use
+ * Admin views use CardItem component instead
+ */
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
+
+// ============================================================================
+// TYPES
+// ============================================================================
 
 type Variation = {
   variation_key: string;
@@ -35,14 +46,33 @@ type Props = {
   onAddToCart: () => void;
 };
 
+// ============================================================================
+// COMPONENT
+// ============================================================================
+
 const ListCardItem = React.memo<Props>(
   ({ card, selectedVariationKey, selectedVariation, currency, onVariationChange, onAddToCart }) => {
+    // Validate we have variations (required for storefront)
+    if (!card.variations || card.variations.length === 0) {
+      console.error(`ListCardItem: No variations for card ${card.id} "${card.name}"`);
+      return (
+        <div className="card-mm p-4 border-2 border-red-300 bg-red-50">
+          <p className="text-xs text-red-600">
+            No variations available for {card.name}
+          </p>
+        </div>
+      );
+    }
+
+    // Use provided variation or fallback to first
+    const effectiveVariation = selectedVariation || card.variations[0];
+    
     const price =
-      selectedVariation && typeof selectedVariation.price === 'number'
-        ? (selectedVariation.price * currency.rate).toFixed(2)
+      effectiveVariation && typeof effectiveVariation.price === 'number'
+        ? (effectiveVariation.price * currency.rate).toFixed(2)
         : (0).toFixed(2);
 
-    const inStock = (selectedVariation?.stock ?? 0) > 0;
+    const inStock = (effectiveVariation?.stock ?? 0) > 0;
 
     return (
       <div className="card-mm">
@@ -82,7 +112,7 @@ const ListCardItem = React.memo<Props>(
                   inStock ? 'text-emerald-700' : 'text-mm-teal'
                 }`}
               >
-                {inStock ? `${selectedVariation?.stock} in stock` : 'Out of stock'}
+                {inStock ? `${effectiveVariation?.stock} in stock` : 'Out of stock'}
               </span>
             </div>
           </div>
@@ -120,7 +150,7 @@ const ListCardItem = React.memo<Props>(
                   inStock ? 'text-emerald-700' : 'text-mm-teal'
                 }`}
               >
-                {inStock ? selectedVariation?.stock : '0'}
+                {inStock ? effectiveVariation?.stock : '0'}
               </span>
             </div>
 
@@ -130,9 +160,9 @@ const ListCardItem = React.memo<Props>(
                 {currency.symbol}
                 {price}
               </span>
-              {inStock && (selectedVariation?.stock ?? 0) <= 3 && (
+              {inStock && (effectiveVariation?.stock ?? 0) <= 3 && (
                 <span className="text-xs font-semibold text-red-600 block mt-0.5 whitespace-nowrap">
-                  {selectedVariation?.stock} left
+                  {effectiveVariation?.stock} left
                 </span>
               )}
             </div>
