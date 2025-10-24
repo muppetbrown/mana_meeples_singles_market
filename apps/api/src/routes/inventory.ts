@@ -79,6 +79,13 @@ const AddInventorySchema = z.object({
   price: z.coerce.number().min(0).default(0),
   stock_quantity: z.coerce.number().int().min(0).default(0),
   language: z.string().trim().min(1),
+  cost: z.coerce.number().min(0).optional(),
+  markup_percentage: z.coerce.number().min(0).max(999).default(0),
+  auto_price_enabled: z.boolean().default(false),
+  low_stock_threshold: z.coerce.number().int().min(0).default(3),
+  tcgplayer_id: z.string().trim().optional(),
+  price_source: z.string().trim().optional(),
+  sku: z.string().trim().optional(),
 });
 
 router.post("/admin/inventory", adminAuthJWT, async (req: Request, res: Response) => {
@@ -87,7 +94,11 @@ router.post("/admin/inventory", adminAuthJWT, async (req: Request, res: Response
     return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
   }
 
-  const { card_id, quality, foil_type, price, stock_quantity, language } = parsed.data;
+  const {
+    card_id, quality, foil_type, price, stock_quantity, language,
+    cost, markup_percentage, auto_price_enabled, low_stock_threshold,
+    tcgplayer_id, price_source, sku
+  } = parsed.data;
 
   // Check if card exists
   const cardCheck = await db.query("SELECT id FROM cards WHERE id = $1", [card_id]);
@@ -97,15 +108,33 @@ router.post("/admin/inventory", adminAuthJWT, async (req: Request, res: Response
 
   // Upsert with explicit target matching your unique index
   const sql = `
-    INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock_quantity)
-    VALUES ($1, NULL, $2, $3, $4, $5, $6)
+    INSERT INTO card_inventory (
+      card_id, variation_id, quality, foil_type, language, price, stock_quantity,
+      cost, markup_percentage, auto_price_enabled, low_stock_threshold,
+      tcgplayer_id, price_source, sku
+    )
+    VALUES ($1, NULL, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
     ON CONFLICT (card_id, variation_id, quality, foil_type, language)
-    DO UPDATE SET price = EXCLUDED.price, stock_quantity = EXCLUDED.stock_quantity, updated_at = NOW()
-    RETURNING id, card_id, quality, foil_type, language, price, stock_quantity
+    DO UPDATE SET
+      price = EXCLUDED.price,
+      stock_quantity = EXCLUDED.stock_quantity,
+      cost = EXCLUDED.cost,
+      markup_percentage = EXCLUDED.markup_percentage,
+      auto_price_enabled = EXCLUDED.auto_price_enabled,
+      low_stock_threshold = EXCLUDED.low_stock_threshold,
+      tcgplayer_id = EXCLUDED.tcgplayer_id,
+      price_source = EXCLUDED.price_source,
+      sku = EXCLUDED.sku,
+      updated_at = NOW()
+    RETURNING *
   `;
 
   try {
-    const rows = await db.query(sql, [card_id, quality, foil_type, language, price, stock_quantity]);
+    const rows = await db.query(sql, [
+      card_id, quality, foil_type, language, price, stock_quantity,
+      cost, markup_percentage, auto_price_enabled, low_stock_threshold,
+      tcgplayer_id, price_source, sku
+    ]);
     return res.status(200).json({ inventory: rows[0] });
   } catch (err: any) {
     console.error("POST /admin/inventory failed", { code: err?.code, message: err?.message, card_id });
@@ -123,6 +152,13 @@ const UpdateInventorySchema = z.object({
   quality: z.string().trim().min(1).optional(),
   foil_type: z.string().trim().min(1).optional(),
   language: z.string().trim().min(1).optional(),
+  cost: z.coerce.number().min(0).optional(),
+  markup_percentage: z.coerce.number().min(0).max(999).optional(),
+  auto_price_enabled: z.boolean().optional(),
+  low_stock_threshold: z.coerce.number().int().min(0).optional(),
+  tcgplayer_id: z.string().trim().optional(),
+  price_source: z.string().trim().optional(),
+  sku: z.string().trim().optional(),
 }).refine(data => Object.keys(data).length > 0, {
   message: "At least one field must be provided for update"
 });
