@@ -83,10 +83,10 @@ router.get("/variations", async (req: Request, res: Response) => {
       Array.isArray(a) ? a.filter(Boolean).map((x) => String(x).toUpperCase()) : [];
     return res.json({
       treatments: normalize(row.treatments),
-      border_colors: normalize(row.border_colors),
+      borderColors: normalize(row.border_colors),
       finishes: normalize(row.finishes),
-      promo_types: normalize(row.promo_types),
-      frame_effects: normalize(row.frame_effects),
+      promoTypes: normalize(row.promo_types),
+      frameEffects: normalize(row.frame_effects),
     });
   } catch (err: any) {
     console.error("GET /variations failed", { code: err?.code, message: err?.message });
