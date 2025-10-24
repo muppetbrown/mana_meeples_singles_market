@@ -238,7 +238,6 @@ digraph repo {
   nafa486fb [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Analytics/AnalyticsTab.tsx", shape=box];
   n6b61cd94 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/AddToInventoryModal.tsx", shape=box];
   nf784c041 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx", shape=box];
-  nd148f2b3 [label="@/features/shop/hooks/useShopFilters", shape=box];
   n536d9c67 [label="@/features/shop/components/Search/SearchBar", shape=box];
   nd1a4f721 [label="@/shared/components/ui/EmptyState", shape=box];
   ncc9d5add [label="@/features/shop/components/CardDisplay/CardSkeleton", shape=box];
@@ -555,7 +554,6 @@ digraph repo {
   nf784c041 -> n983fc1cc;
   nf784c041 -> n59fa91e2;
   nf784c041 -> n2d3cacc1;
-  nf784c041 -> nd148f2b3;
   nf784c041 -> n536d9c67;
   nf784c041 -> nd1a4f721;
   nf784c041 -> ncc9d5add;
@@ -580,9 +578,11 @@ digraph repo {
   n44f8a40c -> n675d97f;
   n44f8a40c -> n5f14927d;
   n44f8a40c -> n7592eab6;
+  n44f8a40c -> n905dedea;
   nd7687d46 -> n675d97f;
   n6a414cca -> n675d97f;
   n6a414cca -> n5f14927d;
+  n6a414cca -> n905dedea;
   n7d775cac -> n675d97f;
   n7d775cac -> n905dedea;
   n350994aa -> n675d97f;

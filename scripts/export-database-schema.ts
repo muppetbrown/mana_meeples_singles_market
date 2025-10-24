@@ -90,7 +90,7 @@ type SchemaDoc = {
 // ============================================================================
 
 function createPool(): Pool {
-  const connectionString = process.env.DATABASE_URL;
+  const connectionString = process.env.DATABASE_URL || 'postgresql://tcg_admin:1FhON1ZvCR7bRry4L9UoonvorMD4BjAR@dpg-d3i3387diees738trbg0-a.singapore-postgres.render.com/tcg_singles';
   
   if (!connectionString) {
     console.error('\n❌ DATABASE_URL environment variable is not set');

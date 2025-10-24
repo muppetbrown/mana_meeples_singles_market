@@ -624,10 +624,10 @@ mana_meeples_singles_market
 │ │ ├── mtg_card_variations_sample.json
 │ │ ├── onepiece_card_variations_sample.json
 │ │ └── sv_card_variations_sample.json
-│ ├── CARD_VARIATIONS_GUIDE.md
+│ ├── OLD-CARD_VARIATIONS_GUIDE.md
+│ ├── OLD-QUICK_START_VARIATIONS.md
 │ ├── openapi.yaml
-│ ├── pokemon_set_codes.txt
-│ └── QUICK_START_VARIATIONS.md
+│ └── pokemon_set_codes.txt
 ├── scripts/
 │ ├── imports/
 │ │ ├── analyze-variations.ts

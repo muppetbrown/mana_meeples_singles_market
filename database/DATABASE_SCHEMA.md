@@ -1,10 +1,10 @@
 # Database Schema — `public`
 
-**Generated:** 23/10/2025, 6:38:15 am
+**Generated:** 25/10/2025, 10:22:12 am
 
-**Tables:** 12
+**Tables:** 11
 
-**Total Rows:** 1,110
+**Total Rows:** 1,111
 
 ---
 
@@ -98,10 +98,6 @@ CHECK ((stock_quantity >= 0))
 ```sql
 FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE
 ```
-- **FOREIGN KEY** `card_inventory_variation_id_fkey`
-```sql
-FOREIGN KEY (variation_id) REFERENCES card_variations(id) ON DELETE SET NULL
-```
 - **PRIMARY KEY** `card_inventory_pkey`
 ```sql
 PRIMARY KEY (id)
@@ -122,7 +118,6 @@ UNIQUE (card_id, variation_id, quality, foil_type, language)
 ### Foreign Keys
 
 - `card_id` → `cards.id` (on update no action, on delete cascade)
-- `variation_id` → `card_variations.id` (on update no action, on delete set null)
 
 ### Indexes
 
@@ -326,45 +321,6 @@ CREATE INDEX idx_card_sets_name_trgm ON public.card_sets USING gin (name gin_trg
     "updated_at": "2025-10-13T19:01:32.046Z"
   }
 ]
-```
-
----
-
-## 📋 card_variations
-
-**Row Count:** -1
-
-### Columns
-
-| Column | Type | Null | Default | Length/Precision |
-|--------|------|------|---------|------------------|
-| `id` | `integer` | `NO` | `nextval('card_variations_id_seq'::regclass)` | `32,0` |
-| `card_id` | `integer` | `YES` | `` | `32,0` |
-| `variation_name` | `character varying` | `NO` | `` | `255` |
-| `variation_code` | `character varying` | `YES` | `` | `50` |
-| `image_url` | `text` | `YES` | `` | `` |
-| `created_at` | `timestamp without time zone` | `YES` | `CURRENT_TIMESTAMP` | `` |
-
-### Constraints
-
-- **FOREIGN KEY** `card_variations_card_id_fkey`
-```sql
-FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE
-```
-- **PRIMARY KEY** `card_variations_pkey`
-```sql
-PRIMARY KEY (id)
-```
-
-### Foreign Keys
-
-- `card_id` → `cards.id` (on update no action, on delete cascade)
-
-### Indexes
-
-- **PRIMARY** **UNIQUE** `card_variations_pkey`
-```sql
-CREATE UNIQUE INDEX card_variations_pkey ON public.card_variations USING btree (id)
 ```
 
 ---
