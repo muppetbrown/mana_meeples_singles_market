@@ -75,9 +75,9 @@ async function analyzeSetVariations(setId: any, gameId: any) {
         analysis.borderColors.add(card.border_color);
       }
       
-      // Collect special foils
-      if (card.promo_type && SPECIAL_FOILS.includes(card.promo_type)) {
-        analysis.specialFoils.add(card.promo_type);
+      // Collect special foils from finish field
+      if (card.finish && SPECIAL_FOILS.includes(card.finish)) {
+        analysis.specialFoils.add(card.finish);
       }
       
       // Collect frame effects (filtered)
@@ -219,9 +219,9 @@ async function analyzeGameVariations(gameId: any) {
         analysis.borderColors.add(card.border_color);
       }
       
-      // Collect special foils
-      if (card.promo_type && SPECIAL_FOILS.includes(card.promo_type)) {
-        analysis.specialFoils.add(card.promo_type);
+      // Collect special foils from finish field
+      if (card.finish && SPECIAL_FOILS.includes(card.finish)) {
+        analysis.specialFoils.add(card.finish);
       }
       
       // Collect frame effects
@@ -375,18 +375,31 @@ async function getVariationFilters(gameId = null, setId = null) {
     let query, params;
     
     if (setId) {
-      // Set-specific filters from materialized view
+      // Set-specific filters from metadata tables
       query = `
-        SELECT 
-          treatments,
-          border_colors,
-          finishes,
-          promo_types,
-          frame_effects
-        FROM mv_set_variation_filters
+        SELECT
+          COALESCE(treatment_codes, '[]'::jsonb) as treatments,
+          COALESCE(border_colors, '[]'::jsonb) as border_colors,
+          COALESCE(special_foils, '[]'::jsonb) as promo_types,
+          COALESCE(frame_effects, '[]'::jsonb) as frame_effects
+        FROM set_variations_metadata
         WHERE set_id = $1
       `;
       params = [setId];
+
+      // Get finishes from actual cards in the set
+      const finishResult = await db.query(`
+        SELECT ARRAY_AGG(DISTINCT finish) as finishes
+        FROM cards
+        WHERE set_id = $1 AND finish IS NOT NULL
+      `, [setId]);
+
+      const result = await db.query(query, params);
+      if (result.length > 0) {
+        result[0].finishes = finishResult[0]?.finishes || [];
+        return result[0];
+      }
+      return null;
     } else if (gameId) {
       // Game-wide filters
       query = `
