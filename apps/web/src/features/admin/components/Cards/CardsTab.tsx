@@ -20,6 +20,7 @@ import EmptyState from '@/shared/components/ui/EmptyState';
 import CardSkeleton from '@/features/shop/components/CardDisplay/CardSkeleton';
 import AddToInventoryModal from './AddToInventoryModal';
 import AdminCardGrid from '@/features/shop/components/CardDisplay/CardGrid';
+import DynamicVariationFilter from '@/shared/components/forms/VariationFilter';
 import type { Card } from '@/types';
 
 // ============================================================================
@@ -91,6 +92,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const selectedGame = searchParams.get('game') || 'all';
   const selectedSet = searchParams.get('set') || 'all';
   const selectedTreatment = searchParams.get('treatment') || 'all';
+  const selectedBorderColor = searchParams.get('borderColor') || 'all';
+  const selectedFinish = searchParams.get('finish') || 'all';
+  const selectedPromoType = searchParams.get('promoType') || 'all';
+  const selectedFrameEffect = searchParams.get('frameEffect') || 'all';
   const isInventoryMode = mode === 'inventory';
 
   // --------------------------------------------------------------------------
@@ -170,6 +175,11 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     updateParam('treatment', treatment);
   }, [updateParam]);
 
+  // Variation filter change handler for DynamicVariationFilter
+  const handleVariationFilterChange = useCallback((filterName: string, value: string) => {
+    updateParam(filterName, value);
+  }, [updateParam]);
+
   // --------------------------------------------------------------------------
   // DATA FETCHING
   // --------------------------------------------------------------------------
@@ -216,6 +226,20 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           params.set('treatment', selectedTreatment);
         }
 
+        // Add additional variation filters
+        if (selectedBorderColor && selectedBorderColor !== 'all') {
+          params.set('border_color', selectedBorderColor);
+        }
+        if (selectedFinish && selectedFinish !== 'all') {
+          params.set('finish', selectedFinish);
+        }
+        if (selectedPromoType && selectedPromoType !== 'all') {
+          params.set('promo_type', selectedPromoType);
+        }
+        if (selectedFrameEffect && selectedFrameEffect !== 'all') {
+          params.set('frame_effect', selectedFrameEffect);
+        }
+
         const url = `${ENDPOINTS.CARDS}?${params.toString()}`;
         console.log('🔍 Fetching cards:', url);
         
@@ -233,7 +257,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     };
     
     fetchCards();
-  }, [selectedGame, selectedSet, searchTerm, selectedTreatment, filtersLoading, filterOptions]);
+  }, [selectedGame, selectedSet, searchTerm, selectedTreatment, selectedBorderColor, selectedFinish, selectedPromoType, selectedFrameEffect, filtersLoading, filterOptions]);
 
   // --------------------------------------------------------------------------
   // DERIVED DATA - SIMPLIFIED!
@@ -420,6 +444,25 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         additionalFilters={additionalFilters}
         isAdminMode={true}
       />
+
+      {/* Advanced Variation Filters */}
+      {(selectedGame !== 'all' || selectedSet !== 'all') && (
+        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
+          <h3 className="text-sm font-semibold text-slate-700 mb-3">Advanced Filters</h3>
+          <DynamicVariationFilter
+            selectedGame={selectedGame !== 'all' ? selectedGame : undefined}
+            selectedSet={selectedSet !== 'all' ? selectedSet : undefined}
+            filters={{
+              treatment: selectedTreatment !== 'all' ? selectedTreatment : undefined,
+              borderColor: selectedBorderColor !== 'all' ? selectedBorderColor : undefined,
+              finish: selectedFinish !== 'all' ? selectedFinish : undefined,
+              promoType: selectedPromoType !== 'all' ? selectedPromoType : undefined,
+              frameEffect: selectedFrameEffect !== 'all' ? selectedFrameEffect : undefined,
+            }}
+            onFilterChange={handleVariationFilterChange}
+          />
+        </div>
+      )}
 
       {/* Cards Display */}
       {loading || filtersLoading ? (
