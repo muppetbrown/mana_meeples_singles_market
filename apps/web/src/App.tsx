@@ -21,23 +21,3 @@ function App() {
 }
 
 export default App;
-
-/**
-export default function App() {
-  return (
-    <ErrorBoundary>
-      <ToastProvider>
-        <BrowserRouter>
-          <Suspense fallback={<LoadingSpinner />}>
-            <Routes>
-              <Route path="/" element={<ShopPage />} />
-              <Route path="/admin" element={<Dashboard />} />
-              <Route path="/admin/login" element={<Login />} />
-            </Routes>
-          </Suspense>
-        </BrowserRouter>
-      </ToastProvider>
-    </ErrorBoundary>
-  );
-}
-*/
