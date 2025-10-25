@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-10-24T21:18:12.647Z",
+  "generatedAt": "2025-10-25T03:10:12.559Z",
   "root": "C:\\Git_Repos\\mana_meeples_singles_market",
   "files": [
     {
@@ -151,7 +151,7 @@
       "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/export-database-schema.ts",
       "isExternal": true,
       "lines": 510,
-      "sizeBytes": 16598,
+      "sizeBytes": 16728,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
@@ -506,8 +506,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/App.tsx",
       "isExternal": true,
-      "lines": 43,
-      "sizeBytes": 1068,
+      "lines": 23,
+      "sizeBytes": 577,
       "onlyReExports": false,
       "exports": [
         {
@@ -997,8 +997,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts",
       "isExternal": true,
-      "lines": 326,
-      "sizeBytes": 10587,
+      "lines": 362,
+      "sizeBytes": 11989,
       "onlyReExports": false,
       "exports": [
         {
@@ -1018,8 +1018,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/orders.ts",
       "isExternal": true,
-      "lines": 623,
-      "sizeBytes": 18325,
+      "lines": 619,
+      "sizeBytes": 18248,
       "onlyReExports": false,
       "exports": [
         {
@@ -1046,8 +1046,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/variations.ts",
       "isExternal": true,
-      "lines": 88,
-      "sizeBytes": 3224,
+      "lines": 98,
+      "sizeBytes": 3590,
       "onlyReExports": false,
       "exports": [
         {
@@ -1083,50 +1083,10 @@
       "isTest": false
     },
     {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/priceService.ts",
-      "isExternal": true,
-      "lines": 103,
-      "sizeBytes": 2310,
-      "onlyReExports": false,
-      "exports": [
-        {
-          "name": "getCurrentPrice",
-          "kind": "value"
-        },
-        {
-          "name": "getPriceHistory",
-          "kind": "value"
-        },
-        {
-          "name": "upsertPrice",
-          "kind": "value"
-        },
-        {
-          "name": "getSetAveragePrice",
-          "kind": "value"
-        }
-      ],
-      "isTest": false
-    },
-    {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/pricing.ts",
-      "isExternal": true,
-      "lines": 10,
-      "sizeBytes": 339,
-      "onlyReExports": false,
-      "exports": [
-        {
-          "name": "getLatestPrice",
-          "kind": "value"
-        }
-      ],
-      "isTest": false
-    },
-    {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/variationAnalysis.ts",
       "isExternal": true,
-      "lines": 493,
-      "sizeBytes": 14046,
+      "lines": 506,
+      "sizeBytes": 14645,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
@@ -2138,8 +2098,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/models/inventory.ts",
       "isExternal": true,
-      "lines": 18,
-      "sizeBytes": 373,
+      "lines": 28,
+      "sizeBytes": 683,
       "onlyReExports": true,
       "exports": [],
       "isTest": false
@@ -3570,16 +3530,6 @@
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/emailService.ts",
       "to": "dotenv",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/priceService.ts",
-      "to": "../lib/db.js",
-      "kind": "import"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/pricing.ts",
-      "to": "pg",
       "kind": "import"
     },
     {

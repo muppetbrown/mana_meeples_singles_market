@@ -30,8 +30,6 @@ mana_meeples_singles_market
 │ │ │ │ └── variations.ts
 │ │ │ ├── services/
 │ │ │ │ ├── emailService.ts
-│ │ │ │ ├── priceService.ts
-│ │ │ │ ├── pricing.ts
 │ │ │ │ └── variationAnalysis.ts
 │ │ │ ├── utils/
 │ │ │ │ └── strings.ts

@@ -1,6 +1,6 @@
 # Database Schema — `public`
 
-**Generated:** 25/10/2025, 10:22:12 am
+**Generated:** 25/10/2025, 4:10:09 pm
 
 **Tables:** 11
 
@@ -55,7 +55,6 @@ CREATE UNIQUE INDEX audit_log_pkey ON public.audit_log USING btree (id)
 |--------|------|------|---------|------------------|
 | `id` | `integer` | `NO` | `nextval('card_inventory_id_seq'::regclass)` | `32,0` |
 | `card_id` | `integer` | `YES` | `` | `32,0` |
-| `variation_id` | `integer` | `YES` | `` | `32,0` |
 | `quality` | `character varying` | `NO` | `` | `50` |
 | `stock_quantity` | `integer` | `NO` | `0` | `32,0` |
 | `price` | `numeric` | `NO` | `` | `10,2` |
@@ -102,17 +101,9 @@ FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE
 ```sql
 PRIMARY KEY (id)
 ```
-- **UNIQUE** `card_inventory_card_id_variation_id_quality_key`
-```sql
-UNIQUE (card_id, variation_id, quality)
-```
 - **UNIQUE** `card_inventory_sku_key`
 ```sql
 UNIQUE (sku)
-```
-- **UNIQUE** `card_inventory_unique_card_variation_quality_foil_lang`
-```sql
-UNIQUE (card_id, variation_id, quality, foil_type, language)
 ```
 
 ### Foreign Keys
@@ -126,19 +117,9 @@ UNIQUE (card_id, variation_id, quality, foil_type, language)
 CREATE UNIQUE INDEX card_inventory_pkey ON public.card_inventory USING btree (id)
 ```
 
-- **UNIQUE** `card_inventory_card_id_variation_id_quality_key`
-```sql
-CREATE UNIQUE INDEX card_inventory_card_id_variation_id_quality_key ON public.card_inventory USING btree (card_id, variation_id, quality)
-```
-
 - **UNIQUE** `card_inventory_sku_key`
 ```sql
 CREATE UNIQUE INDEX card_inventory_sku_key ON public.card_inventory USING btree (sku)
-```
-
-- **UNIQUE** `card_inventory_unique_card_variation_quality_foil_lang`
-```sql
-CREATE UNIQUE INDEX card_inventory_unique_card_variation_quality_foil_lang ON public.card_inventory USING btree (card_id, variation_id, quality, foil_type, language)
 ```
 
 -  `idx_inventory_card`
@@ -149,11 +130,6 @@ CREATE INDEX idx_inventory_card ON public.card_inventory USING btree (card_id)
 -  `idx_inventory_card_quality`
 ```sql
 CREATE INDEX idx_inventory_card_quality ON public.card_inventory USING btree (card_id, quality)
-```
-
--  `idx_inventory_card_variation`
-```sql
-CREATE INDEX idx_inventory_card_variation ON public.card_inventory USING btree (card_id, variation_id)
 ```
 
 -  `idx_inventory_filters`

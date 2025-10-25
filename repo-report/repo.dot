@@ -109,8 +109,6 @@ digraph repo {
   n72492d13 [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/variations.ts", shape=box];
   n4f2a8c8e [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/emailService.ts", shape=box];
   n738e2526 [label="nodemailer", shape=box];
-  nc89a7dfb [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/priceService.ts", shape=box];
-  ne7a33ded [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/pricing.ts", shape=box];
   nc313b784 [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/services/variationAnalysis.ts", shape=box];
   nd7fdcfb4 [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/utils/strings.ts", shape=box];
   ne5a0db3e [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/tests/e2e/checkout.flow.test.ts", shape=box];
@@ -401,8 +399,6 @@ digraph repo {
   n4f2a8c8e -> n738e2526;
   n4f2a8c8e -> n738e2526;
   n4f2a8c8e -> nb0f71304;
-  nc89a7dfb -> nbabebf20;
-  ne7a33ded -> ndf7;
   nc313b784 -> nbabebf20;
   ne5a0db3e -> ncf59c1c5;
   ne5a0db3e -> nec377e8d;
