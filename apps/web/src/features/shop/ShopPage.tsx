@@ -16,6 +16,7 @@ import CardSkeleton from './components/CardDisplay/CardSkeleton.js';
 import SectionHeader from '@/shared/components/ui/SectionHeader';
 import CardItem from './components/CardDisplay/CardItem.js';
 import ListCardItem from './components/CardDisplay/ListCardItem.js';
+import CardList from './components/CardDisplay/CardList';
 import { API_BASE, api } from '@/lib/api';
 import type { 
   StorefrontCard,
@@ -1012,24 +1013,13 @@ const TCGShop: React.FC = () => {
                       {group.section && (
                         <SectionHeader title={group.section} count={group.cards.length} isGrid={false} />
                       )}
-                      <div className="space-y-2">
-                        {group.cards.map((card) => {
-                          const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
-                          const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
-
-                          return (
-                            <ListCardItem
-                              key={card.id}
-                              card={card}
-                              selectedVariationKey={selectedVariationKey}
-                              selectedVariation={selectedVariation}
-                              currency={currency}
-                              onVariationChange={handleVariationChange(card.id)}
-                              onAddToCart={handleAddToCart(card, selectedVariation)}
-                            />
-                          );
-                        })}
-                      </div>
+                      <CardList
+                        cards={group.cards as any}
+                        currency={currency}
+                        isAdminMode={false}
+                        onAddToCart={(card, variation) => handleAddToCart(card as StorefrontCard, variation)}
+                        className="mt-4"
+                      />
                     </div>
                   ))}
                 </div>
