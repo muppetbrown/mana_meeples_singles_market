@@ -325,7 +325,7 @@ const CardItem = React.memo<CardItemProps>(
       prevProps.currency.symbol === nextProps.currency.symbol &&
       prevProps.currency.rate === nextProps.currency.rate &&
       prevProps.isAdminMode === nextProps.isAdminMode &&
-      prevVar?.id === nextVar?.id &&
+      prevVar?.inventory_id === nextVar?.inventory_id &&
       prevVar?.price === nextVar?.price &&
       prevVar?.stock === nextVar?.stock &&
       prevVar?.quality === nextVar?.quality &&

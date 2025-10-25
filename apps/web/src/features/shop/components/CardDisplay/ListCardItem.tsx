@@ -211,7 +211,7 @@ const ListCardItem = React.memo<Props>(
       prev.selectedVariationKey === next.selectedVariationKey &&
       prev.currency.symbol === next.currency.symbol &&
       prev.currency.rate === next.currency.rate &&
-      pv?.id === nv?.id &&
+      pv?.inventory_id === nv?.inventory_id &&
       pv?.price === nv?.price &&
       pv?.stock === nv?.stock &&
       pv?.quality === nv?.quality &&
