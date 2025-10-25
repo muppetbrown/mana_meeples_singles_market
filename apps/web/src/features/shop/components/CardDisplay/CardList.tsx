@@ -21,11 +21,11 @@ type Currency = {
 };
 
 export type CardListProps = {
-  cards: CardDbRow[]; // catalog rows only (no inventory quality/language here)
+  cards: CardDBRow[]; // catalog rows only (no inventory quality/language here)
   currency: Currency;
   isAdminMode?: boolean;
-  onAddToCart?: (card: CardDbRow, variation: BrowseVariation) => void; // shop only
-  onAddToInventory?: (card: CardDbRow) => void;                        // admin only
+  onAddToCart?: (card: CardDBRow, variation: BrowseVariation) => void; // shop only
+  onAddToInventory?: (card: CardDBRow) => void;                        // admin only
   className?: string;
 };
 

@@ -22,6 +22,7 @@ import AddToInventoryModal from './AddToInventoryModal';
 import AdminCardGrid from './AdminCardGrid';
 import CardList from '@/features/shop/components/CardDisplay/CardList';
 import DynamicVariationFilter from '@/shared/components/forms/VariationFilter';
+import { groupCardsForBrowse } from '@/lib/utils/groupCards';
 import type { Card } from '@/types';
 
 // ============================================================================
@@ -286,37 +287,11 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     return unique.size;
   }, [displayCards]);
 
-  // Group cards by card_number (same logic as ShopPage.tsx)
+  // Use the centralized grouping utility
   const groupedCards = useMemo(() => {
-    const groups = new Map<string, Card[]>();
-
-    displayCards.forEach(card => {
-      const key = `${card.set_name}-${card.card_number}`;
-      if (!groups.has(key)) {
-        groups.set(key, []);
-      }
-      groups.get(key)!.push(card);
-    });
-
-    // Merge cards with same card_number into single card with combined variations
-    return Array.from(groups.values()).map(cardGroup => {
-      if (cardGroup.length === 1) return cardGroup[0];
-
-      // For admin mode, we merge the cards but keep the first card's metadata
-      // The variations are handled differently in admin vs storefront
-      const baseCard = cardGroup[0];
-
-      // Sum up inventory data
-      const totalStock = cardGroup.reduce((sum, c) => sum + (c.total_stock || 0), 0);
-      const hasInventory = cardGroup.some(c => c.has_inventory);
-
-      return {
-        ...baseCard,
-        total_stock: totalStock,
-        has_inventory: hasInventory,
-        // Keep other fields from the base card
-      };
-    });
+    // Convert Card[] to CardDBRow[] (they have the same structure in this context)
+    const cardDbRows = displayCards as any[];
+    return groupCardsForBrowse(cardDbRows);
   }, [displayCards]);
 
   // --------------------------------------------------------------------------
