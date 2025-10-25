@@ -102,34 +102,8 @@ const TCGShop: React.FC = () => {
   // ============================================================================
   const [cards, setCards] = useState<CardForDisplay[]>([]);
 
-  // Group cards by card_number (same logic as admin)
-  const groupedCardsFlat = useMemo(() => {
-    const groups = new Map<string, CardForDisplay[]>(); 
-    
-    cards.forEach(card => {
-      const key = `${card.set_name}-${card.card_number}`;
-      if (!groups.has(key)) {
-        groups.set(key, []);
-      }
-      groups.get(key)!.push(card); 
-    });
-    
-    // Merge cards with same card_number
-    return Array.from(groups.values()).map(cardGroup => {
-      if (cardGroup.length === 1) return cardGroup[0];
-      
-      // Merge multiple cards into one with combined variations
-      const baseCard = cardGroup[0];
-      const allVariations = cardGroup.flatMap(c => c.variations || []);
-      
-      return {
-        ...baseCard,
-        variations: allVariations,
-        variation_count: allVariations.length,
-        total_stock: allVariations.reduce((sum, v) => sum + (v.stock || 0), 0),
-      };
-    });
-  }, [cards]);
+  // Cards are used directly - CardList and CardGrid handle their own grouping
+  const displayCards = cards;
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -357,10 +331,7 @@ const TCGShop: React.FC = () => {
         params.append('search', searchTerm.trim());
       }
 
-      // Add treatment filter
-      if (selectedTreatment && selectedTreatment !== 'all') {
-        params.append('treatment', selectedTreatment);
-      }
+      // Note: treatment filter is applied client-side since backend doesn't support it yet
 
       // Add pagination
       params.append('page', '1');
@@ -374,7 +345,16 @@ const TCGShop: React.FC = () => {
       );
 
       // Transform cards to match CardForDisplay interface
-      const transformedCards = (response.cards ?? []).map(transformCard);
+      let transformedCards = (response.cards ?? []).map(transformCard);
+
+      // Apply client-side treatment filtering
+      if (selectedTreatment && selectedTreatment !== 'all') {
+        transformedCards = transformedCards.filter(card => {
+          const cardTreatment = card.treatment || 'STANDARD';
+          return cardTreatment === selectedTreatment;
+        });
+      }
+
       setCards(transformedCards);
     } catch (err: any) {
       console.error('Error fetching cards:', err);
@@ -514,18 +494,18 @@ const TCGShop: React.FC = () => {
   // CARD GROUPING AND SORTING - FIXED PRICE GROUPING
   // ============================================================================
   const groupedCards = useMemo(() => {
-  if (!groupedCardsFlat.length) return [];
+  if (!displayCards.length) return [];
   
   const { sortBy } = filters;
 
   // If no grouping needed, return ungrouped
   if (!['name', 'set', 'rarity', 'price', 'price_low', 'price_high'].includes(sortBy)) {
-    return [{ section: null, cards: groupedCardsFlat }]; 
+    return [{ section: null, cards: displayCards }]; 
   }
 
   const groups = new Map<string, CardForDisplay[]>();
 
-  groupedCardsFlat.forEach(card => { // ← Changed from cards.forEach
+  displayCards.forEach(card => {
     // ... rest of the code stays exactly the same
     let sectionKey: string;
     let sectionTitle: string;
@@ -884,7 +864,7 @@ const TCGShop: React.FC = () => {
             <div className="flex items-center mb-4">
               <div className="flex-1 pr-4">
                 <p className="text-mm-teal" aria-live="polite">
-                  <span className="font-medium">{groupedCardsFlat.length}</span> cards found
+                  <span className="font-medium">{displayCards.length}</span> cards found
                 </p>
               </div>
 

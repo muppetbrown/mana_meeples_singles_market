@@ -77,11 +77,18 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
     onLoad?.();
   }, [onLoad]);
 
-  // Handle image load error
+  // Handle image load error - try fallback if available
   const handleError = useCallback(() => {
-    setLoadState('error');
-    onError?.(new Error(`Failed to load image: ${src}`));
-  }, [src, onError]);
+    // If we haven't tried the fallback yet and it's available, try it
+    if (currentSrc !== '/images/card-back-placeholder.svg' && src !== '/images/card-back-placeholder.svg') {
+      console.log(`Image failed to load: ${src}, trying fallback`);
+      setCurrentSrc('/images/card-back-placeholder.svg');
+      setLoadState('loading');
+    } else {
+      setLoadState('error');
+      onError?.(new Error(`Failed to load image: ${src}`));
+    }
+  }, [src, currentSrc, onError]);
 
   // Blur placeholder SVG
   const blurPlaceholder = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='560'%3E%3Crect fill='%23f1f5f9' width='400' height='560'/%3E%3C/svg%3E`;

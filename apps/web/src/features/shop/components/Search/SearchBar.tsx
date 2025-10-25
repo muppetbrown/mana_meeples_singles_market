@@ -120,7 +120,11 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
           }
         }, debounceMs);
       } else {
-        onSearchChange(value);
+        // For short queries (less than min length), also use debouncing
+        // This prevents triggering searches on every character
+        searchTimeoutRef.current = setTimeout(() => {
+          onSearchChange(value);
+        }, debounceMs);
         setSearchSuggestions([]);
         setShowSuggestions(false);
         setSearchLoading(false);
