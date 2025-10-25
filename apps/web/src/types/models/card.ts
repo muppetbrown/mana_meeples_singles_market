@@ -17,6 +17,7 @@
 export interface Card {
   // Core card identification
   id: number;
+  sku: string;
   name: string;
   card_number: string;
   set_name: string;
