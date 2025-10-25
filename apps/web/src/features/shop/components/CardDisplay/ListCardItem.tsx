@@ -8,7 +8,8 @@
  */
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
-import { Card, CardVariation } from '@/types';
+import VariationBadge from '@/shared/components/ui/VariationBadge';
+import { Card, CardVariation, formatFinish, isFoilCard } from '@/types';
 
 // ============================================================================
 // TYPES
@@ -79,9 +80,17 @@ const ListCardItem = React.memo<Props>(
             <h3 className="font-semibold text-sm sm:text-base text-mm-darkForest truncate mb-0.5">
               {card.name}
             </h3>
-            <p className="text-xs text-mm-teal truncate">
-              {card.set_name} • #{card.card_number}
-            </p>
+            <div className="flex items-center gap-2">
+              <p className="text-xs text-mm-teal truncate">
+                {card.set_name} • #{card.card_number}
+              </p>
+              {/* Variation badges for foil variations */}
+              {effectiveVariation?.foil_type && effectiveVariation.foil_type !== 'Regular' && (
+                <VariationBadge
+                  finish={formatFinish(effectiveVariation.foil_type)}
+                />
+              )}
+            </div>
 
             {/* Stock (mobile) */}
             <div className="flex items-center gap-1.5 mt-1 sm:hidden" aria-live="polite">

@@ -10,14 +10,15 @@
  */
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
+import VariationBadge from '@/shared/components/ui/VariationBadge';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
-import { 
-  Card, 
+import {
+  Card,
   CardVariation,
-  formatTreatment, 
-  formatFinish, 
-  isFoilCard, 
-  hasSpecialTreatment 
+  formatTreatment,
+  formatFinish,
+  isFoilCard,
+  hasSpecialTreatment
 } from '@/types';
 
 // ============================================================================
@@ -82,18 +83,26 @@ const CardItem = React.memo<CardItemProps>(
               placeholder="blur"
               sizes="(max-width: 640px) 128px, (max-width: 1024px) 192px, 100%"
             />
-            {/* Foil badge */}
-            {isCardFoil && (
-              <div className="absolute top-1 left-1 lg:top-2 lg:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-mm-sm shadow-md border border-yellow-300">
-                ✨ {formatFinish(card.finish)}
-              </div>
-            )}
-            {/* Special treatment badge */}
-            {hasSpecial && (
-              <div className="absolute top-1 right-1 lg:top-2 lg:right-2 bg-gradient-to-r from-purple-500 to-purple-600 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-mm-sm shadow-md border border-purple-400">
-                {formatTreatment(card.treatment)}
-              </div>
-            )}
+            {/* Variation badges using VariationBadge component */}
+            <div className="absolute top-1 left-1 lg:top-2 lg:left-2 flex flex-col gap-1">
+              {isCardFoil && (
+                <VariationBadge
+                  finish={formatFinish(card.finish)}
+                />
+              )}
+              {hasSpecial && (
+                <VariationBadge
+                  finish=""
+                  treatment={formatTreatment(card.treatment)}
+                />
+              )}
+              {card.promo_type && (
+                <VariationBadge
+                  finish=""
+                  promoType={card.promo_type}
+                />
+              )}
+            </div>
           </div>
 
           {/* Content */}
