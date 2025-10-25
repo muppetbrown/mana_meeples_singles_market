@@ -20,6 +20,7 @@ import EmptyState from '@/shared/components/ui/EmptyState';
 import CardSkeleton from '@/features/shop/components/CardDisplay/CardSkeleton';
 import AddToInventoryModal from './AddToInventoryModal';
 import AdminCardGrid from '@/features/shop/components/CardDisplay/CardGrid';
+import CardList from '@/features/shop/components/CardDisplay/CardList';
 import DynamicVariationFilter from '@/shared/components/forms/VariationFilter';
 import type { Card } from '@/types';
 
@@ -474,18 +475,28 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       ) : (
         <>
           {displayCards.length > 0 ? (
-            <AdminCardGrid
-              cards={displayCards}
-              mode={mode}
-              viewMode={viewMode}
-              onAddToInventory={isInventoryMode ? undefined : openAddModal}
-            />
+            viewMode === 'list' ? (
+              <CardList
+                cards={displayCards}
+                currency={{ symbol: '$', rate: 1 }}
+                isAdminMode={true}
+                onAddToInventory={isInventoryMode ? undefined : openAddModal}
+                className="mt-4"
+              />
+            ) : (
+              <AdminCardGrid
+                cards={displayCards}
+                mode={mode}
+                viewMode={viewMode}
+                onAddToInventory={isInventoryMode ? undefined : openAddModal}
+              />
+            )
           ) : (
             <EmptyState
               icon={Package}
               title={isInventoryMode ? "No inventory items" : "No cards found"}
-              message={isInventoryMode 
-                ? "Start by adding cards to your inventory" 
+              message={isInventoryMode
+                ? "Start by adding cards to your inventory"
                 : "Try adjusting your search filters"}
             />
           )}

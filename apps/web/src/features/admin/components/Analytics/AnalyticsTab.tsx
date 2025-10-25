@@ -37,7 +37,9 @@ const fetchAnalytics = useCallback(async () => {
   setLoading(true);
     try {
       // Fetch all inventory items from the API
+      console.log('Fetching analytics from /admin/inventory');
       const data = await api.get<{ inventory?: InventoryItem[] }>('/admin/inventory');
+      console.log('Analytics API response:', data);
       const inventory = data?.inventory ?? [];
 
       const base: AnalyticsStats = {

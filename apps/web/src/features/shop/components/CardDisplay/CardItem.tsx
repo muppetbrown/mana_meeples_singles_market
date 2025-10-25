@@ -54,7 +54,7 @@ const CardItem = React.memo<CardItemProps>(
     onAddToCart,
     isAdminMode = false 
   }) => {
-    const imageUrl = card.image_url || '/placeholder-card.png';
+    const imageUrl = card.image_url || '/images/card-back-placeholder.jpg';
     
     // ========================================================================
     // ADMIN MODE RENDERING
@@ -69,7 +69,7 @@ const CardItem = React.memo<CardItemProps>(
       return (
         <div className="card-mm flex flex-row lg:flex-col h-full">
           {/* Image */}
-          <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full">
+          <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full overflow-hidden rounded-mm-sm">
             <OptimizedImage
               src={imageUrl}
               alt={card.name}
@@ -233,7 +233,7 @@ const CardItem = React.memo<CardItemProps>(
     return (
       <div className="card-mm flex flex-row lg:flex-col h-full">
         {/* Image */}
-        <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full">
+        <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full overflow-hidden rounded-mm-sm">
           <OptimizedImage
             src={imageUrl}
             alt={card.name}
