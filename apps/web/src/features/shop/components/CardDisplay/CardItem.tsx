@@ -54,7 +54,7 @@ const CardItem = React.memo<CardItemProps>(
     onAddToCart,
     isAdminMode = false 
   }) => {
-    const imageUrl = card.image_url || '/images/card-back-placeholder.jpg';
+    const imageUrl = card.image_url || '/images/card-back-placeholder.svg';
     
     // ========================================================================
     // ADMIN MODE RENDERING
