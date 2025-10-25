@@ -57,19 +57,51 @@ const CardList = React.memo<CardListProps>(({
 }) => {
   const [expandedCards, setExpandedCards] = useState<ExpandedState>({});
 
-  // Filter cards based on mode
+  // Group cards by card_number to create base cards with expandable variations
+  const baseCards = React.useMemo(() => {
+    const groups = new Map<string, Card[]>();
+
+    // Group by set_name-card_number
+    cards.forEach(card => {
+      const key = `${card.set_name}-${card.card_number}`;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(card);
+    });
+
+    // Create base cards from groups
+    return Array.from(groups.values()).map(cardGroup => {
+      if (cardGroup.length === 1) {
+        return cardGroup[0];
+      }
+
+      // Create base card with merged variations
+      const baseCard = cardGroup[0];
+      const allVariations = cardGroup.flatMap(c => c.variations || []);
+
+      return {
+        ...baseCard,
+        variations: allVariations,
+        variation_count: allVariations.length,
+        total_stock: allVariations.reduce((sum, v) => sum + (v.stock || 0), 0),
+      };
+    });
+  }, [cards]);
+
+  // Filter based on mode
   const displayCards = React.useMemo(() => {
     if (isAdminMode) {
-      // Admin mode: Show all cards
-      return cards;
+      // Admin mode: Show all base cards
+      return baseCards;
     } else {
-      // Shop mode: Only show cards with stock
-      return cards.filter(card => {
+      // Shop mode: Only show base cards with stock
+      return baseCards.filter(card => {
         if (!card.variations || card.variations.length === 0) return false;
         return card.variations.some(variation => (variation.stock || 0) > 0);
       });
     }
-  }, [cards, isAdminMode]);
+  }, [baseCards, isAdminMode]);
 
   const toggleExpanded = (cardId: number) => {
     setExpandedCards(prev => ({
@@ -134,28 +166,6 @@ const CardList = React.memo<CardListProps>(({
                   placeholder="blur"
                   sizes="80px"
                 />
-                {/* Variation badges overlay */}
-                {(isCardFoil || hasSpecial || card.promo_type) && (
-                  <div className="absolute -top-1 -right-1 flex flex-col gap-0.5">
-                    {isCardFoil && (
-                      <VariationBadge
-                        finish={formatFinish(card.finish)}
-                      />
-                    )}
-                    {hasSpecial && (
-                      <VariationBadge
-                        finish=""
-                        treatment={formatTreatment(card.treatment)}
-                      />
-                    )}
-                    {card.promo_type && (
-                      <VariationBadge
-                        finish=""
-                        promoType={card.promo_type}
-                      />
-                    )}
-                  </div>
-                )}
               </div>
 
               {/* Card information */}
@@ -163,10 +173,34 @@ const CardList = React.memo<CardListProps>(({
                 <h3 className="font-semibold text-base sm:text-lg text-mm-darkForest truncate mb-1">
                   {card.name}
                 </h3>
-                <p className="text-sm text-mm-teal truncate mb-2">
-                  {card.set_name} " #{card.card_number}
-                  {card.rarity && ` " ${card.rarity}`}
-                </p>
+                <div className="flex items-center gap-2 mb-2">
+                  <p className="text-sm text-mm-teal truncate">
+                    {card.set_name} " #{card.card_number}
+                    {card.rarity && ` " ${card.rarity}`}
+                  </p>
+                  {/* Variation badges in info section */}
+                  {(isCardFoil || hasSpecial || card.promo_type) && (
+                    <div className="flex gap-1">
+                      {isCardFoil && (
+                        <VariationBadge
+                          finish={formatFinish(card.finish)}
+                        />
+                      )}
+                      {hasSpecial && (
+                        <VariationBadge
+                          finish=""
+                          treatment={formatTreatment(card.treatment)}
+                        />
+                      )}
+                      {card.promo_type && (
+                        <VariationBadge
+                          finish=""
+                          promoType={card.promo_type}
+                        />
+                      )}
+                    </div>
+                  )}
+                </div>
 
                 {/* Summary stats */}
                 <div className="flex items-center gap-4 text-xs sm:text-sm text-mm-darkForest">
