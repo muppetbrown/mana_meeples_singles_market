@@ -7,13 +7,18 @@ import {
   useVariationSelection,
   useCardFetching,
   useCart,
-  useShopFilters,
-  useCardDisplayArea
+  useShopFilters
 } from '@/features/hooks';
 import {
   ResultsHeader,
   ShopHeader,
- } from '@/features/shop/components';
+  Checkout
+} from '@/features/shop/components';
+import { useCardDisplayArea as CardDisplayArea } from '@/features/hooks/useCardDisplayArea';
+import { ErrorBoundary, KeyboardShortcuts } from '@/shared/layout';
+import { CardSkeleton } from '@/shared/card';
+import { FilterSidebar, MobileFilterModal } from '@/shared/ui';
+import { MobileFilterButton } from '@/shared/search';
 import { formatCurrencySimple } from '@/lib/utils';
 import type { Currency } from '@/types';
 
@@ -503,7 +508,7 @@ const ShopPage: React.FC = () => {
               onClearAllFilters={clearAllFilters}
             />
 
-            <useCardDisplayArea
+            <CardDisplayArea
               cards={displayCards}
               viewMode={viewMode}
               currency={currency}
