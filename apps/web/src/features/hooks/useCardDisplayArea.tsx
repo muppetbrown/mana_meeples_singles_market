@@ -30,7 +30,7 @@ interface CardDisplayAreaProps {
   loading: boolean;
 }
 
-export const useCardDisplayArea: React.FC<CardDisplayAreaProps> = ({
+export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
   cards,
   viewMode,
   currency,

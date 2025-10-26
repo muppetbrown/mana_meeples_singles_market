@@ -81,7 +81,6 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const handleError = useCallback(() => {
     // If we haven't tried the fallback yet and it's available, try it
     if (currentSrc !== '/images/card-back-placeholder.svg' && src !== '/images/card-back-placeholder.svg') {
-      console.log(`Image failed to load: ${src}, trying fallback`);
       setCurrentSrc('/images/card-back-placeholder.svg');
       setLoadState('loading');
     } else {

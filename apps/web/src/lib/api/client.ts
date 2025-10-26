@@ -6,6 +6,18 @@ import { z } from 'zod';
 import { throttledFetch } from '@/services/http/throttler';
 import { logError } from '@/services/error/handler';
 
+// API Error class for proper error handling
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    public data: any,
+    message?: string
+  ) {
+    super(message || `API Error: ${status}`);
+    this.name = 'ApiError';
+  }
+}
+
 /**
  * API Client Configuration
  */
@@ -95,15 +107,20 @@ class ApiClient {
           errorData = { message: response.statusText };
         }
         
-        throw {
-          status: response.status,
-          message: errorData.error || errorData.message || response.statusText,
-          data: errorData
-        };
+        throw new ApiError(
+          response.status,
+          errorData,
+          errorData.error || errorData.message || response.statusText
+        );
       }
 
       // Parse successful response
-      const data = await response.json();
+      let data = null;
+      const contentType = response.headers.get('content-type');
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json();
+      }
 
       // Validate with schema if provided
       if (options.schema) {

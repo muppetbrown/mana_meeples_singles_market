@@ -18,10 +18,6 @@ const Login = () => {
     setLoading(true);
 
     try {
-      console.log('Attempting login with credentials:', {
-        username: credentials.username,
-        hasPassword: !!credentials.password
-      });
 
       // ✅ Use endpoint constant instead of hardcoded string
       const data = await api.post<{ success: boolean; message: string }>(
@@ -29,7 +25,6 @@ const Login = () => {
         credentials
       );
 
-      console.log('Login response:', data);
 
       if (!data) {
         throw new Error('Login failed: Received empty response from server');
@@ -42,11 +37,6 @@ const Login = () => {
         throw new Error(`Login failed: ${errorMsg}`);
       }
     } catch (err: any) {
-      console.error('Login error details:', {
-        message: err.message,
-        status: err.status,
-        info: err.info,
-      });
 
       let errorMessage = 'Login failed. Please try again.';
 

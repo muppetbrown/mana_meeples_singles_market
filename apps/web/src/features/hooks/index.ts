@@ -7,4 +7,4 @@ export * from '../hooks/useShopFilters';
 export * from '../hooks/useShopKeyboardShortcuts';
 export * from '../hooks/useShopViewMode';
 export * from '../hooks/useVariationSelection';
-export * from '../hooks/useCardDisplayArea';
+export { CardDisplayArea } from '../hooks/useCardDisplayArea';

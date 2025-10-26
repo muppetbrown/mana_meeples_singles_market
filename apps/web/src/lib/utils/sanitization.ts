@@ -1,8 +1,6 @@
 // Input sanitization utilities for XSS prevention
 // Basic sanitization without external dependencies
 
-import { constants } from "buffer";
-
 /**
  * Remove HTML tags and potentially dangerous characters from input
  * This is a basic implementation - for production, consider using DOMPurify

@@ -74,9 +74,7 @@ const OrdersTab = () => {
     try {
       setLoading(true);
       // Expect { orders: Order[] } from backend
-      console.log('Fetching orders from', ENDPOINTS.ADMIN.ORDERS);
       const data = await api.get<{ orders?: Order[] }>(ENDPOINTS.ADMIN.ORDERS);
-      console.log('Orders API response:', data);
       setOrders(Array.isArray(data?.orders) ? data.orders : []);
       setError(null);
     } catch (err: any) {
