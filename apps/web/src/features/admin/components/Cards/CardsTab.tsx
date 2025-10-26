@@ -19,7 +19,7 @@ import AddToInventoryModal from './AddToInventoryModal';
 import {
   groupCardsForBrowse
 } from '@/lib/utils';
-import { SearchBar as CardSearchBar } from '@/shared/search';
+import { CardSearchBar } from '@/shared/search';
 import { VariationFilter } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
