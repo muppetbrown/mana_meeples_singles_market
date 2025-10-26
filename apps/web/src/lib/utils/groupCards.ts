@@ -5,33 +5,17 @@
 // - Finish/foil and treatment are first-class in the variation identity and ordering.
 // - Groups are keyed by (set_id, card_number) to align with DB uniqueness.
 import {
-  Card as CardDBRow,
+  Card,
   CardVariation,
   formatTreatment,
   formatFinish,
   isFoilCard,
-  hasSpecialTreatment
+  hasSpecialTreatment,
+  BrowseBaseCard,
+  BrowseVariation
 } from '@/types';
 
-export type BrowseVariation = {
-  id: number;           // card row id
-  sku: string;
-  treatment: string;
-  finish: string;
-  border_color?: string | null;
-  frame_effect?: string | null;
-  promo_type?: string | null;
-  image?: string | null;
-  in_stock: number;     // aggregated across qualities/languages for this card row
-  price?: number | null;
-};
 
-export type BrowseBaseCard = Omit<CardDBRow, 'variations'> & {
-  variations: BrowseVariation[];
-  variation_count: number;
-  total_stock: number;
-  lowest_price: number | null;
-};
 
 const finishRank = (f?: string) => {
   const u = (f || '').toUpperCase();
@@ -47,7 +31,7 @@ const treatmentRank = (t?: string) => {
   return i === -1 ? order.length : i;
 };
 
-const isPreferredBase = (c: CardDBRow) =>
+const isPreferredBase = (c: Card) =>
   ['STANDARD', 'REGULAR'].includes((c.treatment || '').toUpperCase()) &&
   (c.finish || '').toUpperCase().includes('NON');
 
@@ -55,10 +39,10 @@ const isPreferredBase = (c: CardDBRow) =>
  * Group catalog rows into browseable base cards.
  * Each input row is itself a variation; we synthesize `variations` from grouped rows.
  */
-export function groupCardsForBrowse(cards: CardDBRow[]): BrowseBaseCard[] {
+export function groupCardsForBrowse(cards: Card[]): BrowseBaseCard[] {
   if (!Array.isArray(cards) || cards.length === 0) return [];
 
-  const groups = new Map<string, CardDBRow[]>();
+  const groups = new Map<string, Card[]>();
   for (const c of cards) {
     const key = `sid:${c.set_id}|num:${c.card_number}`;
     const arr = groups.get(key);

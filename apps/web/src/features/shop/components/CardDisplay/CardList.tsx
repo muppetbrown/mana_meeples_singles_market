@@ -6,10 +6,18 @@
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
 import VariationBadge from '@/shared/components/ui/VariationBadge';
-import { formatTreatment, formatFinish } from '@/types';
 import { ChevronDownIcon, ChevronRightIcon, PlusIcon, ShoppingCartIcon } from '@heroicons/react/24/outline';
-import type { CardDBRow, BrowseBaseCard, BrowseVariation } from '@/lib/utils/groupCards';
-import { groupCardsForBrowse } from '@/lib/utils/groupCards';
+import { groupCardsForBrowse } from '@/lib/utils/index';
+import {
+  Card,
+  CardVariation,
+  formatTreatment,
+  formatFinish,
+  isFoilCard,
+  hasSpecialTreatment,
+  BrowseBaseCard,
+  BrowseVariation
+} from '@/types';
 
 // ============================================================================
 // TYPES
@@ -21,11 +29,11 @@ type Currency = {
 };
 
 export type CardListProps = {
-  cards: CardDBRow[]; // catalog rows only (no inventory quality/language here)
+  cards: Card[]; // catalog rows only (no inventory quality/language here)
   currency: Currency;
   isAdminMode?: boolean;
-  onAddToCart?: (card: CardDBRow, variation: BrowseVariation) => void; // shop only
-  onAddToInventory?: (card: CardDBRow) => void;                        // admin only
+  onAddToCart?: (card: BrowseBaseCard, variation: BrowseVariation) => void; // shop only - receives grouped base card
+  onAddToInventory?: (card: BrowseBaseCard) => void;                        // admin only - receives grouped base card
   className?: string;
 };
 
@@ -36,40 +44,41 @@ type ExpandedState = Record<string, boolean>; // key by group key sid:|num:
 // ============================================================================
 
 const CardList = React.memo<CardListProps>(({ cards, currency, isAdminMode = false, onAddToCart, onAddToInventory, className = '' }) => {
-  const baseCards: BrowseBaseCard[] = React.useMemo(() => groupCardsForBrowse(cards), [cards]);
+const baseCards: BrowseBaseCard[] = React.useMemo(() => groupCardsForBrowse(cards), [cards]);
 
   // Filter based on mode
-  const displayCards = React.useMemo(() => {
-    if (isAdminMode) return baseCards; // show everything to admins
+const displayCards = React.useMemo(() => {
+    if (isAdminMode) 
+    return baseCards; // show everything to admins
     // Shop mode: show only base cards with any stock > 0 across variations
     return baseCards.filter((card) => card.total_stock > 0 || card.variations.some(v => v.in_stock > 0));
   }, [baseCards, isAdminMode]);
 
-  const [expanded, setExpanded] = React.useState<ExpandedState>({});
-  const toggle = (groupKey: string) => setExpanded(s => ({ ...s, [groupKey]: !s[groupKey] }));
+const [expanded, setExpanded] = React.useState<ExpandedState>({});
+const toggle = (groupKey: string) => setExpanded(s => ({ ...s, [groupKey]: !s[groupKey] }));
 
   const formatPrice = (price: number | null | undefined) => {
     if (price == null) return 'N/A';
     return (price * currency.rate).toFixed(2);
   };
 
-  if (displayCards.length === 0) {
-    return (
-      <div className={`text-center py-8 ${className}`}>
-        <p className="text-mm-teal">
-          {isAdminMode ? 'No cards found.' : 'No cards with stock available.'}
-        </p>
-      </div>
-    );
-  }
-
+if (displayCards.length === 0) {
   return (
+    <div className={`text-center py-8 ${className}`}>
+      <p className="text-mm-teal">
+        {isAdminMode ? 'No cards found.' : 'No cards with stock available.'}
+      </p>
+    </div>
+  );
+}
+
+return (
     <ul className={`space-y-2 ${className}`} role="list" aria-label="Card results">
       {displayCards.map((card) => {
         const groupKey = `sid:${card.set_id}|num:${card.card_number}`;
         const isExpanded = !!expanded[groupKey];
         const hasVariations = (card.variation_count || 0) > 0;
-        const imageUrl = card.image_url || card.image_uris?.small || card.image_uris?.normal || '/images/card-back-placeholder.jpg';
+        const imageUrl = card.image_url || '/images/card-back-placeholder.jpg';
         const panelId = `${groupKey}-panel`;
         const btnId = `${groupKey}-button`;
 
@@ -181,10 +190,7 @@ const CardList = React.memo<CardListProps>(({ cards, currency, isAdminMode = fal
                             <VariationBadge
                               treatment={v.treatment}
                               finish={v.finish}
-                              borderColor={v.border_color ?? undefined}
-                              frameEffect={v.frame_effect ?? undefined}
                               promoType={v.promo_type ?? undefined}
-                              ariaLabel={`${formatTreatment(v.treatment)} · ${formatFinish(v.finish)}`}
                             />
                             {typeof v.price === 'number' && (
                               <span className="text-sm font-medium text-mm-darkForest">{currency.symbol}{formatPrice(v.price)}</span>

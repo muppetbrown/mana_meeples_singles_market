@@ -105,6 +105,8 @@ export function isAdminCard(card: Card): card is AdminCard {
   return !card.variations || card.variations.length === 0;
 }
 
+
+
 /**
  * Check if a card has variation metadata
  */
@@ -149,6 +151,26 @@ export interface CardSearchResult {
   treatment?: string;
   finish?: string;
 }
+
+export type BrowseVariation = {
+  id: number;           // card row id
+  sku: string;
+  treatment: string;
+  finish: string;
+  border_color?: string | null;
+  frame_effect?: string | null;
+  promo_type?: string | null;
+  image?: string | null;
+  in_stock: number;     // aggregated across qualities/languages for this card row
+  price?: number | null;
+};
+
+export type BrowseBaseCard = Omit<Card, 'variations'> & {
+  variations: BrowseVariation[];
+  variation_count: number;
+  total_stock: number;
+  lowest_price: number | null;
+};
 
 // ============================================================================
 // UTILITY FUNCTIONS
