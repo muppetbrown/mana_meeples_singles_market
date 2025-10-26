@@ -485,6 +485,9 @@ mana_meeples_singles_market
 │ │ └── vitest.config.ts
 │ └── web/
 │  ├── public/
+│  │ ├── images/
+│  │ │ ├── card-back-placeholder.jpg
+│  │ │ └── card-back-placeholder.svg
 │  │ ├── favicon.ico
 │  │ ├── logo192.png
 │  │ ├── logo512.png
@@ -502,6 +505,7 @@ mana_meeples_singles_market
 │  │ │ │ │ │ └── AnalyticsTab.tsx
 │  │ │ │ │ ├── Cards/
 │  │ │ │ │ │ ├── AddToInventoryModal.tsx
+│  │ │ │ │ │ ├── AdminCardGrid.tsx
 │  │ │ │ │ │ └── CardsTab.tsx
 │  │ │ │ │ ├── Inventory/
 │  │ │ │ │ │ └── BulkManager.tsx
@@ -554,6 +558,7 @@ mana_meeples_singles_market
 │  │ │ └── utils/
 │  │ │  ├── csv.ts
 │  │ │  ├── format.ts
+│  │ │  ├── groupCards.ts
 │  │ │  ├── index.ts
 │  │ │  ├── sanitization.ts
 │  │ │  └── search.ts
