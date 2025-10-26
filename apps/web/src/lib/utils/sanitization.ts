@@ -104,7 +104,7 @@ const sanitizeCustomerData = (customer: any) => {
   };
 };
 
-export constants = {
+export {
   sanitizeText,
   sanitizeHTML,
   sanitizeEmail,

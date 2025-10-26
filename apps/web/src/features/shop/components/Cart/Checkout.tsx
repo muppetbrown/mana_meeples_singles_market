@@ -1,6 +1,7 @@
 // apps/web/src/components/Checkout.tsx
 import { useState } from 'react';
 import { ArrowLeft, Mail, Phone, MapPin, CreditCard, User, AlertCircle } from 'lucide-react';
+import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeAddress, sanitizeHTML } from '@/lib/utils';
 
  type CheckoutForm = {
   // Contact Information
@@ -52,37 +53,14 @@ const Checkout = ({
 
   const cartTotal = cart.items.reduce((sum: any, item: any) => sum + (item.price * item.quantity), 0);
 
-  // Input sanitization function
-  const sanitizeInput = (input: any, type = 'text') => {
-    if (typeof input !== 'string') return '';
-
-    switch (type) {
-      case 'name':
-        // Remove dangerous characters but allow international names
-        return input.replace(/[<>'"&{}]/g, '').trim();
-      case 'email':
-        // Basic email sanitization
-        return input.replace(/[<>'"&{}]/g, '').trim().toLowerCase();
-      case 'phone':
-        // Allow only phone number characters
-        return input.replace(/[^+\d\s\-()]/g, '').trim();
-      case 'address':
-        // Remove scripts but allow address characters
-        return input.replace(/[<>'"&{}]/g, '').trim();
-      case 'notes':
-        // More restrictive for notes field (XSS prevention)
-        return input.replace(/[<>'"&{}<script>]/gi, '').trim();
-      default:
-        return input.replace(/[<>'"&{}]/g, '').trim();
-    }
-  };
+  // Note: Using robust sanitization functions from library instead of inline implementation
 
   const validateForm = () => {
     const newErrors: CheckoutErrors = {};
 
     // Sanitize and validate names
-    const sanitizedFirstName = sanitizeInput(formData.firstName, 'name');
-    const sanitizedLastName = sanitizeInput(formData.lastName, 'name');
+    const sanitizedFirstName = sanitizeText(formData.firstName);
+    const sanitizedLastName = sanitizeText(formData.lastName);
 
     if (!sanitizedFirstName) {
 
@@ -107,7 +85,7 @@ const Checkout = ({
     }
 
     // Email validation with sanitization
-    const sanitizedEmail = sanitizeInput(formData.email, 'email');
+    const sanitizedEmail = sanitizeEmail(formData.email);
     if (!sanitizedEmail) {
 
       newErrors.email = 'Email is required';
@@ -120,14 +98,14 @@ const Checkout = ({
     }
 
     // Phone validation (optional but validated if provided)
-    const sanitizedPhone = sanitizeInput(formData.phone, 'phone');
+    const sanitizedPhone = sanitizePhone(formData.phone);
     if (sanitizedPhone && !/^[+]?[\d\s\-()]{7,20}$/.test(sanitizedPhone)) {
 
       newErrors.phone = 'Please enter a valid phone number';
     }
 
     // Address validation
-    const sanitizedAddress = sanitizeInput(formData.address, 'address');
+    const sanitizedAddress = sanitizeAddress(formData.address);
     if (!sanitizedAddress) {
 
       newErrors.address = 'Address is required';
@@ -137,7 +115,7 @@ const Checkout = ({
     }
 
     // City validation
-    const sanitizedCity = sanitizeInput(formData.city, 'name');
+    const sanitizedCity = sanitizeText(formData.city);
     if (!sanitizedCity) {
 
       newErrors.city = 'City is required';
@@ -147,7 +125,7 @@ const Checkout = ({
     }
 
     // Postal code validation
-    const sanitizedPostalCode = sanitizeInput(formData.postalCode);
+    const sanitizedPostalCode = sanitizeText(formData.postalCode);
     if (!sanitizedPostalCode) {
 
       newErrors.postalCode = 'Postal code is required';
@@ -157,7 +135,7 @@ const Checkout = ({
     }
 
     // Notes validation (optional)
-    const sanitizedNotes = sanitizeInput(formData.notes, 'notes');
+    const sanitizedNotes = sanitizeHTML(formData.notes);
     if (sanitizedNotes.length > 500) {
 
       newErrors.notes = 'Notes are too long (max 500 characters)';
@@ -168,22 +146,35 @@ const Checkout = ({
   };
 
   const handleInputChange = <K extends keyof CheckoutForm>(field: K, value: CheckoutForm[K]) => {
-    // (keep your sanitizeInput logic here; unchanged)
+    // Use library sanitization functions
     let sanitizedValue: CheckoutForm[K] = value;
 
-    const sanitizationType: Partial<Record<keyof CheckoutForm, string>> = {
-      firstName: 'name',
-      lastName: 'name',
-      email: 'email',
-      phone: 'phone',
-      address: 'address',
-      city: 'name',
-      notes: 'notes',
-    };
-
-    const sType = sanitizationType[field];
-    if (sType) {
-      sanitizedValue = sanitizeInput(value, sType) as CheckoutForm[K];
+    if (typeof value === 'string') {
+      switch (field) {
+        case 'firstName':
+        case 'lastName':
+        case 'city':
+        case 'country':
+        case 'region':
+        case 'postalCode':
+          sanitizedValue = sanitizeText(value) as CheckoutForm[K];
+          break;
+        case 'email':
+          sanitizedValue = sanitizeEmail(value) as CheckoutForm[K];
+          break;
+        case 'phone':
+          sanitizedValue = sanitizePhone(value) as CheckoutForm[K];
+          break;
+        case 'address':
+        case 'suburb':
+          sanitizedValue = sanitizeAddress(value) as CheckoutForm[K];
+          break;
+        case 'notes':
+          sanitizedValue = sanitizeHTML(value) as CheckoutForm[K];
+          break;
+        default:
+          sanitizedValue = sanitizeText(value) as CheckoutForm[K];
+      }
     }
 
     setFormData(prev => ({ ...prev, [field]: sanitizedValue }));
@@ -204,19 +195,19 @@ const Checkout = ({
     setIsSubmitting(true);
 
     try {
-      // Create sanitized customer data for submission
+      // Create sanitized customer data for submission using library function
       const sanitizedCustomer = {
-        firstName: sanitizeInput(formData.firstName, 'name'),
-        lastName: sanitizeInput(formData.lastName, 'name'),
-        email: sanitizeInput(formData.email, 'email'),
-        phone: sanitizeInput(formData.phone, 'phone'),
-        address: sanitizeInput(formData.address, 'address'),
-        suburb: sanitizeInput(formData.suburb, 'address'),
-        city: sanitizeInput(formData.city, 'name'),
-        region: sanitizeInput(formData.region, 'name'),
-        postalCode: sanitizeInput(formData.postalCode),
-        country: sanitizeInput(formData.country, 'name'),
-        notes: sanitizeInput(formData.notes, 'notes')
+        firstName: sanitizeText(formData.firstName),
+        lastName: sanitizeText(formData.lastName),
+        email: sanitizeEmail(formData.email),
+        phone: sanitizePhone(formData.phone),
+        address: sanitizeAddress(formData.address),
+        suburb: sanitizeAddress(formData.suburb),
+        city: sanitizeText(formData.city),
+        region: sanitizeText(formData.region),
+        postalCode: sanitizeText(formData.postalCode),
+        country: sanitizeText(formData.country),
+        notes: sanitizeHTML(formData.notes)
       };
 
       const orderData = {

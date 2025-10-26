@@ -15,6 +15,7 @@ import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
 import {
   Card,
   CardVariation,
+  Currency,
   formatTreatment,
   formatFinish,
   isFoilCard,
@@ -24,11 +25,6 @@ import {
 // ============================================================================
 // TYPES
 // ============================================================================
-
-type Currency = {
-  symbol: string;
-  rate: number;
-};
 
 export type CardItemProps = {
   card: Card;
