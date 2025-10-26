@@ -1,6 +1,8 @@
 import React, { useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
-import CardSearchBar from '../../../shared/components/search/SearchBar';
+import {
+  CardSearchBar
+} from '@/shared/components';
 import { API_BASE } from '@/lib/api';
 
 interface Game {
