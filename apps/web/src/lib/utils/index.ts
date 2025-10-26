@@ -3,3 +3,4 @@ export { downloadCSV, csvToArray, validateInventoryCSV, formatInventoryForExport
 export { formatCurrency /*, formatDate*/ } from './format';
 //export { searchCards, fuzzyMatch } from './search';
 export { groupCardsForBrowse } from './groupCards';
+export * from './sanitization';
