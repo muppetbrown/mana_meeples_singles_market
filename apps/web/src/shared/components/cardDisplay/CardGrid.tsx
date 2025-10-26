@@ -128,7 +128,7 @@ export const CardGrid = <T extends Card = Card>({
       return (
         <CardItem
           key={card.id}
-          card={card as any}
+          card={card}
           selectedVariationKey={null} // Not used in admin mode
           selectedVariation={null}     // Not used in admin mode
           currency={cardProps?.currency || { symbol: '$', rate: 1 }}
@@ -170,7 +170,7 @@ export const CardGrid = <T extends Card = Card>({
     return (
       <CardItem
         key={card.id}
-        card={card as any}
+        card={card}
         selectedVariationKey={selectedVariationKey}
         selectedVariation={selectedVariation}
         currency={cardProps?.currency || { symbol: '$', rate: 1 }}

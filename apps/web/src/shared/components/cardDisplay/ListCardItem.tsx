@@ -9,16 +9,11 @@
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
 import VariationBadge from '@/shared/components/ui/VariationBadge';
-import { Card, CardVariation, formatFinish, isFoilCard } from '@/types';
+import { Card, CardVariation, Currency, formatFinish, isFoilCard } from '@/types';
 
 // ============================================================================
 // TYPES
 // ============================================================================
-
-type Currency = {
-  symbol: string;
-  rate: number;
-};
 
 type Props = {
   card: Card;
