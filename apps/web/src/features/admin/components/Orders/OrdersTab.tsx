@@ -17,6 +17,8 @@ import {
   Eye
 } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
+import { formatOrderTotal } from '@/lib/utils';
+import { UI_TEXT } from '@/lib/constants';
 
 // -------------------- Types --------------------
 interface CustomerData {
@@ -212,7 +214,7 @@ const OrdersTab = () => {
       <div className="flex items-center justify-center py-12" role="status" aria-live="polite">
         <div className="text-center">
           <RefreshCw className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" aria-hidden="true" />
-          <p className="text-slate-600">Loading orders...</p>
+          <p className="text-slate-600">{UI_TEXT.LOADING_ORDERS}</p>
         </div>
       </div>
     );
@@ -332,7 +334,7 @@ const OrdersTab = () => {
 
                     <div className="text-right">
                       <div className="font-semibold text-slate-900">
-                        ${parseFloat(order.total).toFixed(2)}
+                        {formatOrderTotal(parseFloat(order.total))}
                       </div>
                       <div className="text-sm text-slate-500">
                         {formatDate(order.created_at)}
@@ -519,8 +521,8 @@ const OrdersTab = () => {
                             </div>
                           </td>
                           <td className="px-4 py-3 text-center">{item.quantity}</td>
-                          <td className="px-4 py-3 text-right">${parseFloat(item.unit_price).toFixed(2)}</td>
-                          <td className="px-4 py-3 text-right font-medium">${parseFloat(item.total_price).toFixed(2)}</td>
+                          <td className="px-4 py-3 text-right">{formatOrderTotal(parseFloat(item.unit_price))}</td>
+                          <td className="px-4 py-3 text-right font-medium">{formatOrderTotal(parseFloat(item.total_price))}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -529,7 +531,7 @@ const OrdersTab = () => {
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-slate-900">Order Total:</span>
                       <span className="text-xl font-bold text-slate-900">
-                        ${parseFloat(selectedOrder.total).toFixed(2)}
+                        {formatOrderTotal(parseFloat(selectedOrder.total))}
                       </span>
                     </div>
                   </div>

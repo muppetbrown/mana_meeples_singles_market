@@ -1,5 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { formatCurrencySimple } from '@/lib/utils';
 import type { Cart, Currency } from '@/types';
 
 interface MiniCartProps {
@@ -65,8 +66,7 @@ export const MiniCart: React.FC<MiniCartProps> = ({
               </div>
             </div>
             <div className="text-mm-forest font-semibold">
-              {currency.symbol}
-              {(item.price * item.quantity * currency.rate).toFixed(2)}
+              {formatCurrencySimple(item.price * item.quantity, currency)}
             </div>
           </div>
         ))}
@@ -82,7 +82,7 @@ export const MiniCart: React.FC<MiniCartProps> = ({
         onClick={onViewCart} 
         className="btn-mm-primary w-full mt-3"
       >
-        View Cart ({currency.symbol}{(total * currency.rate).toFixed(2)})
+        View Cart ({formatCurrencySimple(total, currency)})
       </button>
     </div>
   );

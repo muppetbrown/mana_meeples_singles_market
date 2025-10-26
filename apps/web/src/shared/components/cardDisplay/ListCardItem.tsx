@@ -9,6 +9,7 @@
 import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
 import VariationBadge from '@/shared/components/ui/VariationBadge';
+import { formatCurrencySimple } from '@/lib/utils';
 import { Card, CardVariation, Currency, formatFinish, isFoilCard } from '@/types';
 
 // ============================================================================
@@ -49,8 +50,8 @@ const ListCardItem = React.memo<Props>(
     
     const price =
       effectiveVariation && typeof effectiveVariation.price === 'number'
-        ? (effectiveVariation.price * currency.rate).toFixed(2)
-        : (0).toFixed(2);
+        ? formatCurrencySimple(effectiveVariation.price, currency)
+        : formatCurrencySimple(0, currency);
 
     const inStock = (effectiveVariation?.stock ?? 0) > 0;
 

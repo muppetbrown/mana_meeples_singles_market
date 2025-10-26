@@ -3,6 +3,7 @@ import {
   CardSearchBar
 } from '@/shared/components';
 import { API_BASE } from '@/lib/api';
+import { FILTER_CONFIG } from '@/lib/constants';
 
 interface Game {
   id: number;
@@ -64,8 +65,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           sets={sets}
           additionalFilters={additionalFilters}
           apiUrl={API_BASE}
-          debounceMs={300}
-          minSearchLength={2}
+          debounceMs={FILTER_CONFIG.DEBOUNCE_DELAY}
+          minSearchLength={FILTER_CONFIG.MIN_SEARCH_LENGTH}
         />
       </div>
     </aside>

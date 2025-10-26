@@ -1,7 +1,7 @@
 // apps/web/src/components/Checkout.tsx
 import { useState } from 'react';
 import { ArrowLeft, Mail, Phone, MapPin, CreditCard, User, AlertCircle } from 'lucide-react';
-import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeAddress, sanitizeHTML } from '@/lib/utils';
+import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeAddress, sanitizeHTML, formatCurrencySimple } from '@/lib/utils';
 
  type CheckoutForm = {
   // Contact Information
@@ -612,7 +612,7 @@ const Checkout = ({
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-xs text-slate-600">Qty: {item.quantity}</span>
                     <span className="font-semibold text-slate-900">
-                      {currency.symbol}{(item.price * item.quantity).toFixed(2)}
+                      {formatCurrencySimple(item.price * item.quantity, currency)}
                     </span>
                   </div>
                 </div>
@@ -623,7 +623,7 @@ const Checkout = ({
               <div className="flex justify-between items-center text-xl font-bold">
                 <span>Total:</span>
                 <span className="text-green-600">
-                  {currency.symbol}{cartTotal.toFixed(2)}
+                  {formatCurrencySimple(cartTotal, currency)}
                 </span>
               </div>
 

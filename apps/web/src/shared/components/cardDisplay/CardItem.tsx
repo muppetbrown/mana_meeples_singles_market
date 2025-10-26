@@ -12,6 +12,7 @@ import React from 'react';
 import OptimizedImage from '@/shared/components/media/OptimizedImage';
 import VariationBadge from '@/shared/components/ui/VariationBadge';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
+import { formatCurrencySimple } from '@/lib/utils';
 import {
   Card,
   CardVariation,
@@ -216,8 +217,8 @@ const CardItem = React.memo<CardItemProps>(
     // Safe price calculation
     const price =
       effectiveVariation && typeof effectiveVariation.price === 'number'
-        ? (effectiveVariation.price * currency.rate).toFixed(2)
-        : (0).toFixed(2);
+        ? formatCurrencySimple(effectiveVariation.price, currency)
+        : formatCurrencySimple(0, currency);
 
     // Safe stock check
     const inStock = (effectiveVariation?.stock ?? 0) > 0;
@@ -303,7 +304,7 @@ const CardItem = React.memo<CardItemProps>(
           {/* Price & Action */}
           <div className="flex items-center justify-between gap-3 mt-auto">
             <span className="text-xl lg:text-2xl font-bold text-mm-darkForest">
-              {currency.symbol}{price}
+              {price}
             </span>
             <button
               onClick={onAddToCart}

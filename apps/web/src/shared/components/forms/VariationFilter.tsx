@@ -1,6 +1,6 @@
 // apps/web/src/components/VariationFilter.tsx
 import { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
+import { api, buildQueryString } from '@/lib/api';
 
 type VariationFiltersResponse = {
   treatments?: string[];
@@ -59,17 +59,17 @@ const VariationFilter = ({
       setError(null);
 
       try {
-        const params = new URLSearchParams();
+        const queryParams: Record<string, any> = {};
 
         // Priority: set_id over game_id
         if (selectedSet && selectedSet !== 'all') {
-          params.append('set_id', String(selectedSet));
+          queryParams.set_id = selectedSet;
         } else if (selectedGame && selectedGame !== 'all') {
-          params.append('game_id', String(selectedGame));
+          queryParams.game_id = selectedGame;
         }
 
         // If no filters selected, don't fetch (would return all variations)
-        if (!params.toString()) {
+        if (Object.keys(queryParams).length === 0) {
           setAvailableFilters({
             treatments: [],
             borderColors: [],
@@ -81,7 +81,7 @@ const VariationFilter = ({
           return;
         }
 
-        const data = await api.get<VariationFiltersResponse>(`/variations?${params.toString()}`);
+        const data = await api.get<VariationFiltersResponse>(`/variations${buildQueryString(queryParams)}`);
 
         setAvailableFilters({
           treatments: data.treatments ?? [],

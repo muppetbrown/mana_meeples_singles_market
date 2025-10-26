@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { api } from '@/lib/api';
+import { api, buildQueryString } from '@/lib/api';
 import { useErrorHandler } from '@/services/error/handler';
 import type { StorefrontCard, SearchFilters } from '@/types';
 
