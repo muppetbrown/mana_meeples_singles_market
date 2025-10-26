@@ -1,7 +1,7 @@
 import React from 'react';
 import {
   CardSearchBar
-} from '@/shared/components';
+} from '@/shared/components/search';
 import { API_BASE } from '@/lib/api';
 import { FILTER_CONFIG } from '@/lib/constants';
 

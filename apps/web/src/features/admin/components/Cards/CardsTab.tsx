@@ -17,12 +17,7 @@ import { RefreshCw, Download, LayoutGrid, List, Package } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
 import AddToInventoryModal from './AddToInventoryModal';
 import {
-  CardList,
-  CardGrid,
-  VariationFilter,
   CardSkeleton,
-  EmptyState,
-  CardSearchBar
 } from '@/shared/components';
 import { 
   groupCardsForBrowse 

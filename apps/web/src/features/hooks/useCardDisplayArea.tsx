@@ -1,12 +1,15 @@
 import React, { useMemo } from 'react';
-import ErrorBoundary from '@/shared/components/layout/ErrorBoundary';
-import SectionHeader from '@/shared/components/ui/SectionHeader';
-import CardItem from './CardItem';
-import CardList from './CardList';
-import CardGrid from './CardGrid';
+import type { ViewMode } from './useShopViewMode';
+import { 
+  CardItem,
+  CardList,
+  CardGrid,
+  SectionHeader,
+  ErrorBoundary
+} from '@/shared/components/';
 import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
 import type { StorefrontCard, Currency } from '@/types';
-import type { ViewMode } from '../../../features/hooks/useShopViewMode';
+
 
 interface SelectedVariations {
   [cardId: number]: string;
@@ -25,7 +28,7 @@ interface CardDisplayAreaProps {
   loading: boolean;
 }
 
-export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
+export const useCardDisplayArea: React.FC<CardDisplayAreaProps> = ({
   cards,
   viewMode,
   currency,
@@ -219,4 +222,4 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
   );
 };
 
-export default CardDisplayArea;
+export default useCardDisplayArea;

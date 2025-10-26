@@ -18,6 +18,9 @@ module.exports = {
       conditionNames: ["import", "require", "node", "default"],
       mainFields: ["module", "main", "types"]
     },
+    exclude: {
+      path: ["node_modules"] 
+    },
     doNotFollow: { path: "node_modules" }
   }
 };

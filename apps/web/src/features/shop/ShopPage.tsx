@@ -1,3 +1,4 @@
+// apps\web\src\features\shop\ShopPage.tsx
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -7,20 +8,14 @@ import {
   useCardFetching,
   useCart,
   useShopFilters,
+  useCardDisplayArea
 } from '@/features/hooks';
 import {
   ResultsHeader,
   ShopHeader,
-  Checkout
  } from '@/features/shop/components';
 import {
-  MobileFilterModal,
-  MobileFilterButton,
-  FilterSidebar,
-  CardDisplayArea,
   CardSkeleton,
-  KeyboardShortcuts,
-  ErrorBoundary
 } from '@/shared/components'
 import { formatCurrencySimple } from '@/lib/utils';
 import type { Currency } from '@/types';
@@ -511,7 +506,7 @@ const TCGShop: React.FC = () => {
               onClearAllFilters={clearAllFilters}
             />
 
-            <CardDisplayArea
+            <useCardDisplayArea
               cards={displayCards}
               viewMode={viewMode}
               currency={currency}
