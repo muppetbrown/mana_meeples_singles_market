@@ -10,7 +10,7 @@
  * - Adapts rendering based on card structure
  */
 import React, { useRef, useMemo, useState } from 'react';
-import { useVirtualScroll } from '@/features/hooks';
+import { useVirtualScroll } from '@/lib/utils';
 import { Card, CardVariation, isStorefrontCard } from '@/types';
 import { CardItem, CardSkeleton } from '@/shared/card';
 import { ChevronDown } from 'lucide-react';

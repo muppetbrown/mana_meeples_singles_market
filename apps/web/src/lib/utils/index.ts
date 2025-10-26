@@ -4,3 +4,4 @@ export { formatCurrency, formatPrice, formatCurrencySimple, formatOrderTotal /*,
 //export { searchCards, fuzzyMatch } from './search';
 export { groupCardsForBrowse } from './groupCards';
 export { sanitizeText, sanitizeHTML, sanitizeEmail, sanitizePhone, sanitizeAddress, sanitizeCustomerData } from './sanitization';
+export { useVirtualScroll } from './virtualScroll'
