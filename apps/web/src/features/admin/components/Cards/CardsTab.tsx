@@ -488,18 +488,17 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           {groupedCards.length > 0 ? (
             viewMode === 'list' ? (
               <CardList
-                cards={groupedCards as Card[]}
+                cards={groupedCards as unknown as Card[]}
                 currency={{ symbol: '$', rate: 1 }}
-                onAddToCart={(card, variation) => {
+                onAddToCart={(card: any, variation: any) => {
                   if (!isInventoryMode && openAddModal) {
                     openAddModal(card as Card);
                   }
                 }}
-                className="mt-4"
               />
             ) : (
               <CardGrid
-                cards={groupedCards as Card[]}
+                cards={groupedCards as unknown as Card[]}
                 mode={mode}
                 viewMode={viewMode}
                 onAddToInventory={isInventoryMode ? undefined : (card) => openAddModal(card as Card)}
