@@ -8,5 +8,5 @@ export { default as ResultsHeader } from './ResultsHeader';
 export * from './Cart/AddToCartModal'
 export * from './Cart/CartItem'
 export * from './Cart/CartModal'
-export * from './Cart/Checkout'
+export { Checkout } from './Cart/Checkout'
 export * from './Cart/MiniCart'
