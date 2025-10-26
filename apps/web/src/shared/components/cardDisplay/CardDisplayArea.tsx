@@ -1,41 +1,19 @@
 import React, { useMemo } from 'react';
 import ErrorBoundary from '@/shared/components/layout/ErrorBoundary';
 import SectionHeader from '@/shared/components/ui/SectionHeader';
-import CardItem from './CardItem.js';
-import CardList from './CardList.js';
-import CardGrid from './CardGrid.js';
+import CardItem from './CardItem';
+import CardList from './CardList';
+import CardGrid from './CardGrid';
 import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
 import type { StorefrontCard, Currency } from '@/types';
-import type { ViewMode } from '../../../features/hooks/useShopViewMode.js';
-
-// Card type that matches CardItem/ListCardItem requirements
-interface CardForDisplay {
-  id: number;
-  name: string;
-  image_url: string;
-  set_name: string;
-  card_number: string;
-  game_name: string;
-  rarity?: string;
-  total_stock: number;
-  variation_count: number;
-  variations: Array<{
-    variation_key: string;
-    quality: string;
-    foil_type: string;
-    language?: string;
-    price: number;
-    stock: number;
-    inventory_id: number;
-  }>;
-}
+import type { ViewMode } from '../../../features/hooks/useShopViewMode';
 
 interface SelectedVariations {
   [cardId: number]: string;
 }
 
 interface CardDisplayAreaProps {
-  cards: CardForDisplay[];
+  cards: StorefrontCard[];
   viewMode: ViewMode;
   currency: Currency;
   selectedVariations: SelectedVariations;
@@ -43,7 +21,7 @@ interface CardDisplayAreaProps {
     sortBy: string;
   };
   onVariationChange: (cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onAddToCart: (card: CardForDisplay, selectedVariation: any) => () => void;
+  onAddToCart: (card: StorefrontCard, selectedVariation: any) => () => void;
   loading: boolean;
 }
 
@@ -68,7 +46,7 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
       return [{ section: null, cards }];
     }
 
-    const groups = new Map<string, CardForDisplay[]>();
+    const groups = new Map<string, StorefrontCard[]>();
 
     cards.forEach(card => {
       let sectionKey: string;
@@ -180,7 +158,7 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
         cards.length > VIRTUAL_SCROLL_CONFIG.INITIAL_BATCH_SIZE ? (
           <ErrorBoundary>
             <CardGrid
-              cards={cards as any}
+              cards={cards}
               cardProps={{
                 currency,
                 selectedVariations,
@@ -227,10 +205,10 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
                 <SectionHeader title={group.section} count={group.cards.length} isGrid={false} />
               )}
               <CardList
-                cards={group.cards as any}
+                cards={group.cards}
                 currency={currency}
                 isAdminMode={false}
-                onAddToCart={(card, variation) => onAddToCart(card as StorefrontCard, variation)}
+                onAddToCart={(card, variation) => onAddToCart(card, variation)}
                 className="mt-4"
               />
             </div>

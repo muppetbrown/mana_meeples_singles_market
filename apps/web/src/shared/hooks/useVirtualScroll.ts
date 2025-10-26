@@ -4,8 +4,8 @@
 
 import { useState, useCallback, useEffect, useMemo } from 'react';
 
-interface VirtualScrollConfig {
-  items: any[];
+interface VirtualScrollConfig<T = unknown> {
+  items: T[];
   enabled?: boolean;
   itemHeight: number;
   containerHeight: number;
@@ -13,8 +13,8 @@ interface VirtualScrollConfig {
   overscan?: number;
 }
 
-interface VirtualScrollResult {
-  visibleItems: any[];
+interface VirtualScrollResult<T = unknown> {
+  visibleItems: T[];
   totalHeight: number;
   offsetY: number;
   handleScroll: (e: React.UIEvent<HTMLDivElement>) => void;
@@ -25,14 +25,14 @@ interface VirtualScrollResult {
 /**
  * Virtual scrolling hook for large lists
  */
-export function useVirtualScroll({
+export function useVirtualScroll<T>({
   items,
   enabled = true,
   itemHeight,
   containerHeight,
   columnCount = 4,
   overscan = 3
-}: VirtualScrollConfig): VirtualScrollResult {
+}: VirtualScrollConfig<T>): VirtualScrollResult<T> {
   const [scrollTop, setScrollTop] = useState(0);
   const [responsiveColumnCount, setResponsiveColumnCount] = useState(columnCount);
 

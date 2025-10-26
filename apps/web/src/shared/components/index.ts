@@ -22,6 +22,7 @@ export { default as CardSkeleton } from './cardDisplay/CardSkeleton';
 export { default as CardRow } from './cardDisplay/CardRow';
 export { default as CardGrid } from './cardDisplay/CardGrid';
 export { default as CardList } from './cardDisplay/CardList';
+export { default as ListCardItem } from './cardDisplay/ListCardItem';
 
 // Search
 export { default as FiltersPanel } from './search/FiltersPanel';
