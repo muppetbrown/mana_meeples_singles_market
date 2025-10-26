@@ -20,7 +20,7 @@ import { CardSkeleton } from '@/shared/card';
 import { FilterSidebar, MobileFilterModal } from '@/shared/ui';
 import { MobileFilterButton } from '@/shared/search';
 import { formatCurrencySimple } from '@/lib/utils';
-import type { Currency } from '@/types';
+import type { Currency, StorefrontCard } from '@/types';
 
 // Local type definitions
 interface SelectedVariations {
@@ -92,7 +92,7 @@ const ShopPage: React.FC = () => {
     sets
   });
 
-  const { selectedVariations, selectVariation, clearStaleSelections } = useVariationSelection();
+  const { selectedVariations, selectVariation, clearStaleSelections } = useVariationSelection(cards);
   const { viewMode, setViewMode, currency, setCurrency, isOffline, setIsOffline } = useShopViewMode();
 
   // UI State
@@ -286,7 +286,7 @@ const ShopPage: React.FC = () => {
     selectVariation(cardId, e.target.value);
   }, [selectVariation]);
 
-  const handleAddToCart = useCallback((card: CardForDisplay, selectedVariation: any) => () => {
+  const handleAddToCart = useCallback((card: StorefrontCard, selectedVariation: any) => () => {
     addToCart({
       card_id: card.id,
       inventory_id: selectedVariation.inventory_id,
@@ -338,10 +338,7 @@ const ShopPage: React.FC = () => {
     setCurrency(newCurrency);
   };
 
-  // Effects
-  useEffect(() => {
-    clearStaleSelections(displayCards.map(card => card.id));
-  }, [displayCards, clearStaleSelections]);
+  // Effects - clearStaleSelections is now handled automatically by useVariationSelection hook
 
   // Offline detection
   useEffect(() => {
@@ -500,7 +497,7 @@ const ShopPage: React.FC = () => {
 
           <div className="flex-1">
             <ResultsHeader
-              cardCount={displayCards.length}
+              cardCount={cards.length}
               viewMode={viewMode}
               setViewMode={setViewMode}
               activeFilters={activeFilters}
@@ -509,7 +506,7 @@ const ShopPage: React.FC = () => {
             />
 
             <CardDisplayArea
-              cards={displayCards}
+              cards={cards}
               viewMode={viewMode}
               currency={currency}
               selectedVariations={selectedVariations}
@@ -722,7 +719,7 @@ const ShopPage: React.FC = () => {
 
       {/* ARIA Live Regions */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">
-        {displayCards.length > 0 && `Showing ${displayCards.length} cards`}
+        {cards.length > 0 && `Showing ${cards.length} cards`}
       </div>
       <div aria-live="assertive" aria-atomic="true" className="sr-only">
         {(filtersLoading || cardsLoading) && "Loading cards..."}
@@ -735,11 +732,11 @@ const ShopPage: React.FC = () => {
         aria-live="polite"
         aria-atomic="true"
         className="sr-only"
-        key={`search-${searchTerm}-${displayCards.length}`}
+        key={`search-${searchTerm}-${cards.length}`}
       >
         {searchTerm && !cardsLoading && (
-          displayCards.length > 0
-            ? `Found ${displayCards.length} cards matching "${searchTerm}"`
+          cards.length > 0
+            ? `Found ${cards.length} cards matching "${searchTerm}"`
             : `No cards found matching "${searchTerm}"`
         )}
       </div>
