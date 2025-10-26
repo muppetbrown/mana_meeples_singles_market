@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { Card } from '@/types';
-import CardGrid from '@/features/shop/components/CardDisplay/CardGrid';
+import CardGrid from '@/shared/components/cardDisplay/CardGrid';
 
 interface AdminCardGridProps {
   cards: Card[];

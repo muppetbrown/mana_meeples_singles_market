@@ -12,8 +12,7 @@
 import React, { useRef, useMemo, useState } from 'react';
 import { useVirtualScroll } from '@/shared/hooks';
 import { Card, CardVariation, isStorefrontCard } from '@/types';
-import CardItem from './CardItem';
-import CardSkeleton from './CardSkeleton';
+import { CardItem, CardSkeleton } from '@/shared/components';
 import { ChevronDown } from 'lucide-react';
 
 // ============================================================================

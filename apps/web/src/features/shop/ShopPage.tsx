@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { ShoppingCart, X, Plus, Minus, Filter, ChevronDown, LayoutGrid, List } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import CardSearchBar from './components/Search/SearchBar';
+import CardSearchBar from '../../shared/components/search/SearchBar';
 import { useShopFilters } from './hooks/useShopFilters.js';
 import CurrencySelector from '@/shared/components/forms/CurrencySelector';
 import Checkout from './components/Cart/Checkout.js';
@@ -12,11 +12,11 @@ import ErrorBoundary from '@/shared/components/layout/ErrorBoundary';
 import KeyboardShortcutsModal from '@/shared/components/layout/KeyboardShortcuts';
 import { useErrorHandler } from '@/services/error/handler';
 import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
-import CardSkeleton from './components/CardDisplay/CardSkeleton.js';
+import CardSkeleton from '../../shared/components/cardDisplay/CardSkeleton.js';
 import SectionHeader from '@/shared/components/ui/SectionHeader';
-import CardItem from './components/CardDisplay/CardItem.js';
-import ListCardItem from './components/CardDisplay/ListCardItem.js';
-import CardList from './components/CardDisplay/CardList';
+import CardItem from '../../shared/components/cardDisplay/CardItem.js';
+import ListCardItem from '../../shared/components/cardDisplay/ListCardItem.js';
+import CardList from '../../shared/components/cardDisplay/CardList';
 import { API_BASE, api } from '@/lib/api';
 import type { 
   StorefrontCard,
@@ -24,7 +24,7 @@ import type {
 } from '@/types';
 
 // Lazy load VirtualCardGrid for code splitting
-import CardGrid from './components/CardDisplay/CardGrid.js';
+import CardGrid from '../../shared/components/cardDisplay/CardGrid.js';
 
 // ============================================================================
 // LOCAL TYPE DEFINITIONS (not exported elsewhere)
