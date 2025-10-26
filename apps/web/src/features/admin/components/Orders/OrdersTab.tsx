@@ -16,7 +16,7 @@ import {
   XCircle,
   Eye
 } from 'lucide-react';
-import { api } from '@/lib/api';
+import { api, ENDPOINTS } from '@/lib/api';
 
 // -------------------- Types --------------------
 interface CustomerData {
@@ -72,8 +72,8 @@ const OrdersTab = () => {
     try {
       setLoading(true);
       // Expect { orders: Order[] } from backend
-      console.log('Fetching orders from /admin/orders');
-      const data = await api.get<{ orders?: Order[] }>('/admin/orders');
+      console.log('Fetching orders from', ENDPOINTS.ADMIN.ORDERS);
+      const data = await api.get<{ orders?: Order[] }>(ENDPOINTS.ADMIN.ORDERS);
       console.log('Orders API response:', data);
       setOrders(Array.isArray(data?.orders) ? data.orders : []);
       setError(null);
@@ -88,12 +88,12 @@ const OrdersTab = () => {
 
   const fetchOrderDetails = useCallback(async (orderId: number) => {
     // Expect full order object with items
-    return api.get<Order>(`/admin/orders/${orderId}`);
+    return api.get<Order>(ENDPOINTS.ADMIN.ORDER_DETAIL(orderId));
   }, []);
 
   const patchOrderStatus = useCallback(async (orderId: number, newStatus: OrderStatus) => {
     // Backend: PATCH /admin/orders/:id/status with { status }
-    return api.patch(`/admin/orders/${orderId}/status`, { status: newStatus });
+    return api.patch(ENDPOINTS.ADMIN.UPDATE_ORDER_STATUS(orderId), { status: newStatus });
   }, []);
 
   useEffect(() => {
