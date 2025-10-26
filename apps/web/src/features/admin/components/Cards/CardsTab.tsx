@@ -15,15 +15,21 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download, LayoutGrid, List, Package } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
-import CardSearchBar from '@/shared/components/search/SearchBar';
-import EmptyState from '@/shared/components/ui/EmptyState';
-import CardSkeleton from '@/shared/components/cardDisplay/CardSkeleton';
 import AddToInventoryModal from './AddToInventoryModal';
-import AdminCardGrid from './AdminCardGrid';
-import CardList from '@/shared/components/cardDisplay/CardList';
-import DynamicVariationFilter from '@/shared/components/forms/VariationFilter';
-import { groupCardsForBrowse } from '@/lib/utils/groupCards';
-import type { Card } from '@/types';
+import {
+  CardList,
+  CardGrid,
+  VariationFilter,
+  CardSkeleton,
+  EmptyState,
+  CardSearchBar
+} from '@/shared/components';
+import { 
+  groupCardsForBrowse 
+} from '@/lib/utils';
+import type { 
+  Card 
+} from '@/types';
 
 // ============================================================================
 // TYPES
@@ -458,7 +464,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       {(selectedGame !== 'all' || selectedSet !== 'all') && (
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Advanced Filters</h3>
-          <DynamicVariationFilter
+          <VariationFilter
             selectedGame={selectedGame !== 'all' ? selectedGame : undefined}
             selectedSet={selectedSet !== 'all' ? selectedSet : undefined}
             filters={{
@@ -492,7 +498,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                 className="mt-4"
               />
             ) : (
-              <AdminCardGrid
+              <CardGrid
                 cards={groupedCards}
                 mode={mode}
                 viewMode={viewMode}

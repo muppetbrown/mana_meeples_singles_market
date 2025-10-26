@@ -1,6 +1,6 @@
 import React from 'react';
 import { X, LayoutGrid, List } from 'lucide-react';
-import type { ViewMode } from '../hooks/useShopViewMode';
+import type { ViewMode } from '../../hooks/useShopViewMode';
 
 interface ActiveFilter {
   key: string;

@@ -1,4 +1,4 @@
-// apps/web/src/components/DynamicVariationFilter.tsx
+// apps/web/src/components/VariationFilter.tsx
 import { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 
@@ -24,7 +24,7 @@ type AvailableFilters = {
  * Automatically updates available filter options based on selected game/set
  * Only shows variations that actually exist in the current context
  */
-const DynamicVariationFilter = ({
+const VariationFilter = ({
   selectedGame,
   selectedSet,
   filters,
@@ -262,4 +262,4 @@ const DynamicVariationFilter = ({
   );
 };
 
-export default DynamicVariationFilter;
+export default VariationFilter;

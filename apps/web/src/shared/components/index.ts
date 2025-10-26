@@ -16,7 +16,7 @@ export { default as CurrencySelector } from './forms/CurrencySelector';
 export { default as VariationFilter } from './forms/VariationFilter';
 
 // Card Display
-export { default as CardDisplay } from './cardDisplay/CardDisplay';
+export { default as CardDisplayArea } from './cardDisplay/CardDisplayArea';
 export { default as CardItem } from './cardDisplay/CardItem';
 export { default as CardSkeleton } from './cardDisplay/CardSkeleton';
 export { default as CardRow } from './cardDisplay/CardRow';
@@ -27,3 +27,6 @@ export { default as CardList } from './cardDisplay/CardList';
 export { default as FiltersPanel } from './search/FiltersPanel';
 export { default as CardSearchBar } from './search/SearchBar';
 export { default as ActiveFilters } from './search/ActiveFilters';
+export { default as FilterSidebar } from './search/FilterSidebar';
+export { default as MobileFilterButton } from './search/MobileFilterButton';
+export { default as MobileFilterModal } from './search/MobileFilterModal';

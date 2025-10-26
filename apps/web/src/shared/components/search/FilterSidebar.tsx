@@ -1,5 +1,5 @@
 import React from 'react';
-import CardSearchBar from '../../../shared/components/search/SearchBar';
+import CardSearchBar from './SearchBar';
 import { API_BASE } from '@/lib/api';
 
 interface Game {

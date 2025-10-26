@@ -1,22 +1,28 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import ErrorBoundary from '@/shared/components/layout/ErrorBoundary';
-import KeyboardShortcutsModal from '@/shared/components/layout/KeyboardShortcuts';
-import CardSkeleton from '../../shared/components/cardDisplay/CardSkeleton.js';
-import Checkout from './components/Cart/Checkout.js';
-import { useShopFilters } from './hooks/useShopFilters.js';
-import { useCart } from './hooks/useCart.js';
-import { useCardFetching } from './hooks/useCardFetching';
-import { useVariationSelection } from './hooks/useVariationSelection';
-import { useShopViewMode } from './hooks/useShopViewMode';
-import { useShopKeyboardShortcuts } from './hooks/useShopKeyboardShortcuts';
-import ShopHeader from './components/ShopHeader';
-import FilterSidebar from './components/FilterSidebar';
-import ResultsHeader from './components/ResultsHeader';
-import CardDisplayArea from './components/CardDisplayArea';
-import MobileFilterModal from './components/MobileFilterModal';
-import MobileFilterButton from './components/MobileFilterButton';
-import type { StorefrontCard, Currency } from '@/types';
+import { 
+  useShopKeyboardShortcuts,
+  useShopViewMode,
+  useVariationSelection,
+  useCardFetching,
+  useCart,
+  useShopFilters,
+} from '@/features/hooks';
+import {
+  ResultsHeader,
+  ShopHeader,
+  Checkout
+ } from '@/features/shop';
+import {
+  MobileFilterModal,
+  MobileFilterButton,
+  FilterSidebar,
+  CardDisplayArea,
+  CardSkeleton,
+  KeyboardShortcuts,
+  ErrorBoundary
+} from '@/shared/components'
+import type { Currency } from '@/types';
 
 // Local type definitions
 interface SelectedVariations {
@@ -740,7 +746,7 @@ const TCGShop: React.FC = () => {
         )}
       </div>
 
-      <KeyboardShortcutsModal
+      <KeyboardShortcuts
         isOpen={showKeyboardShortcuts}
         onClose={() => setShowKeyboardShortcuts(false)}
       />

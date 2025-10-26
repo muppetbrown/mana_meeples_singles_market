@@ -1,12 +1,12 @@
 import React, { useMemo } from 'react';
 import ErrorBoundary from '@/shared/components/layout/ErrorBoundary';
 import SectionHeader from '@/shared/components/ui/SectionHeader';
-import CardItem from '../../../shared/components/cardDisplay/CardItem.js';
-import CardList from '../../../shared/components/cardDisplay/CardList';
-import CardGrid from '../../../shared/components/cardDisplay/CardGrid.js';
+import CardItem from './CardItem.js';
+import CardList from './CardList.js';
+import CardGrid from './CardGrid.js';
 import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
 import type { StorefrontCard, Currency } from '@/types';
-import type { ViewMode } from '../hooks/useShopViewMode';
+import type { ViewMode } from '../../../features/hooks/useShopViewMode.js';
 
 // Card type that matches CardItem/ListCardItem requirements
 interface CardForDisplay {
