@@ -1,15 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import type { CartItem, Cart } from '@/types';
+import { useToast } from '@/shared/ui/Toast';
 
 const STORAGE_KEY = 'mana_meeples_cart';
 
-interface Notification {
-  id: number;
-  message: string;
-  type: 'success' | 'error' | 'warning' | 'info';
-}
-
 export function useCart() {
+  const { showToast } = useToast();
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -18,8 +14,6 @@ export function useCart() {
       return [];
     }
   });
-
-  const [cartNotifications, setCartNotifications] = useState<Notification[]>([]);
 
   // Persist to localStorage
   useEffect(() => {
@@ -30,15 +24,7 @@ export function useCart() {
     }
   }, [items]);
 
-  // Auto-clear notifications after 5 seconds
-  useEffect(() => {
-    if (cartNotifications.length > 0) {
-      const timer = setTimeout(() => {
-        setCartNotifications(prev => prev.slice(1));
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
-  }, [cartNotifications]);
+  // Notification cleanup is handled individually in addNotification
 
   const cart: Cart = {
     items,
@@ -112,15 +98,9 @@ export function useCart() {
     return items.some(item => item.card_id === cardId && item.variation_key === variationKey);
   }, [items]);
 
-  const addNotification = useCallback((message: string, type: Notification['type'] = 'info', duration = 5000) => {
-    const id = Date.now();
-    setCartNotifications(prev => [...prev, { id, message, type }]);
-    if (duration > 0) {
-      setTimeout(() => {
-        setCartNotifications(prev => prev.filter(n => n.id !== id));
-      }, duration);
-    }
-  }, []);
+  const addNotification = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+    showToast(message, type);
+  }, [showToast]);
 
   return {
     cart,
@@ -132,7 +112,6 @@ export function useCart() {
     clearCart,
     getItem,
     hasItem,
-    cartNotifications,
     addNotification
   };
 }

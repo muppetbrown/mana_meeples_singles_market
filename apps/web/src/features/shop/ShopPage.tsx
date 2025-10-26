@@ -14,7 +14,7 @@ import {
   ShopHeader,
   Checkout
 } from '@/features/shop/components';
-import { useCardDisplayArea as CardDisplayArea } from '@/features/hooks/useCardDisplayArea';
+import { CardDisplayArea } from '@/features/hooks/useCardDisplayArea';
 import { ErrorBoundary, KeyboardShortcuts } from '@/shared/layout';
 import { CardSkeleton } from '@/shared/card';
 import { FilterSidebar, MobileFilterModal } from '@/shared/ui';
@@ -71,7 +71,6 @@ const ShopPage: React.FC = () => {
 
   const {
     cart,
-    cartNotifications,
     addToCart,
     updateQuantity,
     removeFromCart,
@@ -695,27 +694,7 @@ const ShopPage: React.FC = () => {
         </div>
       )}
 
-      {/* Notifications */}
-      {cartNotifications.length > 0 && (
-        <div className="fixed top-20 right-4 z-50 space-y-2" role="region" aria-label="Notifications">
-          {cartNotifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`px-4 py-3 rounded-lg shadow-lg ${
-                notification.type === 'success' ? 'bg-green-50 border-green-200 text-green-800' :
-                notification.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' :
-                notification.type === 'warning' ? 'bg-orange-50 border-orange-200 text-orange-800' :
-                'bg-mm-tealLight border-mm-tealBright text-mm-tealBright'
-              } border`}
-              role={notification.type === 'error' ? 'alert' : 'status'}
-              aria-live={notification.type === 'error' ? 'assertive' : 'polite'}
-              aria-atomic="true"
-            >
-              {notification.message}
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Notifications handled by ToastProvider */}
 
       {/* ARIA Live Regions */}
       <div aria-live="polite" aria-atomic="true" className="sr-only">

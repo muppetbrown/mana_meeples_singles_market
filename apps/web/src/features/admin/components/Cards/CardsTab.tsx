@@ -111,14 +111,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     const loadFilters = async () => {
       setFiltersLoading(true);
       try {
-        console.log('📊 Fetching filter options from:', ENDPOINTS.FILTERS);
         const data = await api.get<FilterOptions>(ENDPOINTS.FILTERS);
-        
-        console.log('✅ Filter options loaded:', {
-          games: data.games?.length || 0,
-          sets: data.sets?.length || 0,
-          treatments: data.treatments?.length || 0
-        });
         
         setFilterOptions({
           games: data.games || [],
@@ -208,7 +201,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           const game = filterOptions.games.find(g => g.name === selectedGame);
           if (game?.id) {
             params.set('game_id', String(game.id));
-            console.log('🎮 Game filter:', selectedGame, '→ ID:', game.id);
           }
         }
         
@@ -217,7 +209,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           const set = filterOptions.sets.find(s => s.name === selectedSet);
           if (set?.id) {
             params.set('set_id', String(set.id));
-            console.log('📦 Set filter:', selectedSet, '→ ID:', set.id);
           }
         }
         
@@ -246,11 +237,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         }
 
         const url = `${ENDPOINTS.CARDS}?${params.toString()}`;
-        console.log('🔍 Fetching cards:', url);
-        
         const data = await api.get<{ cards?: Card[] }>(url);
-        
-        console.log('✅ Cards loaded:', data?.cards?.length || 0);
         setCards(data?.cards ?? []);
       } catch (err) {
         console.error('❌ Error fetching cards:', err);
@@ -323,8 +310,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, [setSearchParams]);
 
   const handleExportCSV = useCallback(() => {
-    // TODO: Implement CSV export
-    console.log('Export CSV');
+    // TODO: Implement CSV export functionality
   }, []);
 
   // --------------------------------------------------------------------------

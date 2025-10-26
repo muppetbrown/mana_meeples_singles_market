@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import { ArrowLeft, Mail, Phone, MapPin, CreditCard, User, AlertCircle } from 'lucide-react';
 import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeAddress, sanitizeHTML, formatCurrencySimple } from '@/lib/utils';
+import type { Cart, Currency } from '@/types';
 
- type CheckoutForm = {
+type CheckoutForm = {
   // Contact Information
   firstName: string;
   lastName: string;
@@ -27,12 +28,19 @@ type CheckoutErrors = Partial<Record<keyof CheckoutForm, string>> & {
   submit?: string;
 };
 
+interface CheckoutProps {
+  cart: Cart;
+  currency: Currency;
+  onBack: () => void;
+  onOrderSubmit: (orderData: CheckoutForm) => Promise<void>;
+}
+
 const Checkout = ({
   cart,
   currency,
   onBack,
   onOrderSubmit
-}: any) => {
+}: CheckoutProps) => {
   const [formData, setFormData] = useState<CheckoutForm>({
     firstName: '',
     lastName: '',
