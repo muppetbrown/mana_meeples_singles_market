@@ -83,9 +83,9 @@ export function createApp() {
 
     const oneYear = 31536000;
 
-    // Explicit favicon route with correct type
-    app.get("/favicon.ico", (_req, res) => {
-      const file = path.join(frontendDist, "favicon.ico");
+    // Explicit mana & meeples route with correct type
+    app.get("/mana_meeples_logo.ico", (_req, res) => {
+      const file = path.join(frontendDist, "mana_meeples_logo.ico");
       if (fs.existsSync(file)) {
         res.type("image/x-icon");
         res.setHeader("Cache-Control", "public, max-age=604800");
