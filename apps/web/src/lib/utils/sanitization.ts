@@ -102,7 +102,7 @@ const sanitizeCustomerData = (customer: any) => {
   };
 };
 
-module.exports = {
+export {
   sanitizeText,
   sanitizeHTML,
   sanitizeEmail,

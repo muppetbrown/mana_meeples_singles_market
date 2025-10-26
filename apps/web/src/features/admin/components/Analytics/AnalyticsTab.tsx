@@ -1,7 +1,7 @@
 // apps/web/src/components/admin/AnalyticsTab.tsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { Package, DollarSign, AlertTriangle, RefreshCw } from 'lucide-react';
-import { api } from '@/lib/api';
+import { api, ENDPOINTS } from '@/lib/api';
 
 // -------------------- Types --------------------
 export type InventoryItem = {
@@ -37,8 +37,8 @@ const fetchAnalytics = useCallback(async () => {
   setLoading(true);
     try {
       // Fetch all inventory items from the API
-      console.log('Fetching analytics from /admin/inventory');
-      const data = await api.get<{ inventory?: InventoryItem[] }>('/admin/inventory');
+      console.log('Fetching analytics from', ENDPOINTS.ADMIN.INVENTORY);
+      const data = await api.get<{ inventory?: InventoryItem[] }>(ENDPOINTS.ADMIN.INVENTORY);
       console.log('Analytics API response:', data);
       const inventory = data?.inventory ?? [];
 
