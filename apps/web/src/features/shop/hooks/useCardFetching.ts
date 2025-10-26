@@ -1,4 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { api } from '@/lib/api';
+import { useErrorHandler } from '@/services/error/handler';
 import type { StorefrontCard, SearchFilters } from '@/types';
 
 interface Game {
@@ -12,33 +14,104 @@ interface Set {
   name: string;
 }
 
-export function useCardFetching(
-  filters: SearchFilters,
-  games: Game[],
-  sets: Set[]
-) {
+interface UseCardFetchingParams {
+  searchTerm: string;
+  selectedGame: string;
+  selectedSet: string;
+  selectedTreatment: string;
+  games: Game[];
+  sets: Set[];
+}
+
+export function useCardFetching({
+  searchTerm,
+  selectedGame,
+  selectedSet,
+  selectedTreatment,
+  games,
+  sets
+}: UseCardFetchingParams) {
   const [cards, setCards] = useState<StorefrontCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const errorHandler = useErrorHandler();
+  const requestInFlight = useRef(false);
 
-  useEffect(() => {
-    const fetchCards = async () => {
+  const fetchCards = useCallback(async () => {
+    // Prevent duplicate requests
+    if (requestInFlight.current) return;
+    requestInFlight.current = true;
+
+    try {
       setLoading(true);
-      try {
-        // TODO: Implement actual fetch logic
-        // For now, just set empty array
-        setCards([]);
-      } catch (err: any) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+      setError(null);
+
+      const params = new URLSearchParams();
+
+      // Properly resolve game by matching name OR code OR case-insensitive
+      if (selectedGame && selectedGame !== 'all') {
+        const game = games.find(g =>
+          g.name === selectedGame ||
+          g.code === selectedGame ||
+          g.name.toLowerCase() === selectedGame.toLowerCase()
+        );
+
+        if (game?.id) {
+          params.append('game_id', String(game.id));
+        }
       }
-    };
-    
-    if (games.length > 0) {
+
+      // Properly resolve set by matching name
+      if (selectedSet && selectedSet !== 'all') {
+        const set = sets.find(s => s.name === selectedSet);
+        if (set?.id) {
+          params.append('set_id', String(set.id));
+        }
+      }
+
+      // Add search term
+      if (searchTerm && searchTerm.trim()) {
+        params.append('search', searchTerm.trim());
+      }
+
+      // Add pagination
+      params.append('page', '1');
+      params.append('per_page', '100');
+      params.append('sort', 'name');
+      params.append('order', 'asc');
+
+      // Use the storefront endpoint
+      const response = await api.get<{ cards: StorefrontCard[] }>(
+        `/storefront/cards?${params.toString()}`
+      );
+
+      let fetchedCards = response.cards ?? [];
+
+      // Apply client-side treatment filtering
+      if (selectedTreatment && selectedTreatment !== 'all') {
+        fetchedCards = fetchedCards.filter(card => {
+          const cardTreatment = (card as any).treatment || 'STANDARD';
+          return cardTreatment === selectedTreatment;
+        });
+      }
+
+      setCards(fetchedCards);
+    } catch (err: any) {
+      console.error('Error fetching cards:', err);
+      setError(err?.message ?? 'Failed to load cards');
+      errorHandler.handleError(err, { context: 'fetching cards' });
+    } finally {
+      setLoading(false);
+      requestInFlight.current = false;
+    }
+  }, [selectedGame, selectedSet, searchTerm, selectedTreatment, games, sets, errorHandler]);
+
+  // Fetch cards when games are loaded or filters change
+  useEffect(() => {
+    if (games?.length > 0) {
       fetchCards();
     }
-  }, [filters, games, sets]);
+  }, [fetchCards, games]);
 
-  return { cards, loading, error };
+  return { cards, loading, error, refetch: fetchCards };
 }
