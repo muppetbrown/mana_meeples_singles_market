@@ -16,11 +16,16 @@ import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download, LayoutGrid, List, Package } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
 import AddToInventoryModal from './AddToInventoryModal';
-import { 
-  groupCardsForBrowse 
+import {
+  groupCardsForBrowse
 } from '@/lib/utils';
-import type { 
-  Card 
+import { SearchBar as CardSearchBar } from '@/shared/search';
+import { VariationFilter } from '@/shared/search';
+import { CardSkeleton } from '@/shared/card';
+import { CardList, CardGrid } from '@/shared/layout';
+import { EmptyState } from '@/shared/ui';
+import type {
+  Card
 } from '@/types';
 
 // ============================================================================
