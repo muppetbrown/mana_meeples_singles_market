@@ -2,7 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import {
   CardSearchBar
-} from '@/shared/components';
+} from '@/shared/search';
 import { API_BASE } from '@/lib/api';
 import { FILTER_CONFIG } from '@/lib/constants';
 

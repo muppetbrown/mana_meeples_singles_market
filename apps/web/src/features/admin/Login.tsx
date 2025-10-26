@@ -6,7 +6,7 @@ import { api } from '@/lib/api';
 import { ENDPOINTS } from '@/lib/api/endpoints';
 
 
-const AdminLogin = () => {
+const Login = () => {
   const [credentials, setCredentials] = useState({ username: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -147,4 +147,4 @@ const AdminLogin = () => {
   );
 };
 
-export default AdminLogin;
+export default Login;

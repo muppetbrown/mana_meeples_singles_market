@@ -43,7 +43,7 @@ interface CardForDisplay {
   }>;
 }
 
-const TCGShop: React.FC = () => {
+const ShopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
   // URL State
@@ -747,4 +747,4 @@ const TCGShop: React.FC = () => {
   );
 };
 
-export default TCGShop;
+export default ShopPage;

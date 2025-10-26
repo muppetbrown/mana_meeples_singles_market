@@ -1,7 +1,8 @@
 // apps/web/src/App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { ShopPage } from '@/features/shop/components';
-import { Dashboard, Login } from '@/features/admin/components';
+import ShopPage from '@/features/shop/ShopPage';
+import Login from '@/features/admin/Login';
+import Dashboard from '@/features/admin/Login';
 
 function App() {
   return (

@@ -8,7 +8,7 @@ import UnifiedCardsTab from './components/Cards/CardsTab';
 import OrdersTab from './components//Orders/OrdersTab';
 import AnalyticsTab from './components/Analytics/AnalyticsTab';
 
-const AdminDashboard = () => {
+const Dashboard = () => {
   const [authChecking, setAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'all-cards' | 'analytics' | 'orders'>('inventory');
@@ -154,4 +154,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default Dashboard;
