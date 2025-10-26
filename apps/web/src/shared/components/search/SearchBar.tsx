@@ -3,6 +3,7 @@
 
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, RefreshCw, X } from 'lucide-react';
+import { FILTER_CONFIG, ANIMATION_CONFIG } from '@/lib/constants';
 
 // ----- Types -----
 type GameOption = { id: string | number; name: string; card_count?: number };
@@ -55,8 +56,8 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
   additionalFilters = {},
   apiUrl,
   showAutocomplete = true,
-  debounceMs = 300,
-  minSearchLength = 2,
+  debounceMs = FILTER_CONFIG.DEBOUNCE_DELAY,
+  minSearchLength = FILTER_CONFIG.MIN_SEARCH_LENGTH,
   placeholder = 'Search by name, number, or set...',
   isAdminMode = false
 }) => {
@@ -193,7 +194,7 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
               onChange={(e) => handleSearchInput(e.target.value)}
               onKeyDown={handleKeyDown}
               onFocus={() => setShowSuggestions(searchSuggestions.length > 0)}
-              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), ANIMATION_CONFIG.DURATION.FAST)}
               placeholder={placeholder}
               className="w-full pl-10 pr-10 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               aria-label="Search cards"
@@ -360,7 +361,7 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
             onChange={(e) => handleSearchInput(e.target.value)}
             onKeyDown={handleKeyDown}
             onFocus={() => setShowSuggestions(searchSuggestions.length > 0)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), ANIMATION_CONFIG.DURATION.FAST)}
             placeholder={placeholder}
             className="w-full pl-10 pr-10 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             aria-label="Search cards"

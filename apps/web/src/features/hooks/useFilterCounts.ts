@@ -1,6 +1,6 @@
 // apps/web/src/hooks/useFilterCounts.ts
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { FILTER_CONFIG } from '@/lib/constants';
+import { FILTER_CONFIG, ERROR_CONFIG } from '@/lib/constants';
 import { api } from '@/lib/api';
 
 type Filters = Record<string, string | number | boolean | undefined | null>;
@@ -21,8 +21,8 @@ const globalCache: {
 
 const CACHE_DURATION = FILTER_CONFIG.CACHE_DURATION;
 const DEBOUNCE_DELAY = FILTER_CONFIG.DEBOUNCE_DELAY;
-const MAX_RETRIES = 2;
-const RETRY_DELAY = 2000; // ms
+const MAX_RETRIES = ERROR_CONFIG.DEFAULT_MAX_RETRIES;
+const RETRY_DELAY = ERROR_CONFIG.DEFAULT_RETRY_DELAY;
 
 /**
  * Hook to retrieve the total card count for the current filters, with caching, debouncing, and retry.
@@ -100,7 +100,10 @@ export const useFilterCounts = (_deprecatedAPIBase: unknown, currentFilters: Fil
         // Retry on transient 429/5xx (api.get throws; we inspect message)
         const msg = String(e?.message ?? e);
         const transient =
-          /429|503|504|timeout|network/i.test(msg) || e?.status === 429;
+          /503|504|timeout|network/i.test(msg) ||
+          e?.status === ERROR_CONFIG.RATE_LIMIT_STATUS ||
+          e?.status === 503 ||
+          e?.status === 504;
 
         if (transient && retryCount < MAX_RETRIES) {
           await new Promise((r) => setTimeout(r, RETRY_DELAY * Math.pow(2, retryCount)));

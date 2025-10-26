@@ -1,5 +1,6 @@
 import React from 'react';
 import { ShoppingCart, X, Plus, Minus } from 'lucide-react';
+import { formatCurrencySimple } from '@/lib/utils';
 import type { Cart, Currency, CartItem } from '@/types';
 
 interface CartModalProps {
@@ -75,7 +76,7 @@ export const CartModal: React.FC<CartModalProps> = ({
                 Total:
               </span>
               <span className="text-2xl font-bold text-mm-forest">
-                {currency.symbol}{(total * currency.rate).toFixed(2)}
+                {formatCurrencySimple(total, currency)}
               </span>
             </div>
             <button 
@@ -176,12 +177,10 @@ const CartItemRow: React.FC<CartItemRowProps> = ({
       {/* Price */}
       <div className="text-right">
         <div className="font-bold text-mm-forest">
-          {currency.symbol}
-          {(item.price * item.quantity * currency.rate).toFixed(2)}
+          {formatCurrencySimple(item.price * item.quantity, currency)}
         </div>
         <div className="text-xs text-mm-teal mt-1">
-          {currency.symbol}
-          {(item.price * currency.rate).toFixed(2)} each
+          {formatCurrencySimple(item.price, currency)} each
         </div>
       </div>
     </div>

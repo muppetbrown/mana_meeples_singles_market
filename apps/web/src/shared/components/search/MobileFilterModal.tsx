@@ -2,6 +2,7 @@ import React, { useRef, useEffect } from 'react';
 import { X } from 'lucide-react';
 import CardSearchBar from '../../../shared/components/search/SearchBar';
 import { API_BASE } from '@/lib/api';
+import { FILTER_CONFIG } from '@/lib/constants';
 
 interface Game {
   id: number;
@@ -134,8 +135,8 @@ export const MobileFilterModal: React.FC<MobileFilterModalProps> = ({
             sets={sets}
             additionalFilters={additionalFilters}
             apiUrl={API_BASE}
-            debounceMs={300}
-            minSearchLength={2}
+            debounceMs={FILTER_CONFIG.DEBOUNCE_DELAY}
+            minSearchLength={FILTER_CONFIG.MIN_SEARCH_LENGTH}
           />
 
           <div className="mt-6">

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { 
+import {
   useShopKeyboardShortcuts,
   useShopViewMode,
   useVariationSelection,
@@ -22,6 +22,7 @@ import {
   KeyboardShortcuts,
   ErrorBoundary
 } from '@/shared/components'
+import { formatCurrencySimple } from '@/lib/utils';
 import type { Currency } from '@/types';
 
 // Local type definitions
@@ -576,7 +577,7 @@ const TCGShop: React.FC = () => {
                   </div>
                 </div>
                 <div className="text-mm-forest font-semibold">
-                  {currency.symbol}{(item.price * item.quantity * currency.rate).toFixed(2)}
+                  {formatCurrencySimple(item.price * item.quantity, currency)}
                 </div>
               </div>
             ))}
@@ -587,7 +588,7 @@ const TCGShop: React.FC = () => {
           )}
 
           <button onClick={() => setShowCart(true)} className="btn-mm-primary w-full mt-3">
-            View Cart ({currency.symbol}{(cartTotal * currency.rate).toFixed(2)})
+            View Cart ({formatCurrencySimple(cartTotal, currency)})
           </button>
         </div>
       )}
@@ -671,10 +672,10 @@ const TCGShop: React.FC = () => {
                       </div>
                       <div className="text-right">
                         <div className="font-bold text-mm-forest">
-                          {currency.symbol}{(item.price * item.quantity * currency.rate).toFixed(2)}
+                          {formatCurrencySimple(item.price * item.quantity, currency)}
                         </div>
                         <div className="text-xs text-mm-teal mt-1">
-                          {currency.symbol}{(item.price * currency.rate).toFixed(2)} each
+                          {formatCurrencySimple(item.price, currency)} each
                         </div>
                       </div>
                     </div>
@@ -688,7 +689,7 @@ const TCGShop: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <span className="text-lg font-semibold text-mm-darkForest">Total:</span>
                   <span className="text-2xl font-bold text-mm-forest">
-                    {currency.symbol}{(cartTotal * currency.rate).toFixed(2)}
+                    {formatCurrencySimple(cartTotal, currency)}
                   </span>
                 </div>
                 <button onClick={handleCheckoutClick} className="btn-mm-primary w-full">

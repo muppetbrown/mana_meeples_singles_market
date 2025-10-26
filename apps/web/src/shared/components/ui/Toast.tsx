@@ -7,6 +7,7 @@ import React, {
   ReactNode,
 } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, X } from 'lucide-react';
+import { ANIMATION_CONFIG } from '@/lib/constants';
 
 // --------------------
 // Types
@@ -143,7 +144,7 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
 
   const handleRemove = () => {
     setIsVisible(false);
-    setTimeout(() => onRemove(toast.id), 300);
+    setTimeout(() => onRemove(toast.id), ANIMATION_CONFIG.DURATION.NORMAL);
   };
 
   const getIcon = () => {
