@@ -1,7 +1,7 @@
 // apps/web/src/features/shop/components/CardList.tsx (excerpt – refactor core rendering)
 import * as React from 'react';
 import { CardRow } from '@/shared/components/';
-import { AddToCartModal } from '@/features/shop/';
+import { AddToCartModal } from '@/features/shop/components';
 import { formatCurrency } from '@/lib/utils/';
 
 // … existing imports remain (remove unused formatFinish, isFoilCard, hasSpecialTreatment)

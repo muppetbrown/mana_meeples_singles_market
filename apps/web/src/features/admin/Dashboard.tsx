@@ -4,9 +4,9 @@ import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react
 import { api } from '@/lib/api';
 import { ENDPOINTS } from '@/lib/api';
 import CurrencySelector from '@/shared/components/forms/CurrencySelector';
-import UnifiedCardsTab from './Cards/CardsTab';
-import OrdersTab from './Orders/OrdersTab';
-import AnalyticsTab from './Analytics/AnalyticsTab';
+import UnifiedCardsTab from './components/Cards/CardsTab';
+import OrdersTab from './components//Orders/OrdersTab';
+import AnalyticsTab from './components/Analytics/AnalyticsTab';
 
 const AdminDashboard = () => {
   const [authChecking, setAuthChecking] = useState(true);

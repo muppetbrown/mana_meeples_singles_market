@@ -12,7 +12,7 @@ import {
   ResultsHeader,
   ShopHeader,
   Checkout
- } from '@/features/shop';
+ } from '@/features/shop/components';
 import {
   MobileFilterModal,
   MobileFilterButton,
