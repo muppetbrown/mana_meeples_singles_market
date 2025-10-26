@@ -212,9 +212,7 @@ export const useCardDisplayArea: React.FC<CardDisplayAreaProps> = ({
               <CardList
                 cards={group.cards}
                 currency={currency}
-                isAdminMode={false}
-                onAddToCart={(card, variation) => onAddToCart(card, variation)}
-                className="mt-4"
+                onAddToCart={(card: any, variation: any) => onAddToCart(card, variation)}
               />
             </div>
           ))}
