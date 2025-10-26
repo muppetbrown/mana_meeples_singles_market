@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react';
 import { ShoppingCart } from 'lucide-react';
-import CurrencySelector from '@/shared/components/forms/CurrencySelector';
+import CurrencySelector from '@/shared/ui/CurrencySelector';
 import type { Cart, Currency } from '@/types';
 
 interface ShopHeaderProps {

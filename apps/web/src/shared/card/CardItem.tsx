@@ -9,8 +9,8 @@
  * - Adapts display based on isAdminMode prop
  */
 import React from 'react';
-import OptimizedImage from '@/shared/components/media/OptimizedImage';
-import VariationBadge from '@/shared/components/ui/VariationBadge';
+import OptimizedImage from '@/shared/media/OptimizedImage';
+import VariationBadge from '@/shared/ui/VariationBadge';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
 import { formatCurrencySimple } from '@/lib/utils';
 import {

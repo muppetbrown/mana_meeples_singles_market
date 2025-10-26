@@ -16,9 +16,6 @@ import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download, LayoutGrid, List, Package } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
 import AddToInventoryModal from './AddToInventoryModal';
-import {
-  CardSkeleton,
-} from '@/shared/components';
 import { 
   groupCardsForBrowse 
 } from '@/lib/utils';

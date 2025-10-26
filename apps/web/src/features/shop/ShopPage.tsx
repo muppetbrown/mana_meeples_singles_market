@@ -14,9 +14,6 @@ import {
   ResultsHeader,
   ShopHeader,
  } from '@/features/shop/components';
-import {
-  CardSkeleton,
-} from '@/shared/components'
 import { formatCurrencySimple } from '@/lib/utils';
 import type { Currency } from '@/types';
 

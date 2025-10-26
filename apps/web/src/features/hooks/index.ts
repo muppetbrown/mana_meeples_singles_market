@@ -8,3 +8,4 @@ export * from '../hooks/useShopKeyboardShortcuts';
 export * from '../hooks/useShopViewMode';
 export * from '../hooks/useVariationSelection';
 export * from '../hooks/useCardDisplayArea';
+export * from '../hooks/useVirtualScroll';

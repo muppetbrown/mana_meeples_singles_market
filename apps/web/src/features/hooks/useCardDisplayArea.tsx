@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import type { ViewMode } from './useShopViewMode';
 import { 
-  CardItem,
   CardList,
   CardGrid,
-  SectionHeader,
   ErrorBoundary
-} from '@/shared/components/';
+} from '@/shared/layout';
+import { 
+  SectionHeader
+} from '@/shared/ui';
 import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
 import type { StorefrontCard, Currency } from '@/types';
 

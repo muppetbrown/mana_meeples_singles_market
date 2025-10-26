@@ -5,7 +5,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { Clock, X } from 'lucide-react';
-import { OptimizedImage } from '@/shared/components/media';
+import { OptimizedImage } from '@/shared/media';
 import type { Card } from '@/types';
 
 // ---------------------------------------------------------------------------
