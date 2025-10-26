@@ -3,28 +3,32 @@
 import React, { useState, useEffect, useCallback, useMemo, useRef, Suspense } from 'react';
 import { ShoppingCart, X, Plus, Minus, Filter, ChevronDown, LayoutGrid, List } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
-import CardSearchBar from '../../shared/components/search/SearchBar';
-import { useShopFilters } from './hooks/useShopFilters.js';
-import CurrencySelector from '@/shared/components/forms/CurrencySelector';
-import Checkout from './components/Cart/Checkout.js';
-import { useCart } from './hooks/useCart.js';
-import ErrorBoundary from '@/shared/components/layout/ErrorBoundary';
-import KeyboardShortcutsModal from '@/shared/components/layout/KeyboardShortcuts';
 import { useErrorHandler } from '@/services/error/handler';
 import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
-import CardSkeleton from '../../shared/components/cardDisplay/CardSkeleton.js';
-import SectionHeader from '@/shared/components/ui/SectionHeader';
-import CardItem from '../../shared/components/cardDisplay/CardItem.js';
-import ListCardItem from '../../shared/components/cardDisplay/ListCardItem.js';
-import CardList from '../../shared/components/cardDisplay/CardList';
-import { API_BASE, api } from '@/lib/api';
+import { 
+  useCart,
+  Checkout,
+  useShopFilters
+ } from '@/features/shop' 
+import { 
+  CardSkeleton, 
+  CardItem, 
+  CardList, 
+  CardGrid,
+  CardSearchBar,
+  SectionHeader,
+  KeyboardShortcuts,
+  ErrorBoundary,
+  CurrencySelector
+} from '@/shared/components' 
+import { 
+  API_BASE, 
+  api 
+} from '@/lib/api';
 import type { 
   StorefrontCard,
   Currency
 } from '@/types';
-
-// Lazy load VirtualCardGrid for code splitting
-import CardGrid from '../../shared/components/cardDisplay/CardGrid.js';
 
 // ============================================================================
 // LOCAL TYPE DEFINITIONS (not exported elsewhere)
@@ -1298,7 +1302,7 @@ const TCGShop: React.FC = () => {
       </div>
 
       {/* Keyboard Shortcuts Modal */}
-      <KeyboardShortcutsModal
+      <KeyboardShortcuts
         isOpen={showKeyboardShortcuts}
         onClose={() => setShowKeyboardShortcuts(false)}
       />
