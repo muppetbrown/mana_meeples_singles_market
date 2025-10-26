@@ -12,8 +12,7 @@ export function useVariationSelection(cards: StorefrontCard[]) {
     return selections[cardId];
   }, [selections]);
 
-  // Clear selections for cards that no longer exist
-  useEffect(() => {
+  const clearStaleSelections = useCallback(() => {
     const currentIds = new Set(cards.map(c => c.id));
     setSelections(prev => {
       const filtered: Record<number, string> = {};
@@ -26,5 +25,16 @@ export function useVariationSelection(cards: StorefrontCard[]) {
     });
   }, [cards]);
 
-  return { selections, selectVariation, getSelected };
+  // Clear selections for cards that no longer exist
+  useEffect(() => {
+    clearStaleSelections();
+  }, [clearStaleSelections]);
+
+  return {
+    selections,
+    selectedVariations: selections, // Alias for backward compatibility
+    selectVariation,
+    getSelected,
+    clearStaleSelections
+  };
 }
