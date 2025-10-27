@@ -170,7 +170,7 @@ const OrdersTab = () => {
   const showOrderDetails = useCallback(async (orderId: number) => {
     try {
       const data = await fetchOrderDetails(orderId);
-      setSelectedOrder(data as unknown as Order);
+      setSelectedOrder(data);
       setShowOrderModal(true);
     } catch (err) {
       console.error('Error fetching order details:', err);
