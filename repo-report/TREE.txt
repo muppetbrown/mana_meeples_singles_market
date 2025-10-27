@@ -487,9 +487,8 @@ mana_meeples_singles_market
 │  │ ├── images/
 │  │ │ ├── card-back-placeholder.jpg
 │  │ │ └── card-back-placeholder.svg
-│  │ ├── favicon.ico
-│  │ ├── logo192.png
-│  │ ├── logo512.png
+│  │ ├── mana_meeples_logo_192.png
+│  │ ├── mana_meeples_logo_512.png
 │  │ ├── mana_meeples_logo.ico
 │  │ ├── manifest.webmanifest
 │  │ ├── robots.txt
@@ -504,48 +503,40 @@ mana_meeples_singles_market
 │  │ │ │ │ │ └── AnalyticsTab.tsx
 │  │ │ │ │ ├── Cards/
 │  │ │ │ │ │ ├── AddToInventoryModal.tsx
-│  │ │ │ │ │ ├── AdminCardGrid.tsx
+│  │ │ │ │ │ ├── BulkManager.tsx
 │  │ │ │ │ │ └── CardsTab.tsx
-│  │ │ │ │ ├── Inventory/
-│  │ │ │ │ │ └── BulkManager.tsx
-│  │ │ │ │ ├── Orders/
-│  │ │ │ │ │ └── OrdersTab.tsx
-│  │ │ │ │ ├── Dashboard.tsx
-│  │ │ │ │ └── Login.tsx
-│  │ │ │ ├── hooks/
-│  │ │ │ │ └── useFilterCounts.ts
-│  │ │ │ └── index.ts
+│  │ │ │ │ └── Orders/
+│  │ │ │ │  └── OrdersTab.tsx
+│  │ │ │ ├── Dashboard.tsx
+│  │ │ │ └── Login.tsx
+│  │ │ ├── hooks/
+│  │ │ │ ├── index.ts
+│  │ │ │ ├── useCardDisplayArea.tsx
+│  │ │ │ ├── useCardFetching.ts
+│  │ │ │ ├── useCart.ts
+│  │ │ │ ├── useFilterCounts.ts
+│  │ │ │ ├── useRecentlyViewed.tsx
+│  │ │ │ ├── useShopFilters.ts
+│  │ │ │ ├── useShopKeyboardShortcuts.ts
+│  │ │ │ ├── useShopViewMode.ts
+│  │ │ │ └── useVariationSelection.ts
 │  │ │ └── shop/
 │  │ │  ├── components/
-│  │ │  │ ├── CardDisplay/
-│  │ │  │ │ ├── CardDisplay.tsx
-│  │ │  │ │ ├── CardGrid.tsx
-│  │ │  │ │ ├── CardItem.tsx
-│  │ │  │ │ ├── CardList.tsx
-│  │ │  │ │ ├── CardSkeleton.tsx
-│  │ │  │ │ └── ListCardItem.tsx
 │  │ │  │ ├── Cart/
+│  │ │  │ │ ├── AddToCartModal.tsx
 │  │ │  │ │ ├── CartItem.tsx
 │  │ │  │ │ ├── CartModal.tsx
-│  │ │  │ │ ├── CartPanel.tsx
 │  │ │  │ │ ├── Checkout.tsx
-│  │ │  │ │ ├── index.ts
 │  │ │  │ │ └── MiniCart.tsx
-│  │ │  │ ├── Search/
-│  │ │  │ │ ├── ActiveFilters.tsx
-│  │ │  │ │ ├── FiltersPanel.tsx
-│  │ │  │ │ └── SearchBar.tsx
-│  │ │  │ ├── RecentlyViewed.tsx
-│  │ │  │ └── ShopHeader.tsx
-│  │ │  ├── hooks/
-│  │ │  │ ├── useCardFetching.ts
-│  │ │  │ ├── useCart.ts
-│  │ │  │ ├── useRecentlyViewed.ts
-│  │ │  │ ├── useShopFilters.ts
-│  │ │  │ ├── useShopState.ts
-│  │ │  │ └── useVariationSelection.ts
-│  │ │  ├── index.ts
-│  │ │  └── ShopPage.tsx
+│  │ │  │ ├── index.ts
+│  │ │  │ ├── RecentlyViewedCards.tsx
+│  │ │  │ ├── ResultsHeader.tsx
+│  │ │  │ ├── ShopCart.tsx
+│  │ │  │ ├── ShopFilters.tsx
+│  │ │  │ ├── ShopHeader.tsx
+│  │ │  │ └── ShopState.tsx
+│  │ │  ├── ShopPage.tsx
+│  │ │  └── ShopPageRefactored.tsx
 │  │ ├── lib/
 │  │ │ ├── api/
 │  │ │ │ ├── client.ts
@@ -556,13 +547,12 @@ mana_meeples_singles_market
 │  │ │ │ └── validation.ts
 │  │ │ └── utils/
 │  │ │  ├── csv.ts
+│  │ │  ├── errorLogger.ts
 │  │ │  ├── format.ts
 │  │ │  ├── groupCards.ts
 │  │ │  ├── index.ts
 │  │ │  ├── sanitization.ts
-│  │ │  └── search.ts
-│  │ ├── retired/
-│  │ │ └── App.css
+│  │ │  └── virtualScroll.ts
 │  │ ├── services/
 │  │ │ ├── error/
 │  │ │ │ ├── handler.ts
@@ -570,30 +560,41 @@ mana_meeples_singles_market
 │  │ │ └── http/
 │  │ │  └── throttler.ts
 │  │ ├── shared/
-│  │ │ ├── components/
-│  │ │ │ ├── forms/
-│  │ │ │ │ ├── CurrencySelector.tsx
-│  │ │ │ │ └── VariationFilter.tsx
-│  │ │ │ ├── layout/
-│  │ │ │ │ ├── ErrorBoundary.tsx
-│  │ │ │ │ └── KeyboardShortcuts.tsx
-│  │ │ │ ├── media/
-│  │ │ │ │ └── OptimizedImage.tsx
-│  │ │ │ ├── ui/
-│  │ │ │ │ ├── Button.tsx
-│  │ │ │ │ ├── EmptyState.tsx
-│  │ │ │ │ ├── Modal.tsx
-│  │ │ │ │ ├── SectionHeader.tsx
-│  │ │ │ │ ├── Toast.tsx
-│  │ │ │ │ └── VariationBadge.tsx
+│  │ │ ├── card/
+│  │ │ │ ├── CardItem.tsx
+│  │ │ │ ├── CardRow.tsx
+│  │ │ │ ├── CardSkeleton.tsx
 │  │ │ │ └── index.ts
-│  │ │ └── hooks/
+│  │ │ ├── layout/
+│  │ │ │ ├── CardGrid.tsx
+│  │ │ │ ├── CardList.tsx
+│  │ │ │ ├── ErrorBoundary.tsx
+│  │ │ │ ├── index.ts
+│  │ │ │ └── KeyboardShortcuts.tsx
+│  │ │ ├── media/
+│  │ │ │ ├── index.ts
+│  │ │ │ └── OptimizedImage.tsx
+│  │ │ ├── search/
+│  │ │ │ ├── ActiveFilters.tsx
+│  │ │ │ ├── FiltersPanel.tsx
+│  │ │ │ ├── index.ts
+│  │ │ │ ├── MobileFilterButton.tsx
+│  │ │ │ ├── SearchBar.tsx
+│  │ │ │ ├── VariationFilter.tsx
+│  │ │ │ └── VariationFilterCache.ts
+│  │ │ └── ui/
+│  │ │  ├── Button.tsx
+│  │ │  ├── CurrencySelector.tsx
+│  │ │  ├── EmptyState.tsx
+│  │ │  ├── FilterSidebar.tsx
 │  │ │  ├── index.ts
-│  │ │  └── useVirtualScroll.ts
+│  │ │  ├── MobileFilterModal.tsx
+│  │ │  ├── Modal.tsx
+│  │ │  ├── SectionHeader.tsx
+│  │ │  ├── Toast.tsx
+│  │ │  └── VariationBadge.tsx
 │  │ ├── styles/
 │  │ │ └── index.css
-│  │ ├── testUtils/
-│  │ │ └── storageMocks.ts
 │  │ ├── types/
 │  │ │ ├── api/
 │  │ │ │ ├── requests.ts
@@ -618,6 +619,9 @@ mana_meeples_singles_market
 │  ├── tailwind.config.ts
 │  ├── tsconfig.json
 │  └── vite.config.ts
+├── build_logs/
+│ ├── problems-eslint.log
+│ └── problems-ts.log
 ├── database/
 │ ├── DATABASE_SCHEMA.md
 │ └── database-stats.json
@@ -627,10 +631,11 @@ mana_meeples_singles_market
 │ │ ├── mtg_card_variations_sample.json
 │ │ ├── onepiece_card_variations_sample.json
 │ │ └── sv_card_variations_sample.json
-│ ├── OLD-CARD_VARIATIONS_GUIDE.md
-│ ├── OLD-QUICK_START_VARIATIONS.md
+│ ├── ~$mplete File Documentation for apps.docx
+│ ├── Complete File Documentation for apps.docx
 │ ├── openapi.yaml
-│ └── pokemon_set_codes.txt
+│ ├── pokemon_set_codes.txt
+│ └── render-deployment-guide.md
 ├── scripts/
 │ ├── imports/
 │ │ ├── analyze-variations.ts
@@ -641,34 +646,32 @@ mana_meeples_singles_market
 │ ├── migrations/
 │ │ ├── migrate-card-pricing.ts
 │ │ └── run-migration.ts
+│ ├── analyze-repo.mjs
+│ ├── analyze-unused-code.js
 │ ├── copy-dist-to-api.js
 │ ├── debug-admin-login.ts
+│ ├── deps-graph.ts
 │ ├── export-database-schema.ts
 │ ├── generate-admin-hash.ts
+│ ├── line-lengths.ts
 │ ├── refresh-mviews.sh
+│ ├── route-analysis-report.json
+│ ├── scan-routes.js
 │ ├── smoke.mjs
 │ ├── test-db-connected.ts
 │ ├── test-login.sh
 │ └── test-password.ts
+├── .dependency-cruiser.cjs
 ├── .env.example
-├── .eslintrc.cjs
 ├── .gitignore
 ├── ai_dev_principles.md
-├── analyze-repo.mjs
-├── analyze-unused-code.js
 ├── api.effective.tsconfig.json
+├── deps.svg
+├── eslint.config.cjs
 ├── package.json
-├── pnpm
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml
 ├── prettier.config.cjs
-├── render-deployment-guide.md
 ├── render.yaml
-├── repo-tree.txt
-├── route-analysis-report.json
-├── scan-routes.js
-├── test-render-backend.sh
 ├── tsconfig.base.json
-├── tsconfig.json
-├── typecheck_errors.txt
-└── unused-code-report.json
+└── tsconfig.json
