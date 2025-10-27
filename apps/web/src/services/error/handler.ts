@@ -56,8 +56,8 @@ export function categorizeError(error: unknown): ErrorType {
   }
 
   // Extract status code with proper type checking
-  const errorObj = error as Record<string, unknown>;
-  const status = errorObj.status || (errorObj.response as Record<string, unknown>)?.status;
+  const errorObj = error as { status?: number; response?: { status?: number } };
+  const status = errorObj.status || errorObj.response?.status;
 
   // Authentication errors
   if (status === HTTP_STATUS.UNAUTHORIZED || status === HTTP_STATUS.FORBIDDEN) {

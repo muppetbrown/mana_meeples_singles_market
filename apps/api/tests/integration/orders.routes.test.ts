@@ -232,7 +232,7 @@ describe("GET /api/admin/orders", () => {
       .expect(200);
 
     expect(res.body.orders).toBeDefined();
-    res.body.orders.forEach((order: Record<string, unknown>) => {
+    res.body.orders.forEach((order: { status: string }) => {
       expect(order.status).toBe("pending");
     });
   });

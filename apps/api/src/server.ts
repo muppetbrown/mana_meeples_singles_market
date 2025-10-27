@@ -34,8 +34,9 @@ const shutdown = (signal: string) => {
   }, 10_000).unref();
 };
 
-['SIGINT', 'SIGTERM'].forEach(sig => {
-  process.on(sig as NodeJS.Signals, () => shutdown(sig));
+const signals: NodeJS.Signals[] = ['SIGINT', 'SIGTERM'];
+signals.forEach(sig => {
+  process.on(sig, () => shutdown(sig));
 });
 
 // Safety nets for unknown crashes

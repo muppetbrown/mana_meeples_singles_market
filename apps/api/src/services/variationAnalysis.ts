@@ -7,6 +7,15 @@
 
 import { db } from '../lib/db.js';
 
+// Define a minimal card interface for variation analysis
+interface VariationCard {
+  treatment?: string;
+  border_color?: string;
+  frame_effect?: string;
+  finish?: string;
+  set_id?: unknown;
+}
+
 // Constants from MTG spec
 const IGNORE_FRAME_EFFECTS = [
   'legendary', 'enchantment', 'snow', 'miracle', 'boosterfun'
@@ -64,7 +73,7 @@ async function analyzeSetVariations(setId: number, gameId: number) {
       totalVariations: cards.length
     };
     
-    cards.forEach((card: Record<string, unknown>) => {
+    cards.forEach((card: VariationCard) => {
       // Collect treatment codes
       if (card.treatment) {
         analysis.treatmentCodes.add(card.treatment);
@@ -203,7 +212,7 @@ async function analyzeGameVariations(gameId: number) {
       totalCards: cards.length
     };
     
-    cards.forEach((card: Record<string, unknown>) => {
+    cards.forEach((card: VariationCard) => {
       // Track sets
       if (card.set_id) {
         analysis.sets.add(card.set_id);

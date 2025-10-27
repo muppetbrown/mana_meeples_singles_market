@@ -188,7 +188,7 @@ describe("GET /api/admin/inventory", () => {
       .expect(200);
 
     expect(res.body.inventory).toBeDefined();
-    res.body.inventory.forEach((item: Record<string, unknown>) => {
+    res.body.inventory.forEach((item: { card_id: number }) => {
       expect(item.card_id).toBe(1001);
     });
   });
