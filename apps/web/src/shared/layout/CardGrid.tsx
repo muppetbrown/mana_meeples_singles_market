@@ -29,7 +29,10 @@ interface CardGridProps<T extends Card = Card> {
   enableVirtualScroll?: boolean;
   onCardClick?: (card: T) => void;
   renderCard?: (card: T) => React.ReactNode;
-  cardProps?: Record<string, any>;
+  cardProps?: {
+    currency?: { symbol: string; rate: number };
+    onAddToCart?: (card: T, variation?: CardVariation | null) => void;
+  };
   mode?: 'all' | 'inventory';
   onAddToInventory?: (card: T) => void;
 }

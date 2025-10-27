@@ -76,7 +76,7 @@ export const ENDPOINTS = {
 /**
  * Helper function to build query strings
  */
-export function buildQueryString(params: Record<string, any>): string {
+export function buildQueryString(params: Record<string, string | number | boolean | string[]>): string {
   const searchParams = new URLSearchParams();
   
   Object.entries(params).forEach(([key, value]) => {
@@ -97,7 +97,7 @@ export function buildQueryString(params: Record<string, any>): string {
 /**
  * Helper to add query params to an endpoint
  */
-export function withQuery(endpoint: string, params?: Record<string, any>): string {
+export function withQuery(endpoint: string, params?: Record<string, string | number | boolean | string[]>): string {
   if (!params || Object.keys(params).length === 0) {
     return endpoint;
   }
