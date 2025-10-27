@@ -276,4 +276,5 @@ export function getUniqueFinishes(cards: Card[]): string[] {
 // EXPORT ALL
 // ============================================================================
 
-export default Card;
+// Note: No default export with verbatimModuleSyntax
+// Use named exports: import { Card } from './card';

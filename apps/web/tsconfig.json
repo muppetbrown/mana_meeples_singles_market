@@ -2,16 +2,20 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "verbatimModuleSyntax": true,
+    "exactOptionalPropertyTypes": true,
     "noEmit": true,
-    "baseUrl": ".",                       
+    "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
       "@/features/*": ["./src/features/*"],
       "@/shared/*": ["./src/shared/*"],
       "@/lib/*": ["./src/lib/*"],
       "@/services/*": ["./src/services/*"],
-      "@/types": ["./src/types"]     
-    },
+      "@/types": ["./src/types"]
+    }
   },
   "include": ["src", "vite.config.ts"],
   "exclude": ["src/retired/**/*", "src/testUtils/**/*"]

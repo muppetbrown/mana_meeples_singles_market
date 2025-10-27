@@ -2,17 +2,19 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "target": "ES2022",
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "ESNext",
+    "moduleResolution": "node16",
+    "verbatimModuleSyntax": true,
+    "exactOptionalPropertyTypes": true,
     "strict": true,
     "skipLibCheck": true,
-
-    // Common flags
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
-    "verbatimModuleSyntax": true,
     "baseUrl": ".",
+    "paths": {
+      "@api/*": ["./src/*"]
+    },
     "types": ["node"]
   }
 }

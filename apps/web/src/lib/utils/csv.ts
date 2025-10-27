@@ -40,7 +40,11 @@ export const arrayToCSV = (data: Record<string, unknown>[], headers: string[] | 
   }
 
   // Use provided headers or extract from first object
-  const csvHeaders = headers || Object.keys(data[0]);
+  const firstRow = data[0];
+  if (!firstRow) {
+    return '';
+  }
+  const csvHeaders = headers || Object.keys(firstRow);
 
   // Create header row
   const headerRow = csvHeaders.map(header => `"${header}"`).join(',');
@@ -193,11 +197,28 @@ export const validateInventoryCSV = (data: Record<string, unknown>[]): Validatio
 
   if (!Array.isArray(data) || data.length === 0) {
     errors.push('No valid data found in CSV');
-    return { valid: false, errors, warnings };
+    return {
+      totalRows: 0,
+      validRows: 0,
+      valid: false,
+      errors,
+      warnings
+    };
   }
 
   // Check headers
-  const headers = Object.keys(data[0]);
+  const firstRow = data[0];
+  if (!firstRow) {
+    errors.push('First row is empty or invalid');
+    return {
+      totalRows: 0,
+      validRows: 0,
+      valid: false,
+      errors,
+      warnings
+    };
+  }
+  const headers = Object.keys(firstRow);
   const missingRequired = requiredFields.filter(field => !headers.includes(field));
 
   if (missingRequired.length > 0) {
@@ -210,37 +231,42 @@ export const validateInventoryCSV = (data: Record<string, unknown>[]): Validatio
 
     // Check required fields
     requiredFields.forEach(field => {
-      if (!row[field] || String(row[field]).trim() === '') {
+      const fieldValue = row?.[field];
+      if (!fieldValue || String(fieldValue).trim() === '') {
         errors.push(`Row ${rowNumber}: Missing required field '${field}'`);
       }
     });
 
     // Validate price
-    if (row.price) {
-      const price = parseFloat(row.price);
+    const priceValue = row?.price;
+    if (priceValue) {
+      const price = parseFloat(String(priceValue));
       if (isNaN(price) || price < 0) {
-        errors.push(`Row ${rowNumber}: Invalid price '${row.price}'`);
+        errors.push(`Row ${rowNumber}: Invalid price '${priceValue}'`);
       } else if (price > 1000) {
-        warnings.push(`Row ${rowNumber}: High price detected '${row.price}'`);
+        warnings.push(`Row ${rowNumber}: High price detected '${priceValue}'`);
       }
     }
 
     // Validate stock quantity
-    if (row.stock_quantity) {
-      const stock = parseInt(row.stock_quantity, 10);
+    const stockValue = row?.stock_quantity;
+    if (stockValue) {
+      const stock = parseInt(String(stockValue), 10);
       if (isNaN(stock) || stock < 0) {
-        errors.push(`Row ${rowNumber}: Invalid stock quantity '${row.stock_quantity}'`);
+        errors.push(`Row ${rowNumber}: Invalid stock quantity '${stockValue}'`);
       }
     }
 
     // Validate quality
-    if (row.quality && !validQualities.includes(row.quality)) {
-      errors.push(`Row ${rowNumber}: Invalid quality '${row.quality}'. Must be one of: ${validQualities.join(', ')}`);
+    const qualityValue = row?.quality;
+    if (qualityValue && !validQualities.includes(String(qualityValue))) {
+      errors.push(`Row ${rowNumber}: Invalid quality '${qualityValue}'. Must be one of: ${validQualities.join(', ')}`);
     }
 
     // Validate foil type
-    if (row.foil_type && !validFoilTypes.includes(row.foil_type)) {
-      warnings.push(`Row ${rowNumber}: Unusual foil type '${row.foil_type}'. Expected: ${validFoilTypes.join(', ')}`);
+    const foilTypeValue = row?.foil_type;
+    if (foilTypeValue && !validFoilTypes.includes(String(foilTypeValue))) {
+      warnings.push(`Row ${rowNumber}: Unusual foil type '${foilTypeValue}'. Expected: ${validFoilTypes.join(', ')}`);
     }
 
     // Check for suspicious duplicates

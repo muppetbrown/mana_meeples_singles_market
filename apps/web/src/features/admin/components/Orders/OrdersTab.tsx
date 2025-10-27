@@ -1,5 +1,6 @@
 // apps/web/src/components/admin/OrdersTab.tsx
-import { useState, useEffect, useCallback, useMemo, type ComponentType } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
+import type { ComponentType } from 'react';
 import {
   Package,
   User,
@@ -180,7 +181,7 @@ const OrdersTab = () => {
 
   // Status badge with explicit icon component type
   const StatusBadge = ({ status }: { status: OrderStatus }) => {
-    const statusConfig: Record<OrderStatus, { color: string; icon: ComponentType<{ className?: string }> }> = {
+    const statusConfig: Record<OrderStatus, { color: string; icon: ComponentType<React.SVGProps<SVGSVGElement>> }> = {
       pending: { color: 'bg-yellow-50 text-yellow-900 border border-yellow-200', icon: Clock },
       confirmed: { color: 'bg-blue-50 text-blue-900 border border-blue-200', icon: CheckCircle },
       completed: { color: 'bg-green-50 text-green-900 border border-green-200', icon: CheckCircle },

@@ -12,10 +12,16 @@ const router = express.Router();
  */
 router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response) => {
   try {
-    const { card_id, page = "1", per_page = "50" } = req.query;
-    
-    const limit = Math.min(parseInt(per_page as string, 10) || 50, 100);
-    const offset = (parseInt(page as string, 10) - 1) * limit;
+    const { card_id, page, per_page } = req.query;
+
+    const pageRaw = page;
+    const pageNum = typeof pageRaw === 'string' ? Number(pageRaw) : 1;
+    const currentPage = Number.isNaN(pageNum) || pageNum < 1 ? 1 : pageNum;
+
+    const perPageRaw = per_page;
+    const perPageNum = typeof perPageRaw === 'string' ? Number(perPageRaw) : 50;
+    const limit = Math.min(Number.isNaN(perPageNum) ? 50 : perPageNum, 100);
+    const offset = (currentPage - 1) * limit;
 
     let sql = `
       SELECT 
@@ -56,7 +62,7 @@ router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response)
     return res.json({
       inventory,
       pagination: {
-        page: parseInt(page as string, 10),
+        page: currentPage,
         per_page: limit,
         total,
         total_pages: Math.ceil(total / limit),
@@ -295,7 +301,11 @@ router.get("/admin/inventory/export", adminAuthJWT, async (req: Request, res: Re
       return res.status(404).json({ error: "No inventory to export" });
     }
 
-    const headers = Object.keys(inventory[0]).join(",");
+    const row = inventory[0];
+    if (!row) {
+      return res.status(500).json({ error: "Failed to process inventory data" });
+    }
+    const headers = Object.keys(row).join(",");
     const rows = inventory.map(row => 
       Object.values(row).map(val => 
         typeof val === "string" && val.includes(",") ? `"${val}"` : val
