@@ -1,6 +1,7 @@
 // apps/web/src/components/VariationFilter.tsx
 import { useState, useEffect } from 'react';
 import { api, buildQueryString } from '@/lib/api';
+import { variationFilterCache } from './VariationFilterCache';
 
 type VariationFiltersResponse = {
   treatments?: string[];
@@ -81,7 +82,25 @@ const VariationFilter = ({
           return;
         }
 
+        // Check cache first
+        const cachedData = variationFilterCache.get(queryParams);
+        if (cachedData) {
+          setAvailableFilters({
+            treatments: cachedData.treatments ?? [],
+            borderColors: cachedData.borderColors ?? [],
+            finishes: cachedData.finishes ?? [],
+            promoTypes: cachedData.promoTypes ?? [],
+            frameEffects: cachedData.frameEffects ?? []
+          });
+          setLoading(false);
+          return;
+        }
+
+        // Fetch from API and cache result
         const data = await api.get<VariationFiltersResponse>(`/variations${buildQueryString(queryParams)}`);
+
+        // Store in cache
+        variationFilterCache.set(queryParams, data);
 
         setAvailableFilters({
           treatments: data.treatments ?? [],

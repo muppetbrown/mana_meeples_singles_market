@@ -309,9 +309,46 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setSearchParams(prev => new URLSearchParams(prev));
   }, [setSearchParams]);
 
-  const handleExportCSV = useCallback(() => {
-    // TODO: Implement CSV export functionality
-  }, []);
+  const handleExportCSV = useCallback(async () => {
+    if (isLoading || cards.length === 0) {
+      console.warn('No cards available for export');
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+
+      // For inventory mode, export current displayed cards with inventory data
+      // For all cards mode, export all filtered cards
+      const exportData = mode === 'inventory'
+        ? cards.filter(card => card.has_inventory && card.total_stock > 0)
+        : cards;
+
+      if (exportData.length === 0) {
+        console.warn('No inventory data available for export');
+        setIsLoading(false);
+        return;
+      }
+
+      // Format the data for CSV export using existing utility
+      const { formatInventoryForExport, downloadCSV } = await import('@/lib/utils');
+      const formattedData = formatInventoryForExport(exportData);
+
+      // Generate filename with timestamp
+      const timestamp = new Date().toISOString().split('T')[0];
+      const filename = `${mode}-export-${timestamp}.csv`;
+
+      // Download the CSV
+      downloadCSV(formattedData, filename);
+
+      console.log(`Successfully exported ${formattedData.length} items to ${filename}`);
+
+    } catch (error) {
+      console.error('Failed to export CSV:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [cards, isLoading, mode]);
 
   // --------------------------------------------------------------------------
   // MODAL HANDLERS - SIMPLIFIED!

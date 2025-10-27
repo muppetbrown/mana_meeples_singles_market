@@ -7,6 +7,11 @@ interface UseShopKeyboardShortcutsParams {
   setShowCart: (show: boolean) => void;
   setShowMobileFilters: (show: boolean) => void;
   setShowKeyboardShortcuts: (show: boolean) => void;
+  // New keyboard navigation params
+  viewMode?: 'grid' | 'list';
+  setViewMode?: (mode: 'grid' | 'list') => void;
+  onClearAllFilters?: () => void;
+  onAddFocusedCardToCart?: () => void;
 }
 
 export function useShopKeyboardShortcuts({
@@ -15,7 +20,11 @@ export function useShopKeyboardShortcuts({
   showKeyboardShortcuts,
   setShowCart,
   setShowMobileFilters,
-  setShowKeyboardShortcuts
+  setShowKeyboardShortcuts,
+  viewMode,
+  setViewMode,
+  onClearAllFilters,
+  onAddFocusedCardToCart
 }: UseShopKeyboardShortcutsParams) {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -31,10 +40,47 @@ export function useShopKeyboardShortcuts({
         searchInput?.focus();
       }
 
+      // /: Focus search (alternative)
+      if (e.key === '/' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[type="search"]') as HTMLInputElement;
+        searchInput?.focus();
+      }
+
       // ?: Show keyboard shortcuts
       if (e.key === '?') {
         e.preventDefault();
         setShowKeyboardShortcuts(true);
+      }
+
+      // f: Toggle mobile filters panel
+      if (e.key === 'f' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setShowMobileFilters(!showMobileFilters);
+      }
+
+      // g: Switch between grid and list view
+      if (e.key === 'g' && setViewMode && viewMode) {
+        e.preventDefault();
+        setViewMode(viewMode === 'grid' ? 'list' : 'grid');
+      }
+
+      // c: Open shopping cart
+      if (e.key === 'c' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setShowCart(true);
+      }
+
+      // r: Reset all filters
+      if (e.key === 'r' && onClearAllFilters && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        onClearAllFilters();
+      }
+
+      // a: Add focused card to cart
+      if (e.key === 'a' && onAddFocusedCardToCart && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        onAddFocusedCardToCart();
       }
 
       // Escape: Close modals
@@ -53,6 +99,10 @@ export function useShopKeyboardShortcuts({
     showKeyboardShortcuts,
     setShowCart,
     setShowMobileFilters,
-    setShowKeyboardShortcuts
+    setShowKeyboardShortcuts,
+    viewMode,
+    setViewMode,
+    onClearAllFilters,
+    onAddFocusedCardToCart
   ]);
 }
