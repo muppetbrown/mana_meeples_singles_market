@@ -7,7 +7,7 @@ const rl = readline.createInterface({
 });
 
 async function generateHash() {
-  rl.question('Enter admin password (min 12 characters): ', async (password: any) => {
+  rl.question('Enter admin password (min 12 characters): ', async (password: string) => {
     if (password.length < 12) {
       console.error('❌ Password must be at least 12 characters long');
       process.exit(1);
@@ -28,8 +28,9 @@ async function generateHash() {
       
       rl.close();
       process.exit(0);
-    } catch (error) {
-      console.error('❌ Error generating hash:', error);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('❌ Error generating hash:', message);
       rl.close();
       process.exit(1);
     }

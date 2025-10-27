@@ -5,34 +5,35 @@
  * Automatically detects and catalogs all variations in the set
  */
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'Pool'.
-const { Pool } = require('pg');
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'variationS... Remove this comment to see the full error message
-const variationService = require('../services/variationAnalysis');
-require('dotenv').config();
+import { Pool } from 'pg';
+import type { PoolClient } from 'pg';
+import * as variationService from '../services/variationAnalysis.js';
+import 'dotenv/config';
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'pool'.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
 // Import constants from spec
-const { 
-  // @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'IGNORE_FRA... Remove this comment to see the full error message
+const {
   IGNORE_FRAME_EFFECTS,
-  // @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'VISUAL_TRE... Remove this comment to see the full error message
   VISUAL_TREATMENTS,
-  // @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'SPECIAL_FO... Remove this comment to see the full error message
   SPECIAL_FOILS,
-  // @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'BORDER_COL... Remove this comment to see the full error message
-  BORDER_COLORS 
+  BORDER_COLORS
 } = variationService;
+
+interface MTGCard {
+  border_color?: string;
+  frame_effects?: string[];
+  promo_types?: string[];
+  [key: string]: unknown;
+}
 
 /**
  * Calculate treatment code from Scryfall card data
  */
-function calculateTreatment(card: any) {
+function calculateTreatment(card: MTGCard) {
   const borderColor = card.border_color || 'black';
   const frameEffects = card.frame_effects || [];
   const promoTypes = card.promo_types || [];
@@ -96,7 +97,7 @@ function calculateTreatment(card: any) {
 /**
  * Helper: Get base treatment from frame effects
  */
-function getBaseTreatment(frameEffects: any, isBorderless: any) {
+function getBaseTreatment(frameEffects: string[], isBorderless: boolean) {
   const has = (effect: any) => frameEffects.includes(effect);
   
   // Combinations (order matters!)
@@ -131,7 +132,7 @@ function getBaseTreatment(frameEffects: any, isBorderless: any) {
 /**
  * Generate SKU from card data
  */
-function generateSKU(card: any, treatment: any, finish: any) {
+function generateSKU(card: MTGCard, treatment: string, finish: string) {
   return [
     card.set.toUpperCase(),
     card.collector_number,
@@ -143,7 +144,7 @@ function generateSKU(card: any, treatment: any, finish: any) {
 /**
  * Import MTG set with full variation tracking
  */
-async function importMTGSet(setCode: any) {
+async function importMTGSet(setCode: string) {
   console.log(`\n🎴 Starting enhanced import for MTG set: ${setCode.toUpperCase()}`);
   console.log('━'.repeat(60));
   
@@ -331,9 +332,9 @@ async function importMTGSet(setCode: any) {
         variations++;
       }
 
-    } catch (error) {
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
-      console.error(`❌ Error processing ${card.name}: ${error.message}`);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error(`❌ Error processing ${card.name}: ${message}`);
       skipped++;
     }
   }

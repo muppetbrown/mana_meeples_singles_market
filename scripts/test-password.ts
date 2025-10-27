@@ -44,9 +44,9 @@ async function testPassword() {
       
       rl.close();
       process.exit(0);
-    } catch (error) {
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
-      console.error('❌ Error testing password:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('❌ Error testing password:', message);
       rl.close();
       process.exit(1);
     }
