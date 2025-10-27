@@ -189,7 +189,7 @@ router.get("/cards", async (req: Request, res: Response) => {
     const rows = await db.query<any>(sql, params);
     
     return res.json({ cards: rows });
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("GET /cards failed", { 
       code: err?.code, 
       message: err?.message,
@@ -225,8 +225,8 @@ router.get("/count", async (req: Request, res: Response) => {
   try {
     const rows = await db.query<{ count: number }>(sql, params);
     return res.json({ count: rows?.[0]?.count ?? 0 });
-  } catch (err: any) {
-    console.error("GET /cards/count failed", { code: err?.code, message: err?.message });
+  } catch (err: unknown) {
+    console.error("GET /cards/count failed", err instanceof Error ? { code: (err as any).code, message: err.message } : err);
     return res.status(500).json({ error: "Failed to fetch card count" });
   }
 });
@@ -395,7 +395,7 @@ router.get('/filters', async (req: Request, res: Response) => {
     };
     
     return res.json(response);
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error('GET /cards/filters failed', { 
       code: err?.code, 
       message: err?.message,

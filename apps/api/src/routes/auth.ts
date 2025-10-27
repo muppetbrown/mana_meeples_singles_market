@@ -25,18 +25,17 @@ router.use((req: Request, _res: Response, next: express.NextFunction) => {
  * POST /api/auth/admin/login
  * Authenticates admin and issues JWT cookie
  */
-router.post("/admin/login", async (req: Request, res: Response): Promise<void> => {
+router.post("/admin/login", async (req: Request, res: Response) => {
   console.log("🔑 Admin login attempt - handler entered");
 
   try {
     // Validate request body structure
     if (!req.body || typeof req.body !== "object") {
       console.error("❌ Invalid request body");
-      res.status(400).json({ 
-        success: false, 
-        error: "Invalid request format. Content-Type must be application/json" 
+      return res.status(400).json({
+        success: false,
+        error: "Invalid request format. Content-Type must be application/json"
       });
-      return;
     }
 
     const { username, password } = req.body;

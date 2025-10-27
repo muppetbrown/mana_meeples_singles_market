@@ -29,7 +29,7 @@ router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response)
       WHERE 1=1
     `;
     
-    const params: any[] = [];
+    const params: (string | number)[] = [];
     
     if (card_id) {
       params.push(card_id);
@@ -43,7 +43,7 @@ router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response)
 
     // Get total count
     let countSql = `SELECT COUNT(*) as total FROM card_inventory ci WHERE 1=1`;
-    const countParams: any[] = [];
+    const countParams: (string | number)[] = [];
     
     if (card_id) {
       countParams.push(card_id);
@@ -62,8 +62,8 @@ router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response)
         total_pages: Math.ceil(total / limit),
       },
     });
-  } catch (err: any) {
-    console.error("GET /admin/inventory failed", { code: err?.code, message: err?.message });
+  } catch (err: unknown) {
+    console.error("GET /admin/inventory failed", err instanceof Error ? { code: (err as any).code, message: err.message } : err);
     return res.status(500).json({ error: "Failed to retrieve inventory" });
   }
 });
@@ -136,8 +136,8 @@ router.post("/admin/inventory", adminAuthJWT, async (req: Request, res: Response
       tcgplayer_id, price_source, sku
     ]);
     return res.status(200).json({ inventory: rows[0] });
-  } catch (err: any) {
-    console.error("POST /admin/inventory failed", { code: err?.code, message: err?.message, card_id });
+  } catch (err: unknown) {
+    console.error("POST /admin/inventory failed", err instanceof Error ? { code: (err as any).code, message: err.message, card_id } : { err, card_id });
     return res.status(500).json({ error: "Failed to upsert inventory" });
   }
 });
@@ -184,7 +184,7 @@ router.patch("/admin/inventory/:id", adminAuthJWT, async (req: Request, res: Res
 
     // Build update query dynamically
     const updates: string[] = [];
-    const params: any[] = [];
+    const params: (string | number)[] = [];
     let paramIndex = 1;
 
     Object.entries(parsed.data).forEach(([key, value]) => {
@@ -214,12 +214,12 @@ router.patch("/admin/inventory/:id", adminAuthJWT, async (req: Request, res: Res
     }
     
     return res.json({ inventory });
-  } catch (err: any) {
-    console.error("PATCH /admin/inventory/:id failed", { 
-      code: err?.code, 
-      message: err?.message, 
-      inventoryId 
-    });
+  } catch (err: unknown) {
+    console.error("PATCH /admin/inventory/:id failed", err instanceof Error ? {
+      code: (err as any).code,
+      message: err.message,
+      inventoryId
+    } : { err, inventoryId });
     return res.status(500).json({ error: "Failed to update inventory" });
   }
 });
@@ -248,12 +248,12 @@ router.delete("/admin/inventory/:id", adminAuthJWT, async (req: Request, res: Re
       success: true, 
       message: "Inventory item deleted successfully" 
     });
-  } catch (err: any) {
-    console.error("DELETE /admin/inventory/:id failed", { 
-      code: err?.code, 
-      message: err?.message, 
-      inventoryId 
-    });
+  } catch (err: unknown) {
+    console.error("DELETE /admin/inventory/:id failed", err instanceof Error ? {
+      code: (err as any).code,
+      message: err.message,
+      inventoryId
+    } : { err, inventoryId });
     return res.status(500).json({ error: "Failed to delete inventory" });
   }
 });
@@ -300,8 +300,8 @@ router.get("/admin/inventory/export", adminAuthJWT, async (req: Request, res: Re
     res.setHeader("Content-Type", "text/csv");
     res.setHeader("Content-Disposition", `attachment; filename="inventory-export-${Date.now()}.csv"`);
     res.send(csv);
-  } catch (err: any) {
-    console.error("GET /admin/inventory/export failed", { code: err?.code, message: err?.message });
+  } catch (err: unknown) {
+    console.error("GET /admin/inventory/export failed", err instanceof Error ? { code: (err as any).code, message: err.message } : err);
     return res.status(500).json({ error: "Failed to export inventory" });
   }
 });
@@ -353,8 +353,8 @@ router.post("/admin/inventory/bulk-import", adminAuthJWT, async (req: Request, r
       failed: errorCount,
       errors: errors.slice(0, 10), // Limit error details
     });
-  } catch (err: any) {
-    console.error("POST /admin/inventory/bulk-import failed", { code: err?.code, message: err?.message });
+  } catch (err: unknown) {
+    console.error("POST /admin/inventory/bulk-import failed", err instanceof Error ? { code: (err as any).code, message: err.message } : err);
     return res.status(500).json({ error: "Failed to bulk import inventory" });
   }
 });
