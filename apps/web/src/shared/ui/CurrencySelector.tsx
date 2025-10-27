@@ -2,11 +2,26 @@
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Info, InfoIcon } from 'lucide-react';
 
+interface Currency {
+  code: string;
+  symbol: string;
+  label: string;
+  rate: number;
+  flag?: string;
+  lastUpdated?: string;
+}
+
+interface CurrencySelectorProps {
+  currency: Currency;
+  onCurrencyChange: (currency: Currency) => void;
+  className?: string;
+}
+
 const CurrencySelector = ({
   currency,
   onCurrencyChange,
   className = ""
-}: any) => {
+}: CurrencySelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -31,7 +46,7 @@ const CurrencySelector = ({
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event: any) => {
+    const handleClickOutside = (event: MouseEvent) => {
 
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
@@ -42,14 +57,14 @@ const CurrencySelector = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleCurrencySelect = (selectedCurrency: any) => {
+  const handleCurrencySelect = (selectedCurrency: Currency) => {
     if (onCurrencyChange) {
       onCurrencyChange(selectedCurrency);
     }
     setIsOpen(false);
   };
 
-  const handleKeyDown = (event: any) => {
+  const handleKeyDown = (event: React.KeyboardEvent) => {
     switch (event.key) {
       case 'Enter':
       case ' ':

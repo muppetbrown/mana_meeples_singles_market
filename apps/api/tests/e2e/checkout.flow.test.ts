@@ -1,11 +1,12 @@
 // apps/api/tests/e2e/checkout.flow.test.ts
 import { beforeAll, afterAll, describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
+import type { Express } from "express";
 import { startPostgres, stopPostgres, bootstrapMinimalSchema, resetDb } from "../setup/testEnv.js";
 import { seedCards, seedInventory, getCardById, countCards } from "../setup/db.js";
 
-let createApp: any;
-let app: any;
+let createApp: () => Express;
+let app: Express;
 
 beforeAll(async () => {
   await startPostgres();
@@ -98,7 +99,7 @@ describe("Complete Checkout Flow (E2E)", () => {
       .expect(200);
 
     const updatedVariation = updatedCardRes.body.card.variations.find(
-      (v: any) => v.inventory_id === variation.inventory_id
+      (v: Record<string, unknown>) => v.inventory_id === variation.inventory_id
     );
     expect(updatedVariation.stock).toBe(variation.stock - cartItem.quantity);
 
@@ -396,14 +397,14 @@ describe("Complete Checkout Flow (E2E)", () => {
         email: "customer@example.com",
         name: "Multi-item Customer"
       },
-      items: card.variations.slice(0, 2).map((v: any) => ({
+      items: card.variations.slice(0, 2).map((v: Record<string, unknown>) => ({
         inventory_id: v.inventory_id,
         card_id: card.id,
         card_name: card.name,
         quantity: 1,
         price: v.price
       })),
-      total: card.variations.slice(0, 2).reduce((sum: number, v: any) => sum + v.price, 0)
+      total: card.variations.slice(0, 2).reduce((sum: number, v: Record<string, unknown>) => sum + (v.price as number), 0)
     };
 
     const orderRes = await request(app)

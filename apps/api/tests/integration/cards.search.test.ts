@@ -1,12 +1,13 @@
 // apps/api/tests/integration/cards.search.test.ts
 import { beforeAll, afterAll, describe, it, expect } from "vitest";
 import request from "supertest";
+import type { Express } from "express";
 import { startPostgres, stopPostgres, bootstrapMinimalSchema } from "../setup/testEnv.js";
 import { seedCards } from "../setup/db.js";
 
 // Import createApp AFTER startPostgres sets DATABASE_URL
-let createApp: any;
-let app: any;
+let createApp: () => Express;
+let app: Express;
 
 beforeAll(async () => {
   // CRITICAL: Start postgres and set DATABASE_URL BEFORE importing createApp

@@ -1,10 +1,11 @@
 // apps/api/tests/integration/error-handling.test.ts
 import { beforeAll, afterAll, describe, it, expect } from "vitest";
 import request from "supertest";
+import type { Express } from "express";
 import { startPostgres, stopPostgres, bootstrapMinimalSchema } from "../setup/testEnv.js";
 
-let createApp: any;
-let app: any;
+let createApp: () => Express;
+let app: Express;
 
 beforeAll(async () => {
   await startPostgres();

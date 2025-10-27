@@ -25,7 +25,8 @@ import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
 import { EmptyState } from '@/shared/ui';
 import type {
-  Card
+  Card,
+  CardVariation
 } from '@/types';
 
 // ============================================================================
@@ -513,7 +514,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
               <CardList
                 cards={groupedCards as unknown as Card[]}
                 currency={{ symbol: '$', rate: 1 }}
-                onAddToCart={(card: any, variation: any) => {
+                onAddToCart={(card: Card, variation: CardVariation) => {
                   if (!isInventoryMode && openAddModal) {
                     openAddModal(card as Card);
                   }

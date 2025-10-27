@@ -1,11 +1,12 @@
 // apps/api/tests/integration/orders.routes.test.ts
 import { beforeAll, afterAll, describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
+import type { Express } from "express";
 import { startPostgres, stopPostgres, bootstrapMinimalSchema, resetDb } from "../setup/testEnv.js";
 import { seedCards, seedInventory, createTestOrder } from "../setup/db.js";
 
-let createApp: any;
-let app: any;
+let createApp: () => Express;
+let app: Express;
 let authToken: string;
 
 beforeAll(async () => {
@@ -231,7 +232,7 @@ describe("GET /api/admin/orders", () => {
       .expect(200);
 
     expect(res.body.orders).toBeDefined();
-    res.body.orders.forEach((order: any) => {
+    res.body.orders.forEach((order: Record<string, unknown>) => {
       expect(order.status).toBe("pending");
     });
   });

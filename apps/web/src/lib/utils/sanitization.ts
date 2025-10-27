@@ -5,7 +5,7 @@
  * Remove HTML tags and potentially dangerous characters from input
  * This is a basic implementation - for production, consider using DOMPurify
  */
-const sanitizeText = (input: any) => {
+const sanitizeText = (input: unknown) => {
   if (typeof input !== 'string') return input;
 
   return input
@@ -26,7 +26,7 @@ const sanitizeText = (input: any) => {
  * Sanitize HTML content more thoroughly
  * Allow basic formatting tags but strip dangerous content
  */
-const sanitizeHTML = (input: any) => {
+const sanitizeHTML = (input: unknown) => {
   if (typeof input !== 'string') return input;
 
   return input
@@ -50,7 +50,7 @@ const sanitizeHTML = (input: any) => {
  * Sanitize email addresses
  * Returns sanitized email or empty string for invalid emails (doesn't throw)
  */
-const sanitizeEmail = (email: any) => {
+const sanitizeEmail = (email: unknown) => {
   if (typeof email !== 'string') return '';
 
   // Basic email format validation and sanitization
@@ -64,7 +64,7 @@ const sanitizeEmail = (email: any) => {
 /**
  * Sanitize phone numbers - keep only digits, spaces, hyphens, and parentheses
  */
-const sanitizePhone = (phone: any) => {
+const sanitizePhone = (phone: unknown) => {
   if (typeof phone !== 'string') return phone;
 
   return phone.replace(/[^\d\s\-\(\)\+]/g, '').trim().substring(0, 20);
@@ -73,7 +73,7 @@ const sanitizePhone = (phone: any) => {
 /**
  * Sanitize addresses - remove HTML but allow basic punctuation
  */
-const sanitizeAddress = (address: any) => {
+const sanitizeAddress = (address: unknown) => {
   if (typeof address !== 'string') return address;
 
   return address
@@ -86,7 +86,7 @@ const sanitizeAddress = (address: any) => {
 /**
  * Sanitize customer data from orders
  */
-const sanitizeCustomerData = (customer: any) => {
+const sanitizeCustomerData = (customer: Record<string, unknown>) => {
   return {
     firstName: sanitizeText(customer.firstName),
     lastName: sanitizeText(customer.lastName),

@@ -109,8 +109,8 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
                 setSearchSuggestions(data.suggestions ?? []);
                 setShowSuggestions((data.suggestions?.length ?? 0) > 0);
               }
-            } catch (err: any) {
-              if (err.name !== 'AbortError') {
+            } catch (err: unknown) {
+              if (err instanceof Error && err.name !== 'AbortError') {
                 console.error('Autocomplete error:', err);
               }
             } finally {

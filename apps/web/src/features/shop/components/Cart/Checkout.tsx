@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Mail, Phone, MapPin, CreditCard, User, AlertCircle } from 'lucide-react';
 import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeAddress, sanitizeHTML, formatCurrencySimple } from '@/lib/utils';
-import type { Cart, Currency } from '@/types';
+import type { Cart, CartItem, Currency } from '@/types';
 
 type CheckoutForm = {
   // Contact Information
@@ -59,7 +59,7 @@ const Checkout = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const cartTotal = cart.items.reduce((sum: any, item: any) => sum + (item.price * item.quantity), 0);
+  const cartTotal = cart.items.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
 
   // Note: Using robust sanitization functions from library instead of inline implementation
 
@@ -193,7 +193,7 @@ const Checkout = ({
     }
   };
 
-  const handleSubmit = async (e: any) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (!validateForm()) {
@@ -220,8 +220,8 @@ const Checkout = ({
 
       const orderData = {
         customer: sanitizedCustomer,
-        items: cart.items.map((item: any) => ({
-          inventory_id: item.inventory_id || item.id,
+        items: cart.items.map((item: CartItem) => ({
+          inventory_id: item.inventory_id,
 
           // Sanitize quantity
           quantity: Math.max(1, Math.min(50, parseInt(item.quantity) || 1)),
@@ -590,17 +590,17 @@ const Checkout = ({
             <h2 className="text-xl font-bold text-slate-900 mb-6">Order Summary</h2>
 
             <div className="space-y-4 mb-6">
-              {cart.items.map((item: any) => <div key={`${item.id}-${item.quality}`} className="flex gap-4">
+              {cart.items.map((item: CartItem) => <div key={`${item.card_id}-${item.quality}`} className="flex gap-4">
                 <img
                   src={item.image_url}
-                  alt={item.name}
+                  alt={item.card_name}
                   className="w-16 h-20 object-contain rounded bg-slate-100"
 
                   onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
                 />
                 <div className="flex-1 min-w-0">
                   <h3 className="font-medium text-sm text-slate-900 line-clamp-2">
-                    {item.name}
+                    {item.card_name}
                   </h3>
                   <div className="text-xs text-slate-600 mt-1 space-y-1">
                     <div className="font-medium text-slate-800">{item.game_name}</div>
