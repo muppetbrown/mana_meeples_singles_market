@@ -149,9 +149,11 @@ export function useShopFilters() {
         if (isCancelled) return;
 
         // CRITICAL FIX: Check if it's a 404 (endpoint doesn't exist)
-        const is404 = (err as any)?.status === 404 || 
-                      (err as any)?.message?.includes('Not Found') ||
-                      (err as any)?.message?.includes('404');
+        const is404 = (err && typeof err === 'object' && 'status' in err && (err as {status: number}).status === 404) ||
+                      (err && typeof err === 'object' && 'message' in err && typeof (err as {message: string}).message === 'string' && (
+                        (err as {message: string}).message.includes('Not Found') ||
+                        (err as {message: string}).message.includes('404')
+                      ));
 
         if (is404) {
           // Silently fail for 404 - endpoint not implemented yet

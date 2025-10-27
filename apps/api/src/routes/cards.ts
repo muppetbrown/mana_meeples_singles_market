@@ -44,7 +44,7 @@ type CardFilters = z.infer<typeof CardFiltersQuery>;
 function buildFilterSQL(alias: string, f: CardFilters) {
   const where: string[] = [];
   const joins: string[] = [];
-  const params: any[] = [];
+  const params: unknown[] = [];
 
   if (f.game_id) {
     params.push(f.game_id);
@@ -226,7 +226,10 @@ router.get("/count", async (req: Request, res: Response) => {
     const rows = await db.query<{ count: number }>(sql, params);
     return res.json({ count: rows?.[0]?.count ?? 0 });
   } catch (err: unknown) {
-    console.error("GET /cards/count failed", err instanceof Error ? { code: (err as any).code, message: err.message } : err);
+    console.error("GET /cards/count failed", err instanceof Error ? {
+      code: (err && typeof err === 'object' && 'code' in err) ? (err as {code: unknown}).code : 'unknown',
+      message: err.message
+    } : err);
     return res.status(500).json({ error: "Failed to fetch card count" });
   }
 });
@@ -277,7 +280,7 @@ router.get('/filters', async (req: Request, res: Response) => {
   // ============================================================================
   // QUERY 2: Get sets (optionally filtered by game_id)
   // ============================================================================
-  const setsSqlParams: any[] = [];
+  const setsSqlParams: unknown[] = [];
   let setsSql = `
     SELECT 
       s.id,

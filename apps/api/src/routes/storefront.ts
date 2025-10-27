@@ -72,7 +72,7 @@ router.get('/cards', async (req: Request, res: Response) => {
   const { page, per_page, sort, order, search, game_id, set_id, rarity } = parsed.data;
 
   const where: string[] = [];
-  const params: any[] = [];
+  const params: unknown[] = [];
 
   // Build WHERE conditions
   if (typeof game_id === 'number') {
@@ -165,9 +165,9 @@ router.get('/cards', async (req: Request, res: Response) => {
     return res.json({ cards: rows || [] });
   } catch (err: unknown) {
     console.error('GET /storefront/cards failed', err instanceof Error ? {
-      code: (err as any).code,
+      code: (err && typeof err === 'object' && 'code' in err) ? (err as {code: unknown}).code : 'unknown',
       message: err.message,
-      detail: (err as any).detail
+      detail: (err && typeof err === 'object' && 'detail' in err) ? (err as {detail: unknown}).detail : 'No details'
     } : err);
     return res.status(500).json({ error: 'Failed to fetch storefront cards' });
   }

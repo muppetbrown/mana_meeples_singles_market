@@ -10,7 +10,7 @@ import { logError } from '@/services/error/handler';
 export class ApiError extends Error {
   constructor(
     public status: number,
-    public data: any,
+    public data: unknown,
     message?: string
   ) {
     super(message || `API Error: ${status}`);
@@ -47,7 +47,7 @@ class ApiClient {
         Authorization: `Bearer ${token}`
       };
     } else {
-      const { Authorization, ...rest } = this.defaultHeaders as any;
+      const { Authorization, ...rest } = this.defaultHeaders as Record<string, string>;
       this.defaultHeaders = rest;
     }
   }
@@ -55,7 +55,7 @@ class ApiClient {
   /**
    * Build full URL
    */
-  private buildUrl(endpoint: string, params?: Record<string, any>): string {
+  private buildUrl(endpoint: string, params?: Record<string, unknown>): string {
     const url = new URL(`${this.baseUrl}${endpoint}`);
     
     if (params) {
@@ -76,8 +76,8 @@ class ApiClient {
     method: string,
     endpoint: string,
     options: {
-      params?: Record<string, any>;
-      body?: any;
+      params?: Record<string, unknown>;
+      body?: unknown;
       headers?: HeadersInit;
       schema?: z.ZodType<T>;
     } = {}
@@ -97,7 +97,7 @@ class ApiClient {
 
       // Handle non-OK responses
       if (!response.ok) {
-        let errorData: any = {};
+        let errorData: unknown = {};
         
         try {
           // Try to read error response body
@@ -107,10 +107,16 @@ class ApiClient {
           errorData = { message: response.statusText };
         }
         
+        const errorMessage = (errorData && typeof errorData === 'object' && 'error' in errorData)
+          ? (errorData as { error: string }).error
+          : (errorData && typeof errorData === 'object' && 'message' in errorData)
+          ? (errorData as { message: string }).message
+          : response.statusText;
+
         throw new ApiError(
           response.status,
           errorData,
-          errorData.error || errorData.message || response.statusText
+          errorMessage
         );
       }
 
@@ -139,7 +145,7 @@ class ApiClient {
    */
   async get<T>(
     endpoint: string,
-    params?: Record<string, any>,
+    params?: Record<string, unknown>,
     schema?: z.ZodType<T>
   ): Promise<T> {
     return this.request<T>('GET', endpoint, { params, schema });
@@ -150,7 +156,7 @@ class ApiClient {
    */
   async post<T>(
     endpoint: string,
-    body?: any,
+    body?: unknown,
     schema?: z.ZodType<T>
   ): Promise<T> {
     return this.request<T>('POST', endpoint, { body, schema });
@@ -161,7 +167,7 @@ class ApiClient {
    */
   async put<T>(
     endpoint: string,
-    body?: any,
+    body?: unknown,
     schema?: z.ZodType<T>
   ): Promise<T> {
     return this.request<T>('PUT', endpoint, { body, schema });
@@ -172,7 +178,7 @@ class ApiClient {
    */
   async patch<T>(
     endpoint: string,
-    body?: any,
+    body?: unknown,
     schema?: z.ZodType<T>
   ): Promise<T> {
     return this.request<T>('PATCH', endpoint, { body, schema });

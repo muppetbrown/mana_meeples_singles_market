@@ -165,7 +165,7 @@ async function analyzeSetVariations(setId: number, gameId: number) {
 /**
  * Analyze game-wide variations
  */
-async function analyzeGameVariations(gameId: any) {
+async function analyzeGameVariations(gameId: number) {
   const client = await db.getClient();
   
   try {
@@ -309,7 +309,7 @@ async function analyzeGameVariations(gameId: any) {
 /**
  * Get available variations for a set
  */
-async function getSetVariations(setId: any) {
+async function getSetVariations(setId: number) {
   try {
     const result = await db.query(`
       SELECT 
@@ -339,7 +339,7 @@ async function getSetVariations(setId: any) {
 /**
  * Get available variations for a game
  */
-async function getGameVariations(gameId: any) {
+async function getGameVariations(gameId: number) {
   try {
     const result = await db.query(`
       SELECT 
