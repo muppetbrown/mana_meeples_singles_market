@@ -61,9 +61,9 @@ export const db = {
    * Run a parameterized SQL query.
    * Uses pool's automatic connection management.
    */
-  async query<T extends QueryResultRow = any>(
+  async query<T extends QueryResultRow = QueryResultRow>(
     text: string,
-    params?: any[]
+    params?: unknown[]
   ): Promise<T[]> {
     try {
       const result = await getPool().query<T>(text, params);

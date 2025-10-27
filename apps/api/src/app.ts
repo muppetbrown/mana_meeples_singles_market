@@ -140,12 +140,14 @@ export function createApp() {
    *  =============================== */
   app.use(
     (
-      err: any,
+      err: unknown,
       _req: express.Request,
       res: express.Response,
       _next: express.NextFunction
     ) => {
-      if (err?.message?.includes("CORS"))
+      if (err && typeof err === 'object' && 'message' in err &&
+          typeof (err as {message: string}).message === 'string' &&
+          (err as {message: string}).message.includes("CORS"))
         return res.status(403).json({ error: "CORS policy violation" });
 
       console.error("❌ API error:", err);

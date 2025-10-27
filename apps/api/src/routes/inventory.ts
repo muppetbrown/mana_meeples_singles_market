@@ -63,7 +63,10 @@ router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response)
       },
     });
   } catch (err: unknown) {
-    console.error("GET /admin/inventory failed", err instanceof Error ? { code: (err as any).code, message: err.message } : err);
+    console.error("GET /admin/inventory failed", err instanceof Error ? {
+      code: (err && typeof err === 'object' && 'code' in err) ? (err as {code: unknown}).code : 'unknown',
+      message: err.message
+    } : err);
     return res.status(500).json({ error: "Failed to retrieve inventory" });
   }
 });
@@ -137,7 +140,11 @@ router.post("/admin/inventory", adminAuthJWT, async (req: Request, res: Response
     ]);
     return res.status(200).json({ inventory: rows[0] });
   } catch (err: unknown) {
-    console.error("POST /admin/inventory failed", err instanceof Error ? { code: (err as any).code, message: err.message, card_id } : { err, card_id });
+    console.error("POST /admin/inventory failed", err instanceof Error ? {
+      code: (err && typeof err === 'object' && 'code' in err) ? (err as {code: unknown}).code : 'unknown',
+      message: err.message,
+      card_id
+    } : { err, card_id });
     return res.status(500).json({ error: "Failed to upsert inventory" });
   }
 });
@@ -216,7 +223,7 @@ router.patch("/admin/inventory/:id", adminAuthJWT, async (req: Request, res: Res
     return res.json({ inventory });
   } catch (err: unknown) {
     console.error("PATCH /admin/inventory/:id failed", err instanceof Error ? {
-      code: (err as any).code,
+      code: (err && typeof err === 'object' && 'code' in err) ? (err as {code: unknown}).code : 'unknown',
       message: err.message,
       inventoryId
     } : { err, inventoryId });
@@ -250,7 +257,7 @@ router.delete("/admin/inventory/:id", adminAuthJWT, async (req: Request, res: Re
     });
   } catch (err: unknown) {
     console.error("DELETE /admin/inventory/:id failed", err instanceof Error ? {
-      code: (err as any).code,
+      code: (err && typeof err === 'object' && 'code' in err) ? (err as {code: unknown}).code : 'unknown',
       message: err.message,
       inventoryId
     } : { err, inventoryId });
@@ -301,7 +308,10 @@ router.get("/admin/inventory/export", adminAuthJWT, async (req: Request, res: Re
     res.setHeader("Content-Disposition", `attachment; filename="inventory-export-${Date.now()}.csv"`);
     res.send(csv);
   } catch (err: unknown) {
-    console.error("GET /admin/inventory/export failed", err instanceof Error ? { code: (err as any).code, message: err.message } : err);
+    console.error("GET /admin/inventory/export failed", err instanceof Error ? {
+      code: (err && typeof err === 'object' && 'code' in err) ? (err as {code: unknown}).code : 'unknown',
+      message: err.message
+    } : err);
     return res.status(500).json({ error: "Failed to export inventory" });
   }
 });
@@ -320,7 +330,7 @@ router.post("/admin/inventory/bulk-import", adminAuthJWT, async (req: Request, r
 
     let successCount = 0;
     let errorCount = 0;
-    const errors: any[] = [];
+    const errors: {row: number; message: string}[] = [];
 
     for (const item of items) {
       const parsed = AddInventorySchema.safeParse(item);
@@ -354,7 +364,10 @@ router.post("/admin/inventory/bulk-import", adminAuthJWT, async (req: Request, r
       errors: errors.slice(0, 10), // Limit error details
     });
   } catch (err: unknown) {
-    console.error("POST /admin/inventory/bulk-import failed", err instanceof Error ? { code: (err as any).code, message: err.message } : err);
+    console.error("POST /admin/inventory/bulk-import failed", err instanceof Error ? {
+      code: (err && typeof err === 'object' && 'code' in err) ? (err as {code: unknown}).code : 'unknown',
+      message: err.message
+    } : err);
     return res.status(500).json({ error: "Failed to bulk import inventory" });
   }
 });

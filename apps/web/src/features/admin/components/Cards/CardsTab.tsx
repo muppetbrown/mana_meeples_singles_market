@@ -280,7 +280,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   // Use the centralized grouping utility
   const groupedCards = useMemo(() => {
     // Convert Card[] to CardDBRow[] (they have the same structure in this context)
-    const cardDbRows = displayCards as any[];
+    const cardDbRows = displayCards as unknown[];
     return groupCardsForBrowse(cardDbRows);
   }, [displayCards]);
 

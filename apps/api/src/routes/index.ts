@@ -123,15 +123,15 @@ router.use(
       (typeof err === "object" &&
         err !== null &&
         "status" in err &&
-        typeof (err as any).status === "number" &&
-        (err as any).status) || 500;
+        typeof (err as {status: unknown}).status === "number" &&
+        (err as {status: number}).status) || 500;
 
     const message =
       (typeof err === "object" &&
         err !== null &&
         "message" in err &&
-        typeof (err as any).message === "string" &&
-        (err as any).message) || "Internal Server Error";
+        typeof (err as {message: unknown}).message === "string" &&
+        (err as {message: string}).message) || "Internal Server Error";
 
     res.status(status).json({ error: message });
   }

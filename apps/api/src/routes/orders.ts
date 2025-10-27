@@ -370,7 +370,7 @@ router.get("/admin/orders", adminAuthJWT, async (req: Request, res: Response): P
     const { limit, offset, status, search } = validation.data;
 
     const conditions: string[] = [];
-    const params: any[] = [];
+    const params: unknown[] = [];
     let paramIndex = 1;
 
     if (status) {
