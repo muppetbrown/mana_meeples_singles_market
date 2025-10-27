@@ -27,7 +27,7 @@ const BORDER_COLORS = ['black', 'borderless', 'white', 'yellow'];
 /**
  * Analyze a set's variations and update metadata
  */
-async function analyzeSetVariations(setId: any, gameId: any) {
+async function analyzeSetVariations(setId: number, gameId: number) {
   const client = await db.getClient();
   
   try {
@@ -64,7 +64,7 @@ async function analyzeSetVariations(setId: any, gameId: any) {
       totalVariations: cards.length
     };
     
-    cards.forEach((card: any) => {
+    cards.forEach((card: Record<string, unknown>) => {
       // Collect treatment codes
       if (card.treatment) {
         analysis.treatmentCodes.add(card.treatment);
@@ -82,8 +82,8 @@ async function analyzeSetVariations(setId: any, gameId: any) {
       
       // Collect frame effects (filtered)
       if (card.frame_effect) {
-        const effects = card.frame_effect.split(',').map((e: any) => e.trim());
-        effects.forEach((effect: any) => {
+        const effects = String(card.frame_effect).split(',').map((e: string) => e.trim());
+        effects.forEach((effect: string) => {
           if (VISUAL_TREATMENTS.includes(effect)) {
             analysis.visualTreatments.add(effect);
             analysis.frameEffects.add(effect);
@@ -203,7 +203,7 @@ async function analyzeGameVariations(gameId: any) {
       totalCards: cards.length
     };
     
-    cards.forEach((card: any) => {
+    cards.forEach((card: Record<string, unknown>) => {
       // Track sets
       if (card.set_id) {
         analysis.sets.add(card.set_id);
@@ -226,8 +226,8 @@ async function analyzeGameVariations(gameId: any) {
       
       // Collect frame effects
       if (card.frame_effect) {
-        const effects = card.frame_effect.split(',').map((e: any) => e.trim());
-        effects.forEach((effect: any) => {
+        const effects = String(card.frame_effect).split(',').map((e: string) => e.trim());
+        effects.forEach((effect: string) => {
           if (VISUAL_TREATMENTS.includes(effect)) {
             analysis.visualTreatments.add(effect);
             analysis.frameEffects.add(effect);

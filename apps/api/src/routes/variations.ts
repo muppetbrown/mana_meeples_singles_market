@@ -75,11 +75,11 @@ router.get("/variations", async (req: Request, res: Response) => {
   const params = [set_id || null, game_id || null];
 
   try {
-    const result = await db.query<any>(sql, params);
+    const result = await db.query<Record<string, unknown>>(sql, params);
     const rows = unwrapRows(result);
     // Normalize each array to uppercase strings (defensive)
     const row = rows?.[0] ?? {};
-    const normalize = (a: any) =>
+    const normalize = (a: unknown) =>
       Array.isArray(a) ? a.filter(Boolean).map((x) => String(x).toUpperCase()) : [];
     return res.json({
       treatments: normalize(row.treatments),

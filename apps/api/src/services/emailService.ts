@@ -50,8 +50,8 @@ export async function sendEmail(
 
     console.log(`📨 Email sent successfully to ${to}: ${result.messageId}`);
     return { success: true, messageId: result.messageId };
-  } catch (error: any) {
-    console.error("❌ Failed to send email:", error.message);
+  } catch (error: unknown) {
+    console.error("❌ Failed to send email:", error instanceof Error ? error.message : String(error));
     return { success: false };
   }
 }
@@ -61,8 +61,8 @@ export async function testEmail(): Promise<boolean> {
     await getTransport().verify();
     console.log("✅ SMTP connection verified.");
     return true;
-  } catch (error: any) {
-    console.error("❌ SMTP verification failed:", error.message);
+  } catch (error: unknown) {
+    console.error("❌ SMTP verification failed:", error instanceof Error ? error.message : String(error));
     return false;
   }
 }

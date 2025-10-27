@@ -50,7 +50,7 @@ export const useFilterCounts = (_deprecatedAPIBase: unknown, currentFilters: Fil
 
     if (keysA.length !== keysB.length) return false;
     for (const k of keysA) {
-      if ((cachedFilters as any)[k] !== (currentFilters as any)[k]) return false;
+      if (cachedFilters[k] !== currentFilters[k]) return false;
     }
     return cacheAge < CACHE_DURATION;
   }, [currentFilters]);
@@ -93,24 +93,25 @@ export const useFilterCounts = (_deprecatedAPIBase: unknown, currentFilters: Fil
 
         setCount(total);
         setError(null);
-      } catch (e: any) {
+      } catch (e: unknown) {
         // Handle fetch aborts quietly
-        if (e?.name === 'AbortError') return;
+        if (e instanceof Error && e.name === 'AbortError') return;
 
         // Retry on transient 429/5xx (api.get throws; we inspect message)
-        const msg = String(e?.message ?? e);
+        const msg = e instanceof Error ? e.message : String(e);
+        const status = typeof e === 'object' && e !== null && 'status' in e ? e.status : undefined;
         const transient =
           /503|504|timeout|network/i.test(msg) ||
-          e?.status === ERROR_CONFIG.RATE_LIMIT_STATUS ||
-          e?.status === 503 ||
-          e?.status === 504;
+          status === ERROR_CONFIG.RATE_LIMIT_STATUS ||
+          status === 503 ||
+          status === 504;
 
         if (transient && retryCount < MAX_RETRIES) {
           await new Promise((r) => setTimeout(r, RETRY_DELAY * Math.pow(2, retryCount)));
           return fetchCount(filters, retryCount + 1);
         }
 
-        setError(typeof e?.message === 'string' ? e.message : 'Failed to fetch count');
+        setError(e instanceof Error ? e.message : 'Failed to fetch count');
 
         // Fall back to cached total if we have one
         if (globalCache.data) {

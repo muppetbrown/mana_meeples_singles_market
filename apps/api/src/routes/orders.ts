@@ -279,10 +279,10 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
       }
     }
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("❌ Create order error:", error);
-    
-    const errorMessage = error?.message || "Failed to create order";
+
+    const errorMessage = error instanceof Error ? error.message : "Failed to create order";
     
     // Return appropriate status codes
     if (errorMessage.includes("Insufficient stock") || 
@@ -610,7 +610,7 @@ router.patch("/admin/orders/:id/status", adminAuthJWT, async (req: Request, res:
       client.release();
     }
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("❌ Update order status error:", error);
     res.status(500).json({ error: "Failed to update order status" });
   }

@@ -68,11 +68,13 @@ export const db = {
     try {
       const result = await getPool().query<T>(text, params);
       return result.rows;
-    } catch (error: any) {
-      console.error("❌ Database query error:", error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      const code = error instanceof Error && 'code' in error ? error.code : 'unknown';
+      console.error("❌ Database query error:", message);
       console.error("   Query:", text.substring(0, 200));
       console.error("   Params:", JSON.stringify(params?.slice(0, 5)));
-      console.error("   Code:", error.code);
+      console.error("   Code:", code);
       throw error;
     }
   },

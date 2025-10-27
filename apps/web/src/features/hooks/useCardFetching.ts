@@ -90,15 +90,16 @@ export function useCardFetching({
       // Apply client-side treatment filtering
       if (selectedTreatment && selectedTreatment !== 'all') {
         fetchedCards = fetchedCards.filter(card => {
-          const cardTreatment = (card as any).treatment || 'STANDARD';
+          const cardTreatment = 'treatment' in card && typeof card.treatment === 'string' ? card.treatment : 'STANDARD';
           return cardTreatment === selectedTreatment;
         });
       }
 
       setCards(fetchedCards);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching cards:', err);
-      setError(err?.message ?? 'Failed to load cards');
+      const message = err instanceof Error ? err.message : 'Failed to load cards';
+      setError(message);
       errorHandler.handleError(err, { context: 'fetching cards' });
     } finally {
       setLoading(false);
