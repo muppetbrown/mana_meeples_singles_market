@@ -280,9 +280,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
   // Use the centralized grouping utility
   const groupedCards = useMemo(() => {
-    // Convert Card[] to CardDBRow[] (they have the same structure in this context)
-    const cardDbRows = displayCards as unknown[];
-    return groupCardsForBrowse(cardDbRows);
+    return groupCardsForBrowse(displayCards);
   }, [displayCards]);
 
   // --------------------------------------------------------------------------
@@ -311,13 +309,13 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, [setSearchParams]);
 
   const handleExportCSV = useCallback(async () => {
-    if (isLoading || cards.length === 0) {
+    if (loading || cards.length === 0) {
       console.warn('No cards available for export');
       return;
     }
 
     try {
-      setIsLoading(true);
+      setLoading(true);
 
       // For inventory mode, export current displayed cards with inventory data
       // For all cards mode, export all filtered cards
@@ -327,7 +325,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
       if (exportData.length === 0) {
         console.warn('No inventory data available for export');
-        setIsLoading(false);
+        setLoading(false);
         return;
       }
 
@@ -347,9 +345,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     } catch (error) {
       console.error('Failed to export CSV:', error);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
-  }, [cards, isLoading, mode]);
+  }, [cards, loading, mode]);
 
   // --------------------------------------------------------------------------
   // MODAL HANDLERS - SIMPLIFIED!

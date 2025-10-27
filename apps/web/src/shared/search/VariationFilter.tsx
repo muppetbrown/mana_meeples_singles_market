@@ -60,7 +60,7 @@ const VariationFilter = ({
       setError(null);
 
       try {
-        const queryParams: Record<string, any> = {};
+        const queryParams: Record<string, string | number> = {};
 
         // Priority: set_id over game_id
         if (selectedSet && selectedSet !== 'all') {

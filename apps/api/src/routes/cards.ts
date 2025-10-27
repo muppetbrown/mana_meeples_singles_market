@@ -186,15 +186,19 @@ router.get("/cards", async (req: Request, res: Response) => {
   `;
 
   try {
-    const rows = await db.query<any>(sql, params);
-    
+    const rows = await db.query<unknown[]>(sql, params);
+
     return res.json({ cards: rows });
   } catch (err: unknown) {
-    console.error("GET /cards failed", { 
-      code: err?.code, 
-      message: err?.message,
-      detail: err?.detail,
-      stack: err?.stack 
+    const error = err instanceof Error ? err : new Error(String(err));
+    const dbError = err && typeof err === 'object' && 'code' in err
+      ? err as { code?: string; detail?: string }
+      : undefined;
+    console.error("GET /cards failed", {
+      code: dbError?.code,
+      message: error.message,
+      detail: dbError?.detail,
+      stack: error.stack
     });
     return res.status(500).json({ error: "Failed to fetch cards" });
   }
@@ -399,10 +403,14 @@ router.get('/filters', async (req: Request, res: Response) => {
     
     return res.json(response);
   } catch (err: unknown) {
-    console.error('GET /cards/filters failed', { 
-      code: err?.code, 
-      message: err?.message,
-      stack: err?.stack 
+    const error = err instanceof Error ? err : new Error(String(err));
+    const dbError = err && typeof err === 'object' && 'code' in err
+      ? err as { code?: string }
+      : undefined;
+    console.error('GET /cards/filters failed', {
+      code: dbError?.code,
+      message: error.message,
+      stack: error.stack
     });
     return res.status(500).json({ error: 'Failed to fetch card filters' });
   }

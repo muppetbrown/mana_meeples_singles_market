@@ -6,7 +6,7 @@
  * Simple request throttler to prevent API spam
  */
 export class RequestThrottler {
-  private pending = new Map<string, Promise<any>>();
+  private pending = new Map<string, Promise<unknown>>();
   private lastRequest = new Map<string, number>();
   private minInterval: number;
 

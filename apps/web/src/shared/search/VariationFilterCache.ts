@@ -3,6 +3,11 @@
  * Reduces unnecessary API calls by caching responses by game_id/set_id
  */
 
+interface VariationFilterParams {
+  game_id?: string | number;
+  set_id?: string | number;
+}
+
 interface VariationFiltersResponse {
   treatments?: string[];
   borderColors?: string[];
@@ -24,7 +29,7 @@ class VariationFilterCache {
   /**
    * Generate cache key from query parameters
    */
-  private getCacheKey(params: Record<string, any>): string {
+  private getCacheKey(params: VariationFilterParams): string {
     const sortedParams = Object.entries(params)
       .sort(([a], [b]) => a.localeCompare(b))
       .map(([key, value]) => `${key}:${value}`)
@@ -35,7 +40,7 @@ class VariationFilterCache {
   /**
    * Get cached data if available and not expired
    */
-  get(params: Record<string, any>): VariationFiltersResponse | null {
+  get(params: VariationFilterParams): VariationFiltersResponse | null {
     const key = this.getCacheKey(params);
     const entry = this.cache.get(key);
 
@@ -55,7 +60,7 @@ class VariationFilterCache {
   /**
    * Store data in cache with TTL
    */
-  set(params: Record<string, any>, data: VariationFiltersResponse): void {
+  set(params: VariationFilterParams, data: VariationFiltersResponse): void {
     const key = this.getCacheKey(params);
     const now = Date.now();
 
