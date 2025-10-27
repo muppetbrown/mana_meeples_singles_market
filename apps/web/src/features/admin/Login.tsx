@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Lock, User, AlertCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { ENDPOINTS } from '@/lib/api/endpoints';
+import { useErrorHandler } from '@/services/error/handler';
 
 
 const Login = () => {
@@ -11,6 +12,7 @@ const Login = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { handleError } = useErrorHandler();
 
   const handleLogin = async (e: any) => {
     e.preventDefault();
@@ -37,22 +39,8 @@ const Login = () => {
         throw new Error(`Login failed: ${errorMsg}`);
       }
     } catch (err: any) {
-
-      let errorMessage = 'Login failed. Please try again.';
-
-      if (err.status === 400) {
-        errorMessage = 'Please enter both username and password.';
-      } else if (err.status === 401) {
-        errorMessage = 'Invalid username or password.';
-      } else if (err.status === 500) {
-        errorMessage = 'Server configuration error. Please contact administrator.';
-      } else if (err.message?.includes('timeout')) {
-        errorMessage = 'Login request timed out. Please try again.';
-      } else if (err.message?.includes('NetworkError') || err.message?.includes('fetch')) {
-        errorMessage = 'Network error. Please check your connection and try again.';
-      }
-
-      setError(errorMessage);
+      const formattedError = handleError(err, { context: 'admin login' });
+      setError(formattedError.message);
     } finally {
       setLoading(false);
     }

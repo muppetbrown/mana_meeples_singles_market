@@ -48,19 +48,17 @@ const sanitizeHTML = (input: any) => {
 
 /**
  * Sanitize email addresses
+ * Returns sanitized email or empty string for invalid emails (doesn't throw)
  */
 const sanitizeEmail = (email: any) => {
-  if (typeof email !== 'string') return email;
+  if (typeof email !== 'string') return '';
 
   // Basic email format validation and sanitization
   const sanitized = email.toLowerCase().trim();
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-  if (!emailRegex.test(sanitized)) {
-    throw new Error('Invalid email format');
-  }
-
-  return sanitized;
+  // Return sanitized email if valid, empty string if invalid (don't throw)
+  return emailRegex.test(sanitized) ? sanitized : '';
 };
 
 /**

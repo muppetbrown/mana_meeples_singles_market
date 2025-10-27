@@ -2,6 +2,7 @@
 import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api, ENDPOINTS } from '@/lib/api';
+import { useErrorHandler } from '@/services/error/handler';
 import type { SearchFilters } from '@/types';
 
 // ============================================================================
@@ -99,6 +100,7 @@ export function useShopFilters() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>(EMPTY_FILTER_OPTIONS);
+  const { handleError } = useErrorHandler();
 
   // --------------------------------------------------------------------------
   // Derived State
@@ -157,13 +159,11 @@ export function useShopFilters() {
           // Don't set error state - this prevents the red error box
           setFilterOptions(EMPTY_FILTER_OPTIONS);
         } else {
-          // For other errors, log but still don't show error UI
-          console.error('Filter loading error:', err);
+          // For other errors, use proper error handling
+          const formattedError = handleError(err, { context: 'filter loading' });
           setFilterOptions(EMPTY_FILTER_OPTIONS);
-          
           // Only set error for non-404 errors if you want to show them
-          // For now, commenting this out to prevent ANY error UI
-          // setError('Failed to load filters');
+          // setError(formattedError.message);
         }
       } finally {
         if (!isCancelled) {

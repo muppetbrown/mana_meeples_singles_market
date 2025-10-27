@@ -1,4 +1,4 @@
-// apps\web\src\features\shop\ShopPage.tsx
+// apps\web\src\features\shop\ShopPageRefactored.tsx
 import React, { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
@@ -18,6 +18,7 @@ import {
 import { CardDisplayArea } from '@/features/hooks/useCardDisplayArea';
 import { ErrorBoundary } from '@/shared/layout';
 import { CardSkeleton } from '@/shared/card';
+import { formatCurrencySimple } from '@/lib/utils';
 import type { Currency } from '@/types';
 
 // Local type definitions (simplified)
