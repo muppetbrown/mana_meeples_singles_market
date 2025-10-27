@@ -44,7 +44,7 @@ describe("GET /api/storefront/cards", () => {
 
     expect(res.body.cards).toBeDefined();
     // All cards should belong to game_id 1
-    res.body.cards.forEach((card: Record<string, unknown>) => {
+    res.body.cards.forEach((card: { game_id?: number; game_name?: string }) => {
       expect(card.game_id || card.game_name).toBeDefined();
     });
   });

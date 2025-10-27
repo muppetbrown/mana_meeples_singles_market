@@ -99,7 +99,7 @@ describe("Complete Checkout Flow (E2E)", () => {
       .expect(200);
 
     const updatedVariation = updatedCardRes.body.card.variations.find(
-      (v: Record<string, unknown>) => v.inventory_id === variation.inventory_id
+      (v: { inventory_id: unknown; stock: number }) => v.inventory_id === variation.inventory_id
     );
     expect(updatedVariation.stock).toBe(variation.stock - cartItem.quantity);
 
@@ -397,14 +397,14 @@ describe("Complete Checkout Flow (E2E)", () => {
         email: "customer@example.com",
         name: "Multi-item Customer"
       },
-      items: card.variations.slice(0, 2).map((v: Record<string, unknown>) => ({
+      items: card.variations.slice(0, 2).map((v: { inventory_id: unknown; price: number }) => ({
         inventory_id: v.inventory_id,
         card_id: card.id,
         card_name: card.name,
         quantity: 1,
         price: v.price
       })),
-      total: card.variations.slice(0, 2).reduce((sum: number, v: Record<string, unknown>) => sum + (v.price as number), 0)
+      total: card.variations.slice(0, 2).reduce((sum: number, v: { price: number }) => sum + v.price, 0)
     };
 
     const orderRes = await request(app)
