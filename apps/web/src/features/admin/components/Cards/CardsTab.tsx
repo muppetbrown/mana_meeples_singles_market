@@ -26,7 +26,8 @@ import { CardList, CardGrid } from '@/shared/layout';
 import { EmptyState } from '@/shared/ui';
 import type {
   Card,
-  CardVariation
+  CardVariation,
+  BrowseBaseCard
 } from '@/types';
 
 // ============================================================================
@@ -279,7 +280,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, [displayCards]);
 
   // Use the centralized grouping utility
-  const groupedCards = useMemo(() => {
+  const groupedCards: BrowseBaseCard[] = useMemo(() => {
     return groupCardsForBrowse(displayCards);
   }, [displayCards]);
 
@@ -510,20 +511,20 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           {groupedCards.length > 0 ? (
             viewMode === 'list' ? (
               <CardList
-                cards={groupedCards as unknown as Card[]}
+                cards={groupedCards}
                 currency={{ symbol: '$', rate: 1 }}
                 onAddToCart={(card: Card, variation: CardVariation) => {
                   if (!isInventoryMode && openAddModal) {
-                    openAddModal(card as Card);
+                    openAddModal(card);
                   }
                 }}
               />
             ) : (
               <CardGrid
-                cards={groupedCards as unknown as Card[]}
+                cards={groupedCards}
                 mode={mode}
                 viewMode={viewMode}
-                onAddToInventory={isInventoryMode ? undefined : (card) => openAddModal(card as Card)}
+                onAddToInventory={isInventoryMode ? undefined : (card) => openAddModal(card)}
               />
             )
           ) : (

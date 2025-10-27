@@ -391,14 +391,14 @@ router.get('/filters', async (req: Request, res: Response) => {
       treatments: filterRow?.treatments ?? [],
       languages: filterRow?.languages ?? [],
       qualities: filterRow?.qualities ?? [],
-      foilTypes: filterRow?.foiltypes ?? filterRow?.foilTypes ?? [],
-      
+      foilTypes: filterRow?.foilTypes ?? [],
+
       // Price range
-      priceMin: filterRow?.pricemin ?? null,
-      priceMax: filterRow?.pricemax ?? null,
-      
+      priceMin: filterRow?.priceMin ?? null,
+      priceMax: filterRow?.priceMax ?? null,
+
       // Stock info
-      inStockCount: filterRow?.instockcount ?? 0,
+      inStockCount: filterRow?.inStockCount ?? 0,
     };
     
     return res.json(response);

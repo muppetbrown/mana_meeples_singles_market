@@ -199,19 +199,21 @@ router.get("/cards/:id", async (req: Request, res: Response) => {
       [id]
     );
     
-    if (cardRes.rowCount === 0) {
+    if (cardRes.rowCount === 0 || !cardRes.rows[0]) {
       return res.status(404).json({ error: "Card not found" });
     }
+
+    const card = cardRes.rows[0];
 
     // Get inventory variations with proper field aliases
     // IMPORTANT: Alias 'id' as 'inventory_id' and 'stock_quantity' as 'stock'
     // to match the CardVariation interface used throughout the app
     const invRes = await client.query(
-      `SELECT 
+      `SELECT
         id AS inventory_id,
-        quality, 
-        foil_type, 
-        language, 
+        quality,
+        foil_type,
+        language,
         stock_quantity AS stock,
         price
        FROM card_inventory
@@ -220,11 +222,11 @@ router.get("/cards/:id", async (req: Request, res: Response) => {
       [id]
     );
 
-    return res.json({ 
-      card: { 
-        ...cardRes.rows[0], 
-        variations: invRes.rows 
-      } 
+    return res.json({
+      card: {
+        ...card,
+        variations: invRes.rows
+      }
     });
     
   } catch (err) {

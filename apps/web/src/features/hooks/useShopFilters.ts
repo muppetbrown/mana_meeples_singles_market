@@ -149,11 +149,23 @@ export function useShopFilters() {
         if (isCancelled) return;
 
         // CRITICAL FIX: Check if it's a 404 (endpoint doesn't exist)
-        const is404 = (err && typeof err === 'object' && 'status' in err && (err as {status: number}).status === 404) ||
-                      (err && typeof err === 'object' && 'message' in err && typeof (err as {message: string}).message === 'string' && (
-                        (err as {message: string}).message.includes('Not Found') ||
-                        (err as {message: string}).message.includes('404')
-                      ));
+        const is404Error = (error: unknown): boolean => {
+          if (!error || typeof error !== 'object') return false;
+
+          // Check status property
+          if ('status' in error && typeof error.status === 'number' && error.status === 404) {
+            return true;
+          }
+
+          // Check message property
+          if ('message' in error && typeof error.message === 'string') {
+            return error.message.includes('Not Found') || error.message.includes('404');
+          }
+
+          return false;
+        };
+
+        const is404 = is404Error(err);
 
         if (is404) {
           // Silently fail for 404 - endpoint not implemented yet

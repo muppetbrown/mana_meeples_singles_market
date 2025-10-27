@@ -163,8 +163,13 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
         ]
       );
 
-      const orderId = orderResult.rows[0].id;
-      const createdAt = orderResult.rows[0].created_at;
+      if (orderResult.rowCount === 0 || !orderResult.rows[0]) {
+        throw new Error('Failed to create order');
+      }
+
+      const orderRecord = orderResult.rows[0];
+      const orderId = orderRecord.id;
+      const createdAt = orderRecord.created_at;
 
       // 2. Process each order item
       for (const item of items) {
