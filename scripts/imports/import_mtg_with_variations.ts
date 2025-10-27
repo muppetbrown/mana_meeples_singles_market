@@ -7,7 +7,7 @@
 
 import { Pool } from 'pg';
 import type { PoolClient } from 'pg';
-import * as variationService from '../services/variationAnalysis.js';
+import * as variationService from '../../apps/api/src/services/variationAnalysis.js';
 import 'dotenv/config';
 
 const pool = new Pool({
@@ -39,14 +39,14 @@ function calculateTreatment(card: MTGCard) {
   const promoTypes = card.promo_types || [];
   
   // Filter frame effects
-  const relevantFrameEffects = frameEffects.filter((e: any) => !IGNORE_FRAME_EFFECTS.includes(e)
+  const relevantFrameEffects = frameEffects.filter((e: string) => !IGNORE_FRAME_EFFECTS.includes(e)
   );
-  
+
   // Find special foil type
-  const specialFoilType = promoTypes.find((p: any) => SPECIAL_FOILS.includes(p));
-  
+  const specialFoilType = promoTypes.find((p: string) => SPECIAL_FOILS.includes(p));
+
   // Helper function
-  const has = (effect: any) => relevantFrameEffects.includes(effect);
+  const has = (effect: string) => relevantFrameEffects.includes(effect);
   const isBorderless = borderColor === 'borderless';
   
   // PRIORITY ORDER
@@ -384,10 +384,9 @@ async function importMTGSet(setCode: string) {
 }
 
 // Main execution
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'setCode'.
-const setCode = process.argv[2];
+const inputSetCode = process.argv[2];
 
-if (!setCode) {
+if (!inputSetCode) {
   console.error('\n❌ Error: No set code provided');
   console.error('\n📖 Usage: node scripts/import-mtg-set-enhanced.js <SET_CODE>');
   console.error('\n📝 Examples:');
@@ -398,7 +397,7 @@ if (!setCode) {
   process.exit(1);
 }
 
-importMTGSet(setCode)
+importMTGSet(inputSetCode)
   .then(() => {
     pool.end();
     process.exit(0);

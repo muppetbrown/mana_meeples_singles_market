@@ -161,7 +161,15 @@ function identText(id: ts.Node | undefined): string {
   if (!id) return '';
   if (ts.isIdentifier(id)) return String(id.escapedText);
   if (ts.isStringLiteralLike(id)) return id.text;
-  try { return (id as any).getText?.() ?? ''; } catch { return ''; }
+  try {
+    // Use type predicate to safely access getText method
+    if ('getText' in id && typeof id.getText === 'function') {
+      return id.getText() ?? '';
+    }
+    return '';
+  } catch {
+    return '';
+  }
 }
 
 function hasExportModifier(node: ts.Node): boolean {
@@ -221,7 +229,7 @@ function collectFromSource(sourceFile: ts.SourceFile, env: TsEnv): { edges: Edge
             names.push(identText(el.propertyName) || identText(el.name));
           }
         } else if ('name' in ec) { // NamespaceExport
-          names.push(identText((ec as any).name));
+          names.push(identText((ec as ts.NamespaceExport).name));
         }
       } else {
         names.push('*');
@@ -313,7 +321,7 @@ function buildGraph(files: string[], envDefault: TsEnv, forcedProject?: string):
         const ec = node.exportClause;
         if (ec) {
           if (ts.isNamedExports(ec)) for (const el of ec.elements) names.push(identText(el.name) || identText(el.propertyName));
-          else if ('name' in ec) names.push(identText((ec as any).name)); // namespace export
+          else if ('name' in ec) names.push(identText((ec as ts.NamespaceExport).name)); // namespace export
         } else names.push('*');
         reexports.push({ from: mod, names });
       }
