@@ -91,7 +91,10 @@ module.exports = defineConfig([
   globalIgnores([
     "**/dist/**",
     "**/build/**",
+    "**/docs/**",
+    "**/database/**",
     "**/coverage/**",
+    "**/repo-report/**",
     "**/*.d.ts"
     // If you want to exclude this config file entirely, uncomment:
     // ".dependency-cruiser.cjs"
