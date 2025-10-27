@@ -1,5 +1,6 @@
 // apps/web/src/components/ErrorBoundary.tsx
-import { Component, ErrorInfo, ReactNode } from "react";
+import { Component } from "react";
+import type { ErrorInfo, ReactNode } from "react";
 import { errorLogger } from "@/lib/utils/errorLogger";
 
 type Props = { fallback?: ReactNode; children: ReactNode };

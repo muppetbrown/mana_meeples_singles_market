@@ -108,6 +108,13 @@ export const adminAuthBasic = async (
     }
 
     const base64Credentials = authHeader.split(" ")[1];
+    if (typeof base64Credentials !== 'string' || !base64Credentials.length) {
+      res.status(401).json({
+        error: "Invalid authorization header format",
+        hint: "Use Basic Auth with username:password"
+      });
+      return;
+    }
     const credentials = Buffer.from(base64Credentials, "base64").toString("utf-8");
     const [username, password] = credentials.split(":");
 

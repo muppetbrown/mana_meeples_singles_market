@@ -2,7 +2,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { CartModal, MiniCart, Checkout } from '@/features/shop/components';
 import { useCart, useVariationSelection } from '@/features/hooks';
-import type { StorefrontCard, CardVariation } from '@/types';
+import type { StorefrontCard, CardVariation, CartItem } from '@/types';
 
 interface ShopCartProps {
   cards: StorefrontCard[];
@@ -36,12 +36,12 @@ export const ShopCart: React.FC<ShopCartProps> = ({
 
   // Derived state
   const cartTotal = useMemo(() =>
-    cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
+    cart.items.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0),
     [cart]
   );
 
   const cartCount = useMemo(() =>
-    cart.items.reduce((sum, item) => sum + item.quantity, 0),
+    cart.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0),
     [cart]
   );
 

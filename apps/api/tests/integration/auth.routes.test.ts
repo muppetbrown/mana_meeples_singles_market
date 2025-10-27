@@ -52,8 +52,9 @@ describe("POST /api/auth/admin/login", () => {
       .expect(200);
 
     expect(res.body.success).toBe(true);
-    expect(res.headers["set-cookie"]).toBeDefined();
-    expect(res.headers["set-cookie"][0]).toContain("adminToken");
+    const cookies = res.headers["set-cookie"];
+    expect(Array.isArray(cookies) && cookies[0]).toBeTruthy();
+    expect(cookies![0]).toContain("adminToken");
   });
 });
 
@@ -64,8 +65,9 @@ describe("POST /api/auth/admin/logout", () => {
       .expect(200);
 
     expect(res.body.success).toBe(true);
-    expect(res.headers["set-cookie"]).toBeDefined();
-    expect(res.headers["set-cookie"][0]).toContain("adminToken=;");
+    const logoutCookies = res.headers["set-cookie"];
+    expect(Array.isArray(logoutCookies) && logoutCookies[0]).toBeTruthy();
+    expect(logoutCookies![0]).toContain("adminToken=;");
   });
 });
 
@@ -88,11 +90,12 @@ describe("GET /api/auth/admin/check", () => {
       });
 
     const cookies = loginRes.headers["set-cookie"];
+    expect(Array.isArray(cookies) && cookies[0]).toBeTruthy();
 
     // Then check auth status
     const res = await request(app)
       .get("/api/auth/admin/check")
-      .set("Cookie", cookies)
+      .set("Cookie", cookies as string[])
       .expect(200);
 
     expect(res.body.authenticated).toBe(true);
