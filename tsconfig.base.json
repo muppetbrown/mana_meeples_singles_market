@@ -1,4 +1,4 @@
-// tsconfig.base.json
+// ./tsconfig.base.json
 {
   "compilerOptions": {
     "target": "ES2022",
@@ -18,7 +18,11 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "skipLibCheck": true,
-    "strict": false
+    "strict": true,
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
+    "types": ["node"],
+    "moduleDetection": "force"
   },
   "include": ["apps", "utils", "scripts", "database", "types.d.ts"],
   "exclude": ["**/dist", "**/.next", "**/build"]

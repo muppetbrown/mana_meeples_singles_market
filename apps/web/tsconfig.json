@@ -3,11 +3,16 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "ESNext",
+    "types": ["vite/client"],
+    "incremental": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     "moduleResolution": "bundler",
     "verbatimModuleSyntax": true,
     "exactOptionalPropertyTypes": true,
+    "strictNullChecks": true,
     "noEmit": true,
     "baseUrl": ".",
+    "composite": true,
     "paths": {
       "@/*": ["./src/*"],
       "@/features/*": ["./src/features/*"],

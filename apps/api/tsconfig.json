@@ -1,9 +1,8 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "node16",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "verbatimModuleSyntax": true,
     "exactOptionalPropertyTypes": true,
     "strict": true,
@@ -11,10 +10,12 @@
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
+    "incremental": true,
+    "composite": true,
+    "tsBuildInfoFile": ".tsbuildinfo",
     "baseUrl": ".",
-    "paths": {
-      "@api/*": ["./src/*"]
-    },
-    "types": ["node"]
-  }
+    "paths": { "@api/*": ["./src/*"] },
+    "types": ["node", "vitest", "vitest/globals", "supertest"]
+  },
+  "include": ["src", "tests"]
 }

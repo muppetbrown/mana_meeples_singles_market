@@ -1,3 +1,4 @@
+// apps/api/vitest.config.ts
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
@@ -12,7 +13,7 @@ export default defineConfig({
       provider: "v8",
       reportsDirectory: "./coverage",
       reporter: ["text", "lcov", "html"],
-      exclude: ["**/tests/**", "**/*.d.ts"],
+      exclude: ["**/tests/**", "**/*.d.ts", "src/database/migrations/**", "src/database/seeds/**"],
     },
   },
 });
