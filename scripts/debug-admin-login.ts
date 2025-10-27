@@ -68,8 +68,9 @@ async function debugAdminLogin() {
       }
 
       rl.close();
-    } catch (error: any) {
-      console.error('❌ Error testing password:', error.message);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
+      console.error('❌ Error testing password:', message);
       rl.close();
     }
   });

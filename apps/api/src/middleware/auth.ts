@@ -53,8 +53,8 @@ export const adminAuthJWT = async (
       console.log(`🔄 JWT refreshed for ${decoded.username}`);
     }
 
-    // Extend Request type properly instead of using 'as any'
-    (req as Request & { user: { username: string; role: string; exp: number; iat: number } }).user = {
+    // Set user information on request object
+    req.user = {
       username: decoded.username,
       role: decoded.role,
       exp: decoded.exp,
@@ -118,10 +118,10 @@ export const adminAuthBasic = async (
       return;
     }
 
-    (req as Request & { user: { username: string; role: string } }).user = { username, role: "admin" };
+    req.user = { username, role: "admin" };
     next();
-  } catch (error) {
-    console.error("Basic auth error:", error);
+  } catch (error: unknown) {
+    console.error("Basic auth error:", error instanceof Error ? error.message : String(error));
     res.status(500).json({ error: "Authentication failed" });
   }
 };
@@ -139,7 +139,7 @@ export const generateCSRFToken = (
   res.cookie("csrfToken", csrfToken, getCSRFCookieConfig(false));
   res.cookie("_csrfSecret", csrfToken, getCSRFCookieConfig(true));
 
-  (req as Request & { csrfToken: string }).csrfToken = csrfToken;
+  req.csrfToken = csrfToken;
   next();
 };
 

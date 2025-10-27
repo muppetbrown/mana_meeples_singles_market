@@ -1,15 +1,14 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'Pool'.
-const { Pool } = require('pg');
-require('dotenv').config();
+import { Pool } from 'pg';
+import type { PoolClient } from 'pg';
+import 'dotenv/config';
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'pool'.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
 
 // One Piece TCG card rarities mapping
-const RARITY_MAPPING = {
+const RARITY_MAPPING: Record<string, string> = {
   'C': 'Common',
   'UC': 'Uncommon',
   'R': 'Rare',
@@ -20,7 +19,7 @@ const RARITY_MAPPING = {
 };
 
 // One Piece TCG card types
-const CARD_TYPES = {
+const CARD_TYPES: Record<string, string> = {
   'Leader': 'Leader',
   'Character': 'Character',
   'Event': 'Event',
@@ -30,7 +29,7 @@ const CARD_TYPES = {
 
 // Mock API for One Piece TCG cards (since there's no official API like Scryfall)
 // This would be replaced with actual API calls or file parsing
-async function fetchOnePieceCards(setCode: any) {
+async function fetchOnePieceCards(setCode: string) {
   // This is a placeholder for the actual One Piece card data
   // In a real implementation, this would:
   // 1. Read from a JSON file provided by the user
@@ -76,16 +75,16 @@ async function fetchOnePieceCards(setCode: any) {
 }
 
 // Import One Piece set
-async function importOnePieceSet(setCode: any) {
+async function importOnePieceSet(setCode: string) {
   console.log(`\n🏴‍☠️ Starting import for One Piece set: ${setCode.toUpperCase()}`);
   console.log('━'.repeat(60));
 
   let allCards;
   try {
     allCards = await fetchOnePieceCards(setCode);
-  } catch (err) {
-    // @ts-expect-error TS(2571): Object is of type 'unknown'.
-    console.error('❌ Failed to fetch One Piece cards:', err.message);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error('❌ Failed to fetch One Piece cards:', message);
     throw err;
   }
 
@@ -142,11 +141,9 @@ async function importOnePieceSet(setCode: any) {
       const imageUrl = card.images?.large || card.images?.small || '';
 
       // Map rarity
-      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       const mappedRarity = RARITY_MAPPING[card.rarity] || card.rarity || 'Common';
 
       // Map card type
-      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       const mappedType = CARD_TYPES[card.type] || card.type || 'Character';
 
       // Build description from card properties

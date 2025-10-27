@@ -8,11 +8,9 @@
  *   node docs/samples/api_driven_variations.js
  */
 
-const axios = require('axios');
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'fs'.
-const fs = require('fs');
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'path'.
-const path = require('path');
+import axios from 'axios';
+import * as fs from 'fs';
+import * as path from 'path';
 
 // Configuration
 const API_BASE = process.env.API_BASE || 'http://localhost:5000';
