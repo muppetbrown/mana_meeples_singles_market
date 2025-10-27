@@ -1,0 +1,55 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    // ── TypeScript: one-off ────────────────────────────────────────────────
+    {
+      "label": "TS: Export Problems",
+      "type": "shell",
+      "command": "pnpm exec tsc -p . --noEmit --pretty false > build_logs/problems-ts.log",
+      "problemMatcher": "$tsc"
+    },
+
+    // ── ESLint: one-off ────────────────────────────────────────────────────
+    {
+      "label": "ESLint: Export Problems",
+      "type": "shell",
+      "command": "pnpm exec eslint . --ext .ts,.tsx,.js,.jsx --format unix | tee build_logs/problems-eslint.log",
+      "problemMatcher": "$eslint-compact"
+    },
+
+    // ── Combined “export all” one-off ──────────────────────────────────────
+    {
+      "label": "Populate & Export Problems (one-off)",
+      "dependsOn": [
+        "TS: Export Problems",
+        "ESLint: Export Problems"
+      ],
+      "dependsOrder": "parallel",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+
+    // ── Watchers (optional, no file output, live updates) ──────────────────
+    {
+      "label": "TS: Watch",
+      "type": "shell",
+      "command": "pnpm exec tsc -p . -w --noEmit",
+      "isBackground": true,
+      "problemMatcher": "$tsc-watch"
+    },
+    {
+      "label": "ESLint: Watch",
+      "type": "shell",
+      "command": "pnpm exec eslint . --ext .ts,.tsx,.js,.jsx --format unix --watch",
+      "isBackground": true,
+      "problemMatcher": "$eslint-compact"
+    },
+    {
+      "label": "Populate Problems (watch all)",
+      "dependsOn": ["TS: Watch", "ESLint: Watch"],
+      "dependsOrder": "parallel"
+    }
+  ]
+}

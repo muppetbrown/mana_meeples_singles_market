@@ -15,5 +15,8 @@
   
   "files.associations": {
     "*.css": "tailwindcss"
-  }
+  },
+
+  "eslint.runtime": "node",
+  "eslint.workingDirectories": [{ "mode": "auto" }]
 }
