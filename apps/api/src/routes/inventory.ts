@@ -38,8 +38,12 @@ router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response)
     const params: (string | number)[] = [];
     
     if (card_id) {
-      params.push(card_id);
-      sql += ` AND ci.card_id = $${params.length}`;
+      const asString = Array.isArray(card_id) ? card_id[0] : card_id;
+      const cardIdString = asString != null ? String(asString) : undefined;
+      if (cardIdString) {
+        params.push(cardIdString);
+        sql += ` AND ci.card_id = $${params.length}`;
+      }
     }
     
     sql += ` ORDER BY ci.created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
@@ -52,8 +56,12 @@ router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response)
     const countParams: (string | number)[] = [];
     
     if (card_id) {
-      countParams.push(card_id);
-      countSql += ` AND ci.card_id = $1`;
+      const asString = Array.isArray(card_id) ? card_id[0] : card_id;
+      const cardIdString = asString != null ? String(asString) : undefined;
+      if (cardIdString) {
+        countParams.push(cardIdString);
+        countSql += ` AND ci.card_id = $1`;
+      }
     }
     
     const countResult = await db.query(countSql, countParams);
@@ -342,11 +350,12 @@ router.post("/admin/inventory/bulk-import", adminAuthJWT, async (req: Request, r
     let errorCount = 0;
     const errors: {row: number; message: string}[] = [];
 
-    for (const item of items) {
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
       const parsed = AddInventorySchema.safeParse(item);
       if (!parsed.success) {
         errorCount++;
-        errors.push({ item, error: parsed.error.flatten() });
+        errors.push({ row: i + 1, message: JSON.stringify(parsed.error.flatten()) });
         continue;
       }
 
@@ -363,7 +372,7 @@ router.post("/admin/inventory/bulk-import", adminAuthJWT, async (req: Request, r
         successCount++;
       } catch (err) {
         errorCount++;
-        errors.push({ item, error: "Database error" });
+        errors.push({ row: i + 1, message: "Database error" });
       }
     }
 

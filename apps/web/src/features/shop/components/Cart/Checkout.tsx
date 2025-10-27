@@ -224,12 +224,12 @@ const Checkout = ({
           inventory_id: item.inventory_id,
 
           // Sanitize quantity
-          quantity: Math.max(1, Math.min(50, parseInt(item.quantity) || 1)),
+          quantity: Math.max(1, Math.min(50, Number.parseInt(String(item.quantity), 10) || 1)),
 
           // Sanitize price
-          price: Math.max(0, parseFloat(item.price) || 0)
+          price: Math.max(0, Number.parseFloat(String(item.price)) || 0)
         })),
-        total: Math.max(0, parseFloat(cartTotal) || 0), // Sanitize total
+        total: Math.max(0, Number.parseFloat(String(cartTotal)) || 0), // Sanitize total
         currency: currency.code || 'NZD',
         timestamp: new Date().toISOString(),
       };

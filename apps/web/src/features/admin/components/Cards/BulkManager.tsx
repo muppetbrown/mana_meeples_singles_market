@@ -122,7 +122,22 @@ const BulkInventoryManager: React.FC<BulkInventoryManagerProps> = ({ onInventory
       }
 
       const inventoryData = (await response.json()) as { inventory?: InventoryCSVRow[] };
-      const formattedData = formatInventoryForExport(inventoryData.inventory || []);
+
+      // Map CSV rows → InventoryItem before export
+      const items = (inventoryData.inventory ?? []).map(r => ({
+        name: String(r.name ?? ''),
+        set_name: String(r.set_name ?? ''),
+        card_number: String(r.card_number ?? ''),
+        rarity: String(r.rarity ?? ''),
+        quality: String(r.quality ?? 'NM'),
+        foil_type: String(r.foil_type ?? 'Regular'),
+        language: String(r.language ?? 'English'),
+        price: Number(r.price ?? 0),
+        stock_quantity: Number(r.stock_quantity ?? 0),
+        game_name: String(r.game_name ?? ''),
+        updated_at: String(r.updated_at ?? '')
+      }));
+      const formattedData = formatInventoryForExport(items);
 
       const filename = `inventory-export-${new Date().toISOString().split('T')[0]}.csv`;
       downloadCSV(formattedData, filename);
