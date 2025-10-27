@@ -53,7 +53,8 @@ export const adminAuthJWT = async (
       console.log(`🔄 JWT refreshed for ${decoded.username}`);
     }
 
-    (req as any).user = {
+    // Extend Request type properly instead of using 'as any'
+    (req as Request & { user: { username: string; role: string; exp: number; iat: number } }).user = {
       username: decoded.username,
       role: decoded.role,
       exp: decoded.exp,
@@ -61,8 +62,8 @@ export const adminAuthJWT = async (
     };
 
     next();
-  } catch (error: any) {
-    if (error.name === "TokenExpiredError") {
+  } catch (error: unknown) {
+    if (error instanceof Error && error.name === "TokenExpiredError") {
       console.warn("❌ Token expired");
       res.status(401).json({
         error: "Token expired. Please login again.",
@@ -71,7 +72,7 @@ export const adminAuthJWT = async (
       return;
     }
 
-    if (error.name === "JsonWebTokenError") {
+    if (error instanceof Error && error.name === "JsonWebTokenError") {
       console.warn("❌ Invalid token");
       res.status(401).json({
         error: "Invalid token",
@@ -117,7 +118,7 @@ export const adminAuthBasic = async (
       return;
     }
 
-    (req as any).user = { username, role: "admin" };
+    (req as Request & { user: { username: string; role: string } }).user = { username, role: "admin" };
     next();
   } catch (error) {
     console.error("Basic auth error:", error);
@@ -138,7 +139,7 @@ export const generateCSRFToken = (
   res.cookie("csrfToken", csrfToken, getCSRFCookieConfig(false));
   res.cookie("_csrfSecret", csrfToken, getCSRFCookieConfig(true));
 
-  (req as any).csrfToken = csrfToken;
+  (req as Request & { csrfToken: string }).csrfToken = csrfToken;
   next();
 };
 
@@ -154,7 +155,7 @@ export const validateCSRFToken = (
     return next();
   }
 
-  const clientToken = req.headers["x-csrf-token"] || (req.body as any)?._csrfToken;
+  const clientToken = req.headers["x-csrf-token"] || (req.body && typeof req.body === 'object' && '_csrfToken' in req.body ? req.body._csrfToken : undefined);
   const serverToken = req.cookies?._csrfSecret;
 
   if (!clientToken || !serverToken) {
@@ -186,7 +187,7 @@ export const adminAuthWithCSRF = (
   res: Response,
   next: NextFunction
 ): void => {
-  validateCSRFToken(req, res, (err?: any) => {
+  validateCSRFToken(req, res, (err?: unknown) => {
     if (err) return next(err);
     adminAuthJWT(req, res, next);
   });

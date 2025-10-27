@@ -77,7 +77,7 @@ const OrdersTab = () => {
       const data = await api.get<{ orders?: Order[] }>(ENDPOINTS.ADMIN.ORDERS);
       setOrders(Array.isArray(data?.orders) ? data.orders : []);
       setError(null);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching orders:', err);
       setError('Failed to load orders');
       setOrders([]);

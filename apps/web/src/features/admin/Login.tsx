@@ -14,7 +14,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { handleError } = useErrorHandler();
 
-  const handleLogin = async (e: any) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
     setLoading(true);
@@ -38,7 +38,7 @@ const Login = () => {
         const errorMsg = data.message || 'Unknown error';
         throw new Error(`Login failed: ${errorMsg}`);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       const formattedError = handleError(err, { context: 'admin login' });
       setError(formattedError.message);
     } finally {

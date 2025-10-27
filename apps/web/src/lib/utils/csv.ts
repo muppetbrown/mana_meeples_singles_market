@@ -9,7 +9,7 @@
  * @param {Array} headers - Optional array of headers (keys to include)
  * @returns {string} CSV formatted string
  */
-export const arrayToCSV = (data: any, headers = null) => {
+export const arrayToCSV = (data: Record<string, unknown>[], headers: string[] | null = null) => {
   if (!data || data.length === 0) {
     return '';
   }
@@ -21,7 +21,7 @@ export const arrayToCSV = (data: any, headers = null) => {
   const headerRow = csvHeaders.map(header => `"${header}"`).join(',');
 
   // Create data rows
-  const dataRows = data.map((row: any) => {
+  const dataRows = data.map((row: Record<string, unknown>) => {
     return csvHeaders.map(header => {
       const value = row[header];
       // Handle null/undefined values
@@ -42,7 +42,7 @@ export const arrayToCSV = (data: any, headers = null) => {
  * @param {Object} options - Parsing options
  * @returns {Array} Array of objects
  */
-export const csvToArray = (csvString: any, options = {}) => {
+export const csvToArray = (csvString: string, options: Record<string, unknown> = {}) => {
 
   type CsvOptions = { delimiter?: string; hasHeader?: boolean };
   const { delimiter = ',', hasHeader = true } = (options ?? {}) as CsvOptions;
@@ -58,7 +58,7 @@ export const csvToArray = (csvString: any, options = {}) => {
   }
 
   // Parse a single CSV line, handling quoted values
-  const parseLine = (line: any) => {
+  const parseLine = (line: string) => {
     const result = [];
     let current = '';
     let inQuotes = false;
