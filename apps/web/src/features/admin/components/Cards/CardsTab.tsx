@@ -264,7 +264,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       return cards;
     }
     // "Inventory" mode: Only show cards with stock
-    return cards.filter(c => Boolean(c?.has_inventory) && Number(c?.total_stock) > 0);
+    return cards.filter(c => Boolean(c?.has_inventory) && (c?.total_stock ?? 0) > 0);
   }, [cards, isInventoryMode]);
 
   // Calculate totals
@@ -321,7 +321,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       // For inventory mode, export current displayed cards with inventory data
       // For all cards mode, export all filtered cards
       const exportData = mode === 'inventory'
-        ? cards.filter(card => card.has_inventory && card.total_stock > 0)
+        ? cards.filter(card => card.has_inventory && (card.total_stock ?? 0) > 0)
         : cards;
 
       if (exportData.length === 0) {
@@ -330,9 +330,25 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         return;
       }
 
+      // Transform Card → InventoryItem before calling formatInventoryForExport
+      const inventoryItems = exportData.map(card => ({
+        inventory_id: card.id,
+        name: card.name,
+        set_name: card.set_name,
+        card_number: card.card_number ?? '',
+        rarity: card.rarity ?? '',
+        quality: 'NM', // Default quality for cards being exported
+        foil_type: card.finish === 'foil' ? 'Foil' : 'Regular',
+        language: 'English', // Default language
+        price: 0, // Default price
+        stock_quantity: card.total_stock ?? 0,
+        game_name: card.game_name ?? '',
+        updated_at: new Date().toISOString()
+      }));
+
       // Format the data for CSV export using existing utility
       const { formatInventoryForExport, downloadCSV } = await import('@/lib/utils');
-      const formattedData = formatInventoryForExport(exportData);
+      const formattedData = formatInventoryForExport(inventoryItems);
 
       // Generate filename with timestamp
       const timestamp = new Date().toISOString().split('T')[0];
@@ -487,13 +503,18 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           <VariationFilter
             selectedGame={selectedGame !== 'all' ? selectedGame : undefined}
             selectedSet={selectedSet !== 'all' ? selectedSet : undefined}
-            filters={{
-              treatment: selectedTreatment !== 'all' ? selectedTreatment : undefined,
-              borderColor: selectedBorderColor !== 'all' ? selectedBorderColor : undefined,
-              finish: selectedFinish !== 'all' ? selectedFinish : undefined,
-              promoType: selectedPromoType !== 'all' ? selectedPromoType : undefined,
-              frameEffect: selectedFrameEffect !== 'all' ? selectedFrameEffect : undefined,
-            }}
+            filters={(() => {
+              const raw = {
+                treatment: selectedTreatment !== 'all' ? selectedTreatment : undefined,
+                borderColor: selectedBorderColor !== 'all' ? selectedBorderColor : undefined,
+                finish: selectedFinish !== 'all' ? selectedFinish : undefined,
+                promoType: selectedPromoType !== 'all' ? selectedPromoType : undefined,
+                frameEffect: selectedFrameEffect !== 'all' ? selectedFrameEffect : undefined,
+              } as const;
+              return Object.fromEntries(
+                Object.entries(raw).filter(([,v]) => v !== undefined)
+              ) as { treatment?: string; borderColor?: string; finish?: string; promoType?: string; frameEffect?: string };
+            })()}
             onFilterChange={handleVariationFilterChange}
           />
         </div>
@@ -520,7 +541,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                 }}
               />
             ) : (
-              <CardGrid
+              <CardGrid<BrowseBaseCard>
                 cards={groupedCards}
                 mode={mode}
                 viewMode={viewMode}

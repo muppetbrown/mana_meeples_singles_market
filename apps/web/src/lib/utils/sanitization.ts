@@ -5,8 +5,8 @@
  * Remove HTML tags and potentially dangerous characters from input
  * This is a basic implementation - for production, consider using DOMPurify
  */
-const sanitizeText = (input: unknown) => {
-  if (typeof input !== 'string') return input;
+const sanitizeText = (input: unknown): string => {
+  if (typeof input !== 'string') return '';
 
   return input
     // Remove HTML tags
@@ -26,8 +26,8 @@ const sanitizeText = (input: unknown) => {
  * Sanitize HTML content more thoroughly
  * Allow basic formatting tags but strip dangerous content
  */
-const sanitizeHTML = (input: unknown) => {
-  if (typeof input !== 'string') return input;
+const sanitizeHTML = (input: unknown): string => {
+  if (typeof input !== 'string') return '';
 
   return input
     // Remove script tags and their content
@@ -50,7 +50,7 @@ const sanitizeHTML = (input: unknown) => {
  * Sanitize email addresses
  * Returns sanitized email or empty string for invalid emails (doesn't throw)
  */
-const sanitizeEmail = (email: unknown) => {
+const sanitizeEmail = (email: unknown): string => {
   if (typeof email !== 'string') return '';
 
   // Basic email format validation and sanitization
@@ -64,8 +64,8 @@ const sanitizeEmail = (email: unknown) => {
 /**
  * Sanitize phone numbers - keep only digits, spaces, hyphens, and parentheses
  */
-const sanitizePhone = (phone: unknown) => {
-  if (typeof phone !== 'string') return phone;
+const sanitizePhone = (phone: unknown): string => {
+  if (typeof phone !== 'string') return '';
 
   return phone.replace(/[^\d\s\-\(\)\+]/g, '').trim().substring(0, 20);
 };
@@ -73,8 +73,8 @@ const sanitizePhone = (phone: unknown) => {
 /**
  * Sanitize addresses - remove HTML but allow basic punctuation
  */
-const sanitizeAddress = (address: unknown) => {
-  if (typeof address !== 'string') return address;
+const sanitizeAddress = (address: unknown): string => {
+  if (typeof address !== 'string') return '';
 
   return address
     .replace(/<[^>]*>/g, '') // Remove HTML

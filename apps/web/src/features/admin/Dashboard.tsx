@@ -4,15 +4,28 @@ import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react
 import { api } from '@/lib/api';
 import { ENDPOINTS } from '@/lib/api';
 import CurrencySelector from '@/shared/ui/CurrencySelector';
+
 import UnifiedCardsTab from './components/Cards/CardsTab';
 import OrdersTab from './components//Orders/OrdersTab';
 import AnalyticsTab from './components/Analytics/AnalyticsTab';
+
+interface Currency {
+  code: string;
+  symbol: string;
+  label: string;
+  rate: number;
+}
 
 const Dashboard = () => {
   const [authChecking, setAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [activeTab, setActiveTab] = useState<'inventory' | 'all-cards' | 'analytics' | 'orders'>('inventory');
-  const [currency, setCurrency] = useState<'USD' | 'CAD'>('USD'); // Currently unused, kept for future
+  const [currency, setCurrency] = useState<Currency>({
+    code: 'USD',
+    symbol: '$',
+    label: 'US Dollar (USD)',
+    rate: 0.625
+  });
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -42,7 +55,7 @@ const Dashboard = () => {
     }
   };
 
-  const handleCurrencyChange = (newCurrency: 'USD' | 'CAD') => {
+  const handleCurrencyChange = (newCurrency: Currency) => {
     setCurrency(newCurrency);
   };
 
