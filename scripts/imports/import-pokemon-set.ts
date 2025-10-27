@@ -9,7 +9,7 @@ const pool = new Pool({
 });
 
 // Retry helper for API calls
-async function fetchWithRetry(url: any, headers: any, maxRetries = 3, delay = 2000) {
+async function fetchWithRetry(url: string, headers: Record<string, string>, maxRetries = 3, delay = 2000) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       console.log(`   Attempt ${attempt}/${maxRetries}...`);

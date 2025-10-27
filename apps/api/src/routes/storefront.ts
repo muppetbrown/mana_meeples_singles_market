@@ -163,12 +163,12 @@ router.get('/cards', async (req: Request, res: Response) => {
   try {
     const rows = await db.query(sql, params);
     return res.json({ cards: rows || [] });
-  } catch (err: any) {
-    console.error('GET /storefront/cards failed', { 
-      code: err?.code, 
-      message: err?.message,
-      detail: err?.detail 
-    });
+  } catch (err: unknown) {
+    console.error('GET /storefront/cards failed', err instanceof Error ? {
+      code: (err as any).code,
+      message: err.message,
+      detail: (err as any).detail
+    } : err);
     return res.status(500).json({ error: 'Failed to fetch storefront cards' });
   }
 });

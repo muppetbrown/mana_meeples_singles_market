@@ -88,8 +88,8 @@ router.get("/variations", async (req: Request, res: Response) => {
       promoTypes: normalize(row.promo_types),
       frameEffects: normalize(row.frame_effects),
     });
-  } catch (err: any) {
-    console.error("GET /variations failed", { code: err?.code, message: err?.message });
+  } catch (err: unknown) {
+    console.error("GET /variations failed", err instanceof Error ? { code: (err as any).code, message: err.message } : err);
     return res.status(500).json({ error: "Failed to fetch variations" });
   }
 });

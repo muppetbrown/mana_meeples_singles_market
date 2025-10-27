@@ -5,7 +5,7 @@ import { useToast } from '@/shared/ui/Toast';
 const STORAGE_KEY = 'mana_meeples_cart';
 
 export function useCart() {
-  const { showToast } = useToast();
+  const { toast } = useToast();
   const [items, setItems] = useState<CartItem[]>(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
@@ -53,12 +53,8 @@ export function useCart() {
 
   const addToCart = useCallback((item: Omit<CartItem, 'quantity'>, quantity = 1) => {
     addItem(item, quantity);
-    setCartNotifications(prev => [...prev, {
-      id: Date.now(),
-      message: `Added ${item.card_name} to cart`,
-      type: 'success'
-    }]);
-  }, [addItem]);
+    toast.success(`Added ${item.card_name} to cart`);
+  }, [addItem, toast]);
 
   const updateQuantity = useCallback((cardId: number, variationKey: string, quantity: number) => {
     setItems(current => {
@@ -99,8 +95,8 @@ export function useCart() {
   }, [items]);
 
   const addNotification = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
-    showToast(message, type);
-  }, [showToast]);
+    toast[type](message);
+  }, [toast]);
 
   return {
     cart,
