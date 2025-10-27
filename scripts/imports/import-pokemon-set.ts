@@ -1,8 +1,7 @@
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'Pool'.
-const { Pool } = require('pg');
-require('dotenv').config();
+import { Pool } from 'pg';
+import type { PoolClient } from 'pg';
+import 'dotenv/config';
 
-// @ts-expect-error TS(2451): Cannot redeclare block-scoped variable 'pool'.
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
@@ -14,11 +13,15 @@ async function fetchWithRetry(url: string, headers: Record<string, string>, maxR
     try {
       console.log(`   Attempt ${attempt}/${maxRetries}...`);
       
-      const response = await fetch(url, { 
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+
+      const response = await fetch(url, {
         headers,
-        // @ts-expect-error TS(2769): No overload matches this call.
-        timeout: 30000 // 30 second timeout
+        signal: controller.signal
       });
+
+      clearTimeout(timeoutId);
       
       if (!response.ok) {
         if (response.status === 504 || response.status === 503 || response.status === 502) {
@@ -44,10 +47,10 @@ async function fetchWithRetry(url: string, headers: Record<string, string>, maxR
       }
       
       return await response.json();
-    } catch (err) {
+    } catch (err: unknown) {
       if (attempt === maxRetries) throw err;
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
-      console.log(`   ⚠️  ${err.message}, retrying in ${delay}ms...`);
+      const message = err instanceof Error ? err.message : String(err);
+      console.log(`   ⚠️  ${message}, retrying in ${delay}ms...`);
       await new Promise(resolve => setTimeout(resolve, delay));
       delay *= 2;
     }
@@ -55,7 +58,7 @@ async function fetchWithRetry(url: string, headers: Record<string, string>, maxR
 }
 
 // Validate set ID format
-function validateSetId(setId: any) {
+function validateSetId(setId: string) {
   const normalized = setId.toLowerCase().trim();
   
   // Common patterns including the weird Black Bolt/White Flare codes
@@ -71,7 +74,7 @@ function validateSetId(setId: any) {
 }
 
 // Try multiple query formats for finding cards
-async function fetchCardsMultipleFormats(setId: any, page: any, headers: any) {
+async function fetchCardsMultipleFormats(setId: string, page: number, headers: Record<string, string>) {
   const queries = [
     // Standard query
     `https://api.pokemontcg.io/v2/cards?q=set.id:${setId}&page=${page}&pageSize=250`,
@@ -89,9 +92,9 @@ async function fetchCardsMultipleFormats(setId: any, page: any, headers: any) {
         console.log(`   ✅ Success with query format ${i + 1}`);
         return data;
       }
-    } catch (err) {
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
-      console.log(`   ❌ Query format ${i + 1} failed: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.log(`   ❌ Query format ${i + 1} failed: ${message}`);
       if (i === queries.length - 1) throw err;
     }
   }
@@ -100,7 +103,7 @@ async function fetchCardsMultipleFormats(setId: any, page: any, headers: any) {
 }
 
 // Import Pokemon set from Pokemon TCG API
-async function importPokemonSet(setId: any) {
+async function importPokemonSet(setId: string) {
   const normalizedSetId = validateSetId(setId);
   
   console.log(`\n🎴 Starting import for Pokemon set: ${normalizedSetId.toUpperCase()}`);
@@ -124,9 +127,9 @@ async function importPokemonSet(setId: any) {
       console.log(`   Total Cards: ${setInfo.total || 'Unknown'}`);
       console.log(`   Series: ${setInfo.series || 'Unknown'}`);
     }
-  } catch (err) {
-    // @ts-expect-error TS(2571): Object is of type 'unknown'.
-    console.log(`❌ Could not verify set: ${err.message}`);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.log(`❌ Could not verify set: ${message}`);
     console.log('\n💡 Suggestions:');
     console.log('   1. Check set ID at: https://pokemontcg.io/sets');
     console.log('   2. Ensure the set ID is correct (case-insensitive)');
@@ -141,8 +144,7 @@ async function importPokemonSet(setId: any) {
   if (setInfo && setInfo.releaseDate) {
     const releaseDate = new Date(setInfo.releaseDate);
     const now = new Date();
-    // @ts-expect-error TS(2362): The left-hand side of an arithmetic operation must... Remove this comment to see the full error message
-    const daysSinceRelease = Math.floor((now - releaseDate) / (1000 * 60 * 60 * 24));
+    const daysSinceRelease = Math.floor((now.getTime() - releaseDate.getTime()) / (1000 * 60 * 60 * 24));
     
     if (daysSinceRelease < 0) {
       console.log(`\n⚠️  WARNING: This set releases in ${Math.abs(daysSinceRelease)} days!`);
@@ -194,9 +196,9 @@ async function importPokemonSet(setId: any) {
         console.log(`   ⏳ Waiting 1000ms before next request...`);
         await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    } catch (err) {
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
-      console.log(`\n❌ Failed to fetch page ${page}: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.log(`\n❌ Failed to fetch page ${page}: ${message}`);
       
       if (allCards.length > 0) {
         console.log(`\n⚠️  Partial import: Retrieved ${allCards.length} cards before error.`);
@@ -330,9 +332,9 @@ async function importPokemonSet(setId: any) {
         console.log(`   📊 Processed ${idx + 1}/${allCards.length} cards (${Math.round((idx + 1) / allCards.length * 100)}%)`);
       }
 
-    } catch (err) {
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
-      console.error(`   ⚠️  Error with ${card.name}: ${err.message}`);
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error(`   ⚠️  Error with ${card.name}: ${message}`);
       errors++;
     }
   }

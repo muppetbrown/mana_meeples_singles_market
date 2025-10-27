@@ -6,22 +6,25 @@ async function listPokemonSets() {
   console.log('━'.repeat(80));
   
   // Group by series
-  const grouped = {};
-  data.data.forEach((set: any) => {
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
+  interface PokemonSet {
+    id: string;
+    name: string;
+    series: string;
+    releaseDate: string;
+  }
+
+  const grouped: Record<string, PokemonSet[]> = {};
+  data.data.forEach((set: PokemonSet) => {
     if (!grouped[set.series]) {
-      // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
       grouped[set.series] = [];
     }
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
     grouped[set.series].push(set);
   });
-  
+
   // Print by series
   Object.keys(grouped).reverse().forEach(series => {
     console.log(`\n${series}:`);
-    // @ts-expect-error TS(7053): Element implicitly has an 'any' type because expre... Remove this comment to see the full error message
-    grouped[series].forEach((set: any) => {
+    grouped[series].forEach((set: PokemonSet) => {
       console.log(`  ${set.name.padEnd(40)} | ID: ${set.id.padEnd(15)} | ${set.releaseDate}`);
     });
   });
