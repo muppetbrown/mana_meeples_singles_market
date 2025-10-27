@@ -3,6 +3,31 @@
  * Provides functionality to import and export inventory data in CSV format
  */
 
+// Type definitions
+export interface InventoryItem {
+  inventory_id?: number;
+  id?: number;
+  name: string;
+  set_name: string;
+  card_number?: string;
+  rarity?: string;
+  quality: string;
+  foil_type?: string;
+  language?: string;
+  price: string | number;
+  stock_quantity: number;
+  game_name?: string;
+  updated_at?: string;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  totalRows: number;
+  validRows: number;
+}
+
 /**
  * Convert array of objects to CSV string
  * @param {Array} data - Array of objects to convert
@@ -101,13 +126,13 @@ export const csvToArray = (csvString: string, options: Record<string, unknown> =
   }
 
   // Parse data rows
-  const data = [];
+  const data: Record<string, string>[] = [];
   for (let i = startIndex; i < lines.length; i++) {
 
     const line = lines[i].trim();
     if (line) {
       const values = parseLine(line);
-      const row = {};
+      const row: Record<string, string> = {};
 
       headers.forEach((header, index) => {
 
@@ -127,7 +152,7 @@ export const csvToArray = (csvString: string, options: Record<string, unknown> =
  * @param {string} filename - Filename for the download
  * @param {Array} headers - Optional headers to include
  */
-export const downloadCSV = (data: any, filename = 'export.csv', headers = null) => {
+export const downloadCSV = (data: Record<string, unknown>[], filename = 'export.csv', headers: string[] | null = null) => {
   try {
     const csvContent = arrayToCSV(data, headers);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
@@ -146,9 +171,9 @@ export const downloadCSV = (data: any, filename = 'export.csv', headers = null) 
 
     // Clean up
     URL.revokeObjectURL(url);
-  } catch (error) {
-
-    throw new Error(`Failed to download CSV: ${error.message}`);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+    throw new Error(`Failed to download CSV: ${errorMessage}`);
   }
 };
 
@@ -157,9 +182,9 @@ export const downloadCSV = (data: any, filename = 'export.csv', headers = null) 
  * @param {Array} data - Parsed CSV data to validate
  * @returns {Object} Validation result with errors and warnings
  */
-export const validateInventoryCSV = (data: any) => {
-  const errors = [];
-  const warnings: any = [];
+export const validateInventoryCSV = (data: Record<string, unknown>[]): ValidationResult => {
+  const errors: string[] = [];
+  const warnings: string[] = [];
 
   const requiredFields = ['name', 'set_name', 'quality', 'price', 'stock_quantity'];
   const optionalFields = ['card_number', 'rarity', 'foil_type', 'language', 'game_name'];
@@ -247,8 +272,8 @@ export const validateInventoryCSV = (data: any) => {
  * @param {Array} inventoryData - Raw inventory data from API
  * @returns {Array} Formatted data ready for CSV export
  */
-export const formatInventoryForExport = (inventoryData: any) => {
-  return inventoryData.map((item: any) => ({
+export const formatInventoryForExport = (inventoryData: InventoryItem[]) => {
+  return inventoryData.map((item: InventoryItem) => ({
     id: item.inventory_id || item.id,
     name: item.name,
     set_name: item.set_name,

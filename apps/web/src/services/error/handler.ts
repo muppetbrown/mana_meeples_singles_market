@@ -49,14 +49,15 @@ const HTTP_STATUS = {
 /**
  * Categorize error based on characteristics
  */
-export function categorizeError(error: any): ErrorType {
+export function categorizeError(error: unknown): ErrorType {
   // Network errors
-  if (!navigator.onLine || (error.name === 'TypeError' && error.message.includes('fetch'))) {
+  if (!navigator.onLine || (error instanceof Error && error.name === 'TypeError' && error.message.includes('fetch'))) {
     return ErrorType.NETWORK;
   }
 
-  // Extract status code
-  const status = error.status || error.response?.status;
+  // Extract status code with proper type checking
+  const errorObj = error as Record<string, unknown>;
+  const status = errorObj.status || (errorObj.response as Record<string, unknown>)?.status;
 
   // Authentication errors
   if (status === HTTP_STATUS.UNAUTHORIZED || status === HTTP_STATUS.FORBIDDEN) {
@@ -79,7 +80,7 @@ export function categorizeError(error: any): ErrorType {
 /**
  * Format error for user display
  */
-export function formatError(error: any, customMessage?: string): FormattedError {
+export function formatError(error: unknown, customMessage?: string): FormattedError {
   const category = categorizeError(error);
   const template = ERROR_TEMPLATES[category];
 
@@ -96,7 +97,7 @@ export function formatError(error: any, customMessage?: string): FormattedError 
 /**
  * Log error for monitoring (console in dev, service in prod)
  */
-export function logError(error: any, context: Record<string, any> = {}): void {
+export function logError(error: unknown, context: Record<string, unknown> = {}): void {
   const formattedError = formatError(error);
 
   if (process.env.NODE_ENV === 'development') {
@@ -116,7 +117,7 @@ export function logError(error: any, context: Record<string, any> = {}): void {
  * React hook for error handling
  */
 export function useErrorHandler() {
-  const handleError = (error: any, context?: Record<string, any>) => {
+  const handleError = (error: unknown, context?: Record<string, unknown>) => {
     logError(error, context);
     return formatError(error);
   };

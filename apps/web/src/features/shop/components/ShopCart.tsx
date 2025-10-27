@@ -2,7 +2,7 @@
 import React, { useMemo, useCallback } from 'react';
 import { CartModal, MiniCart, Checkout } from '@/features/shop/components';
 import { useCart, useVariationSelection } from '@/features/hooks';
-import type { StorefrontCard } from '@/types';
+import type { StorefrontCard, CardVariation } from '@/types';
 
 interface ShopCartProps {
   cards: StorefrontCard[];
@@ -50,7 +50,7 @@ export const ShopCart: React.FC<ShopCartProps> = ({
     selectVariation(cardId, e.target.value);
   }, [selectVariation]);
 
-  const handleAddToCart = useCallback((card: StorefrontCard, selectedVariation: any) => () => {
+  const handleAddToCart = useCallback((card: StorefrontCard, selectedVariation: CardVariation) => () => {
     addToCart({
       card_id: card.id,
       inventory_id: selectedVariation.inventory_id,
@@ -141,7 +141,7 @@ export const useShopCartUtils = (cards: StorefrontCard[]) => {
     selectVariation(cardId, e.target.value);
   }, [selectVariation]);
 
-  const handleAddToCart = useCallback((card: StorefrontCard, selectedVariation: any) => () => {
+  const handleAddToCart = useCallback((card: StorefrontCard, selectedVariation: CardVariation) => () => {
     addToCart({
       card_id: card.id,
       inventory_id: selectedVariation.inventory_id,

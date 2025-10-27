@@ -5,10 +5,15 @@ import { X, Keyboard } from 'lucide-react';
  * Keyboard Shortcuts Help Modal Component
  * Displays available keyboard shortcuts for improved accessibility and power user experience
  */
+interface KeyboardShortcutsProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
 const KeyboardShortcutsModal = ({
   isOpen,
   onClose
-}: any) => {
+}: KeyboardShortcutsProps) => {
   if (!isOpen) return null;
 
   const shortcuts = [
@@ -59,7 +64,7 @@ const KeyboardShortcutsModal = ({
     }
   ];
 
-  const handleBackdropClick = (e: any) => {
+  const handleBackdropClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) {
       onClose();
     }

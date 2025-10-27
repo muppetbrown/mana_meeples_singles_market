@@ -10,7 +10,7 @@ import {
   SectionHeader
 } from '@/shared/ui';
 import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
-import type { StorefrontCard, Currency } from '@/types';
+import type { StorefrontCard, CardVariation, Currency } from '@/types';
 
 
 interface SelectedVariations {
@@ -26,7 +26,7 @@ interface CardDisplayAreaProps {
     sortBy: string;
   };
   onVariationChange: (cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onAddToCart: (card: StorefrontCard, selectedVariation: any) => () => void;
+  onAddToCart: (card: StorefrontCard, selectedVariation: CardVariation) => () => void;
   loading: boolean;
 }
 
@@ -212,7 +212,7 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
               <CardList
                 cards={group.cards}
                 currency={currency}
-                onAddToCart={(card: any, variation: any) => onAddToCart(card, variation)}
+                onAddToCart={(card: StorefrontCard, variation: CardVariation) => onAddToCart(card, variation)}
               />
             </div>
           ))}

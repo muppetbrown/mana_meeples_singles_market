@@ -15,7 +15,7 @@ export interface FormattedError {
   title: string;
   message: string;
   action: string;
-  originalError: any;
+  originalError: unknown;
   timestamp: string;
 }
 

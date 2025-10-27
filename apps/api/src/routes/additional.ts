@@ -32,7 +32,7 @@ router.get("/sets", async (req: Request, res: Response): Promise<void> => {
       LEFT JOIN cards c ON c.set_id = cs.id
     `;
 
-    const params: any[] = [];
+    const params: unknown[] = [];
 
     if (game_id) {
       query += ` WHERE cs.game_id = $1`;
@@ -202,7 +202,7 @@ router.get("/search/autocomplete", async (req: Request, res: Response): Promise<
 
     // Build query
     const conditions = ["(c.name ILIKE $1 OR c.card_number ILIKE $1)"];
-    const params: any[] = [`%${q}%`];
+    const params: unknown[] = [`%${q}%`];
     let paramIndex = 2;
 
     if (game_id) {
@@ -272,7 +272,7 @@ router.get("/search", async (req: Request, res: Response): Promise<void> => {
     const conditions = [
       "(c.name ILIKE $1 OR c.card_number ILIKE $1 OR c.sku ILIKE $1)"
     ];
-    const params: any[] = [`%${searchTerm}%`];
+    const params: unknown[] = [`%${searchTerm}%`];
     let paramIndex = 2;
 
     if (game_id) {

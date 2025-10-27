@@ -1,11 +1,12 @@
 // apps/api/tests/integration/inventory.routes.test.ts
 import { beforeAll, afterAll, describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
+import type { Express } from "express";
 import { startPostgres, stopPostgres, bootstrapMinimalSchema, resetDb } from "../setup/testEnv.js";
 import { seedCards, seedInventory } from "../setup/db.js";
 
-let createApp: any;
-let app: any;
+let createApp: () => Express;
+let app: Express;
 let authToken: string;
 
 beforeAll(async () => {
@@ -187,7 +188,7 @@ describe("GET /api/admin/inventory", () => {
       .expect(200);
 
     expect(res.body.inventory).toBeDefined();
-    res.body.inventory.forEach((item: any) => {
+    res.body.inventory.forEach((item: Record<string, unknown>) => {
       expect(item.card_id).toBe(1001);
     });
   });

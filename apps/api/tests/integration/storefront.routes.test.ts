@@ -1,11 +1,12 @@
 // apps/api/tests/integration/storefront.routes.test.ts
 import { beforeAll, afterAll, describe, it, expect, beforeEach } from "vitest";
 import request from "supertest";
+import type { Express } from "express";
 import { startPostgres, stopPostgres, bootstrapMinimalSchema, resetDb } from "../setup/testEnv.js";
 import { seedCards, seedMultipleCards } from "../setup/db.js";
 
-let createApp: any;
-let app: any;
+let createApp: () => Express;
+let app: Express;
 
 beforeAll(async () => {
   await startPostgres();
@@ -43,7 +44,7 @@ describe("GET /api/storefront/cards", () => {
 
     expect(res.body.cards).toBeDefined();
     // All cards should belong to game_id 1
-    res.body.cards.forEach((card: any) => {
+    res.body.cards.forEach((card: Record<string, unknown>) => {
       expect(card.game_id || card.game_name).toBeDefined();
     });
   });
