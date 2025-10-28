@@ -1,31 +1,4 @@
 C:\Git_Repos\mana_meeples_singles_market>pnpm -w tsc -b
-apps/web/src/features/admin/components/Cards/CardsTab.tsx:561:17 - error TS2741: Property 'label' is missing in type '{ code: string; symbol: string; rate: number; }' but required in type 'Currency'.
-
-561                 currency={{ code: 'USD', symbol: '$', rate: 1 }}
-                    ~~~~~~~~
-
-  apps/web/src/types/ui/common.ts:6:3
-    6   label: string;
-        ~~~~~
-    'label' is declared here.
-  apps/web/src/shared/layout/CardList.tsx:22:3
-    22   currency: Currency;
-         ~~~~~~~~
-    The expected type comes from property 'currency' which is declared here on type 'IntrinsicAttributes & CardListProps'
-
-apps/web/src/features/admin/Dashboard.tsx:85:17 - error TS2322: Type '(newCurrency: Currency) => void' is not assignable to type '(currency: Currency) => void'.
-  Types of parameters 'newCurrency' and 'currency' are incompatible.
-    Type 'Currency' is not assignable to type 'Currency'. Two different types with this name exist, but they are unrelated.
-      Property 'label' is optional in type 'Currency' but required in type 'Currency'.
-
-85                 onCurrencyChange={handleCurrencyChange}
-                   ~~~~~~~~~~~~~~~~
-
-  apps/web/src/shared/ui/CurrencySelector.tsx:14:3
-    14   onCurrencyChange: (currency: Currency) => void;
-         ~~~~~~~~~~~~~~~~
-    The expected type comes from property 'onCurrencyChange' which is declared here on type 'IntrinsicAttributes & CurrencySelectorProps'
-
 apps/web/src/features/hooks/useCardDisplayArea.tsx:169:17 - error TS2322: Type '(card: StorefrontCard, variation: CardVariation) => void' is not assignable to type '(card: StorefrontCard, variation?: unknown) => void'.
   Types of parameters 'variation' and 'variation' are incompatible.
     Type 'unknown' is not assignable to type 'CardVariation'.
@@ -33,149 +6,27 @@ apps/web/src/features/hooks/useCardDisplayArea.tsx:169:17 - error TS2322: Type '
 169                 onAddToCart: (card: StorefrontCard, variation: CardVariation) => {
                     ~~~~~~~~~~~
 
-apps/web/src/features/hooks/useShopViewMode.ts:17:54 - error TS2345: Argument of type '{ symbol: string; rate: number; code: string; }' is not assignable to parameter of type 'Currency | (() => Currency)'.
-  Property 'label' is missing in type '{ symbol: string; rate: number; code: string; }' but required in type 'Currency'.
-
- 17   const [currency, setCurrency] = useState<Currency>({
-                                                         ~
- 18     symbol: 'NZ$',
-    ~~~~~~~~~~~~~~~~~~
-...
- 20     code: 'NZD'
-    ~~~~~~~~~~~~~~~
- 21   });
-    ~~~
-
-  apps/web/src/types/ui/common.ts:6:3
-    6   label: string;
-        ~~~~~
-    'label' is declared here.
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:62:58 - error TS2345: Argument of type '{ firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }' is not assignable to parameter of type 'CheckoutForm | (() => CheckoutForm)'.
-  Type '{ firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }' is missing the following properties from type 'CheckoutForm': items, total, currency, timestamp
-
- 62   const [formData, setFormData] = useState<CheckoutForm>({
-                                                             ~
- 63     firstName: '',
-    ~~~~~~~~~~~~~~~~~~
-...
- 73     notes: '',
-    ~~~~~~~~~~~~~~
- 74   });
-    ~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:641:73 - error TS2345: Argument of type 'Currency | { code: string; symbol: string; rate: number; }' is not assignable to parameter of type 'Currency'.
-  Property 'label' is missing in type '{ code: string; symbol: string; rate: number; }' but required in type 'Currency'.
-
-641                       {formatCurrencySimple(item.price * item.quantity, effectiveCurrency)}
-                                                                            ~~~~~~~~~~~~~~~~~
-
-  apps/web/src/types/ui/common.ts:6:3
-    6   label: string;
-        ~~~~~
-    'label' is declared here.
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:652:52 - error TS2345: Argument of type 'Currency | { code: string; symbol: string; rate: number; }' is not assignable to parameter of type 'Currency'.
-  Property 'label' is missing in type '{ code: string; symbol: string; rate: number; }' but required in type 'Currency'.
-
-652                   {formatCurrencySimple(cartTotal, effectiveCurrency)}
-                                                       ~~~~~~~~~~~~~~~~~
-
-  apps/web/src/types/ui/common.ts:6:3
-    6   label: string;
-        ~~~~~
-    'label' is declared here.
-
-apps/web/src/features/shop/components/Cart/MiniCart.tsx:79:65 - error TS2345: Argument of type 'Currency | { code: string; symbol: string; rate: number; }' is not assignable to parameter of type 'Currency'.
-  Property 'label' is missing in type '{ code: string; symbol: string; rate: number; }' but required in type 'Currency'.
-
-79               {formatCurrencySimple(item.price * item.quantity, currency || { code: 'USD', symbol: '$', rate: 1 })}
-                                                                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  apps/web/src/types/ui/common.ts:6:3
-    6   label: string;
-        ~~~~~
-    'label' is declared here.
-
-apps/web/src/features/shop/components/Cart/MiniCart.tsx:96:51 - error TS2345: Argument of type 'Currency | { code: string; symbol: string; rate: number; }' is not assignable to parameter of type 'Currency'.
-  Property 'label' is missing in type '{ code: string; symbol: string; rate: number; }' but required in type 'Currency'.
-
-96           View Cart ({formatCurrencySimple(total, currency || { code: 'USD', symbol: '$', rate: 1 })})
-                                                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-  apps/web/src/types/ui/common.ts:6:3
-    6   label: string;
-        ~~~~~
-    'label' is declared here.
-
-apps/web/src/features/shop/components/ShopHeader.tsx:51:17 - error TS2322: Type '(currency: import("C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/ui/common").Currency) => void' is not assignable to type '(currency: Currency) => void'.
-  Types of parameters 'currency' and 'currency' are incompatible.
-    Type 'Currency' is not assignable to type 'import("C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/ui/common").Currency'.
-      Property 'label' is optional in type 'Currency' but required in type 'Currency'.
-
-51                 onCurrencyChange={onCurrencyChange}
-                   ~~~~~~~~~~~~~~~~
-
-  apps/web/src/shared/ui/CurrencySelector.tsx:14:3
-    14   onCurrencyChange: (currency: Currency) => void;
-         ~~~~~~~~~~~~~~~~
-    The expected type comes from property 'onCurrencyChange' which is declared here on type 'IntrinsicAttributes & CurrencySelectorProps'
-
-apps/web/src/features/shop/ShopPage.tsx:236:11 - error TS2322: Type '{ searchTerm: string; selectedGame: string; selectedSet: string; games: Game[]; sets: Set[]; cartCount: number; currency: Currency; isOffline: boolean; onShowCart: () => void; onCurrencyChange: (newCurrency: Currency) => void; onShowKeyboardShortcuts: () => void; }' is not assignable to type 'IntrinsicAttributes & ShopHeaderProps'.
-  Property 'games' does not exist on type 'IntrinsicAttributes & ShopHeaderProps'.
-
-236           games={games}
-              ~~~~~
-
-apps/web/src/features/shop/ShopPage.tsx:269:17 - error TS2322: Type '{ searchTerm: string; resultsCount: number; currency: Currency; setCurrency: (currency: Currency) => void; viewMode: ViewMode; setViewMode: (mode: ViewMode) => void; }' is not assignable to type 'IntrinsicAttributes & ResultsHeaderProps'.
-  Property 'currency' does not exist on type 'IntrinsicAttributes & ResultsHeaderProps'.
-
-269                 currency={currency}
-                    ~~~~~~~~
-
-apps/web/src/features/shop/ShopPage.tsx:282:35 - error TS2322: Type '(card: StorefrontCard, selectedVariation: CardVariation) => () => void' is not assignable to type '(state: { open: boolean; cardId: number; }) => void'.
-  Target signature provides too few arguments. Expected 2 or more, but got 1.
-
-282                 setAddToCartModal={handleAddToCart}
-                                      ~~~~~~~~~~~~~~~~~
-
-  apps/web/src/features/shop/ShopPage.tsx:282:35
-    282                 setAddToCartModal={handleAddToCart}
-                                          ~~~~~~~~~~~~~~~~~
-    Did you mean to call this expression?
-
-apps/web/src/features/shop/ShopPageRefactored.tsx:237:11 - error TS2322: Type '{ searchTerm: string; selectedGame: string; selectedSet: string; games: Game[]; sets: Set[]; cartCount: number; currency: Currency; isOffline: boolean; onShowCart: () => void; onCurrencyChange: (newCurrency: Currency) => void; onShowKeyboardShortcuts: () => void; }' is not assignable to type 'IntrinsicAttributes & ShopHeaderProps'.
-  Property 'games' does not exist on type 'IntrinsicAttributes & ShopHeaderProps'.
-
-237           games={games}
-              ~~~~~
-
-apps/web/src/features/shop/ShopPageRefactored.tsx:270:17 - error TS2322: Type '{ searchTerm: string; resultsCount: number; currency: Currency; setCurrency: (currency: Currency) => void; viewMode: ViewMode; setViewMode: (mode: ViewMode) => void; }' is not assignable to type 'IntrinsicAttributes & ResultsHeaderProps'.
-  Property 'currency' does not exist on type 'IntrinsicAttributes & ResultsHeaderProps'.
-
-270                 currency={currency}
-                    ~~~~~~~~
-
-apps/web/src/features/shop/ShopPageRefactored.tsx:283:35 - error TS2322: Type '(card: StorefrontCard, selectedVariation: CardVariation) => () => void' is not assignable to type '(state: { open: boolean; cardId: number; }) => void'.
-  Target signature provides too few arguments. Expected 2 or more, but got 1.
-
-283                 setAddToCartModal={handleAddToCart}
-                                      ~~~~~~~~~~~~~~~~~
-
-  apps/web/src/features/shop/ShopPageRefactored.tsx:283:35
-    283                 setAddToCartModal={handleAddToCart}
-                                          ~~~~~~~~~~~~~~~~~
-    Did you mean to call this expression?
-
-apps/web/src/shared/layout/CardGrid.tsx:142:17 - error TS2352: Conversion of type 'T' to type 'Card' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+apps/web/src/shared/layout/CardGrid.tsx:76:18 - error TS2344: Type 'T' does not satisfy the constraint 'Card'.
   Type 'MinimalCard' is missing the following properties from type 'Card': sku, card_number, set_name, game_name
 
-142           card={card as Card}
-                    ~~~~~~~~~~~~
+76 }: CardGridProps<T>) => {
+                    ~
 
-apps/web/src/shared/layout/CardGrid.tsx:145:11 - error TS2741: Property 'label' is missing in type '{ code: string; symbol: string; rate: number; }' but required in type 'Currency'.
+apps/web/src/shared/layout/CardGrid.tsx:142:11 - error TS2375: Type 'T' is not assignable to type 'Card' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type 'MinimalCard' is missing the following properties from type 'Card': sku, card_number, set_name, game_name
 
-145           currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1 }}
+142           card={card}
+              ~~~~
+
+  apps/web/src/shared/card/CardItem.tsx:33:3
+    33   card: Card;
+         ~~~~
+    The expected type comes from property 'card' which is declared here on type 'IntrinsicAttributes & CardItemProps'
+
+apps/web/src/shared/layout/CardGrid.tsx:145:11 - error TS2322: Type '{ code: string; symbol: string; rate: number; } | { code: string; symbol: string; rate: number; label: string; }' is not assignable to type 'Currency'.
+  Property 'label' is missing in type '{ code: string; symbol: string; rate: number; }' but required in type 'Currency'.
+
+145           currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
               ~~~~~~~~
 
   apps/web/src/types/ui/common.ts:6:3
@@ -193,9 +44,10 @@ apps/web/src/shared/layout/CardGrid.tsx:158:27 - error TS2379: Argument of type 
 158     if (!isStorefrontCard(card)) {
                               ~~~~
 
-apps/web/src/shared/layout/CardGrid.tsx:187:9 - error TS2741: Property 'label' is missing in type '{ code: string; symbol: string; rate: number; }' but required in type 'Currency'.
+apps/web/src/shared/layout/CardGrid.tsx:187:9 - error TS2322: Type '{ code: string; symbol: string; rate: number; } | { code: string; symbol: string; rate: number; label: string; }' is not assignable to type 'Currency'.
+  Property 'label' is missing in type '{ code: string; symbol: string; rate: number; }' but required in type 'Currency'.
 
-187         currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1 }}
+187         currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
             ~~~~~~~~
 
   apps/web/src/types/ui/common.ts:6:3
@@ -207,11 +59,5 @@ apps/web/src/shared/layout/CardGrid.tsx:187:9 - error TS2741: Property 'label' i
          ~~~~~~~~
     The expected type comes from property 'currency' which is declared here on type 'IntrinsicAttributes & CardItemProps'
 
-apps/web/src/shared/ui/CurrencySelector.tsx:6:11 - error TS2430: Interface 'Currency' incorrectly extends interface 'import("C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/ui/common").Currency'.
-  Property 'label' is optional in type 'Currency' but required in type 'Currency'.
 
-6 interface Currency extends BaseCurrency {
-            ~~~~~~~~
-
-
-Found 21 errors.
+Found 6 errors.

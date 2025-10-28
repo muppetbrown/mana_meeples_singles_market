@@ -31,6 +31,8 @@ mana_meeples_singles_market
 │ │ │ ├── services/
 │ │ │ │ ├── emailService.ts
 │ │ │ │ └── variationAnalysis.ts
+│ │ │ ├── types/
+│ │ │ │ └── express.d.ts
 │ │ │ ├── utils/
 │ │ │ │ └── strings.ts
 │ │ │ ├── app.ts
@@ -477,6 +479,7 @@ mana_meeples_singles_market
 │ │ │ └── testresults.txt
 │ │ ├── .env
 │ │ ├── .env.example
+│ │ ├── .tsbuildinfo
 │ │ ├── package-lock.json
 │ │ ├── package.json
 │ │ ├── tsconfig.build.json
@@ -536,8 +539,7 @@ mana_meeples_singles_market
 │  │ │  │ ├── ShopFilters.tsx
 │  │ │  │ ├── ShopHeader.tsx
 │  │ │  │ └── ShopState.tsx
-│  │ │  ├── ShopPage.tsx
-│  │ │  └── ShopPageRefactored.tsx
+│  │ │  └── ShopPage.tsx
 │  │ ├── lib/
 │  │ │ ├── api/
 │  │ │ │ ├── client.ts
@@ -614,6 +616,7 @@ mana_meeples_singles_market
 │  │ └── vit-env.d.ts
 │  ├── .env.local
 │  ├── .env.local.example
+│  ├── .tsbuildinfo
 │  ├── index.html
 │  ├── package.json
 │  ├── postcss.config.cjs
@@ -632,11 +635,10 @@ mana_meeples_singles_market
 │ │ ├── mtg_card_variations_sample.json
 │ │ ├── onepiece_card_variations_sample.json
 │ │ └── sv_card_variations_sample.json
-│ ├── ~$mplete File Documentation for apps.docx
 │ ├── Complete File Documentation for apps.docx
 │ ├── openapi.yaml
 │ ├── pokemon_set_codes.txt
-│ └── render-deployment-guide.md
+│ └── problems_to_fix.txt
 ├── scripts/
 │ ├── imports/
 │ │ ├── analyze-variations.ts

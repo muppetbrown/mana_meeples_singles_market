@@ -358,7 +358,6 @@ class VariationWorkflows {
 /**
  * Main execution
  */
-// @ts-expect-error TS(2393): Duplicate function implementation.
 async function main() {
   console.log('🚀 Starting Card Variations API Demo');
   console.log('━'.repeat(60));

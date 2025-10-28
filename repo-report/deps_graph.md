@@ -51,8 +51,27 @@ graph LR
   apps_web_src_features_admin_Login_tsx --> apps_web_src_lib_api_index_ts:::edge
   apps_web_src_features_admin_Login_tsx --> apps_web_src_lib_api_endpoints_ts:::edge
   apps_web_src_features_admin_Login_tsx --> apps_web_src_services_error_handler_ts:::edge
+  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_hooks_index_ts:::edge
+  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_shop_components_index_ts:::edge
+  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_hooks_useCardDisplayArea_tsx:::edge
+  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_shared_layout_index_ts:::edge
+  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_shared_card_index_ts:::edge
+  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_types_index_ts:::edge
+  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_lib_api_index_ts:::edge
+  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_services_error_handler_ts:::edge
+  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_types_index_ts:::edge
+  apps_web_src_features_hooks_useCart_ts --> apps_web_src_types_index_ts:::edge
+  apps_web_src_features_hooks_useCart_ts --> apps_web_src_shared_ui_Toast_tsx:::edge
+  apps_web_src_features_hooks_useFilterCounts_ts --> apps_web_src_lib_constants_index_ts:::edge
+  apps_web_src_features_hooks_useFilterCounts_ts --> apps_web_src_lib_api_index_ts:::edge
+  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_lib_api_index_ts:::edge
+  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_services_error_handler_ts:::edge
+  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_types_index_ts:::edge
+  apps_web_src_features_hooks_useShopViewMode_ts --> apps_web_src_types_index_ts:::edge
+  apps_web_src_features_hooks_useVariationSelection_ts --> apps_web_src_types_index_ts:::edge
   apps_web_src_features_hooks_index_ts --> apps_web_src_features_hooks_useCardFetching_ts:::edge
   apps_web_src_features_hooks_index_ts --> apps_web_src_features_hooks_useCart_ts:::edge
+  apps_web_src_features_hooks_index_ts --> apps_web_src_features_hooks_useFilterCounts_ts:::edge
   apps_web_src_features_hooks_index_ts --> apps_web_src_features_hooks_useRecentlyViewed_tsx:::edge
   apps_web_src_features_hooks_index_ts --> apps_web_src_features_hooks_useShopFilters_ts:::edge
   apps_web_src_features_hooks_index_ts --> apps_web_src_features_hooks_useShopKeyboardShortcuts_ts:::edge
@@ -65,33 +84,8 @@ graph LR
   apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_ui_index_ts:::edge
   apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_lib_constants_index_ts:::edge
   apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_types_index_ts:::edge
-  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_lib_api_index_ts:::edge
-  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_services_error_handler_ts:::edge
-  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_types_index_ts:::edge
-  apps_web_src_features_hooks_useCart_ts --> apps_web_src_types_index_ts:::edge
-  apps_web_src_features_hooks_useCart_ts --> apps_web_src_shared_ui_Toast_tsx:::edge
-  apps_web_src_features_hooks_useFilterCounts_ts --> apps_web_src_lib_constants_index_ts:::edge
-  apps_web_src_features_hooks_useFilterCounts_ts --> apps_web_src_lib_api_index_ts:::edge
   apps_web_src_features_hooks_useRecentlyViewed_tsx --> apps_web_src_shared_media_index_ts:::edge
   apps_web_src_features_hooks_useRecentlyViewed_tsx --> apps_web_src_types_index_ts:::edge
-  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_lib_api_index_ts:::edge
-  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_services_error_handler_ts:::edge
-  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_types_index_ts:::edge
-  apps_web_src_features_hooks_useShopViewMode_ts --> apps_web_src_types_index_ts:::edge
-  apps_web_src_features_hooks_useVariationSelection_ts --> apps_web_src_types_index_ts:::edge
-  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_hooks_index_ts:::edge
-  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_shop_components_index_ts:::edge
-  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_hooks_useCardDisplayArea_tsx:::edge
-  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_shared_layout_index_ts:::edge
-  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_shared_card_index_ts:::edge
-  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_types_index_ts:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_features_hooks_index_ts:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_features_shop_components_index_ts:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_features_hooks_useCardDisplayArea_tsx:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_shared_layout_index_ts:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_shared_card_index_ts:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_lib_utils_index_ts:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_types_index_ts:::edge
   apps_web_src_lib_api_client_ts --> apps_web_src_services_http_throttler_ts:::edge
   apps_web_src_lib_api_client_ts --> apps_web_src_services_error_handler_ts:::edge
   apps_web_src_lib_api_index_ts --> apps_web_src_lib_api_client_ts:::edge
@@ -113,18 +107,19 @@ graph LR
   apps_web_src_shared_card_index_ts --> apps_web_src_shared_card_CardItem_tsx:::edge
   apps_web_src_shared_card_index_ts --> apps_web_src_shared_card_CardRow_tsx:::edge
   apps_web_src_shared_card_index_ts --> apps_web_src_shared_card_CardSkeleton_tsx:::edge
+  apps_web_src_shared_media_index_ts --> apps_web_src_shared_media_OptimizedImage_tsx:::edge
   apps_web_src_shared_layout_CardGrid_tsx --> apps_web_src_lib_utils_index_ts:::edge
   apps_web_src_shared_layout_CardGrid_tsx --> apps_web_src_types_index_ts:::edge
   apps_web_src_shared_layout_CardGrid_tsx --> apps_web_src_shared_card_index_ts:::edge
   apps_web_src_shared_layout_CardList_tsx --> apps_web_src_shared_card_index_ts:::edge
   apps_web_src_shared_layout_CardList_tsx --> apps_web_src_features_shop_components_index_ts:::edge
   apps_web_src_shared_layout_CardList_tsx --> apps_web_src_lib_utils_index_ts:::edge
+  apps_web_src_shared_layout_CardList_tsx --> apps_web_src_types_index_ts:::edge
   apps_web_src_shared_layout_ErrorBoundary_tsx --> apps_web_src_lib_utils_errorLogger_ts:::edge
   apps_web_src_shared_layout_index_ts --> apps_web_src_shared_layout_ErrorBoundary_tsx:::edge
   apps_web_src_shared_layout_index_ts --> apps_web_src_shared_layout_KeyboardShortcuts_tsx:::edge
   apps_web_src_shared_layout_index_ts --> apps_web_src_shared_layout_CardGrid_tsx:::edge
   apps_web_src_shared_layout_index_ts --> apps_web_src_shared_layout_CardList_tsx:::edge
-  apps_web_src_shared_media_index_ts --> apps_web_src_shared_media_OptimizedImage_tsx:::edge
   apps_web_src_shared_search_ActiveFilters_tsx --> apps_web_src_types_index_ts:::edge
   apps_web_src_shared_search_FiltersPanel_tsx --> apps_web_src_lib_api_index_ts:::edge
   apps_web_src_shared_search_index_ts --> apps_web_src_shared_search_FiltersPanel_tsx:::edge
@@ -135,6 +130,7 @@ graph LR
   apps_web_src_shared_search_SearchBar_tsx --> apps_web_src_lib_constants_index_ts:::edge
   apps_web_src_shared_search_VariationFilter_tsx --> apps_web_src_lib_api_index_ts:::edge
   apps_web_src_shared_search_VariationFilter_tsx --> apps_web_src_shared_search_VariationFilterCache_ts:::edge
+  apps_web_src_shared_ui_CurrencySelector_tsx --> apps_web_src_types_index_ts:::edge
   apps_web_src_shared_ui_FilterSidebar_tsx --> apps_web_src_shared_search_index_ts:::edge
   apps_web_src_shared_ui_FilterSidebar_tsx --> apps_web_src_lib_api_index_ts:::edge
   apps_web_src_shared_ui_FilterSidebar_tsx --> apps_web_src_lib_constants_index_ts:::edge
@@ -177,6 +173,9 @@ graph LR
   apps_web_src_features_shop_components_ShopState_tsx --> apps_web_src_shared_layout_index_ts:::edge
   apps_web_src_features_shop_components_ShopState_tsx --> apps_web_src_features_hooks_index_ts:::edge
   apps_web_src_features_admin_components_Analytics_AnalyticsTab_tsx --> apps_web_src_lib_api_index_ts:::edge
+  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_api_index_ts:::edge
+  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_utils_index_ts:::edge
+  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_constants_index_ts:::edge
   apps_web_src_features_admin_components_Cards_AddToInventoryModal_tsx --> apps_web_src_types_index_ts:::edge
   apps_web_src_features_admin_components_Cards_BulkManager_tsx --> apps_web_src_lib_utils_index_ts:::edge
   apps_web_src_features_admin_components_Cards_BulkManager_tsx --> apps_web_src_lib_api_index_ts:::edge
@@ -188,9 +187,6 @@ graph LR
   apps_web_src_features_admin_components_Cards_CardsTab_tsx --> apps_web_src_shared_layout_index_ts:::edge
   apps_web_src_features_admin_components_Cards_CardsTab_tsx --> apps_web_src_shared_ui_index_ts:::edge
   apps_web_src_features_admin_components_Cards_CardsTab_tsx --> apps_web_src_types_index_ts:::edge
-  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_api_index_ts:::edge
-  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_utils_index_ts:::edge
-  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_constants_index_ts:::edge
   apps_web_src_features_shop_components_Cart_AddToCartModal_tsx --> apps_web_src_lib_utils_index_ts:::edge
   apps_web_src_features_shop_components_Cart_AddToCartModal_tsx --> apps_web_src_types_index_ts:::edge
   apps_web_src_features_shop_components_Cart_CartItem_tsx --> apps_web_src_types_index_ts:::edge
@@ -204,43 +200,34 @@ graph LR
   apps_web_src_features_admin_Dashboard_tsx --> apps_web_src_lib_api_client_ts:::edge
   apps_web_src_features_admin_Dashboard_tsx --> apps_web_src_lib_api_endpoints_ts:::edge
   apps_web_src_features_admin_Login_tsx --> apps_web_src_lib_api_client_ts:::edge
-  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_layout_CardList_tsx:::edge
-  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_layout_CardGrid_tsx:::edge
-  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_layout_ErrorBoundary_tsx:::edge
-  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_card_CardItem_tsx:::edge
-  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_ui_SectionHeader_tsx:::edge
-  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_types_ui_common_ts:::edge
-  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_lib_api_client_ts:::edge
-  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_lib_api_endpoints_ts:::edge
-  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_types_ui_common_ts:::edge
-  apps_web_src_features_hooks_useCart_ts --> apps_web_src_types_ui_common_ts:::edge
-  apps_web_src_features_hooks_useFilterCounts_ts --> apps_web_src_lib_api_client_ts:::edge
-  apps_web_src_features_hooks_useRecentlyViewed_tsx --> apps_web_src_shared_media_OptimizedImage_tsx:::edge
-  apps_web_src_features_hooks_useRecentlyViewed_tsx --> apps_web_src_types_ui_common_ts:::edge
-  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_lib_api_client_ts:::edge
-  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_lib_api_endpoints_ts:::edge
-  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_types_ui_common_ts:::edge
-  apps_web_src_features_hooks_useShopViewMode_ts --> apps_web_src_types_ui_common_ts:::edge
-  apps_web_src_features_hooks_useVariationSelection_ts --> apps_web_src_types_ui_common_ts:::edge
   apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_hooks_useVariationSelection_ts:::edge
   apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_shop_components_ResultsHeader_tsx:::edge
   apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_shop_components_ShopHeader_tsx:::edge
   apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_shop_components_ShopFilters_tsx:::edge
   apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_shop_components_ShopCart_tsx:::edge
   apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_shop_components_ShopState_tsx:::edge
+  apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_features_shop_components_Cart_MiniCart_tsx:::edge
   apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_shared_layout_ErrorBoundary_tsx:::edge
   apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_shared_card_CardSkeleton_tsx:::edge
   apps_web_src_features_shop_ShopPage_tsx --> apps_web_src_types_ui_common_ts:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_features_hooks_useVariationSelection_ts:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_features_shop_components_ResultsHeader_tsx:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_features_shop_components_ShopHeader_tsx:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_features_shop_components_ShopFilters_tsx:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_features_shop_components_ShopCart_tsx:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_features_shop_components_ShopState_tsx:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_shared_layout_ErrorBoundary_tsx:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_shared_card_CardSkeleton_tsx:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_lib_utils_format_ts:::edge
-  apps_web_src_features_shop_ShopPageRefactored_tsx --> apps_web_src_types_ui_common_ts:::edge
+  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_lib_api_client_ts:::edge
+  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_lib_api_endpoints_ts:::edge
+  apps_web_src_features_hooks_useCardFetching_ts --> apps_web_src_types_ui_common_ts:::edge
+  apps_web_src_features_hooks_useCart_ts --> apps_web_src_types_ui_common_ts:::edge
+  apps_web_src_features_hooks_useFilterCounts_ts --> apps_web_src_lib_api_client_ts:::edge
+  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_lib_api_client_ts:::edge
+  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_lib_api_endpoints_ts:::edge
+  apps_web_src_features_hooks_useShopFilters_ts --> apps_web_src_types_ui_common_ts:::edge
+  apps_web_src_features_hooks_useShopViewMode_ts --> apps_web_src_types_ui_common_ts:::edge
+  apps_web_src_features_hooks_useVariationSelection_ts --> apps_web_src_types_ui_common_ts:::edge
+  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_layout_CardList_tsx:::edge
+  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_layout_CardGrid_tsx:::edge
+  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_layout_ErrorBoundary_tsx:::edge
+  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_card_CardItem_tsx:::edge
+  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_shared_ui_SectionHeader_tsx:::edge
+  apps_web_src_features_hooks_useCardDisplayArea_tsx --> apps_web_src_types_ui_common_ts:::edge
+  apps_web_src_features_hooks_useRecentlyViewed_tsx --> apps_web_src_shared_media_OptimizedImage_tsx:::edge
+  apps_web_src_features_hooks_useRecentlyViewed_tsx --> apps_web_src_types_ui_common_ts:::edge
   apps_web_src_lib_utils_format_ts --> apps_web_src_types_ui_common_ts:::edge
   apps_web_src_lib_utils_groupCards_ts --> apps_web_src_types_ui_common_ts:::edge
   apps_web_src_shared_card_CardItem_tsx --> apps_web_src_lib_utils_format_ts:::edge
@@ -252,10 +239,12 @@ graph LR
   apps_web_src_shared_layout_CardList_tsx --> apps_web_src_shared_card_CardRow_tsx:::edge
   apps_web_src_shared_layout_CardList_tsx --> apps_web_src_features_shop_components_Cart_MiniCart_tsx:::edge
   apps_web_src_shared_layout_CardList_tsx --> apps_web_src_lib_utils_format_ts:::edge
+  apps_web_src_shared_layout_CardList_tsx --> apps_web_src_types_ui_common_ts:::edge
   apps_web_src_shared_search_ActiveFilters_tsx --> apps_web_src_types_ui_common_ts:::edge
   apps_web_src_shared_search_FiltersPanel_tsx --> apps_web_src_lib_api_client_ts:::edge
   apps_web_src_shared_search_VariationFilter_tsx --> apps_web_src_lib_api_client_ts:::edge
   apps_web_src_shared_search_VariationFilter_tsx --> apps_web_src_lib_api_endpoints_ts:::edge
+  apps_web_src_shared_ui_CurrencySelector_tsx --> apps_web_src_types_ui_common_ts:::edge
   apps_web_src_shared_ui_FilterSidebar_tsx --> apps_web_src_shared_search_SearchBar_tsx:::edge
   apps_web_src_shared_ui_FilterSidebar_tsx --> apps_web_src_lib_api_client_ts:::edge
   apps_web_src_shared_ui_MobileFilterModal_tsx --> apps_web_src_shared_search_SearchBar_tsx:::edge
@@ -276,6 +265,9 @@ graph LR
   apps_web_src_features_shop_components_ShopState_tsx --> apps_web_src_features_hooks_useVariationSelection_ts:::edge
   apps_web_src_features_admin_components_Analytics_AnalyticsTab_tsx --> apps_web_src_lib_api_client_ts:::edge
   apps_web_src_features_admin_components_Analytics_AnalyticsTab_tsx --> apps_web_src_lib_api_endpoints_ts:::edge
+  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_api_client_ts:::edge
+  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_api_endpoints_ts:::edge
+  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_utils_format_ts:::edge
   apps_web_src_features_admin_components_Cards_AddToInventoryModal_tsx --> apps_web_src_types_ui_common_ts:::edge
   apps_web_src_features_admin_components_Cards_BulkManager_tsx --> apps_web_src_lib_utils_csv_ts:::edge
   apps_web_src_features_admin_components_Cards_BulkManager_tsx --> apps_web_src_lib_api_client_ts:::edge
@@ -289,9 +281,6 @@ graph LR
   apps_web_src_features_admin_components_Cards_CardsTab_tsx --> apps_web_src_shared_layout_CardGrid_tsx:::edge
   apps_web_src_features_admin_components_Cards_CardsTab_tsx --> apps_web_src_shared_ui_EmptyState_tsx:::edge
   apps_web_src_features_admin_components_Cards_CardsTab_tsx --> apps_web_src_types_ui_common_ts:::edge
-  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_api_client_ts:::edge
-  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_api_endpoints_ts:::edge
-  apps_web_src_features_admin_components_Orders_OrdersTab_tsx --> apps_web_src_lib_utils_format_ts:::edge
   apps_web_src_features_shop_components_Cart_AddToCartModal_tsx --> apps_web_src_lib_utils_format_ts:::edge
   apps_web_src_features_shop_components_Cart_AddToCartModal_tsx --> apps_web_src_types_ui_common_ts:::edge
   apps_web_src_features_shop_components_Cart_CartItem_tsx --> apps_web_src_types_ui_common_ts:::edge
@@ -331,23 +320,30 @@ graph LR
   apps_api_src_middleware_securityHeaders_ts["apps/api/src/middleware/securityHeaders.ts"]
   apps_api_src_services_emailService_ts["apps/api/src/services/emailService.ts"]
   apps_api_src_services_variationAnalysis_ts["apps/api/src/services/variationAnalysis.ts"]
-  apps_api_src_utils_strings_ts["apps/api/src/utils/strings.ts"]
+  apps_api_src_types_express_d_ts["apps/api/src/types/express.d.ts"]
   apps_web_src_a11y_Announcer_tsx["apps/web/src/a11y/Announcer.tsx"]
+  apps_web_src_types_models_card_ts["apps/web/src/types/models/card.ts"]
+  apps_web_src_types_models_order_ts["apps/web/src/types/models/order.ts"]
+  apps_web_src_types_models_inventory_ts["apps/web/src/types/models/inventory.ts"]
+  apps_web_src_types_api_requests_ts["apps/web/src/types/api/requests.ts"]
+  apps_web_src_types_api_responses_ts["apps/web/src/types/api/responses.ts"]
+  apps_web_src_types_ui_cart_ts["apps/web/src/types/ui/cart.ts"]
+  apps_web_src_types_ui_common_ts["apps/web/src/types/ui/common.ts"]
   apps_web_src_types_index_ts["apps/web/src/types/index.ts"]
+  apps_api_src_utils_strings_ts["apps/api/src/utils/strings.ts"]
   apps_web_src_features_admin_Dashboard_tsx["apps/web/src/features/admin/Dashboard.tsx"]
   apps_web_src_features_admin_Login_tsx["apps/web/src/features/admin/Login.tsx"]
-  apps_web_src_features_hooks_index_ts["apps/web/src/features/hooks/index.ts"]
-  apps_web_src_features_hooks_useCardDisplayArea_tsx["apps/web/src/features/hooks/useCardDisplayArea.tsx"]
+  apps_web_src_features_shop_ShopPage_tsx["apps/web/src/features/shop/ShopPage.tsx"]
   apps_web_src_features_hooks_useCardFetching_ts["apps/web/src/features/hooks/useCardFetching.ts"]
   apps_web_src_features_hooks_useCart_ts["apps/web/src/features/hooks/useCart.ts"]
   apps_web_src_features_hooks_useFilterCounts_ts["apps/web/src/features/hooks/useFilterCounts.ts"]
-  apps_web_src_features_hooks_useRecentlyViewed_tsx["apps/web/src/features/hooks/useRecentlyViewed.tsx"]
   apps_web_src_features_hooks_useShopFilters_ts["apps/web/src/features/hooks/useShopFilters.ts"]
   apps_web_src_features_hooks_useShopKeyboardShortcuts_ts["apps/web/src/features/hooks/useShopKeyboardShortcuts.ts"]
   apps_web_src_features_hooks_useShopViewMode_ts["apps/web/src/features/hooks/useShopViewMode.ts"]
   apps_web_src_features_hooks_useVariationSelection_ts["apps/web/src/features/hooks/useVariationSelection.ts"]
-  apps_web_src_features_shop_ShopPage_tsx["apps/web/src/features/shop/ShopPage.tsx"]
-  apps_web_src_features_shop_ShopPageRefactored_tsx["apps/web/src/features/shop/ShopPageRefactored.tsx"]
+  apps_web_src_features_hooks_index_ts["apps/web/src/features/hooks/index.ts"]
+  apps_web_src_features_hooks_useCardDisplayArea_tsx["apps/web/src/features/hooks/useCardDisplayArea.tsx"]
+  apps_web_src_features_hooks_useRecentlyViewed_tsx["apps/web/src/features/hooks/useRecentlyViewed.tsx"]
   apps_web_src_lib_api_client_ts["apps/web/src/lib/api/client.ts"]
   apps_web_src_lib_api_endpoints_ts["apps/web/src/lib/api/endpoints.ts"]
   apps_web_src_lib_api_index_ts["apps/web/src/lib/api/index.ts"]
@@ -357,30 +353,30 @@ graph LR
   apps_web_src_lib_utils_errorLogger_ts["apps/web/src/lib/utils/errorLogger.ts"]
   apps_web_src_lib_utils_format_ts["apps/web/src/lib/utils/format.ts"]
   apps_web_src_lib_utils_groupCards_ts["apps/web/src/lib/utils/groupCards.ts"]
-  apps_web_src_lib_utils_index_ts["apps/web/src/lib/utils/index.ts"]
   apps_web_src_lib_utils_sanitization_ts["apps/web/src/lib/utils/sanitization.ts"]
   apps_web_src_lib_utils_virtualScroll_ts["apps/web/src/lib/utils/virtualScroll.ts"]
-  apps_web_src_services_error_handler_ts["apps/web/src/services/error/handler.ts"]
+  apps_web_src_lib_utils_index_ts["apps/web/src/lib/utils/index.ts"]
   apps_web_src_services_error_types_ts["apps/web/src/services/error/types.ts"]
+  apps_web_src_services_error_handler_ts["apps/web/src/services/error/handler.ts"]
   apps_web_src_services_http_throttler_ts["apps/web/src/services/http/throttler.ts"]
   apps_web_src_shared_card_CardItem_tsx["apps/web/src/shared/card/CardItem.tsx"]
   apps_web_src_shared_card_CardRow_tsx["apps/web/src/shared/card/CardRow.tsx"]
   apps_web_src_shared_card_CardSkeleton_tsx["apps/web/src/shared/card/CardSkeleton.tsx"]
   apps_web_src_shared_card_index_ts["apps/web/src/shared/card/index.ts"]
+  apps_web_src_shared_media_index_ts["apps/web/src/shared/media/index.ts"]
+  apps_web_src_shared_media_OptimizedImage_tsx["apps/web/src/shared/media/OptimizedImage.tsx"]
   apps_web_src_shared_layout_CardGrid_tsx["apps/web/src/shared/layout/CardGrid.tsx"]
   apps_web_src_shared_layout_CardList_tsx["apps/web/src/shared/layout/CardList.tsx"]
   apps_web_src_shared_layout_ErrorBoundary_tsx["apps/web/src/shared/layout/ErrorBoundary.tsx"]
   apps_web_src_shared_layout_index_ts["apps/web/src/shared/layout/index.ts"]
   apps_web_src_shared_layout_KeyboardShortcuts_tsx["apps/web/src/shared/layout/KeyboardShortcuts.tsx"]
-  apps_web_src_shared_media_index_ts["apps/web/src/shared/media/index.ts"]
-  apps_web_src_shared_media_OptimizedImage_tsx["apps/web/src/shared/media/OptimizedImage.tsx"]
   apps_web_src_shared_search_ActiveFilters_tsx["apps/web/src/shared/search/ActiveFilters.tsx"]
   apps_web_src_shared_search_FiltersPanel_tsx["apps/web/src/shared/search/FiltersPanel.tsx"]
   apps_web_src_shared_search_index_ts["apps/web/src/shared/search/index.ts"]
   apps_web_src_shared_search_MobileFilterButton_tsx["apps/web/src/shared/search/MobileFilterButton.tsx"]
   apps_web_src_shared_search_SearchBar_tsx["apps/web/src/shared/search/SearchBar.tsx"]
-  apps_web_src_shared_search_VariationFilter_tsx["apps/web/src/shared/search/VariationFilter.tsx"]
   apps_web_src_shared_search_VariationFilterCache_ts["apps/web/src/shared/search/VariationFilterCache.ts"]
+  apps_web_src_shared_search_VariationFilter_tsx["apps/web/src/shared/search/VariationFilter.tsx"]
   apps_web_src_shared_ui_Button_tsx["apps/web/src/shared/ui/Button.tsx"]
   apps_web_src_shared_ui_CurrencySelector_tsx["apps/web/src/shared/ui/CurrencySelector.tsx"]
   apps_web_src_shared_ui_EmptyState_tsx["apps/web/src/shared/ui/EmptyState.tsx"]
@@ -391,13 +387,6 @@ graph LR
   apps_web_src_shared_ui_SectionHeader_tsx["apps/web/src/shared/ui/SectionHeader.tsx"]
   apps_web_src_shared_ui_Toast_tsx["apps/web/src/shared/ui/Toast.tsx"]
   apps_web_src_shared_ui_VariationBadge_tsx["apps/web/src/shared/ui/VariationBadge.tsx"]
-  apps_web_src_types_models_card_ts["apps/web/src/types/models/card.ts"]
-  apps_web_src_types_models_inventory_ts["apps/web/src/types/models/inventory.ts"]
-  apps_web_src_types_models_order_ts["apps/web/src/types/models/order.ts"]
-  apps_web_src_types_ui_cart_ts["apps/web/src/types/ui/cart.ts"]
-  apps_web_src_types_ui_common_ts["apps/web/src/types/ui/common.ts"]
-  apps_web_src_types_api_requests_ts["apps/web/src/types/api/requests.ts"]
-  apps_web_src_types_api_responses_ts["apps/web/src/types/api/responses.ts"]
   apps_web_src_features_shop_components_index_ts["apps/web/src/features/shop/components/index.ts"]
   apps_web_src_features_shop_components_RecentlyViewedCards_tsx["apps/web/src/features/shop/components/RecentlyViewedCards.tsx"]
   apps_web_src_features_shop_components_ResultsHeader_tsx["apps/web/src/features/shop/components/ResultsHeader.tsx"]
@@ -406,10 +395,10 @@ graph LR
   apps_web_src_features_shop_components_ShopHeader_tsx["apps/web/src/features/shop/components/ShopHeader.tsx"]
   apps_web_src_features_shop_components_ShopState_tsx["apps/web/src/features/shop/components/ShopState.tsx"]
   apps_web_src_features_admin_components_Analytics_AnalyticsTab_tsx["apps/web/src/features/admin/components/Analytics/AnalyticsTab.tsx"]
+  apps_web_src_features_admin_components_Orders_OrdersTab_tsx["apps/web/src/features/admin/components/Orders/OrdersTab.tsx"]
   apps_web_src_features_admin_components_Cards_AddToInventoryModal_tsx["apps/web/src/features/admin/components/Cards/AddToInventoryModal.tsx"]
   apps_web_src_features_admin_components_Cards_BulkManager_tsx["apps/web/src/features/admin/components/Cards/BulkManager.tsx"]
   apps_web_src_features_admin_components_Cards_CardsTab_tsx["apps/web/src/features/admin/components/Cards/CardsTab.tsx"]
-  apps_web_src_features_admin_components_Orders_OrdersTab_tsx["apps/web/src/features/admin/components/Orders/OrdersTab.tsx"]
   apps_web_src_features_shop_components_Cart_AddToCartModal_tsx["apps/web/src/features/shop/components/Cart/AddToCartModal.tsx"]
   apps_web_src_features_shop_components_Cart_CartItem_tsx["apps/web/src/features/shop/components/Cart/CartItem.tsx"]
   apps_web_src_features_shop_components_Cart_CartModal_tsx["apps/web/src/features/shop/components/Cart/CartModal.tsx"]
