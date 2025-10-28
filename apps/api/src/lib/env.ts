@@ -1,10 +1,29 @@
 // apps/api/src/lib/env.ts
 import { z } from "zod";
+import { config } from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
 
-// NO dotenv imports or config calls here!
-// Environment variables are loaded in server.ts before this file is imported
+// ============================================
+// Load environment variables HERE (not in server.ts)
+// ============================================
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-// ---------- SCHEMA ----------
+// Load .env then .env.local (local overrides production)
+config({ path: path.resolve(__dirname, '../../.env') });
+config({ path: path.resolve(__dirname, '../../.env.local'), override: true });
+
+console.log('🔧 env.ts: Environment variables loaded');
+console.log('  DATABASE_URL:', process.env.DATABASE_URL ? '✅ SET' : '❌ MISSING');
+console.log('  JWT_SECRET:', process.env.JWT_SECRET ? '✅ SET' : '❌ MISSING');
+console.log('  ADMIN_USERNAME:', process.env.ADMIN_USERNAME || '❌ MISSING');
+console.log('  NODE_ENV:', process.env.NODE_ENV || 'not set');
+console.log();
+
+// ============================================
+// SCHEMA
+// ============================================
 const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(8080),
@@ -24,10 +43,7 @@ const EnvSchema = z.object({
 
   // Cookie settings
   COOKIE_DOMAIN: z.string().optional(),
-  CROSS_ORIGIN: z
-    .string()
-    .transform((v) => v === "true")
-    .default("false"),
+  CROSS_ORIGIN: z.string().transform((v) => v === "true").default("false"),
 
   // Session Configuration
   SESSION_SECRET: z.string().optional(),
@@ -42,15 +58,12 @@ const EnvSchema = z.object({
   SMTP_PORT: z.coerce.number().optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
-  SMTP_SECURE: z
-    .string()
-    .transform((v) => v === "true")
-    .optional(),
+  SMTP_SECURE: z.string().transform((v) => v === "true").optional(),
   SMTP_FROM: z.string().email().optional(),
 });
 
-// ---------- TYPES ----------
+// ============================================
+// TYPES & VALIDATION
+// ============================================
 export type Env = z.infer<typeof EnvSchema>;
-
-// ---------- VALIDATION ----------
 export const env: Env = EnvSchema.parse(process.env);

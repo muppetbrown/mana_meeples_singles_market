@@ -12,10 +12,10 @@ export { ShopState } from './ShopState';
 
 // Cart components
 export { AddToCartModal } from './Cart/AddToCartModal';
-export { CartItem } from './Cart/CartItem';
+export { CartItemDisplay } from './Cart/CartItem';
 export { CartModal } from './Cart/CartModal';
 export { MiniCart } from './Cart/MiniCart';
-export { Checkout } from './Cart/Checkout';
+export { default as Checkout } from './Cart/Checkout';
 
 // Deprecated default exports - will be removed in future version
 /** @deprecated Use named export { ShopHeader } instead */

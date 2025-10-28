@@ -1,28 +1,7 @@
 // apps/api/src/server.ts
+// Environment variables are loaded in env.ts
+// This ensures they're loaded before validation happens
 
-// ============================================
-// CRITICAL: Load env vars FIRST, before ANY other imports
-// ============================================
-import { config } from 'dotenv';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-
-// Load environment variables IMMEDIATELY
-config({ path: path.resolve(__dirname, '../.env') });
-config({ path: path.resolve(__dirname, '../.env.local'), override: true });
-
-console.log('🔐 Environment loaded:');
-console.log('  DATABASE_URL:', process.env.DATABASE_URL ? '✅' : '❌');
-console.log('  JWT_SECRET:', process.env.JWT_SECRET ? '✅' : '❌');
-console.log('  ADMIN_USERNAME:', process.env.ADMIN_USERNAME ? '✅' : '❌');
-console.log();
-
-// ============================================
-// NOW import everything else
-// ============================================
 import { createApp } from './app.js';
 import { env } from './lib/env.js';
 
