@@ -35,7 +35,7 @@ export type CardItemProps = {
   selectedVariation?: CardVariation | null;
   currency: Currency;
   onVariationChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onAddToCart: () => void;
+  onAddToCart?: () => void;
   isAdminMode?: boolean;  // NEW: Determines rendering mode
 };
 
@@ -176,14 +176,16 @@ const CardItem = React.memo<CardItemProps>(
 
             {/* Action */}
             <div className="flex items-center justify-end gap-3 mt-auto">
-              <button
-                onClick={onAddToCart}
-                className="btn-mm-primary text-xs lg:text-sm px-3 py-2 lg:px-4 lg:py-2"
-                style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
-                aria-label={`Add ${card.name} to inventory`}
-              >
-                Add to Inventory
-              </button>
+              {onAddToCart && (
+                <button
+                  onClick={onAddToCart}
+                  className="btn-mm-primary text-xs lg:text-sm px-3 py-2 lg:px-4 lg:py-2"
+                  style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
+                  aria-label={`Add ${card.name} to inventory`}
+                >
+                  Add to Inventory
+                </button>
+              )}
             </div>
           </div>
         </div>
@@ -308,15 +310,17 @@ const CardItem = React.memo<CardItemProps>(
             <span className="text-xl lg:text-2xl font-bold text-mm-darkForest">
               {price}
             </span>
-            <button
-              onClick={onAddToCart}
-              disabled={!inStock}
-              className="btn-mm-primary text-xs lg:text-sm px-3 py-2 lg:px-4 lg:py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
-              aria-label={`Add ${card.name} to cart`}
-            >
-              Add to Cart
-            </button>
+            {onAddToCart && (
+              <button
+                onClick={onAddToCart}
+                disabled={!inStock}
+                className="btn-mm-primary text-xs lg:text-sm px-3 py-2 lg:px-4 lg:py-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
+                aria-label={`Add ${card.name} to cart`}
+              >
+                Add to Cart
+              </button>
+            )}
           </div>
         </div>
       </div>

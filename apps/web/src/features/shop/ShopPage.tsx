@@ -107,9 +107,9 @@ const ShopPage: React.FC = () => {
       set_name: card.set_name,
       card_number: card.card_number,
       game_name: card.game_name,
-      rarity: card.rarity,
-      total_stock: card.total_stock,
-      variation_count: card.variation_count,
+      rarity: card.rarity ?? 'Unknown',
+      total_stock: card.total_stock ?? 0,
+      variation_count: card.variation_count ?? 0,
       variations: card.variations
     })), [cards]
   );
@@ -281,6 +281,7 @@ const ShopPage: React.FC = () => {
         {/* Cart Components */}
         <ShopCart
           cards={cards}
+          currency={currency}
           showCart={showCart}
           setShowCart={setShowCart}
           showMiniCart={showMiniCart}
