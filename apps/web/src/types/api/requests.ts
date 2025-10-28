@@ -1,13 +1,13 @@
 // 4. types/api/requests.ts - API Request shapes
 export interface SearchFilters {
-  game?: string;
-  set?: string;
-  rarity?: string[];
-  quality?: string[];
-  foilType?: string[];
-  minPrice?: number;
-  maxPrice?: number;
-  inStockOnly?: boolean;
+  game?: string | undefined;
+  set?: string | undefined;
+  rarity?: string[] | undefined;
+  quality?: string[] | undefined;
+  foilType?: string[] | undefined;
+  minPrice?: number | undefined;
+  maxPrice?: number | undefined;
+  inStockOnly?: boolean | undefined;
 }
 
 export interface PaginationParams {

@@ -1,6 +1,6 @@
 // apps/web/src/lib/utils/format.ts
 // Shared price formatter to eliminate duplication across components.
-import { Currency } from '@/types'
+import type { Currency } from '@/types'
 
 export function formatCurrency(cents: number, currency: Currency): string {
 const amount = (cents * (currency?.rate ?? 1)) / 100;

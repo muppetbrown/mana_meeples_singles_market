@@ -222,4 +222,4 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
   );
 };
 
-export default useCardDisplayArea;
+export default CardDisplayArea;

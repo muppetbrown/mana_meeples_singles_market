@@ -211,7 +211,11 @@ router.patch("/admin/inventory/:id", adminAuthJWT, async (req: Request, res: Res
     Object.entries(parsed.data).forEach(([key, value]) => {
       if (value !== undefined) {
         updates.push(`${key} = $${paramIndex}`);
-        params.push(value);
+        if (typeof value === 'boolean') {
+          params.push(value ? 1 : 0);
+        } else {
+          params.push(value);
+        }
         paramIndex++;
       }
     });

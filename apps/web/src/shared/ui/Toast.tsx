@@ -4,8 +4,8 @@ import React, {
   useEffect,
   createContext,
   useContext,
-  ReactNode,
 } from 'react';
+import type { ReactNode } from 'react';
 import { CheckCircle, XCircle, AlertTriangle, X } from 'lucide-react';
 import { ANIMATION_CONFIG } from '@/lib/constants';
 

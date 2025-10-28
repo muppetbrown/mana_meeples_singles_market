@@ -4,6 +4,7 @@ import CurrencySelector from '@/shared/ui/CurrencySelector';
 import type { Cart, Currency } from '@/types';
 
 interface ShopHeaderProps {
+  searchTerm: string;
   cart: Cart;
   currency: Currency;
   onCurrencyChange: (currency: Currency) => void;
@@ -12,6 +13,7 @@ interface ShopHeaderProps {
 }
 
 export const ShopHeader: React.FC<ShopHeaderProps> = ({
+  searchTerm,
   cart,
   currency,
   onCurrencyChange,

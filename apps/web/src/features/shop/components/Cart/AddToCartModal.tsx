@@ -2,7 +2,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils/';
-import { Currency } from '@/types';
+import type { Currency } from '@/types';
 
 export type InventoryOption = {
   inventoryId: number; // card_inventory.id

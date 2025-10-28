@@ -6,7 +6,7 @@
  * Simple request throttler to prevent API spam
  */
 export class RequestThrottler {
-  private pending = new Map<string, Promise<unknown>>();
+  private pending = new Map<string, Promise<any>>();
   private lastRequest = new Map<string, number>();
   private minInterval: number;
 
@@ -25,7 +25,7 @@ export class RequestThrottler {
   ): Promise<T> {
     // If same request is already pending, return that promise
     if (this.pending.has(key)) {
-      return this.pending.get(key)!;
+      return this.pending.get(key)! as Promise<T>;
     }
 
     // Check if we need to wait before making request
@@ -46,7 +46,7 @@ export class RequestThrottler {
         this.lastRequest.set(key, Date.now());
       });
 
-    this.pending.set(key, promise);
+    this.pending.set(key, promise as Promise<any>);
     return promise;
   }
 

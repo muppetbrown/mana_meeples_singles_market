@@ -4,6 +4,7 @@ import { formatCurrencySimple } from '@/lib/utils';
 import type { Cart, Currency, CartItem } from '@/types';
 
 interface CartModalProps {
+  isOpen: boolean;
   cart: Cart;
   currency: Currency;
   onClose: () => void;
@@ -13,6 +14,7 @@ interface CartModalProps {
 }
 
 export const CartModal: React.FC<CartModalProps> = ({
+  isOpen,
   cart,
   currency,
   onClose,
@@ -28,6 +30,8 @@ export const CartModal: React.FC<CartModalProps> = ({
       onUpdateQuantity(item.card_id, item.variation_key, newQuantity);
     }
   };
+
+  if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">

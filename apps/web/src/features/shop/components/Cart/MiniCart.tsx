@@ -4,6 +4,7 @@ import { formatCurrencySimple } from '@/lib/utils';
 import type { Cart, Currency } from '@/types';
 
 interface MiniCartProps {
+  isOpen: boolean;
   cart: Cart;
   currency: Currency;
   onViewCart: () => void;
@@ -11,6 +12,7 @@ interface MiniCartProps {
 }
 
 export const MiniCart: React.FC<MiniCartProps> = ({
+  isOpen,
   cart,
   currency,
   onViewCart,
@@ -18,7 +20,7 @@ export const MiniCart: React.FC<MiniCartProps> = ({
 }) => {
   const { items, total, itemCount } = cart;
 
-  if (itemCount === 0) return null;
+  if (!isOpen || itemCount === 0) return null;
 
   return (
     <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg border border-mm-warmAccent p-4 z-40 max-w-sm">
