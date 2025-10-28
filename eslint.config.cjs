@@ -7,19 +7,22 @@ const tsParser = require("@typescript-eslint/parser");
 const globals = require("globals");
 const js = require("@eslint/js");
 
+// If you use import plugin with TS paths:
+const importPlugin = require("eslint-plugin-import");
+
 const compat = new FlatCompat({
   baseDirectory: __dirname,
   recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all
+  allConfig: js.configs.all,
 });
 
 module.exports = defineConfig([
-  // ── Base presets (apply to all files) ──────────────────────────────────────
+  // ── Base presets ──────────────────────────────────────────────────────────
   fixupConfigRules(
     compat.extends(
       "eslint:recommended",
       "plugin:react/recommended",
-      "plugin:react/jsx-runtime",          // modern JSX (no React in scope)
+      "plugin:react/jsx-runtime",
       "plugin:react-hooks/recommended",
       "plugin:import/recommended",
       "plugin:import/typescript",
@@ -27,7 +30,7 @@ module.exports = defineConfig([
     )
   ),
 
-  // ── TypeScript (including type-aware rules) — ONLY for ts/tsx ─────────────
+  // ── TypeScript (type-aware) for app sources only ─────────────────────────
   ...fixupConfigRules(
     compat
       .extends(
@@ -35,56 +38,91 @@ module.exports = defineConfig([
         "plugin:@typescript-eslint/recommended-requiring-type-checking"
       )
       .map((cfg) => ({
-        // scope those extends to TS files only
         ...cfg,
-        files: ["**/*.{ts,tsx}"]
+        files: ["apps/{api,web}/**/*.{ts,tsx}"], // <-- scope to apps
       }))
   ),
   {
-    files: ["**/*.{ts,tsx}"],
+    files: ["apps/{api,web}/**/*.{ts,tsx}"],
+    plugins: { import: importPlugin },
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
         ecmaFeatures: { jsx: true },
-        project: ["./tsconfig.json"],
-        tsconfigRootDir: __dirname
+        // IMPORTANT: point the TS parser at the per-app projects we actually use
+        project: ["./apps/api/tsconfig.json", "./apps/web/tsconfig.json"],
+        tsconfigRootDir: __dirname,
       },
-      globals: { ...globals.browser, ...globals.node }
+      globals: { ...globals.browser, ...globals.node },
     },
     settings: {
-      react: { version: "detect" }
-      // If you use TS path aliases, also install:
-      // pnpm add -D eslint-import-resolver-typescript
-      // and then uncomment:
-      // 'import/resolver': { typescript: { project: ['./tsconfig.json'] } }
+      react: { version: "detect" },
+      // Teach import plugin about TS project + path aliases
+      "import/parsers": { "@typescript-eslint/parser": [".ts", ".tsx"] },
+      "import/resolver": {
+        typescript: {
+          alwaysTryTypes: true,
+          project: ["apps/api/tsconfig.json", "apps/web/tsconfig.json"],
+        },
+        node: { extensions: [".ts", ".tsx", ".js", ".jsx", ".d.ts"] },
+      },
     },
     rules: {
-      // Reasonable TS tweaks
       "@typescript-eslint/explicit-module-boundary-types": "off",
-      "@typescript-eslint/no-misused-promises": ["error", { checksVoidReturn: { attributes: false } }]
-    }
+      // Allow async handlers passed to Express/router without wrapping
+      "@typescript-eslint/no-misused-promises": [
+        "error",
+        { checksVoidReturn: { attributes: false } },
+      ],
+    },
   },
 
-  // ── JavaScript / JSX (no TS parser; no type-aware TS rules) ───────────────
+  // ── Tests: allow Vitest/Jest-style globals (type-aware still on via above) ─
+  {
+    files: [
+      "apps/api/tests/**/*.{ts,tsx}",
+      "apps/web/src/**/*.{test,spec}.{ts,tsx}",
+    ],
+    languageOptions: {
+      globals: { ...globals.node, ...globals.jest }, // covers describe/it/expect
+    },
+  },
+
+  // ── Scripts: TS without type-aware parsing (no project = no parsing errors) ─
+  {
+    files: ["scripts/**/*.ts"],
+    languageOptions: {
+      parser: tsParser,
+      parserOptions: {
+        project: null, // turn OFF type-aware for scripts to avoid project mismatch
+        ecmaVersion: "latest",
+        sourceType: "module",
+      },
+      globals: { ...globals.node },
+    },
+    rules: {
+      // you can keep basic TS rules here if you like
+    },
+  },
+
+  // ── Plain JS/JSX (no TS project) ─────────────────────────────────────────
   {
     files: ["**/*.{js,jsx,mjs,cjs}"],
     languageOptions: {
       parserOptions: {
         ecmaVersion: "latest",
         sourceType: "module",
-        ecmaFeatures: { jsx: true }
+        ecmaFeatures: { jsx: true },
       },
-      globals: { ...globals.browser, ...globals.node }
+      globals: { ...globals.browser, ...globals.node },
     },
-    settings: {
-      react: { version: "detect" }
-    },
+    settings: { react: { version: "detect" } },
     rules: {
-      // Keep this off unless you configure the resolver for Node/TS paths
-      "import/no-unresolved": "off"
-    }
+      // Keep off unless resolver is fully configured for JS import paths
+      "import/no-unresolved": "off",
+    },
   },
 
   // ── Ignores ───────────────────────────────────────────────────────────────
@@ -95,8 +133,6 @@ module.exports = defineConfig([
     "**/database/**",
     "**/coverage/**",
     "**/repo-report/**",
-    "**/*.d.ts"
-    // If you want to exclude this config file entirely, uncomment:
-    // ".dependency-cruiser.cjs"
-  ])
+    "**/*.d.ts",
+  ]),
 ]);
