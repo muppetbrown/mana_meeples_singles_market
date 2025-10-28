@@ -38,7 +38,7 @@ interface CardGridProps<T extends Card = Card> {
   onCardClick?: (card: T) => void;
   renderCard?: (card: T) => React.ReactNode;
   cardProps?: {
-    currency?: { code: string; symbol: string; rate: number };
+    currency?: { code: string; symbol: string; rate: number; label: string };
     onAddToCart?: (card: T, variation?: unknown) => void;
   };
   mode?: 'all' | 'inventory';
@@ -60,7 +60,7 @@ const DEFAULT_CONTAINER_HEIGHT = 800;
 // COMPONENT
 // ============================================================================
 
-export const CardGrid = <T extends MinimalCard = MinimalCard>({
+export const CardGrid = <T extends Card = Card>({
   cards,
   viewMode = 'grid',
   isLoading = false,

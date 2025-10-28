@@ -166,7 +166,7 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
               cards={cards}
               cardProps={{
                 currency,
-                onAddToCart: (card: StorefrontCard, variation: CardVariation) => {
+                onAddToCart: (card: StorefrontCard, variation?: CardVariation) => {
                   setAddToCartModal({ open: true, cardId: card.id });
                 }
               }}
