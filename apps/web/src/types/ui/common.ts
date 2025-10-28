@@ -3,6 +3,7 @@ export interface Currency {
   code: string;
   symbol: string;
   rate: number;
+  label: string;
 }
 
 export type ViewMode = 'grid' | 'list';
