@@ -1,10 +1,9 @@
 // apps/web/src/components/CurrencySelector.tsx
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Info, InfoIcon } from 'lucide-react';
-import type { Currency as BaseCurrency } from '@/types';
+import type { Currency } from '@/types';
 
-interface Currency extends BaseCurrency {
-  label?: string;
+interface CurrencySelectorCurrency extends Currency {
   flag?: string;
   lastUpdated?: string;
 }
@@ -23,7 +22,7 @@ const CurrencySelector = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const currencies = [
+  const currencies: CurrencySelectorCurrency[] = [
     {
       code: 'NZD',
       symbol: 'NZ$',
@@ -55,9 +54,11 @@ const CurrencySelector = ({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleCurrencySelect = (selectedCurrency: Currency) => {
+  const handleCurrencySelect = (selectedCurrency: CurrencySelectorCurrency) => {
     if (onCurrencyChange) {
-      onCurrencyChange(selectedCurrency);
+      // Convert to standard Currency format by omitting the extra fields
+      const { flag, lastUpdated, ...currency } = selectedCurrency;
+      onCurrencyChange(currency);
     }
     setIsOpen(false);
   };

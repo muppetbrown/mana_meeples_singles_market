@@ -71,6 +71,10 @@ const Checkout = ({
     postalCode: '',
     country: 'New Zealand',
     notes: '',
+    items: [],
+    total: 0,
+    currency: 'NZD',
+    timestamp: new Date().toISOString()
   });
 
  const [errors, setErrors] = useState<CheckoutErrors>({});
@@ -78,7 +82,7 @@ const Checkout = ({
   const [submitted, setSubmitted] = useState(false);
 
   const cartTotal = providedTotal ?? cart.items.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
-  const effectiveCurrency = currency || { code: 'NZD', symbol: '$', rate: 1 };
+  const effectiveCurrency = currency || { code: 'NZD', symbol: 'NZ$', rate: 1, label: 'New Zealand Dollar' };
 
   // Note: Using robust sanitization functions from library instead of inline implementation
 
