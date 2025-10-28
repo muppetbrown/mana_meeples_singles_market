@@ -26,7 +26,7 @@ interface CardDisplayAreaProps {
     sortBy: string;
   };
   onVariationChange: (cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onAddToCart: (card: StorefrontCard, selectedVariation: CardVariation) => () => void;
+  onAddToCart: (card: StorefrontCard, selectedVariation: CardVariation) => (() => void) | void;
   loading: boolean;
 }
 

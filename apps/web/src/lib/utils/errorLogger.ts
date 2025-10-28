@@ -67,7 +67,7 @@ class ErrorLogger {
       error: {
         name: error.name,
         message: error.message,
-        stack: error.stack
+        ...(error.stack ? { stack: error.stack } : {})
       },
       context: {
         url: window.location.href,

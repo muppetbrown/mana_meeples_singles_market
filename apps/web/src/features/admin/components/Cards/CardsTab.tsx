@@ -370,17 +370,42 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   // MODAL HANDLERS - SIMPLIFIED!
   // --------------------------------------------------------------------------
   
-  const openAddModal = useCallback((card: Card) => {
-    setAddModalCard(card);
+  // Adapter to convert BrowseBaseCard to Card format
+  const toCard = useCallback((browseCard: BrowseBaseCard): Card => ({
+    ...browseCard,
+    sku: browseCard.sku ?? String(browseCard.id),
+    card_number: browseCard.card_number ?? '',
+    set_name: browseCard.set_name ?? '',
+    game_name: browseCard.game_name ?? '',
+    variations: browseCard.variations.map(v => ({
+      inventory_id: v.id,
+      card_id: browseCard.id,
+      quality: 'NM',
+      foil_type: v.finish === 'foil' ? 'Foil' : 'Regular',
+      language: 'EN',
+      price: v.price ?? 0,
+      stock: v.in_stock ?? 0,
+      variation_key: `${v.treatment || 'Standard'}-${v.finish || 'Regular'}`,
+      finish: v.finish,
+      treatment: v.treatment
+    }))
+  }), []);
+
+  const openAddModal = useCallback((card: Card | BrowseBaseCard) => {
+    // Convert BrowseBaseCard to Card if needed
+    const cardData = 'variations' in card && Array.isArray(card.variations) && card.variations.length > 0 && 'in_stock' in card.variations[0]
+      ? toCard(card as BrowseBaseCard)
+      : card as Card;
+    setAddModalCard(cardData);
     setAddFormData({
       quality: 'Near Mint',
-      foil_type: card.finish === 'foil' ? 'Foil' : 'Regular',
+      foil_type: cardData.finish === 'foil' ? 'Foil' : 'Regular',
       price: '',
       stock_quantity: 1,
       language: 'English',
     });
     setShowAddModal(true);
-  }, []);
+  }, [toCard]);
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
@@ -533,7 +558,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
             viewMode === 'list' ? (
               <CardList
                 cards={groupedCards}
-                currency={{ symbol: '$', rate: 1 }}
+                currency={{ code: 'USD', symbol: '$', rate: 1 }}
                 onAddToCart={(card: Card, variation: CardVariation) => {
                   if (!isInventoryMode && openAddModal) {
                     openAddModal(card);

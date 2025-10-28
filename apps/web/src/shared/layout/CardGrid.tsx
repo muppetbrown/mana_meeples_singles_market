@@ -38,7 +38,7 @@ interface CardGridProps<T extends MinimalCard = MinimalCard> {
   onCardClick?: (card: T) => void;
   renderCard?: (card: T) => React.ReactNode;
   cardProps?: {
-    currency?: { symbol: string; rate: number };
+    currency?: { code: string; symbol: string; rate: number };
     onAddToCart?: (card: T, variation?: unknown) => void;
   };
   mode?: 'all' | 'inventory';
@@ -184,7 +184,7 @@ export const CardGrid = <T extends MinimalCard = MinimalCard>({
         card={card}
         selectedVariationKey={selectedVariationKey}
         selectedVariation={selectedVariation}
-        currency={cardProps?.currency || { symbol: '$', rate: 1 }}
+        currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1 }}
         onVariationChange={handleVariationChange(card.id)}
         onAddToCart={cardProps?.onAddToCart?.(card, selectedVariation) || (() => {})}
         isAdminMode={false}
