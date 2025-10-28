@@ -559,10 +559,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
               <CardList
                 cards={groupedCards}
                 currency={{ code: 'USD', symbol: '$', rate: 1 }}
-                onAddToCart={(card: Card, variation: CardVariation) => {
-                  if (!isInventoryMode && openAddModal) {
-                    openAddModal(card);
-                  }
+                onAddToCart={(payload) => {
+                  // In admin mode, this should not be called for adding to cart
+                  // but rather for adding to inventory
+                  console.warn('Admin mode onAddToCart called with payload:', payload);
                 }}
               />
             ) : (

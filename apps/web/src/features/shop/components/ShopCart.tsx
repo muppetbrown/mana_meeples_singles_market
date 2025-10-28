@@ -57,7 +57,7 @@ export const ShopCart: React.FC<ShopCartProps> = ({
       card_id: card.id,
       inventory_id: selectedVariation.inventory_id,
       card_name: card.name,
-      image_url: card.image_url,
+      image_url: card.image_url ?? '',
       quality: selectedVariation.quality,
       price: selectedVariation.price ?? 0,
       stock: selectedVariation.stock ?? 0,
@@ -90,6 +90,7 @@ export const ShopCart: React.FC<ShopCartProps> = ({
       {/* Mini Cart */}
       <MiniCart
         cart={cart}
+        currency={currency}
         isOpen={showMiniCart}
         onClose={() => setShowMiniCart(false)}
         onOpenFullCart={() => {
@@ -109,10 +110,7 @@ export const ShopCart: React.FC<ShopCartProps> = ({
         onOrderComplete={() => {
           clearCart();
           setShowCheckout(false);
-          addNotification({
-            type: 'success',
-            message: 'Order placed successfully!'
-          });
+          addNotification('Order placed successfully!', 'success');
         }}
       />
     </>
@@ -147,7 +145,7 @@ export const useShopCartUtils = (cards: StorefrontCard[]) => {
       card_id: card.id,
       inventory_id: selectedVariation.inventory_id,
       card_name: card.name,
-      image_url: card.image_url,
+      image_url: card.image_url ?? '',
       quality: selectedVariation.quality,
       price: selectedVariation.price ?? 0,
       stock: selectedVariation.stock ?? 0,

@@ -6,9 +6,12 @@ import type { Cart, Currency } from '@/types';
 interface MiniCartProps {
   isOpen: boolean;
   cart: Cart;
-  currency: Currency;
-  onViewCart: () => void;
+  currency?: Currency;
+  onViewCart?: () => void;
+  onOpenFullCart?: () => void;
   onClose?: () => void;
+  total?: number;
+  itemCount?: number;
 }
 
 export const MiniCart: React.FC<MiniCartProps> = ({
@@ -16,9 +19,14 @@ export const MiniCart: React.FC<MiniCartProps> = ({
   cart,
   currency,
   onViewCart,
-  onClose
+  onOpenFullCart,
+  onClose,
+  total: providedTotal,
+  itemCount: providedItemCount
 }) => {
-  const { items, total, itemCount } = cart;
+  const { items, total: cartTotal, itemCount: cartItemCount } = cart;
+  const total = providedTotal ?? cartTotal;
+  const itemCount = providedItemCount ?? cartItemCount;
 
   if (!isOpen || itemCount === 0) return null;
 
@@ -68,7 +76,7 @@ export const MiniCart: React.FC<MiniCartProps> = ({
               </div>
             </div>
             <div className="text-mm-forest font-semibold">
-              {formatCurrencySimple(item.price * item.quantity, currency)}
+              {formatCurrencySimple(item.price * item.quantity, currency || { code: 'USD', symbol: '$', rate: 1 })}
             </div>
           </div>
         ))}
@@ -80,12 +88,14 @@ export const MiniCart: React.FC<MiniCartProps> = ({
         </p>
       )}
 
-      <button 
-        onClick={onViewCart} 
-        className="btn-mm-primary w-full mt-3"
-      >
-        View Cart ({formatCurrencySimple(total, currency)})
-      </button>
+      {(onViewCart || onOpenFullCart) && (
+        <button
+          onClick={onViewCart || onOpenFullCart}
+          className="btn-mm-primary w-full mt-3"
+        >
+          View Cart ({formatCurrencySimple(total, currency || { code: 'USD', symbol: '$', rate: 1 })})
+        </button>
+      )}
     </div>
   );
 };

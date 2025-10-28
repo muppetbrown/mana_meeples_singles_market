@@ -26,7 +26,7 @@ interface CardDisplayAreaProps {
     sortBy: string;
   };
   onVariationChange: (cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  onAddToCart: (card: StorefrontCard, selectedVariation: CardVariation) => (() => void) | void;
+  setAddToCartModal: (state: { open: boolean; cardId: number }) => void;
   loading: boolean;
 }
 
@@ -37,7 +37,7 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
   selectedVariations,
   filters,
   onVariationChange,
-  onAddToCart,
+  setAddToCartModal,
   loading
 }) => {
   // Card grouping and sorting logic extracted from ShopPage
@@ -192,7 +192,7 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
                         selectedVariation={selectedVariation}
                         currency={currency}
                         onVariationChange={onVariationChange(card.id)}
-                        onAddToCart={onAddToCart(card, selectedVariation)}
+                        onAddToCart={() => setAddToCartModal({ open: true, cardId: card.id })}
                       />
                     );
                   })}
@@ -212,7 +212,10 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
               <CardList
                 cards={group.cards}
                 currency={currency}
-                onAddToCart={(card: StorefrontCard, variation: CardVariation) => onAddToCart(card, variation)}
+                onAddToCart={(payload: { inventoryId: number; quantity: number }) => {
+                  // TODO: This needs to be connected to the actual cart handler
+                  console.warn('CardList onAddToCart called with payload:', payload);
+                }}
               />
             </div>
           ))}

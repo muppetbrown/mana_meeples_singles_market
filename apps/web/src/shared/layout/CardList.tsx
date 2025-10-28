@@ -20,7 +20,7 @@ type CardListProps = {
     lowest_price_cents?: number;
   }>;
   currency: Currency;
-  onAddToCart: (cardId: number) => void;
+  onAddToCart: (payload: { inventoryId: number; quantity: number }) => void;
 };
 
 export default function CardList({ cards, currency, onAddToCart }: CardListProps) {
@@ -35,9 +35,9 @@ export default function CardList({ cards, currency, onAddToCart }: CardListProps
           identity={{
             id: card.id,
             name: card.name,
-            gameName: card.game_name,
+            gameName: card.game_name ?? '',
             setName: card.set_name,
-            cardNumber: card.card_number,
+            cardNumber: card.card_number ?? '',
             rarity: card.rarity,
             imageUrl: card.image_url,
           }}
@@ -67,7 +67,7 @@ export default function CardList({ cards, currency, onAddToCart }: CardListProps
         isOpen={modalCardId !== null}
         onClose={() => setModalCardId(null)}
         currency={currency}
-        onAdd={onAddToCart}
+        onAdd={(p) => onAddToCart(p)}
       />
 
       {/* Existing ImageModal can be reused; wire to imageCardId */}

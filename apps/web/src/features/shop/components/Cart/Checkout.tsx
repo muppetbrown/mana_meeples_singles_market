@@ -31,9 +31,12 @@ type CheckoutErrors = Partial<Record<keyof CheckoutForm, string>> & {
 interface CheckoutProps {
   isOpen: boolean;
   cart: Cart;
-  currency: Currency;
-  onBack: () => void;
-  onOrderSubmit: (orderData: CheckoutForm) => Promise<void>;
+  currency?: Currency;
+  onBack?: () => void;
+  onClose?: () => void;
+  onOrderSubmit?: (orderData: CheckoutForm) => Promise<void>;
+  onOrderComplete?: () => void;
+  total?: number;
 }
 
 const Checkout = ({
@@ -41,7 +44,10 @@ const Checkout = ({
   cart,
   currency,
   onBack,
-  onOrderSubmit
+  onClose,
+  onOrderSubmit,
+  onOrderComplete,
+  total: providedTotal
 }: CheckoutProps) => {
   const [formData, setFormData] = useState<CheckoutForm>({
     firstName: '',
@@ -61,7 +67,8 @@ const Checkout = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const cartTotal = cart.items.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
+  const cartTotal = providedTotal ?? cart.items.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0);
+  const effectiveCurrency = currency || { code: 'NZD', symbol: '$', rate: 1 };
 
   // Note: Using robust sanitization functions from library instead of inline implementation
 
@@ -232,13 +239,16 @@ const Checkout = ({
           price: Math.max(0, Number.parseFloat(String(item.price)) || 0)
         })),
         total: Math.max(0, Number.parseFloat(String(cartTotal)) || 0), // Sanitize total
-        currency: currency.code || 'NZD',
+        currency: effectiveCurrency.code || 'NZD',
         timestamp: new Date().toISOString(),
       };
 
       // Call the parent handler to process the order
       if (onOrderSubmit) {
         await onOrderSubmit(orderData);
+      } else if (onOrderComplete) {
+        // If no custom submit handler, just call completion
+        onOrderComplete();
       }
 
       setSubmitted(true);
@@ -266,7 +276,7 @@ const Checkout = ({
             to confirm your order and provide payment details.
           </p>
           <button
-            onClick={onBack}
+            onClick={onBack || onClose}
             className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
           >
             Continue Shopping
@@ -284,7 +294,7 @@ const Checkout = ({
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
           <button
-            onClick={onBack}
+            onClick={onBack || onClose}
             className="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
           >
             <ArrowLeft className="w-5 h-5" />
@@ -624,7 +634,7 @@ const Checkout = ({
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-xs text-slate-600">Qty: {item.quantity}</span>
                     <span className="font-semibold text-slate-900">
-                      {formatCurrencySimple(item.price * item.quantity, currency)}
+                      {formatCurrencySimple(item.price * item.quantity, effectiveCurrency)}
                     </span>
                   </div>
                 </div>
@@ -635,7 +645,7 @@ const Checkout = ({
               <div className="flex justify-between items-center text-xl font-bold">
                 <span>Total:</span>
                 <span className="text-green-600">
-                  {formatCurrencySimple(cartTotal, currency)}
+                  {formatCurrencySimple(cartTotal, effectiveCurrency)}
                 </span>
               </div>
 
