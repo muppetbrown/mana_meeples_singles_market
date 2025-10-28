@@ -233,14 +233,11 @@ const ShopPage: React.FC = () => {
           searchTerm={searchTerm}
           selectedGame={selectedGame}
           selectedSet={selectedSet}
-          games={games}
-          sets={sets}
-          cartCount={cartCount}
+          cart={cart}
           currency={currency}
           isOffline={isOffline}
-          onShowCart={() => setShowCart(true)}
-          onCurrencyChange={handleCurrencyChange}
-          onShowKeyboardShortcuts={() => setShowKeyboardShortcuts(true)}
+          onCartClick={() => setShowCart(true)}
+          onCurrencyChange={setCurrency}
         />
 
         {/* Main Content */}
@@ -266,10 +263,11 @@ const ShopPage: React.FC = () => {
               <ResultsHeader
                 searchTerm={searchTerm}
                 resultsCount={cards.length}
-                currency={currency}
-                setCurrency={setCurrency}
                 viewMode={viewMode}
                 setViewMode={setViewMode}
+                activeFilters={[]}
+                onClearFilter={() => {}}
+                onClearAllFilters={() => {}}
               />
 
               <CardDisplayArea

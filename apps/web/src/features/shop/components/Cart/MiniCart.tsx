@@ -76,7 +76,7 @@ export const MiniCart: React.FC<MiniCartProps> = ({
               </div>
             </div>
             <div className="text-mm-forest font-semibold">
-              {formatCurrencySimple(item.price * item.quantity, currency || { code: 'USD', symbol: '$', rate: 1 })}
+              {formatCurrencySimple(item.price * item.quantity, currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' })}
             </div>
           </div>
         ))}
@@ -93,7 +93,7 @@ export const MiniCart: React.FC<MiniCartProps> = ({
           onClick={onViewCart || onOpenFullCart}
           className="btn-mm-primary w-full mt-3"
         >
-          View Cart ({formatCurrencySimple(total, currency || { code: 'USD', symbol: '$', rate: 1 })})
+          View Cart ({formatCurrencySimple(total, currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' })})
         </button>
       )}
     </div>

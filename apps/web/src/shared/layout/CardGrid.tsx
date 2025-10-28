@@ -27,7 +27,7 @@ export type MinimalCard = {
   variations?: Array<unknown>; // flexible variations type
 };
 
-interface CardGridProps<T extends MinimalCard = MinimalCard> {
+interface CardGridProps<T extends Card = Card> {
   cards: T[];
   viewMode?: 'grid' | 'list';
   isLoading?: boolean;
@@ -139,10 +139,10 @@ export const CardGrid = <T extends MinimalCard = MinimalCard>({
       return (
         <CardItem
           key={card.id}
-          card={card as Card}
+          card={card}
           selectedVariationKey={null} // Not used in admin mode
           selectedVariation={null}     // Not used in admin mode
-          currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1 }}
+          currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
           onVariationChange={() => {}} // No-op in admin mode
           onAddToCart={() => onAddToInventory?.(card)}
           isAdminMode={true}
@@ -184,7 +184,7 @@ export const CardGrid = <T extends MinimalCard = MinimalCard>({
         card={card as Card}
         selectedVariationKey={selectedVariationKey}
         selectedVariation={selectedVariation}
-        currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1 }}
+        currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
         onVariationChange={handleVariationChange(card.id)}
         onAddToCart={() => cardProps?.onAddToCart?.(card, selectedVariation)}
         isAdminMode={false}
