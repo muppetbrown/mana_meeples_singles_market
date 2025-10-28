@@ -558,7 +558,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
             viewMode === 'list' ? (
               <CardList
                 cards={groupedCards}
-                currency={{ code: 'USD', symbol: '$', rate: 1 }}
+                currency={{ code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
                 onAddToCart={(payload) => {
                   // In admin mode, this should not be called for adding to cart
                   // but rather for adding to inventory

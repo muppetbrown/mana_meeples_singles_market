@@ -17,7 +17,8 @@ export function useShopViewMode(): UseShopViewModeReturn {
   const [currency, setCurrency] = useState<Currency>({
     symbol: 'NZ$',
     rate: 1.0,
-    code: 'NZD'
+    code: 'NZD',
+    label: 'New Zealand Dollar'
   });
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
 
