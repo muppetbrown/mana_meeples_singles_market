@@ -13,7 +13,8 @@ import {
   ShopFilters,
   ShopCart,
   ShopState,
-  useShopCartUtils
+  useShopCartUtils,
+  AddToCartModal
 } from '@/features/shop/components';
 import { CardDisplayArea } from '@/features/hooks/useCardDisplayArea';
 import { ErrorBoundary } from '@/shared/layout';
@@ -89,6 +90,7 @@ const ShopPage: React.FC = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
+  const [addToCartModal, setAddToCartModal] = useState<{ open: boolean; cardId: number }>({ open: false, cardId: 0 });
 
   // Use extracted cart utilities
   const {
@@ -96,7 +98,8 @@ const ShopPage: React.FC = () => {
     cartCount,
     handleVariationChange,
     handleAddToCart,
-    selectedVariations
+    selectedVariations,
+    addToCart
   } = useShopCartUtils(cards);
 
   // Transform StorefrontCard to CardForDisplay
@@ -278,7 +281,7 @@ const ShopPage: React.FC = () => {
                 selectedVariations={selectedVariations}
                 filters={filters}
                 onVariationChange={handleVariationChange}
-                setAddToCartModal={handleAddToCart}
+                setAddToCartModal={setAddToCartModal}
                 loading={cardsLoading}
               />
             </div>
@@ -334,6 +337,55 @@ const ShopPage: React.FC = () => {
               : `No cards found matching "${searchTerm}"`
           )}
         </div>
+
+        {/* Add to Cart Modal */}
+        <AddToCartModal
+          cardId={addToCartModal.cardId}
+          isOpen={addToCartModal.open}
+          onClose={() => setAddToCartModal({ open: false, cardId: 0 })}
+          currency={currency}
+          onAdd={async (payload: { inventoryId: number; quantity: number }) => {
+            // Find the card data
+            const card = cards.find(c => c.id === addToCartModal.cardId);
+            if (!card) return;
+
+            try {
+              // Fetch the inventory details to get the complete variation info
+              const response = await fetch(`/api/cards/${addToCartModal.cardId}/inventory`);
+              const inventoryData = await response.json();
+              const selectedInventory = inventoryData.options?.find(
+                (opt: any) => opt.inventoryId === payload.inventoryId
+              );
+
+              if (!selectedInventory) {
+                console.error('Could not find inventory details');
+                return;
+              }
+
+              // Construct the CartItem with complete information
+              addToCart({
+                card_id: card.id,
+                inventory_id: payload.inventoryId,
+                card_name: card.name,
+                variation_key: `${selectedInventory.quality}-${selectedInventory.foilType}-${selectedInventory.language}`,
+                quality: selectedInventory.quality,
+                foil_type: selectedInventory.foilType,
+                language: selectedInventory.language,
+                price: selectedInventory.priceCents / 100, // Convert cents to dollars
+                stock: selectedInventory.inStock,
+                image_url: card.image_url || '',
+                set_name: card.set_name,
+                card_number: card.card_number,
+                game_name: card.game_name,
+                rarity: card.rarity || 'Unknown'
+              }, payload.quantity);
+
+              setAddToCartModal({ open: false, cardId: 0 });
+            } catch (error) {
+              console.error('Error adding to cart:', error);
+            }
+          }}
+        />
       </div>
     </ErrorBoundary>
   );

@@ -164,6 +164,7 @@ export const useShopCartUtils = (cards: StorefrontCard[]) => {
     cartCount,
     handleVariationChange,
     handleAddToCart,
-    selectedVariations
+    selectedVariations,
+    addToCart
   };
 };
