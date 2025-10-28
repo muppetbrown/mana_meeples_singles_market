@@ -182,6 +182,8 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
 
   // Props for FilterSidebar
   const filterSidebarProps = {
+    searchTerm,
+    onSearchChange: handleSearchChange,
     selectedGame,
     selectedSet,
     selectedRarity,
@@ -211,8 +213,8 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
       {/* Mobile Filter Button */}
       <div className="lg:hidden">
         <MobileFilterButton
-          onShowFilters={() => setShowMobileFilters(true)}
-          activeFiltersCount={activeFilters.length}
+          showMobileFilters={showMobileFilters}
+          setShowMobileFilters={setShowMobileFilters}
         />
       </div>
 
@@ -220,7 +222,17 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
       <MobileFilterModal
         showMobileFilters={showMobileFilters}
         setShowMobileFilters={setShowMobileFilters}
-        {...filterSidebarProps}
+        searchTerm={searchTerm}
+        onSearchChange={handleSearchChange}
+        selectedGame={selectedGame}
+        onGameChange={handleGameChange}
+        selectedSet={selectedSet}
+        onSetChange={handleSetChange}
+        games={games}
+        sets={sets}
+        additionalFilters={additionalFilters}
+        filters={filters}
+        handleFilterChange={handleFilterChange}
       />
     </>
   );
