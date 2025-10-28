@@ -7,85 +7,57 @@ apps/web/src/features/admin/components/Cards/CardsTab.tsx:503:12 - error TS2375:
 503           <VariationFilter
                ~~~~~~~~~~~~~~~
 
-apps/web/src/features/admin/components/Cards/CardsTab.tsx:544:25 - error TS2344: Type 'BrowseBaseCard' does not satisfy the constraint 'Card'.
+apps/web/src/features/admin/components/Cards/CardsTab.tsx:544:16 - error TS2375: Type '{ cards: BrowseBaseCard[]; mode: "all" | "inventory"; viewMode: "grid"; onAddToInventory: ((card: BrowseBaseCard) => void) | undefined; }' is not assignable to type 'CardGridProps<BrowseBaseCard>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'onAddToInventory' are incompatible.
+    Type '((card: BrowseBaseCard) => void) | undefined' is not assignable to type '(card: BrowseBaseCard) => void'.
+      Type 'undefined' is not assignable to type '(card: BrowseBaseCard) => void'.
+
+544               <CardGrid<BrowseBaseCard>
+                   ~~~~~~~~
+
+apps/web/src/features/admin/components/Cards/CardsTab.tsx:548:88 - error TS2379: Argument of type 'BrowseBaseCard' is not assignable to parameter of type 'Card' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
   Types of property 'variations' are incompatible.
     Type 'BrowseVariation[]' is not assignable to type 'CardVariation[]'.
       Type 'BrowseVariation' is missing the following properties from type 'CardVariation': inventory_id, quality, foil_type, language, and 2 more.
 
-544               <CardGrid<BrowseBaseCard>
-                            ~~~~~~~~~~~~~~
+548                 onAddToInventory={isInventoryMode ? undefined : (card) => openAddModal(card)}
+                                                                                           ~~~~
 
-apps/web/src/features/hooks/useCardDisplayArea.tsx:171:17 - error TS2322: Type '(card: StorefrontCard, selectedVariation: CardVariation) => () => void' is not assignable to type '(card: StorefrontCard, variation?: CardVariation | null | undefined) => void'.
+apps/web/src/features/hooks/useCardDisplayArea.tsx:171:17 - error TS2322: Type '(card: StorefrontCard, selectedVariation: CardVariation) => () => void' is not assignable to type '(card: StorefrontCard, variation?: unknown) => void'.
   Types of parameters 'selectedVariation' and 'variation' are incompatible.
-    Type 'CardVariation | null | undefined' is not assignable to type 'CardVariation'.
-      Type 'undefined' is not assignable to type 'CardVariation'.
+    Type 'unknown' is not assignable to type 'CardVariation'.
 
 171                 onAddToCart
                     ~~~~~~~~~~~
 
-apps/web/src/features/hooks/useCardDisplayArea.tsx:225:16 - error TS2552: Cannot find name 'useCardDisplayArea'. Did you mean 'CardDisplayArea'?
-
-225 export default useCardDisplayArea;
-                   ~~~~~~~~~~~~~~~~~~
-
-apps/web/src/features/hooks/useShopFilters.ts:63:3 - error TS2375: Type '{ game: string | undefined; set: string | undefined; rarity: string[]; quality: string[]; foilType: string[]; minPrice: number | undefined; maxPrice: number | undefined; inStockOnly: boolean; }' is not assignable to type 'SearchFilters' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'game' are incompatible.
-    Type 'string | undefined' is not assignable to type 'string'.
-      Type 'undefined' is not assignable to type 'string'.
-
-63   return {
-     ~~~~~~
-
-apps/web/src/features/shop/components/Cart/AddToCartModal.tsx:5:10 - error TS1484: 'Currency' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-5 import { Currency } from '@/types';
-           ~~~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:239:29 - error TS2345: Argument of type '{ customer: { firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }; items: { ...; }[]; total: number; currency: string; timestamp: string; }' is not assignable to parameter of type 'CheckoutForm'.
+apps/web/src/features/shop/components/Cart/Checkout.tsx:241:29 - error TS2345: Argument of type '{ customer: { firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }; items: { ...; }[]; total: number; currency: string; timestamp: string; }' is not assignable to parameter of type 'CheckoutForm'.
   Type '{ customer: { firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }; items: { ...; }[]; total: number; currency: string; timestamp: string; }' is missing the following properties from type 'CheckoutForm': firstName, lastName, email, phone, and 7 more.
 
-239         await onOrderSubmit(orderData);
+241         await onOrderSubmit(orderData);
                                 ~~~~~~~~~
 
-apps/web/src/features/shop/components/ShopCart.tsx:60:7 - error TS2322: Type 'number | null' is not assignable to type 'number'.
-  Type 'null' is not assignable to type 'number'.
+apps/web/src/features/shop/components/ShopCart.tsx:68:7 - error TS2561: Object literal may only specify known properties, but 'quantity' does not exist in type 'Omit<CartItem, "quantity">'. Did you mean to write 'quality'?
 
-60       price: selectedVariation.price,
-         ~~~~~
+68       quantity: 1
+         ~~~~~~~~
 
-  apps/web/src/types/ui/cart.ts:10:3
-    10   price: number;
-         ~~~~~
-    The expected type comes from property 'price' which is declared here on type 'Omit<CartItem, "quantity">'
+apps/web/src/features/shop/components/ShopCart.tsx:81:9 - error TS2322: Type '{ isOpen: boolean; onClose: () => void; cart: Cart; onUpdateQuantity: (cardId: number, variationKey: string, quantity: number) => void; onRemoveItem: (cardId: number, variationKey: string) => void; onClearCart: () => void; onCheckout: () => void; total: number; }' is not assignable to type 'IntrinsicAttributes & CartModalProps'.
+  Property 'onClearCart' does not exist on type 'IntrinsicAttributes & CartModalProps'.
 
-apps/web/src/features/shop/components/ShopCart.tsx:61:7 - error TS2322: Type 'number | null' is not assignable to type 'number'.
-  Type 'null' is not assignable to type 'number'.
+81         onClearCart={clearCart}
+           ~~~~~~~~~~~
 
-61       stock: selectedVariation.stock,
-         ~~~~~
+apps/web/src/features/shop/components/ShopCart.tsx:94:9 - error TS2322: Type '{ cart: Cart; isOpen: boolean; onClose: () => void; onOpenFullCart: () => void; total: number; itemCount: number; }' is not assignable to type 'IntrinsicAttributes & MiniCartProps'.
+  Property 'onOpenFullCart' does not exist on type 'IntrinsicAttributes & MiniCartProps'.
 
-  apps/web/src/types/ui/cart.ts:12:3
-    12   stock: number;
-         ~~~~~
-    The expected type comes from property 'stock' which is declared here on type 'Omit<CartItem, "quantity">'
+94         onOpenFullCart={() => {
+           ~~~~~~~~~~~~~~
 
-apps/web/src/features/shop/components/ShopCart.tsx:76:9 - error TS2322: Type '{ isOpen: boolean; onClose: () => void; cart: Cart; onUpdateQuantity: (cardId: number, variationKey: string, quantity: number) => void; onRemoveItem: (cardId: number, variationKey: string) => void; onClearCart: () => void; onCheckout: () => void; total: number; }' is not assignable to type 'IntrinsicAttributes & CartModalProps'.
-  Property 'isOpen' does not exist on type 'IntrinsicAttributes & CartModalProps'.
+apps/web/src/features/shop/components/ShopCart.tsx:105:9 - error TS2322: Type '{ isOpen: boolean; onClose: () => void; cart: Cart; total: number; onOrderComplete: () => void; }' is not assignable to type 'IntrinsicAttributes & CheckoutProps'.
+  Property 'onClose' does not exist on type 'IntrinsicAttributes & CheckoutProps'.
 
-76         isOpen={showCart}
-           ~~~~~~
-
-apps/web/src/features/shop/components/ShopCart.tsx:92:9 - error TS2322: Type '{ cart: Cart; isOpen: boolean; onClose: () => void; onOpenFullCart: () => void; total: number; itemCount: number; }' is not assignable to type 'IntrinsicAttributes & MiniCartProps'.
-  Property 'isOpen' does not exist on type 'IntrinsicAttributes & MiniCartProps'.
-
-92         isOpen={showMiniCart}
-           ~~~~~~
-
-apps/web/src/features/shop/components/ShopCart.tsx:104:9 - error TS2322: Type '{ isOpen: boolean; onClose: () => void; cart: Cart; total: number; onOrderComplete: () => void; }' is not assignable to type 'IntrinsicAttributes & CheckoutProps'.
-  Property 'isOpen' does not exist on type 'IntrinsicAttributes & CheckoutProps'.
-
-104         isOpen={showCheckout}
-            ~~~~~~
+105         onClose={() => setShowCheckout(false)}
+            ~~~~~~~
 
 apps/web/src/features/shop/components/ShopCart.tsx:111:27 - error TS2345: Argument of type '{ type: string; message: string; }' is not assignable to parameter of type 'string'.
 
@@ -98,27 +70,10 @@ apps/web/src/features/shop/components/ShopCart.tsx:111:27 - error TS2345: Argume
 114           });
     ~~~~~~~~~~~
 
-apps/web/src/features/shop/components/ShopCart.tsx:151:7 - error TS2322: Type 'number | null' is not assignable to type 'number'.
-  Type 'null' is not assignable to type 'number'.
+apps/web/src/features/shop/components/ShopCart.tsx:159:7 - error TS2561: Object literal may only specify known properties, but 'quantity' does not exist in type 'Omit<CartItem, "quantity">'. Did you mean to write 'quality'?
 
-151       price: selectedVariation.price,
-          ~~~~~
-
-  apps/web/src/types/ui/cart.ts:10:3
-    10   price: number;
-         ~~~~~
-    The expected type comes from property 'price' which is declared here on type 'Omit<CartItem, "quantity">'
-
-apps/web/src/features/shop/components/ShopCart.tsx:152:7 - error TS2322: Type 'number | null' is not assignable to type 'number'.
-  Type 'null' is not assignable to type 'number'.
-
-152       stock: selectedVariation.stock,
-          ~~~~~
-
-  apps/web/src/types/ui/cart.ts:12:3
-    12   stock: number;
-         ~~~~~
-    The expected type comes from property 'stock' which is declared here on type 'Omit<CartItem, "quantity">'
+159       quantity: 1
+          ~~~~~~~~
 
 apps/web/src/features/shop/components/ShopFilters.tsx:208:10 - error TS2739: Type '{ selectedGame: string; selectedSet: string; selectedRarity: string; selectedQuality: string; filters: { quality: string; rarity: string; foilType: string; language: string; minPrice: string; maxPrice: string; sortBy: string; sortOrder: string; set: string; }; ... 11 more ...; error: string | null; }' is missing the following properties from type 'FilterSidebarProps': searchTerm, onSearchChange
 
@@ -131,15 +86,14 @@ apps/web/src/features/shop/components/ShopFilters.tsx:214:11 - error TS2322: Typ
 214           onShowFilters={() => setShowMobileFilters(true)}
               ~~~~~~~~~~~~~
 
-apps/web/src/features/shop/components/ShopFilters.tsx:221:9 - error TS2322: Type '{ selectedGame: string; selectedSet: string; selectedRarity: string; selectedQuality: string; filters: { quality: string; rarity: string; foilType: string; language: string; minPrice: string; maxPrice: string; sortBy: string; sortOrder: string; set: string; }; ... 13 more ...; onClose: () => void; }' is not assignable to type 'IntrinsicAttributes & MobileFilterModalProps'.
-  Property 'isOpen' does not exist on type 'IntrinsicAttributes & MobileFilterModalProps'.
+apps/web/src/features/shop/components/ShopFilters.tsx:220:8 - error TS2739: Type '{ selectedGame: string; selectedSet: string; selectedRarity: string; selectedQuality: string; filters: { quality: string; rarity: string; foilType: string; language: string; minPrice: string; maxPrice: string; sortBy: string; sortOrder: string; set: string; }; ... 13 more ...; setShowMobileFilters: (show: boolean) =...' is missing the following properties from type 'MobileFilterModalProps': searchTerm, onSearchChange, handleFilterChange
 
-221         isOpen={showMobileFilters}
-            ~~~~~~
+220       <MobileFilterModal
+           ~~~~~~~~~~~~~~~~~
 
-apps/web/src/features/shop/components/ShopHeader.tsx:44:17 - error TS2741: Property 'label' is missing in type 'import("C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/ui/common").Currency' but required in type 'Currency'.
+apps/web/src/features/shop/components/ShopHeader.tsx:46:17 - error TS2741: Property 'label' is missing in type 'import("C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/ui/common").Currency' but required in type 'Currency'.
 
-44                 currency={currency}
+46                 currency={currency}
                    ~~~~~~~~
 
   apps/web/src/shared/ui/CurrencySelector.tsx:8:3
@@ -170,17 +124,17 @@ apps/web/src/features/shop/ShopPage.tsx:145:82 - error TS2554: Expected 1-2 argu
 145       addNotification('You are offline. Some features may not work.', 'warning', 5000);
                                                                                      ~~~~
 
-apps/web/src/features/shop/ShopPage.tsx:225:11 - error TS2322: Type '{ searchTerm: string; selectedGame: string; selectedSet: string; games: Game[]; sets: Set[]; cartCount: number; currency: Currency; isOffline: boolean; onShowCart: () => void; onCurrencyChange: (newCurrency: Currency) => void; onShowKeyboardShortcuts: () => void; }' is not assignable to type 'IntrinsicAttributes & ShopHeaderProps'.
-  Property 'searchTerm' does not exist on type 'IntrinsicAttributes & ShopHeaderProps'.
+apps/web/src/features/shop/ShopPage.tsx:226:11 - error TS2322: Type '{ searchTerm: string; selectedGame: string; selectedSet: string; games: Game[]; sets: Set[]; cartCount: number; currency: Currency; isOffline: boolean; onShowCart: () => void; onCurrencyChange: (newCurrency: Currency) => void; onShowKeyboardShortcuts: () => void; }' is not assignable to type 'IntrinsicAttributes & ShopHeaderProps'.
+  Property 'selectedGame' does not exist on type 'IntrinsicAttributes & ShopHeaderProps'.
 
-225           searchTerm={searchTerm}
-              ~~~~~~~~~~
+226           selectedGame={selectedGame}
+              ~~~~~~~~~~~~
 
-apps/web/src/features/shop/ShopPage.tsx:259:17 - error TS2322: Type '{ searchTerm: string; resultsCount: number; currency: Currency; setCurrency: (currency: Currency) => void; viewMode: ViewMode; setViewMode: (mode: ViewMode) => void; }' is not assignable to type 'IntrinsicAttributes & ResultsHeaderProps'.
-  Property 'searchTerm' does not exist on type 'IntrinsicAttributes & ResultsHeaderProps'.
+apps/web/src/features/shop/ShopPage.tsx:260:17 - error TS2322: Type '{ searchTerm: string; resultsCount: number; currency: Currency; setCurrency: (currency: Currency) => void; viewMode: ViewMode; setViewMode: (mode: ViewMode) => void; }' is not assignable to type 'IntrinsicAttributes & ResultsHeaderProps'.
+  Property 'resultsCount' does not exist on type 'IntrinsicAttributes & ResultsHeaderProps'.
 
-259                 searchTerm={searchTerm}
-                    ~~~~~~~~~~
+260                 resultsCount={cards.length}
+                    ~~~~~~~~~~~~
 
 apps/web/src/features/shop/ShopPageRefactored.tsx:103:9 - error TS2322: Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string | undefined; total_stock: number | undefined; variation_count: number | undefined; variations: CardVariation[]; }[]' is not assignable to type 'CardForDisplay[]'.
   Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string | undefined; total_stock: number | undefined; variation_count: number | undefined; variations: CardVariation[]; }' is not assignable to type 'CardForDisplay' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
@@ -201,83 +155,22 @@ apps/web/src/features/shop/ShopPageRefactored.tsx:146:82 - error TS2554: Expecte
 146       addNotification('You are offline. Some features may not work.', 'warning', 5000);
                                                                                      ~~~~
 
-apps/web/src/features/shop/ShopPageRefactored.tsx:226:11 - error TS2322: Type '{ searchTerm: string; selectedGame: string; selectedSet: string; games: Game[]; sets: Set[]; cartCount: number; currency: Currency; isOffline: boolean; onShowCart: () => void; onCurrencyChange: (newCurrency: Currency) => void; onShowKeyboardShortcuts: () => void; }' is not assignable to type 'IntrinsicAttributes & ShopHeaderProps'.
-  Property 'searchTerm' does not exist on type 'IntrinsicAttributes & ShopHeaderProps'.
+apps/web/src/features/shop/ShopPageRefactored.tsx:227:11 - error TS2322: Type '{ searchTerm: string; selectedGame: string; selectedSet: string; games: Game[]; sets: Set[]; cartCount: number; currency: Currency; isOffline: boolean; onShowCart: () => void; onCurrencyChange: (newCurrency: Currency) => void; onShowKeyboardShortcuts: () => void; }' is not assignable to type 'IntrinsicAttributes & ShopHeaderProps'.
+  Property 'selectedGame' does not exist on type 'IntrinsicAttributes & ShopHeaderProps'.
 
-226           searchTerm={searchTerm}
-              ~~~~~~~~~~
+227           selectedGame={selectedGame}
+              ~~~~~~~~~~~~
 
-apps/web/src/features/shop/ShopPageRefactored.tsx:260:17 - error TS2322: Type '{ searchTerm: string; resultsCount: number; currency: Currency; setCurrency: (currency: Currency) => void; viewMode: ViewMode; setViewMode: (mode: ViewMode) => void; }' is not assignable to type 'IntrinsicAttributes & ResultsHeaderProps'.
-  Property 'searchTerm' does not exist on type 'IntrinsicAttributes & ResultsHeaderProps'.
+apps/web/src/features/shop/ShopPageRefactored.tsx:261:17 - error TS2322: Type '{ searchTerm: string; resultsCount: number; currency: Currency; setCurrency: (currency: Currency) => void; viewMode: ViewMode; setViewMode: (mode: ViewMode) => void; }' is not assignable to type 'IntrinsicAttributes & ResultsHeaderProps'.
+  Property 'resultsCount' does not exist on type 'IntrinsicAttributes & ResultsHeaderProps'.
 
-260                 searchTerm={searchTerm}
-                    ~~~~~~~~~~
-
-apps/web/src/lib/api/client.ts:88:50 - error TS2379: Argument of type '{ method: string; headers: { length: number; toString(): string; toLocaleString(): string; toLocaleString(locales: string | string[], options?: Intl.NumberFormatOptions & Intl.DateTimeFormatOptions): string; ... 31 more ...; [Symbol.unscopables]: { ...; }; } | ... 10 more ... | { ...; }; body: string | undefined; cr...' is not assignable to parameter of type 'RequestInit' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'body' are incompatible.
-    Type 'string | undefined' is not assignable to type 'BodyInit | null'.
-      Type 'undefined' is not assignable to type 'BodyInit | null'.
-
- 88       const response = await throttledFetch(url, {
-                                                     ~
- 89         method,
-    ~~~~~~~~~~~~~~~
-...
- 95         credentials: 'include'
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- 96       });
-    ~~~~~~~
-
-apps/web/src/lib/api/client.ts:151:45 - error TS2379: Argument of type '{ params: Record<string, unknown> | undefined; schema: z.ZodType<T, z.ZodTypeDef, T> | undefined; }' is not assignable to parameter of type '{ params?: Record<string, unknown>; body?: unknown; headers?: HeadersInit; schema?: ZodType<T, ZodTypeDef, T>; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'params' are incompatible.
-    Type 'Record<string, unknown> | undefined' is not assignable to type 'Record<string, unknown>'.
-      Type 'undefined' is not assignable to type 'Record<string, unknown>'.
-
-151     return this.request<T>('GET', endpoint, { params, schema });
-                                                ~~~~~~~~~~~~~~~~~~
-
-apps/web/src/lib/api/client.ts:162:46 - error TS2379: Argument of type '{ body: unknown; schema: z.ZodType<T, z.ZodTypeDef, T> | undefined; }' is not assignable to parameter of type '{ params?: Record<string, unknown>; body?: unknown; headers?: HeadersInit; schema?: ZodType<T, ZodTypeDef, T>; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'schema' are incompatible.
-    Type 'ZodType<T, ZodTypeDef, T> | undefined' is not assignable to type 'ZodType<T, ZodTypeDef, T>'.
-      Type 'undefined' is not assignable to type 'ZodType<T, ZodTypeDef, T>'.
-
-162     return this.request<T>('POST', endpoint, { body, schema });
-                                                 ~~~~~~~~~~~~~~~~
-
-apps/web/src/lib/api/client.ts:173:45 - error TS2379: Argument of type '{ body: unknown; schema: z.ZodType<T, z.ZodTypeDef, T> | undefined; }' is not assignable to parameter of type '{ params?: Record<string, unknown>; body?: unknown; headers?: HeadersInit; schema?: ZodType<T, ZodTypeDef, T>; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'schema' are incompatible.
-    Type 'ZodType<T, ZodTypeDef, T> | undefined' is not assignable to type 'ZodType<T, ZodTypeDef, T>'.
-      Type 'undefined' is not assignable to type 'ZodType<T, ZodTypeDef, T>'.
-
-173     return this.request<T>('PUT', endpoint, { body, schema });
-                                                ~~~~~~~~~~~~~~~~
-
-apps/web/src/lib/api/client.ts:184:47 - error TS2379: Argument of type '{ body: unknown; schema: z.ZodType<T, z.ZodTypeDef, T> | undefined; }' is not assignable to parameter of type '{ params?: Record<string, unknown>; body?: unknown; headers?: HeadersInit; schema?: ZodType<T, ZodTypeDef, T>; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'schema' are incompatible.
-    Type 'ZodType<T, ZodTypeDef, T> | undefined' is not assignable to type 'ZodType<T, ZodTypeDef, T>'.
-      Type 'undefined' is not assignable to type 'ZodType<T, ZodTypeDef, T>'.
-
-184     return this.request<T>('PATCH', endpoint, { body, schema });
-                                                  ~~~~~~~~~~~~~~~~
-
-apps/web/src/lib/api/client.ts:194:48 - error TS2379: Argument of type '{ schema: z.ZodType<T, z.ZodTypeDef, T> | undefined; }' is not assignable to parameter of type '{ params?: Record<string, unknown>; body?: unknown; headers?: HeadersInit; schema?: ZodType<T, ZodTypeDef, T>; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'schema' are incompatible.
-    Type 'ZodType<T, ZodTypeDef, T> | undefined' is not assignable to type 'ZodType<T, ZodTypeDef, T>'.
-      Type 'undefined' is not assignable to type 'ZodType<T, ZodTypeDef, T>'.
-
-194     return this.request<T>('DELETE', endpoint, { schema });
-                                                   ~~~~~~~~~~
+261                 resultsCount={cards.length}
+                    ~~~~~~~~~~~~
 
 apps/web/src/lib/constants/validation.ts:71:3 - error TS18004: No value exists in scope for the shorthand property 'VALIDATION_CONFIG'. Either declare one or provide an initializer.
 
 71   VALIDATION_CONFIG,
      ~~~~~~~~~~~~~~~~~
-
-apps/web/src/lib/utils/csv.ts:311:23 - error TS2345: Argument of type 'string | number' is not assignable to parameter of type 'string'.
-  Type 'number' is not assignable to type 'string'.
-
-311     price: parseFloat(item.price).toFixed(2),
-                          ~~~~~~~~~~
 
 apps/web/src/lib/utils/errorLogger.ts:67:7 - error TS2375: Type '{ name: string; message: string; stack: string | undefined; }' is not assignable to type '{ name: string; message: string; stack?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
   Types of property 'stack' are incompatible.
@@ -292,131 +185,74 @@ apps/web/src/lib/utils/errorLogger.ts:67:7 - error TS2375: Type '{ name: string;
         ~~~~~
     The expected type comes from property 'error' which is declared here on type 'ErrorLogEntry'
 
-apps/web/src/lib/utils/format.ts:3:10 - error TS1484: 'Currency' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+apps/web/src/services/error/handler.ts:74:7 - error TS18048: 'status' is possibly 'undefined'.
 
-3 import { Currency } from '@/types'
-           ~~~~~~~~
-
-apps/web/src/lib/utils/groupCards.ts:8:3 - error TS1484: 'Card' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-8   Card,
-    ~~~~
-
-apps/web/src/lib/utils/groupCards.ts:9:3 - error TS1484: 'CardVariation' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-9   CardVariation,
-    ~~~~~~~~~~~~~
-
-apps/web/src/lib/utils/groupCards.ts:14:3 - error TS1484: 'BrowseBaseCard' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-14   BrowseBaseCard,
-     ~~~~~~~~~~~~~~
-
-apps/web/src/lib/utils/groupCards.ts:15:3 - error TS1484: 'BrowseVariation' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-15   BrowseVariation
-     ~~~~~~~~~~~~~~~
-
-apps/web/src/lib/utils/groupCards.ts:54:11 - error TS2322: Type '{ id: number; sku: string; treatment: string | undefined; finish: string | undefined; border_color: string | null; frame_effect: string | null; promo_type: string | null; image: string | null; in_stock: number; }[]' is not assignable to type 'BrowseVariation[]'.
-  Type '{ id: number; sku: string; treatment: string | undefined; finish: string | undefined; border_color: string | null; frame_effect: string | null; promo_type: string | null; image: string | null; in_stock: number; }' is not assignable to type 'BrowseVariation'.
-    Types of property 'treatment' are incompatible.
-      Type 'string | undefined' is not assignable to type 'string'.
-        Type 'undefined' is not assignable to type 'string'.
-
-54     const variations: BrowseVariation[] = group
-             ~~~~~~~~~~
-
-apps/web/src/services/error/handler.ts:5:21 - error TS1484: 'FormattedError' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-5 import { ErrorType, FormattedError, ErrorTemplate } from './types';
-                      ~~~~~~~~~~~~~~
-
-apps/web/src/services/error/handler.ts:5:37 - error TS1484: 'ErrorTemplate' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-5 import { ErrorType, FormattedError, ErrorTemplate } from './types';
-                                      ~~~~~~~~~~~~~
-
-apps/web/src/services/error/handler.ts:73:7 - error TS18048: 'status' is possibly 'undefined'.
-
-73   if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR || (status >= 400 && status < 500)) {
+74   if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR || (status >= 400 && status < 500)) {
          ~~~~~~
 
-apps/web/src/services/error/handler.ts:73:55 - error TS18048: 'status' is possibly 'undefined'.
+apps/web/src/services/error/handler.ts:74:55 - error TS18048: 'status' is possibly 'undefined'.
 
-73   if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR || (status >= 400 && status < 500)) {
+74   if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR || (status >= 400 && status < 500)) {
                                                          ~~~~~~
 
-apps/web/src/services/error/handler.ts:73:72 - error TS18048: 'status' is possibly 'undefined'.
+apps/web/src/services/error/handler.ts:74:72 - error TS18048: 'status' is possibly 'undefined'.
 
-73   if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR || (status >= 400 && status < 500)) {
+74   if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR || (status >= 400 && status < 500)) {
                                                                           ~~~~~~
 
-apps/web/src/services/error/handler.ts:90:31 - error TS18046: 'error' is of type 'unknown'.
+apps/web/src/services/error/handler.ts:91:31 - error TS18046: 'error' is of type 'unknown'.
 
-90     message: customMessage || error.message || template.message,
+91     message: customMessage || error.message || template.message,
                                  ~~~~~
 
-apps/web/src/services/error/handler.ts:107:14 - error TS18046: 'error' is of type 'unknown'.
+apps/web/src/services/error/handler.ts:108:14 - error TS18046: 'error' is of type 'unknown'.
 
-107       stack: error.stack
+108       stack: error.stack
                  ~~~~~
 
-apps/web/src/services/http/throttler.ts:28:7 - error TS2322: Type 'unknown' is not assignable to type 'T'.
-  'T' could be instantiated with an arbitrary type which could be unrelated to 'unknown'.
+apps/web/src/shared/layout/CardGrid.tsx:142:11 - error TS2375: Type 'T' is not assignable to type 'Card' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type 'MinimalCard' is missing the following properties from type 'Card': sku, card_number, set_name, game_name
 
-28       return this.pending.get(key)!;
-         ~~~~~~
+142           card={card}
+              ~~~~
 
-apps/web/src/shared/card/CardItem.tsx:17:3 - error TS1484: 'Card' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
+  apps/web/src/shared/card/CardItem.tsx:33:3
+    33   card: Card;
+         ~~~~
+    The expected type comes from property 'card' which is declared here on type 'IntrinsicAttributes & CardItemProps'
 
-17   Card,
-     ~~~~
+apps/web/src/shared/layout/CardGrid.tsx:145:11 - error TS2322: Type '{ symbol: string; rate: number; } | { code: string; symbol: string; rate: number; }' is not assignable to type 'Currency'.
+  Property 'code' is missing in type '{ symbol: string; rate: number; }' but required in type 'Currency'.
 
-apps/web/src/shared/card/CardItem.tsx:18:3 - error TS1484: 'CardVariation' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-18   CardVariation,
-     ~~~~~~~~~~~~~
-
-apps/web/src/shared/card/CardItem.tsx:19:3 - error TS1484: 'Currency' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-19   Currency,
-     ~~~~~~~~
-
-apps/web/src/shared/layout/CardGrid.tsx:14:10 - error TS1484: 'Card' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-14 import { Card, CardVariation, isStorefrontCard } from '@/types';
-            ~~~~
-
-apps/web/src/shared/layout/CardGrid.tsx:14:16 - error TS1484: 'CardVariation' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-14 import { Card, CardVariation, isStorefrontCard } from '@/types';
-                  ~~~~~~~~~~~~~
-
-apps/web/src/shared/layout/CardGrid.tsx:137:11 - error TS2741: Property 'code' is missing in type '{ symbol: string; rate: number; }' but required in type 'Currency'.
-
-137           currency={cardProps?.currency || { symbol: '$', rate: 1 }}
+145           currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1 }}
               ~~~~~~~~
 
   apps/web/src/types/ui/common.ts:3:3
     3   code: string;
         ~~~~
     'code' is declared here.
-  apps/web/src/shared/card/CardItem.tsx:34:3
-    34   currency: Currency;
+  apps/web/src/shared/card/CardItem.tsx:36:3
+    36   currency: Currency;
          ~~~~~~~~
     The expected type comes from property 'currency' which is declared here on type 'IntrinsicAttributes & CardItemProps'
 
-apps/web/src/shared/layout/CardGrid.tsx:179:9 - error TS2741: Property 'code' is missing in type '{ symbol: string; rate: number; }' but required in type 'Currency'.
+apps/web/src/shared/layout/CardGrid.tsx:158:27 - error TS2379: Argument of type 'T' is not assignable to parameter of type 'Card' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Type 'MinimalCard' is missing the following properties from type 'Card': sku, card_number, set_name, game_name
 
-179         currency={cardProps?.currency || { symbol: '$', rate: 1 }}
+158     if (!isStorefrontCard(card)) {
+                              ~~~~
+
+apps/web/src/shared/layout/CardGrid.tsx:187:9 - error TS2741: Property 'code' is missing in type '{ symbol: string; rate: number; }' but required in type 'Currency'.
+
+187         currency={cardProps?.currency || { symbol: '$', rate: 1 }}
             ~~~~~~~~
 
   apps/web/src/types/ui/common.ts:3:3
     3   code: string;
         ~~~~
     'code' is declared here.
-  apps/web/src/shared/card/CardItem.tsx:34:3
-    34   currency: Currency;
+  apps/web/src/shared/card/CardItem.tsx:36:3
+    36   currency: Currency;
          ~~~~~~~~
     The expected type comes from property 'currency' which is declared here on type 'IntrinsicAttributes & CardItemProps'
 
@@ -448,71 +284,6 @@ apps/web/src/shared/layout/CardList.tsx:16:10 - error TS2375: Type '{ key: any; 
 16         <CardRow
             ~~~~~~~
 
-apps/web/src/shared/layout/ErrorBoundary.tsx:18:38 - error TS2345: Argument of type 'ErrorInfo' is not assignable to parameter of type '{ componentStack: string; }'.
-  Types of property 'componentStack' are incompatible.
-    Type 'string | null' is not assignable to type 'string'.
-      Type 'null' is not assignable to type 'string'.
-
-18     errorLogger.logReactError(error, info);
-                                        ~~~~
-
-apps/web/src/shared/search/ActiveFilters.tsx:25:37 - error TS2379: Argument of type '{ game: undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'game' are incompatible.
-    Type 'undefined' is not assignable to type 'string'.
-
-25       onRemove: () => onClearFilter({ game: undefined })
-                                       ~~~~~~~~~~~~~~~~~~~
-
-apps/web/src/shared/search/ActiveFilters.tsx:35:37 - error TS2379: Argument of type '{ set: undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'set' are incompatible.
-    Type 'undefined' is not assignable to type 'string'.
-
-35       onRemove: () => onClearFilter({ set: undefined })
-                                       ~~~~~~~~~~~~~~~~~~
-
-apps/web/src/shared/search/ActiveFilters.tsx:46:39 - error TS2379: Argument of type '{ rarity: string[] | undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'rarity' are incompatible.
-    Type 'string[] | undefined' is not assignable to type 'string[]'.
-      Type 'undefined' is not assignable to type 'string[]'.
-
-46         onRemove: () => onClearFilter({
-                                         ~
-47           rarity: filters.rarity?.filter(r => r !== rarity)
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-48         })
-   ~~~~~~~~~
-
-apps/web/src/shared/search/ActiveFilters.tsx:60:39 - error TS2379: Argument of type '{ quality: string[] | undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'quality' are incompatible.
-    Type 'string[] | undefined' is not assignable to type 'string[]'.
-      Type 'undefined' is not assignable to type 'string[]'.
-
-60         onRemove: () => onClearFilter({
-                                         ~
-61           quality: filters.quality?.filter(q => q !== quality)
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-62         })
-   ~~~~~~~~~
-
-apps/web/src/shared/search/ActiveFilters.tsx:74:39 - error TS2379: Argument of type '{ foilType: string[] | undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'foilType' are incompatible.
-    Type 'string[] | undefined' is not assignable to type 'string[]'.
-      Type 'undefined' is not assignable to type 'string[]'.
-
-74         onRemove: () => onClearFilter({
-                                         ~
-75           foilType: filters.foilType?.filter(f => f !== foilType)
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-76         })
-   ~~~~~~~~~
-
-apps/web/src/shared/search/ActiveFilters.tsx:96:37 - error TS2379: Argument of type '{ minPrice: undefined; maxPrice: undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'minPrice' are incompatible.
-    Type 'undefined' is not assignable to type 'number'.
-
-96       onRemove: () => onClearFilter({ minPrice: undefined, maxPrice: undefined })
-                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
 apps/web/src/shared/ui/CurrencySelector.tsx:51:55 - error TS2339: Property 'contains' does not exist on type 'never'.
 
 51       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -528,21 +299,10 @@ apps/web/src/shared/ui/index.ts:10:10 - error TS2305: Module '"./Modal"' has no 
 10 export { default as Modal } from './Modal';
             ~~~~~~~
 
-apps/web/src/shared/ui/Toast.tsx:7:3 - error TS1484: 'ReactNode' is a type and must be imported using a type-only import when 'verbatimModuleSyntax' is enabled.
-
-7   ReactNode,
-    ~~~~~~~~~
-
-apps/api/src/routes/inventory.ts:214:21 - error TS2345: Argument of type 'string | number | boolean' is not assignable to parameter of type 'string | number'.
-  Type 'boolean' is not assignable to type 'string | number'.
-
-214         params.push(value);
-                        ~~~~~
-
 apps/api/tests/integration/auth.routes.test.ts:98:22 - error TS2352: Conversion of type 'string' to type 'string[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
 
 98       .set("Cookie", cookies as string[])
                         ~~~~~~~~~~~~~~~~~~~
 
 
-Found 77 errors.
+Found 45 errors.
