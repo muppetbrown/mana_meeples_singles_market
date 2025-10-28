@@ -280,7 +280,7 @@ const ShopPage: React.FC = () => {
                 selectedVariations={selectedVariations}
                 filters={filters}
                 onVariationChange={handleVariationChange}
-                onAddToCart={handleAddToCart}
+                setAddToCartModal={handleAddToCart}
                 loading={cardsLoading}
               />
             </div>

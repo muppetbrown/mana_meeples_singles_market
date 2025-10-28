@@ -1,7 +1,8 @@
 // Validation constants and schemas
 // Re-exports validation-related constants from main constants file
 
-export { VALIDATION_CONFIG } from './index';
+import { VALIDATION_CONFIG } from './index';
+export { VALIDATION_CONFIG };
 
 // Additional validation schemas and utilities can be added here
 export const FORM_VALIDATION = {

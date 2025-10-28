@@ -38,8 +38,8 @@ export default function CardList({ cards, currency, onAddToCart }: CardListProps
             gameName: card.game_name ?? '',
             setName: card.set_name ?? '',
             cardNumber: card.card_number ?? '',
-            rarity: card.rarity ?? 'Unknown',
-            imageUrl: card.image_url ?? '',
+            ...(card.rarity && { rarity: card.rarity }),
+            ...(card.image_url && { imageUrl: card.image_url }),
           }}
           badges={card.treatments?.length ? [{ label: `${card.treatments.length} treatments` }] : []}
           onImageOpen={() => setImageCardId(card.id)}

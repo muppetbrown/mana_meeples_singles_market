@@ -570,7 +570,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                 cards={groupedCards}
                 mode={mode}
                 viewMode={viewMode}
-                onAddToInventory={isInventoryMode ? undefined : (card) => openAddModal(card)}
+                {...(!isInventoryMode && { onAddToInventory: (card) => openAddModal(card) })}
               />
             )
           ) : (
