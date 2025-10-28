@@ -31,7 +31,7 @@ function browseVariationToCardVariation(variation: BrowseVariation): CardVariati
  * Card is expected by CardItem component with CardVariation[] (inventory entries)
  */
 export function browseCardToCard(browseCard: BrowseBaseCard): Card {
-  return {
+  const result: Card = {
     // Core identification - direct mapping
     id: browseCard.id,
     name: browseCard.name,
@@ -39,17 +39,6 @@ export function browseCardToCard(browseCard: BrowseBaseCard): Card {
     card_number: browseCard.card_number || '',
     set_name: browseCard.set_name || '',
     game_name: browseCard.game_name || '',
-    game_id: browseCard.game_id,
-    set_id: browseCard.set_id,
-    rarity: browseCard.rarity,
-    image_url: browseCard.image_url,
-
-    // Variation metadata - take from first variation if available
-    treatment: browseCard.variations[0]?.treatment || browseCard.treatment,
-    border_color: browseCard.variations[0]?.border_color || browseCard.border_color,
-    finish: browseCard.variations[0]?.finish || browseCard.finish,
-    frame_effect: browseCard.variations[0]?.frame_effect || browseCard.frame_effect,
-    promo_type: browseCard.variations[0]?.promo_type || browseCard.promo_type,
 
     // Inventory aggregates - direct mapping
     total_stock: browseCard.total_stock,
@@ -59,4 +48,44 @@ export function browseCardToCard(browseCard: BrowseBaseCard): Card {
     // Transform variations array
     variations: browseCard.variations.map(browseVariationToCardVariation),
   };
+
+  // Handle optional properties - only assign if not undefined
+  if (browseCard.game_id !== undefined) {
+    result.game_id = browseCard.game_id;
+  }
+  if (browseCard.set_id !== undefined) {
+    result.set_id = browseCard.set_id;
+  }
+  if (browseCard.rarity !== undefined) {
+    result.rarity = browseCard.rarity;
+  }
+  if (browseCard.image_url !== undefined) {
+    result.image_url = browseCard.image_url;
+  }
+
+  // Handle optional variation metadata
+  const firstVariation = browseCard.variations[0];
+  const treatment = firstVariation?.treatment || browseCard.treatment;
+  const border_color = firstVariation?.border_color || browseCard.border_color;
+  const finish = firstVariation?.finish || browseCard.finish;
+  const frame_effect = firstVariation?.frame_effect || browseCard.frame_effect;
+  const promo_type = firstVariation?.promo_type || browseCard.promo_type;
+
+  if (treatment !== undefined) {
+    result.treatment = treatment;
+  }
+  if (border_color !== undefined) {
+    result.border_color = border_color;
+  }
+  if (finish !== undefined) {
+    result.finish = finish;
+  }
+  if (frame_effect !== undefined) {
+    result.frame_effect = frame_effect;
+  }
+  if (promo_type !== undefined) {
+    result.promo_type = promo_type;
+  }
+
+  return result;
 }
