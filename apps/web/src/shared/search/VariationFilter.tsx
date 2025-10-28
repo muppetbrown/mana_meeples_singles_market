@@ -31,8 +31,8 @@ const VariationFilter = ({
   filters,
   onFilterChange,
 }: {
-  selectedGame?: string | number;
-  selectedSet?: string | number;
+  selectedGame?: string | number | undefined;
+  selectedSet?: string | number | undefined;
   filters: {
     treatment?: string;
     borderColor?: string;

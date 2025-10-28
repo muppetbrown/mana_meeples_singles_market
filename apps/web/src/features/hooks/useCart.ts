@@ -94,7 +94,7 @@ export function useCart() {
     return items.some(item => item.card_id === cardId && item.variation_key === variationKey);
   }, [items]);
 
-  const addNotification = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info') => {
+  const addNotification = useCallback((message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', timeoutMs?: number) => {
     toast[type](message);
   }, [toast]);
 
