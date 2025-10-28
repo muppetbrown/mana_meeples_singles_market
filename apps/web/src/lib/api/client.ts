@@ -77,7 +77,7 @@ class ApiClient {
     endpoint: string,
     options: {
       params?: Record<string, unknown>;
-      body?: unknown;
+      body?: BodyInit | null | unknown;
       headers?: HeadersInit;
       schema?: z.ZodType<T>;
     } = {}
@@ -91,7 +91,7 @@ class ApiClient {
           ...this.defaultHeaders,
           ...options.headers
         },
-        body: options.body ? JSON.stringify(options.body) : undefined,
+        body: options.body ? JSON.stringify(options.body) : null,
         credentials: 'include'
       });
 
@@ -148,7 +148,10 @@ class ApiClient {
     params?: Record<string, unknown>,
     schema?: z.ZodType<T>
   ): Promise<T> {
-    return this.request<T>('GET', endpoint, { params, schema });
+    return this.request<T>('GET', endpoint, {
+      ...(params ? { params } : {}),
+      ...(schema ? { schema } : {})
+    });
   }
 
   /**
@@ -159,7 +162,10 @@ class ApiClient {
     body?: unknown,
     schema?: z.ZodType<T>
   ): Promise<T> {
-    return this.request<T>('POST', endpoint, { body, schema });
+    return this.request<T>('POST', endpoint, {
+      ...(body !== undefined ? { body } : {}),
+      ...(schema ? { schema } : {})
+    });
   }
 
   /**
@@ -170,7 +176,10 @@ class ApiClient {
     body?: unknown,
     schema?: z.ZodType<T>
   ): Promise<T> {
-    return this.request<T>('PUT', endpoint, { body, schema });
+    return this.request<T>('PUT', endpoint, {
+      ...(body !== undefined ? { body } : {}),
+      ...(schema ? { schema } : {})
+    });
   }
 
   /**
@@ -181,7 +190,10 @@ class ApiClient {
     body?: unknown,
     schema?: z.ZodType<T>
   ): Promise<T> {
-    return this.request<T>('PATCH', endpoint, { body, schema });
+    return this.request<T>('PATCH', endpoint, {
+      ...(body !== undefined ? { body } : {}),
+      ...(schema ? { schema } : {})
+    });
   }
 
   /**
@@ -191,7 +203,9 @@ class ApiClient {
     endpoint: string,
     schema?: z.ZodType<T>
   ): Promise<T> {
-    return this.request<T>('DELETE', endpoint, { schema });
+    return this.request<T>('DELETE', endpoint, {
+      ...(schema ? { schema } : {})
+    });
   }
 }
 

@@ -13,10 +13,12 @@ import OptimizedImage from '@/shared/media/OptimizedImage';
 import VariationBadge from '@/shared/ui/VariationBadge';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
 import { formatCurrencySimple } from '@/lib/utils';
-import {
+import type {
   Card,
   CardVariation,
-  Currency,
+  Currency
+} from '@/types';
+import {
   formatTreatment,
   formatFinish,
   isFoilCard,

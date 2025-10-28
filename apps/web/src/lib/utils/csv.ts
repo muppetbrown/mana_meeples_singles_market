@@ -308,7 +308,7 @@ export const formatInventoryForExport = (inventoryData: InventoryItem[]) => {
     quality: item.quality,
     foil_type: item.foil_type || 'Regular',
     language: item.language || 'English',
-    price: parseFloat(item.price).toFixed(2),
+    price: parseFloat(String(item.price)).toFixed(2),
     stock_quantity: item.stock_quantity,
     game_name: item.game_name || '',
     last_updated: item.updated_at ? new Date(item.updated_at).toISOString().split('T')[0] : ''

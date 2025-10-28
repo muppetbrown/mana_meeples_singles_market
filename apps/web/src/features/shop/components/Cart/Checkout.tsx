@@ -29,6 +29,7 @@ type CheckoutErrors = Partial<Record<keyof CheckoutForm, string>> & {
 };
 
 interface CheckoutProps {
+  isOpen: boolean;
   cart: Cart;
   currency: Currency;
   onBack: () => void;
@@ -36,6 +37,7 @@ interface CheckoutProps {
 }
 
 const Checkout = ({
+  isOpen,
   cart,
   currency,
   onBack,
@@ -273,6 +275,8 @@ const Checkout = ({
       </div>
     );
   }
+
+  if (!isOpen) return null;
 
   return (
     <div className="min-h-screen bg-slate-50">

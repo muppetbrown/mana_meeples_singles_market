@@ -9,6 +9,7 @@ interface ActiveFilter {
 }
 
 interface ResultsHeaderProps {
+  searchTerm: string;
   cardCount: number;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
@@ -18,6 +19,7 @@ interface ResultsHeaderProps {
 }
 
 export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
+  searchTerm,
   cardCount,
   viewMode,
   setViewMode,

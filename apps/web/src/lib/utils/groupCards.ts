@@ -4,15 +4,17 @@
 // - This intentionally avoids inventory-specific fields (quality, language).
 // - Finish/foil and treatment are first-class in the variation identity and ordering.
 // - Groups are keyed by (set_id, card_number) to align with DB uniqueness.
-import {
+import type {
   Card,
   CardVariation,
+  BrowseBaseCard,
+  BrowseVariation
+} from '@/types';
+import {
   formatTreatment,
   formatFinish,
   isFoilCard,
-  hasSpecialTreatment,
-  BrowseBaseCard,
-  BrowseVariation
+  hasSpecialTreatment
 } from '@/types';
 
 
@@ -55,8 +57,8 @@ export function groupCardsForBrowse(cards: Card[]): BrowseBaseCard[] {
       .map((c) => ({
         id: c.id,
         sku: c.sku,
-        treatment: c.treatment,
-        finish: c.finish,
+        treatment: c.treatment ?? '',
+        finish: c.finish ?? '',
         border_color: c.border_color ?? null,
         frame_effect: c.frame_effect ?? null,
         promo_type: c.promo_type ?? null,
