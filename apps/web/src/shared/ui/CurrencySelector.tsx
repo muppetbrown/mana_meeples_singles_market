@@ -23,7 +23,7 @@ const CurrencySelector = ({
   className = ""
 }: CurrencySelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const currencies = [
     {
@@ -47,8 +47,8 @@ const CurrencySelector = ({
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      const target = event.target as Node | null;
+      if (dropdownRef.current && target && !dropdownRef.current.contains(target)) {
         setIsOpen(false);
       }
     };

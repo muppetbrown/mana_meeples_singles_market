@@ -2,10 +2,11 @@
 import React, { useMemo, useCallback } from 'react';
 import { CartModal, MiniCart, Checkout } from '@/features/shop/components';
 import { useCart, useVariationSelection } from '@/features/hooks';
-import type { StorefrontCard, CardVariation, CartItem } from '@/types';
+import type { StorefrontCard, CardVariation, CartItem, Currency } from '@/types';
 
 interface ShopCartProps {
   cards: StorefrontCard[];
+  currency: Currency;
   showCart: boolean;
   setShowCart: (show: boolean) => void;
   showMiniCart: boolean;
@@ -16,6 +17,7 @@ interface ShopCartProps {
 
 export const ShopCart: React.FC<ShopCartProps> = ({
   cards,
+  currency,
   showCart,
   setShowCart,
   showMiniCart,
@@ -65,7 +67,7 @@ export const ShopCart: React.FC<ShopCartProps> = ({
       set_name: card.set_name,
       rarity: card.rarity || 'Unknown',
       card_number: card.card_number,
-      quantity: 1
+      variation_key: `${selectedVariation.quality}-${selectedVariation.foil_type}-${selectedVariation.language}`
     });
   }, [addToCart]);
 
@@ -76,14 +78,13 @@ export const ShopCart: React.FC<ShopCartProps> = ({
         isOpen={showCart}
         onClose={() => setShowCart(false)}
         cart={cart}
+        currency={currency}
         onUpdateQuantity={updateQuantity}
         onRemoveItem={removeFromCart}
-        onClearCart={clearCart}
         onCheckout={() => {
           setShowCart(false);
           setShowCheckout(true);
         }}
-        total={cartTotal}
       />
 
       {/* Mini Cart */}
@@ -156,7 +157,7 @@ export const useShopCartUtils = (cards: StorefrontCard[]) => {
       set_name: card.set_name,
       rarity: card.rarity || 'Unknown',
       card_number: card.card_number,
-      quantity: 1
+      variation_key: `${selectedVariation.quality}-${selectedVariation.foil_type}-${selectedVariation.language}`
     });
   }, [addToCart]);
 

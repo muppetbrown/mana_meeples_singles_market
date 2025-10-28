@@ -90,12 +90,12 @@ describe("GET /api/auth/admin/check", () => {
       });
 
     const cookies = loginRes.headers["set-cookie"];
-    expect(Array.isArray(cookies) && cookies[0]).toBeTruthy();
+    if (!Array.isArray(cookies)) throw new Error('Missing cookie');
 
     // Then check auth status
     const res = await request(app)
       .get("/api/auth/admin/check")
-      .set("Cookie", cookies as string[])
+      .set("Cookie", cookies as unknown as string[])
       .expect(200);
 
     expect(res.body.authenticated).toBe(true);

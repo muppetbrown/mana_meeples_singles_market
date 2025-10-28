@@ -57,8 +57,9 @@ export function categorizeError(error: unknown): ErrorType {
   }
 
   // Extract status code with proper type checking
-  const errorObj = error as { status?: number; response?: { status?: number } };
-  const status = errorObj.status || errorObj.response?.status;
+  const status = (error && typeof error === 'object' && 'status' in error && typeof (error as any).status === 'number')
+    ? (error as any).status as number
+    : undefined;
 
   // Authentication errors
   if (status === HTTP_STATUS.UNAUTHORIZED || status === HTTP_STATUS.FORBIDDEN) {
@@ -71,7 +72,7 @@ export function categorizeError(error: unknown): ErrorType {
   }
 
   // API errors
-  if (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR || (status >= 400 && status < 500)) {
+  if (status !== undefined && (status >= HTTP_STATUS.INTERNAL_SERVER_ERROR || (status >= 400 && status < 500))) {
     return ErrorType.API;
   }
 
@@ -85,10 +86,12 @@ export function formatError(error: unknown, customMessage?: string): FormattedEr
   const category = categorizeError(error);
   const template = ERROR_TEMPLATES[category];
 
+  const safe = (error && typeof error === 'object') ? (error as { message?: string }) : {};
+
   return {
     type: category,
     title: template.title,
-    message: customMessage || error.message || template.message,
+    message: customMessage || safe.message || template.message,
     action: template.action,
     originalError: error,
     timestamp: new Date().toISOString()
@@ -102,10 +105,11 @@ export function logError(error: unknown, context: Record<string, unknown> = {}):
   const formattedError = formatError(error);
 
   if (process.env.NODE_ENV === 'development') {
+    const safe = (error && typeof error === 'object') ? (error as { stack?: string }) : {};
     console.error('Error occurred:', {
       ...formattedError,
       context,
-      stack: error.stack
+      stack: safe.stack
     });
   } else {
     // In production, send to monitoring service (Sentry, etc.)
