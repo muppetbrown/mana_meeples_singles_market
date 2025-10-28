@@ -1,70 +1,19 @@
 C:\Git_Repos\mana_meeples_singles_market>pnpm -w tsc -b
-apps/web/src/features/admin/components/Cards/BulkManager.tsx:125:54 - error TS2345: Argument of type 'InventoryCSVRow[]' is not assignable to parameter of type 'InventoryItem[]'.
-  Type 'InventoryCSVRow' is missing the following properties from type 'InventoryItem': name, set_name, quality, price, stock_quantity
+apps/web/src/features/admin/components/Cards/CardsTab.tsx:503:12 - error TS2375: Type '{ selectedGame: string | undefined; selectedSet: string | undefined; filters: { treatment?: string; borderColor?: string; finish?: string; promoType?: string; frameEffect?: string; }; onFilterChange: (filterName: string, value: string) => void; }' is not assignable to type '{ selectedGame?: string | number; selectedSet?: string | number; filters: { treatment?: string; borderColor?: string; finish?: string; promoType?: string; frameEffect?: string; }; onFilterChange: (filterName: string, value: string) => void; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'selectedGame' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string | number'.
+      Type 'undefined' is not assignable to type 'string | number'.
 
-125       const formattedData = formatInventoryForExport(inventoryData.inventory || []);
-                                                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+503           <VariationFilter
+               ~~~~~~~~~~~~~~~
 
-apps/web/src/features/admin/components/Cards/CardsTab.tsx:324:54 - error TS18048: 'card.total_stock' is possibly 'undefined'.
+apps/web/src/features/admin/components/Cards/CardsTab.tsx:544:25 - error TS2344: Type 'BrowseBaseCard' does not satisfy the constraint 'Card'.
+  Types of property 'variations' are incompatible.
+    Type 'BrowseVariation[]' is not assignable to type 'CardVariation[]'.
+      Type 'BrowseVariation' is missing the following properties from type 'CardVariation': inventory_id, quality, foil_type, language, and 2 more.
 
-324         ? cards.filter(card => card.has_inventory && card.total_stock > 0)
-                                                         ~~~~~~~~~~~~~~~~
-
-apps/web/src/features/admin/components/Cards/CardsTab.tsx:335:54 - error TS2345: Argument of type 'Card[]' is not assignable to parameter of type 'InventoryItem[]'.
-  Type 'Card' is missing the following properties from type 'InventoryItem': quality, price, stock_quantity
-
-335       const formattedData = formatInventoryForExport(exportData);
-                                                         ~~~~~~~~~~
-
-apps/web/src/features/admin/components/Cards/CardsTab.tsx:490:13 - error TS2375: Type '{ treatment: string | undefined; borderColor: string | undefined; finish: string | undefined; promoType: string | undefined; frameEffect: string | undefined; }' is not assignable to type '{ treatment?: string; borderColor?: string; finish?: string; promoType?: string; frameEffect?: string; }' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'treatment' are incompatible.
-    Type 'string | undefined' is not assignable to type 'string'.
-      Type 'undefined' is not assignable to type 'string'.
-
-490             filters={{
-                ~~~~~~~
-
-  apps/web/src/shared/search/VariationFilter.tsx:36:3
-    36   filters: {
-         ~~~~~~~
-    The expected type comes from property 'filters' which is declared here on type 'IntrinsicAttributes & { selectedGame?: string | number; selectedSet?: string | number; filters: { treatment?: string; borderColor?: string; finish?: string; promoType?: string; frameEffect?: string; }; onFilterChange: (filterName: string, value: string) => void; }'
-
-apps/web/src/features/admin/components/Cards/CardsTab.tsx:524:17 - error TS2322: Type 'BrowseBaseCard[]' is not assignable to type 'Card[]'.
-  Type 'BrowseBaseCard' is not assignable to type 'Card' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-    Types of property 'variations' are incompatible.
-      Type 'BrowseVariation[]' is not assignable to type 'CardVariation[]'.
-        Type 'BrowseVariation' is missing the following properties from type 'CardVariation': inventory_id, quality, foil_type, language, and 2 more.
-
-524                 cards={groupedCards}
-                    ~~~~~
-
-  apps/web/src/shared/layout/CardGrid.tsx:23:3
-    23   cards: T[];
-         ~~~~~
-    The expected type comes from property 'cards' which is declared here on type 'IntrinsicAttributes & CardGridProps<Card>'
-
-apps/web/src/features/admin/Dashboard.tsx:71:17 - error TS2322: Type 'string' is not assignable to type 'Currency'.
-  Type 'string' is not assignable to type 'Currency'.
-
-71                 currency={currency}
-                   ~~~~~~~~
-
-  apps/web/src/shared/ui/CurrencySelector.tsx:15:3
-    15   currency: Currency;
-         ~~~~~~~~
-    The expected type comes from property 'currency' which is declared here on type 'IntrinsicAttributes & CurrencySelectorProps'
-
-apps/web/src/features/admin/Dashboard.tsx:72:17 - error TS2322: Type '(newCurrency: "USD" | "CAD") => void' is not assignable to type '(currency: Currency) => void'.
-  Types of parameters 'newCurrency' and 'currency' are incompatible.
-    Type 'Currency' is not assignable to type '"USD" | "CAD"'.
-
-72                 onCurrencyChange={handleCurrencyChange}
-                   ~~~~~~~~~~~~~~~~
-
-  apps/web/src/shared/ui/CurrencySelector.tsx:16:3
-    16   onCurrencyChange: (currency: Currency) => void;
-         ~~~~~~~~~~~~~~~~
-    The expected type comes from property 'onCurrencyChange' which is declared here on type 'IntrinsicAttributes & CurrencySelectorProps'
+544               <CardGrid<BrowseBaseCard>
+                            ~~~~~~~~~~~~~~
 
 apps/web/src/features/hooks/useCardDisplayArea.tsx:171:17 - error TS2322: Type '(card: StorefrontCard, selectedVariation: CardVariation) => () => void' is not assignable to type '(card: StorefrontCard, variation?: CardVariation | null | undefined) => void'.
   Types of parameters 'selectedVariation' and 'variation' are incompatible.
@@ -92,68 +41,8 @@ apps/web/src/features/shop/components/Cart/AddToCartModal.tsx:5:10 - error TS148
 5 import { Currency } from '@/types';
            ~~~~~~~~
 
-apps/web/src/features/shop/components/Cart/Checkout.tsx:76:35 - error TS2339: Property 'length' does not exist on type '{}'.
-
-76     } else if (sanitizedFirstName.length > 50) {
-                                     ~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:79:55 - error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
-
-79     } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'.]+$/.test(sanitizedFirstName)) {
-                                                         ~~~~~~~~~~~~~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:87:34 - error TS2339: Property 'length' does not exist on type '{}'.
-
-87     } else if (sanitizedLastName.length > 50) {
-                                    ~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:90:55 - error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
-
-90     } else if (!/^[a-zA-Z\u00C0-\u017F\s\-'.]+$/.test(sanitizedLastName)) {
-                                                         ~~~~~~~~~~~~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:110:58 - error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
-
-110     if (sanitizedPhone && !/^[+]?[\d\s\-()]{7,20}$/.test(sanitizedPhone)) {
-                                                             ~~~~~~~~~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:120:33 - error TS2339: Property 'length' does not exist on type '{}'.
-
-120     } else if (sanitizedAddress.length > 200) {
-                                    ~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:130:30 - error TS2339: Property 'length' does not exist on type '{}'.
-
-130     } else if (sanitizedCity.length > 100) {
-                                 ~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:140:45 - error TS2345: Argument of type '{}' is not assignable to parameter of type 'string'.
-
-140     } else if (!/^[A-Z0-9\s-]{3,10}$/i.test(sanitizedPostalCode)) {
-                                                ~~~~~~~~~~~~~~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:147:9 - error TS18046: 'sanitizedNotes' is of type 'unknown'.
-
-147     if (sanitizedNotes.length > 500) {
-            ~~~~~~~~~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:227:55 - error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
-
-227           quantity: Math.max(1, Math.min(50, parseInt(item.quantity) || 1)),
-                                                          ~~~~~~~~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:230:41 - error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
-
-230           price: Math.max(0, parseFloat(item.price) || 0)
-                                            ~~~~~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:232:39 - error TS2345: Argument of type 'number' is not assignable to parameter of type 'string'.
-
-232         total: Math.max(0, parseFloat(cartTotal) || 0), // Sanitize total
-                                          ~~~~~~~~~
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:239:29 - error TS2345: Argument of type '{ customer: { firstName: unknown; lastName: unknown; email: string; phone: unknown; address: unknown; suburb: unknown; city: unknown; region: unknown; postalCode: unknown; country: unknown; notes: unknown; }; items: { inventory_id: number; quantity: number; price: number; }[]; total: number; currency: string; timest...' is not assignable to parameter of type 'CheckoutForm'.
-  Type '{ customer: { firstName: unknown; lastName: unknown; email: string; phone: unknown; address: unknown; suburb: unknown; city: unknown; region: unknown; postalCode: unknown; country: unknown; notes: unknown; }; items: { inventory_id: number; quantity: number; price: number; }[]; total: number; currency: string; timest...' is missing the following properties from type 'CheckoutForm': firstName, lastName, email, phone, and 7 more.
+apps/web/src/features/shop/components/Cart/Checkout.tsx:239:29 - error TS2345: Argument of type '{ customer: { firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }; items: { ...; }[]; total: number; currency: string; timestamp: string; }' is not assignable to parameter of type 'CheckoutForm'.
+  Type '{ customer: { firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }; items: { ...; }[]; total: number; currency: string; timestamp: string; }' is missing the following properties from type 'CheckoutForm': firstName, lastName, email, phone, and 7 more.
 
 239         await onOrderSubmit(orderData);
                                 ~~~~~~~~~
@@ -644,57 +533,11 @@ apps/web/src/shared/ui/Toast.tsx:7:3 - error TS1484: 'ReactNode' is a type and m
 7   ReactNode,
     ~~~~~~~~~
 
-apps/api/src/lib/logger.ts:4:28 - error TS2769: No overload matches this call.
-  Overload 1 of 2, '(optionsOrStream?: DestinationStream | LoggerOptions<never, boolean> | undefined): Logger<never, boolean>', gave the following error.
-    Argument of type '{ level: string; transport: { target: string; options: { colorize: boolean; translateTime: string; ignore: string; }; } | undefined; }' is not assignable to parameter of type 'DestinationStream | LoggerOptions<never, boolean> | undefined'.
-      Type '{ level: string; transport: { target: string; options: { colorize: boolean; translateTime: string; ignore: string; }; } | undefined; }' is not assignable to type 'LoggerOptions<never, boolean>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-        Types of property 'transport' are incompatible.
-          Type '{ target: string; options: { colorize: boolean; translateTime: string; ignore: string; }; } | undefined' is not assignable to type 'TransportSingleOptions<Record<string, any>> | TransportMultiOptions<Record<string, any>> | TransportPipelineOptions<Record<string, any>>'.
-            Type 'undefined' is not assignable to type 'TransportSingleOptions<Record<string, any>> | TransportMultiOptions<Record<string, any>> | TransportPipelineOptions<Record<string, any>>'.
-  Overload 2 of 2, '(options: LoggerOptions<never, boolean>, stream?: DestinationStream | undefined): Logger<never, boolean>', gave the following error.
-    Argument of type '{ level: string; transport: { target: string; options: { colorize: boolean; translateTime: string; ignore: string; }; } | undefined; }' is not assignable to parameter of type 'LoggerOptions<never, boolean>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-      Types of property 'transport' are incompatible.
-        Type '{ target: string; options: { colorize: boolean; translateTime: string; ignore: string; }; } | undefined' is not assignable to type 'TransportSingleOptions<Record<string, any>> | TransportMultiOptions<Record<string, any>> | TransportPipelineOptions<Record<string, any>>'.
-          Type 'undefined' is not assignable to type 'TransportSingleOptions<Record<string, any>> | TransportMultiOptions<Record<string, any>> | TransportPipelineOptions<Record<string, any>>'.
-
-  4 export const logger = pino({
-                               ~
-  5   level: process.env.LOG_LEVEL || "info",
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-...
- 16       : undefined,
-    ~~~~~~~~~~~~~~~~~~
- 17 });
-    ~
-
-
-apps/api/src/routes/inventory.ts:41:19 - error TS2345: Argument of type 'string | ParsedQs | (string | ParsedQs)[]' is not assignable to parameter of type 'string | number'.
-  Type 'ParsedQs' is not assignable to type 'string | number'.
-
-41       params.push(card_id);
-                     ~~~~~~~
-
-apps/api/src/routes/inventory.ts:55:24 - error TS2345: Argument of type 'string | ParsedQs | (string | ParsedQs)[]' is not assignable to parameter of type 'string | number'.
-  Type 'ParsedQs' is not assignable to type 'string | number'.
-
-55       countParams.push(card_id);
-                          ~~~~~~~
-
-apps/api/src/routes/inventory.ts:206:21 - error TS2345: Argument of type 'string | number | boolean' is not assignable to parameter of type 'string | number'.
+apps/api/src/routes/inventory.ts:214:21 - error TS2345: Argument of type 'string | number | boolean' is not assignable to parameter of type 'string | number'.
   Type 'boolean' is not assignable to type 'string | number'.
 
-206         params.push(value);
+214         params.push(value);
                         ~~~~~
-
-apps/api/src/routes/inventory.ts:349:23 - error TS2353: Object literal may only specify known properties, and 'item' does not exist in type '{ row: number; message: string; }'.
-
-349         errors.push({ item, error: parsed.error.flatten() });
-                          ~~~~
-
-apps/api/src/routes/inventory.ts:366:23 - error TS2353: Object literal may only specify known properties, and 'item' does not exist in type '{ row: number; message: string; }'.
-
-366         errors.push({ item, error: "Database error" });
-                          ~~~~
 
 apps/api/tests/integration/auth.routes.test.ts:98:22 - error TS2352: Conversion of type 'string' to type 'string[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
 
@@ -702,7 +545,4 @@ apps/api/tests/integration/auth.routes.test.ts:98:22 - error TS2352: Conversion 
                         ~~~~~~~~~~~~~~~~~~~
 
 
-Found 99 errors.
-
-
-C:\Git_Repos\mana_meeples_singles_market>
+Found 77 errors.
