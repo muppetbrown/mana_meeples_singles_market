@@ -15,7 +15,7 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     // Log error with context and breadcrumbs
-    errorLogger.logReactError(error, info);
+    errorLogger.logReactError(error, { componentStack: info.componentStack ?? '' });
 
     // Still log to console for development
     console.error("ErrorBoundary caught an error", { error, info });

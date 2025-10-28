@@ -11,7 +11,8 @@
  */
 import React, { useRef, useMemo, useState } from 'react';
 import { useVirtualScroll } from '@/lib/utils';
-import { Card, CardVariation, isStorefrontCard } from '@/types';
+import type { Card, CardVariation } from '@/types';
+import { isStorefrontCard } from '@/types';
 import { CardItem, CardSkeleton } from '@/shared/card';
 import { ChevronDown } from 'lucide-react';
 
@@ -19,7 +20,14 @@ import { ChevronDown } from 'lucide-react';
 // TYPES
 // ============================================================================
 
-interface CardGridProps<T extends Card = Card> {
+// Minimal card shape that CardGrid actually uses
+export type MinimalCard = {
+  id: number;
+  name: string;
+  variations?: Array<unknown>; // flexible variations type
+};
+
+interface CardGridProps<T extends MinimalCard = MinimalCard> {
   cards: T[];
   viewMode?: 'grid' | 'list';
   isLoading?: boolean;
@@ -31,7 +39,7 @@ interface CardGridProps<T extends Card = Card> {
   renderCard?: (card: T) => React.ReactNode;
   cardProps?: {
     currency?: { symbol: string; rate: number };
-    onAddToCart?: (card: T, variation?: CardVariation | null) => void;
+    onAddToCart?: (card: T, variation?: unknown) => void;
   };
   mode?: 'all' | 'inventory';
   onAddToInventory?: (card: T) => void;
@@ -52,7 +60,7 @@ const DEFAULT_CONTAINER_HEIGHT = 800;
 // COMPONENT
 // ============================================================================
 
-export const CardGrid = <T extends Card = Card>({
+export const CardGrid = <T extends MinimalCard = MinimalCard>({
   cards,
   viewMode = 'grid',
   isLoading = false,
@@ -134,7 +142,7 @@ export const CardGrid = <T extends Card = Card>({
           card={card}
           selectedVariationKey={null} // Not used in admin mode
           selectedVariation={null}     // Not used in admin mode
-          currency={cardProps?.currency || { symbol: '$', rate: 1 }}
+          currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1 }}
           onVariationChange={() => {}} // No-op in admin mode
           onAddToCart={() => onAddToInventory?.(card)}
           isAdminMode={true}

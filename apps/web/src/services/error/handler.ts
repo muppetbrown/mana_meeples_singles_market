@@ -2,7 +2,8 @@
 // services/error/handler.ts - Centralized error handling
 // ============================================================================
 
-import { ErrorType, FormattedError, ErrorTemplate } from './types';
+import { ErrorType } from './types';
+import type { FormattedError, ErrorTemplate } from './types';
 
 /**
  * User-friendly error messages by type

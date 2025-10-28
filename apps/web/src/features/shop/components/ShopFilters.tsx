@@ -218,8 +218,8 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
 
       {/* Mobile Filter Modal */}
       <MobileFilterModal
-        isOpen={showMobileFilters}
-        onClose={() => setShowMobileFilters(false)}
+        showMobileFilters={showMobileFilters}
+        setShowMobileFilters={setShowMobileFilters}
         {...filterSidebarProps}
       />
     </>
