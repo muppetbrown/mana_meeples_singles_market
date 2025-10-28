@@ -23,6 +23,7 @@ import { CardSearchBar } from '@/shared/search';
 import { VariationFilter } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
+import AdminCardGrid from './AdminCardGrid';
 import { EmptyState } from '@/shared/ui';
 import type {
   Card,
@@ -566,7 +567,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                 }}
               />
             ) : (
-              <CardGrid<BrowseBaseCard>
+              <AdminCardGrid
                 cards={groupedCards}
                 mode={mode}
                 viewMode={viewMode}
