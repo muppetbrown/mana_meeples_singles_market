@@ -1,18 +1,12 @@
-// features/shop/components/CardDisplay/CardGrid.tsx
+// apps/web/src/features/admin/components/Cards/AdminCardGrid.tsx
 /**
- * Unified Card Grid Component - REFACTORED FOR NEW ARCHITECTURE
- * Consolidates CardGrid.tsx and VirtualCardGrid.tsx
- * Automatically uses virtual scrolling for large datasets
- * 
- * NEW ARCHITECTURE:
- * - Admin mode: Cards have variation metadata directly (no variations array)
- * - Storefront mode: Cards have variations array for purchase options
- * - Adapts rendering based on card structure
+ * Admin-specific Card Grid Component
+ * Handles BrowseBaseCard with BrowseVariation[] (admin browse data)
+ * Separate from the main CardGrid to avoid type conflicts
  */
 import React, { useRef, useMemo, useState } from 'react';
 import { useVirtualScroll } from '@/lib/utils';
-import type { Card, CardVariation } from '@/types';
-import { isStorefrontCard } from '@/types';
+import type { BrowseBaseCard, BrowseVariation } from '@/types';
 import { CardItem, CardSkeleton } from '@/shared/card';
 import { ChevronDown } from 'lucide-react';
 
@@ -20,29 +14,17 @@ import { ChevronDown } from 'lucide-react';
 // TYPES
 // ============================================================================
 
-// Minimal card shape that CardGrid actually uses
-export type MinimalCard = {
-  id: number;
-  name: string;
-  variations?: Array<CardVariation>; // flexible variations type
-};
-
-interface CardGridProps<T extends Card = Card> {
-  cards: T[];
+interface AdminCardGridProps {
+  cards: BrowseBaseCard[];
   viewMode?: 'grid' | 'list';
   isLoading?: boolean;
   columnCount?: number;
   cardHeight?: number;
   containerHeight?: number;
   enableVirtualScroll?: boolean;
-  onCardClick?: (card: T) => void;
-  renderCard?: (card: T) => React.ReactNode;
-  cardProps?: {
-    currency?: { code: string; symbol: string; rate: number; label: string };
-    onAddToCart?: (card: T, variation?: CardVariation) => void;
-  };
+  onCardClick?: (card: BrowseBaseCard) => void;
   mode?: 'all' | 'inventory';
-  onAddToInventory?: (card: T) => void;
+  onAddToInventory?: (card: BrowseBaseCard) => void;
 }
 
 // ============================================================================
@@ -60,7 +42,7 @@ const DEFAULT_CONTAINER_HEIGHT = 800;
 // COMPONENT
 // ============================================================================
 
-export const CardGrid = <T extends Card = Card>({
+export const AdminCardGrid = ({
   cards,
   viewMode = 'grid',
   isLoading = false,
@@ -69,15 +51,10 @@ export const CardGrid = <T extends Card = Card>({
   containerHeight = DEFAULT_CONTAINER_HEIGHT,
   enableVirtualScroll: enableVirtualScrollProp,
   onCardClick,
-  renderCard,
-  cardProps = {},
   mode = 'all',
   onAddToInventory
-}: CardGridProps<T>) => {
+}: AdminCardGridProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Track selected variations per card (for storefront mode)
-  const [selectedVariations, setSelectedVariations] = useState<Record<number, string>>({});
 
   // Determine if virtual scrolling should be enabled
   const shouldUseVirtualScroll = useMemo(() => {
@@ -115,84 +92,26 @@ export const CardGrid = <T extends Card = Card>({
     }
   };
 
-  // Variation selection handler (for storefront mode)
-  const handleVariationChange = (cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedVariations(prev => ({
-      ...prev,
-      [cardId]: e.target.value
-    }));
-  };
-
   // ============================================================================
-  // DEFAULT CARD RENDERER - HANDLES BOTH ADMIN AND STOREFRONT
+  // ADMIN CARD RENDERER - SPECIALIZED FOR BrowseBaseCard
   // ============================================================================
-  
-  const defaultRenderCard = (card: T) => {
-    const isAdminMode = mode === 'all' || mode === 'inventory';
-    
-    // ========================================================================
-    // ADMIN MODE: Cards have variation metadata directly (no variations array)
-    // ========================================================================
-    if (isAdminMode) {
-      // In admin mode, cards don't have variations array
-      // Each card IS a variation, with metadata directly on it
-      return (
-        <CardItem
-          key={card.id}
-          card={card}
-          selectedVariationKey={null} // Not used in admin mode
-          selectedVariation={null}     // Not used in admin mode
-          currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
-          onVariationChange={() => {}} // No-op in admin mode
-          onAddToCart={() => onAddToInventory?.(card)}
-          isAdminMode={true}
-        />
-      );
-    }
-    
-    // ========================================================================
-    // STOREFRONT MODE: Cards have variations array for purchase options
-    // ========================================================================
-    
-    // Skip cards without variations in storefront mode
-    if (!isStorefrontCard(card)) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Storefront card ${card.id} "${card.name}" has no variations array`);
-      }
-      return null;
-    }
 
-    // Get selected variation key for this card, or default to first variation
-    const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
-    
-    // Find the selected variation object
-    const selectedVariation = card.variations.find(
-      (v: CardVariation) => v.variation_key === selectedVariationKey
-    ) || card.variations[0];
-
-    // Safety check (should never happen with type guard above)
-    if (!selectedVariation) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Card ${card.id} "${card.name}" has variations array but no valid variation found`);
-      }
-      return null;
-    }
-    
+  const renderAdminCard = (card: BrowseBaseCard) => {
+    // For admin mode, we treat the card itself as the main entity
+    // with its variations being the different card rows
     return (
       <CardItem
         key={card.id}
-        card={card as Card}
-        selectedVariationKey={selectedVariationKey}
-        selectedVariation={selectedVariation}
-        currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
-        onVariationChange={handleVariationChange(card.id)}
-        onAddToCart={() => cardProps?.onAddToCart?.(card, selectedVariation)}
-        isAdminMode={false}
+        card={card}
+        selectedVariationKey={null} // Not used in admin mode
+        selectedVariation={null}     // Not used in admin mode
+        currency={{ code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
+        onVariationChange={() => {}} // No-op in admin mode
+        onAddToCart={() => onAddToInventory?.(card)}
+        isAdminMode={true}
       />
     );
   };
-
-  const cardRenderer = renderCard || defaultRenderCard;
 
   // ========================================================================
   // LOADING STATE
@@ -200,7 +119,7 @@ export const CardGrid = <T extends Card = Card>({
 
   if (isLoading) {
     return (
-      <div 
+      <div
         className={`grid ${getGridClasses()} gap-4 sm:gap-5 lg:gap-6`}
         role="status"
         aria-label="Loading cards"
@@ -226,7 +145,7 @@ export const CardGrid = <T extends Card = Card>({
     } = virtualScroll;
 
     return (
-      <div 
+      <div
         ref={containerRef}
         className="relative overflow-auto"
         style={{ height: `${containerHeight}px` }}
@@ -245,11 +164,11 @@ export const CardGrid = <T extends Card = Card>({
             }}
           >
             <div className={`grid ${getGridClasses()} gap-4 sm:gap-5 lg:gap-6`}>
-              {visibleItems.map((card) => cardRenderer(card))}
+              {visibleItems.map((card) => renderAdminCard(card))}
             </div>
           </div>
         </div>
-        
+
         {/* Scroll indicator - show if not at end */}
         {visibleRange.endIndex < cards.length - 1 && (
           <div className="flex justify-center py-4">
@@ -265,14 +184,14 @@ export const CardGrid = <T extends Card = Card>({
   // ========================================================================
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`grid ${getGridClasses()} gap-4 sm:gap-5 lg:gap-6`}
     >
-      {cards.map((card) => cardRenderer(card))}
+      {cards.map((card) => renderAdminCard(card))}
     </div>
   );
 };
 
 // Export as default for compatibility
-export default CardGrid;
+export default AdminCardGrid;
