@@ -10,7 +10,8 @@ interface ActiveFilter {
 
 interface ResultsHeaderProps {
   searchTerm: string;
-  cardCount: number;
+  cardCount?: number; // deprecated, use resultsCount
+  resultsCount: number;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
   activeFilters: ActiveFilter[];
@@ -21,19 +22,21 @@ interface ResultsHeaderProps {
 export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
   searchTerm,
   cardCount,
+  resultsCount,
   viewMode,
   setViewMode,
   activeFilters,
   onClearFilter,
   onClearAllFilters
 }) => {
+  const count = resultsCount ?? cardCount ?? 0;
   return (
     <>
       {/* Results Count and View Toggle */}
       <div className="flex items-center mb-4">
         <div className="flex-1 pr-4">
           <p className="text-mm-teal" aria-live="polite">
-            <span className="font-medium">{cardCount}</span> cards found
+            <span className="font-medium">{count}</span> cards found
           </p>
         </div>
 

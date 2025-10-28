@@ -5,6 +5,8 @@ import type { Cart, Currency } from '@/types';
 
 interface ShopHeaderProps {
   searchTerm: string;
+  selectedGame: string;
+  selectedSet: string;
   cart: Cart;
   currency: Currency;
   onCurrencyChange: (currency: Currency) => void;
@@ -14,6 +16,8 @@ interface ShopHeaderProps {
 
 export const ShopHeader: React.FC<ShopHeaderProps> = ({
   searchTerm,
+  selectedGame,
+  selectedSet,
   cart,
   currency,
   onCurrencyChange,

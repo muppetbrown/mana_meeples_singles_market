@@ -21,6 +21,16 @@ type CheckoutForm = {
 
   // Optional
   notes: string;
+
+  // Order details
+  items: Array<{
+    inventory_id: number;
+    quantity: number;
+    price: number;
+  }>;
+  total: number;
+  currency: string;
+  timestamp: string;
 };
 
 // 2) Errors map to form keys + an optional submit-level error
@@ -212,8 +222,8 @@ const Checkout = ({
     setIsSubmitting(true);
 
     try {
-      // Create sanitized customer data for submission using library function
-      const sanitizedCustomer = {
+      // Create flattened order data matching CheckoutForm
+      const orderData: CheckoutForm = {
         firstName: sanitizeText(formData.firstName),
         lastName: sanitizeText(formData.lastName),
         email: sanitizeEmail(formData.email),
@@ -224,23 +234,17 @@ const Checkout = ({
         region: sanitizeText(formData.region),
         postalCode: sanitizeText(formData.postalCode),
         country: sanitizeText(formData.country),
-        notes: sanitizeHTML(formData.notes)
-      };
-
-      const orderData = {
-        customer: sanitizedCustomer,
+        notes: sanitizeHTML(formData.notes),
         items: cart.items.map((item: CartItem) => ({
           inventory_id: item.inventory_id,
-
           // Sanitize quantity
           quantity: Math.max(1, Math.min(50, Number.parseInt(String(item.quantity), 10) || 1)),
-
           // Sanitize price
           price: Math.max(0, Number.parseFloat(String(item.price)) || 0)
         })),
         total: Math.max(0, Number.parseFloat(String(cartTotal)) || 0), // Sanitize total
         currency: effectiveCurrency.code || 'NZD',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date().toISOString()
       };
 
       // Call the parent handler to process the order
