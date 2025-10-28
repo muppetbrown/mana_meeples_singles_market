@@ -6,15 +6,39 @@ import { z } from 'zod';
 import { throttledFetch } from '@/services/http/throttler';
 import { logError } from '@/services/error/handler';
 
+// Helper function for clean error message extraction
+function extractErrorMessage(data: unknown, fallback: string): string {
+  if (!data || typeof data !== 'object') return fallback;
+
+  const obj = data as Record<string, unknown>;
+
+  // Try common error fields
+  if (typeof obj.error === 'string') return obj.error;
+  if (typeof obj.message === 'string') return obj.message;
+
+  // Handle validation errors with details
+  if (obj.details && typeof obj.details === 'object') {
+    return 'Validation failed: ' + JSON.stringify(obj.details);
+  }
+
+  return fallback;
+}
+
 // API Error class for proper error handling
 export class ApiError extends Error {
   constructor(
     public status: number,
     public data: unknown,
-    message?: string
+    message?: string,
+    public parseError?: Error | null  // Track if response wasn't valid JSON
   ) {
     super(message || `API Error: ${status}`);
     this.name = 'ApiError';
+  }
+
+  // Helper to check if error was due to bad JSON response
+  get hadInvalidJsonResponse(): boolean {
+    return Boolean(this.parseError);
   }
 }
 
@@ -98,25 +122,29 @@ class ApiClient {
       // Handle non-OK responses
       if (!response.ok) {
         let errorData: unknown = {};
-        
+        let parseError: Error | null = null;
+
         try {
-          // Try to read error response body
+          // Clone response before reading body (for retry logic if needed)
           errorData = await response.json();
         } catch (jsonError) {
-          // If body already consumed or invalid JSON, use status text
+          parseError = jsonError as Error;
+          logError(jsonError, {
+            context: 'API response JSON parse failed',
+            status: response.status,
+            url: response.url
+          });
           errorData = { message: response.statusText };
         }
-        
-        const errorMessage = (errorData && typeof errorData === 'object' && 'error' in errorData)
-          ? (errorData as { error: string }).error
-          : (errorData && typeof errorData === 'object' && 'message' in errorData)
-          ? (errorData as { message: string }).message
-          : response.statusText;
+
+        // Extract error message with proper type guards
+        const errorMessage = extractErrorMessage(errorData, response.statusText);
 
         throw new ApiError(
           response.status,
           errorData,
-          errorMessage
+          errorMessage,
+          parseError
         );
       }
 
