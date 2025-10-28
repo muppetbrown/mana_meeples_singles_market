@@ -1,12 +1,10 @@
 // apps/web/src/components/CurrencySelector.tsx
 import { useState, useRef, useEffect } from 'react';
 import { ChevronDown, Info, InfoIcon } from 'lucide-react';
+import type { Currency as BaseCurrency } from '@/types';
 
-interface Currency {
-  code: string;
-  symbol: string;
-  label: string;
-  rate: number;
+interface Currency extends BaseCurrency {
+  label?: string;
   flag?: string;
   lastUpdated?: string;
 }

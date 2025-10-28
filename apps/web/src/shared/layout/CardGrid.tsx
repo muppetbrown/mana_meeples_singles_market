@@ -186,7 +186,7 @@ export const CardGrid = <T extends MinimalCard = MinimalCard>({
         selectedVariation={selectedVariation}
         currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1 }}
         onVariationChange={handleVariationChange(card.id)}
-        onAddToCart={cardProps?.onAddToCart?.(card, selectedVariation) || (() => {})}
+        onAddToCart={() => cardProps?.onAddToCart?.(card, selectedVariation)}
         isAdminMode={false}
       />
     );
