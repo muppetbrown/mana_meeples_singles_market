@@ -1,15 +1,4 @@
 C:\Git_Repos\mana_meeples_singles_market>pnpm -w tsc -b
-apps/web/src/features/admin/components/Cards/CardsTab.tsx:562:17 - error TS2322: Type '(card: Card, variation: CardVariation) => void' is not assignable to type '(cardId: number) => void'.
-  Target signature provides too few arguments. Expected 2 or more, but got 1.
-
-562                 onAddToCart={(card: Card, variation: CardVariation) => {
-                    ~~~~~~~~~~~
-
-  apps/web/src/shared/layout/CardList.tsx:23:3
-    23   onAddToCart: (cardId: number) => void;
-         ~~~~~~~~~~~
-    The expected type comes from property 'onAddToCart' which is declared here on type 'IntrinsicAttributes & CardListProps'
-
 apps/web/src/features/admin/components/Cards/CardsTab.tsx:569:16 - error TS2375: Type '{ cards: BrowseBaseCard[]; mode: "all" | "inventory"; viewMode: "grid"; onAddToInventory: ((card: BrowseBaseCard) => void) | undefined; }' is not assignable to type 'CardGridProps<BrowseBaseCard>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
   Types of property 'onAddToInventory' are incompatible.
     Type '((card: BrowseBaseCard) => void) | undefined' is not assignable to type '(card: BrowseBaseCard) => void'.
@@ -18,93 +7,26 @@ apps/web/src/features/admin/components/Cards/CardsTab.tsx:569:16 - error TS2375:
 569               <CardGrid<BrowseBaseCard>
                    ~~~~~~~~
 
-apps/web/src/features/hooks/useCardDisplayArea.tsx:171:17 - error TS2322: Type '(card: StorefrontCard, selectedVariation: CardVariation) => void | (() => void)' is not assignable to type '(card: StorefrontCard, variation?: unknown) => void'.
-  Types of parameters 'selectedVariation' and 'variation' are incompatible.
-    Type 'unknown' is not assignable to type 'CardVariation'.
+apps/web/src/features/hooks/useCardDisplayArea.tsx:169:17 - error TS2353: Object literal may only specify known properties, and 'selectedVariations' does not exist in type '{ currency?: { code: string; symbol: string; rate: number; }; onAddToCart?: (card: StorefrontCard, variation?: unknown) => void; }'.
+
+169                 selectedVariations,
+                    ~~~~~~~~~~~~~~~~~~
+
+  apps/web/src/shared/layout/CardGrid.tsx:40:3
+    40   cardProps?: {
+         ~~~~~~~~~
+    The expected type comes from property 'cardProps' which is declared here on type 'IntrinsicAttributes & CardGridProps<StorefrontCard>'
+
+apps/web/src/features/hooks/useCardDisplayArea.tsx:171:17 - error TS18004: No value exists in scope for the shorthand property 'onAddToCart'. Either declare one or provide an initializer.
 
 171                 onAddToCart
                     ~~~~~~~~~~~
 
-apps/web/src/features/hooks/useCardDisplayArea.tsx:195:25 - error TS2322: Type 'void | (() => void)' is not assignable to type '() => void'.
-  Type 'void' is not assignable to type '() => void'.
-
-195                         onAddToCart={onAddToCart(card, selectedVariation)}
-                            ~~~~~~~~~~~
-
-  apps/web/src/shared/card/CardItem.tsx:38:3
-    38   onAddToCart: () => void;
-         ~~~~~~~~~~~
-    The expected type comes from property 'onAddToCart' which is declared here on type 'IntrinsicAttributes & CardItemProps'
-
-apps/web/src/features/hooks/useCardDisplayArea.tsx:215:17 - error TS2322: Type '(card: StorefrontCard, variation: CardVariation) => void | (() => void)' is not assignable to type '(cardId: number) => void'.
-  Target signature provides too few arguments. Expected 2 or more, but got 1.
-
-215                 onAddToCart={(card: StorefrontCard, variation: CardVariation) => onAddToCart(card, variation)}
-                    ~~~~~~~~~~~
-
-  apps/web/src/shared/layout/CardList.tsx:23:3
-    23   onAddToCart: (cardId: number) => void;
-         ~~~~~~~~~~~
-    The expected type comes from property 'onAddToCart' which is declared here on type 'IntrinsicAttributes & CardListProps'
-
-apps/web/src/features/shop/components/Cart/Checkout.tsx:241:29 - error TS2345: Argument of type '{ customer: { firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }; items: { ...; }[]; total: number; currency: string; timestamp: string; }' is not assignable to parameter of type 'CheckoutForm'.
+apps/web/src/features/shop/components/Cart/Checkout.tsx:248:29 - error TS2345: Argument of type '{ customer: { firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }; items: { ...; }[]; total: number; currency: string; timestamp: string; }' is not assignable to parameter of type 'CheckoutForm'.
   Type '{ customer: { firstName: string; lastName: string; email: string; phone: string; address: string; suburb: string; city: string; region: string; postalCode: string; country: string; notes: string; }; items: { ...; }[]; total: number; currency: string; timestamp: string; }' is missing the following properties from type 'CheckoutForm': firstName, lastName, email, phone, and 7 more.
 
-241         await onOrderSubmit(orderData);
+248         await onOrderSubmit(orderData);
                                 ~~~~~~~~~
-
-apps/web/src/features/shop/components/ShopCart.tsx:56:15 - error TS2379: Argument of type '{ card_id: number; inventory_id: number; card_name: string; image_url: string | undefined; quality: string; price: number; stock: number; foil_type: string; language: string; game_name: string; set_name: string; rarity: string; card_number: string; variation_key: string; }' is not assignable to parameter of type 'Omit<CartItem, "quantity">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'image_url' are incompatible.
-    Type 'string | undefined' is not assignable to type 'string'.
-      Type 'undefined' is not assignable to type 'string'.
-
- 56     addToCart({
-                  ~
- 57       card_id: card.id,
-    ~~~~~~~~~~~~~~~~~~~~~~~
-...
- 70       variation_key: `${selectedVariation.quality}-${selectedVariation.foil_type}-${selectedVariation.language}`
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- 71     });
-    ~~~~~
-
-apps/web/src/features/shop/components/ShopCart.tsx:95:9 - error TS2322: Type '{ cart: Cart; isOpen: boolean; onClose: () => void; onOpenFullCart: () => void; total: number; itemCount: number; }' is not assignable to type 'IntrinsicAttributes & MiniCartProps'.
-  Property 'onOpenFullCart' does not exist on type 'IntrinsicAttributes & MiniCartProps'.
-
-95         onOpenFullCart={() => {
-           ~~~~~~~~~~~~~~
-
-apps/web/src/features/shop/components/ShopCart.tsx:106:9 - error TS2322: Type '{ isOpen: boolean; onClose: () => void; cart: Cart; total: number; onOrderComplete: () => void; }' is not assignable to type 'IntrinsicAttributes & CheckoutProps'.
-  Property 'onClose' does not exist on type 'IntrinsicAttributes & CheckoutProps'.
-
-106         onClose={() => setShowCheckout(false)}
-            ~~~~~~~
-
-apps/web/src/features/shop/components/ShopCart.tsx:112:27 - error TS2345: Argument of type '{ type: string; message: string; }' is not assignable to parameter of type 'string'.
-
-112           addNotification({
-                              ~
-113             type: 'success',
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-114             message: 'Order placed successfully!'
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-115           });
-    ~~~~~~~~~~~
-
-apps/web/src/features/shop/components/ShopCart.tsx:146:15 - error TS2379: Argument of type '{ card_id: number; inventory_id: number; card_name: string; image_url: string | undefined; quality: string; price: number; stock: number; foil_type: string; language: string; game_name: string; set_name: string; rarity: string; card_number: string; variation_key: string; }' is not assignable to parameter of type 'Omit<CartItem, "quantity">' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-  Types of property 'image_url' are incompatible.
-    Type 'string | undefined' is not assignable to type 'string'.
-      Type 'undefined' is not assignable to type 'string'.
-
-146     addToCart({
-                  ~
-147       card_id: card.id,
-    ~~~~~~~~~~~~~~~~~~~~~~~
-...
-160       variation_key: `${selectedVariation.quality}-${selectedVariation.foil_type}-${selectedVariation.language}`
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-161     });
-    ~~~~~
 
 apps/web/src/features/shop/components/ShopFilters.tsx:208:10 - error TS2739: Type '{ selectedGame: string; selectedSet: string; selectedRarity: string; selectedQuality: string; filters: { quality: string; rarity: string; foilType: string; language: string; minPrice: string; maxPrice: string; sortBy: string; sortOrder: string; set: string; }; ... 11 more ...; error: string | null; }' is missing the following properties from type 'FilterSidebarProps': searchTerm, onSearchChange
 
@@ -136,11 +58,14 @@ apps/web/src/features/shop/components/ShopHeader.tsx:46:17 - error TS2741: Prope
          ~~~~~~~~
     The expected type comes from property 'currency' which is declared here on type 'IntrinsicAttributes & CurrencySelectorProps'
 
-apps/web/src/features/shop/ShopPage.tsx:102:9 - error TS2322: Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string | undefined; total_stock: number | undefined; variation_count: number | undefined; variations: CardVariation[]; }[]' is not assignable to type 'CardForDisplay[]'.
-  Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string | undefined; total_stock: number | undefined; variation_count: number | undefined; variations: CardVariation[]; }' is not assignable to type 'CardForDisplay' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-    Types of property 'rarity' are incompatible.
-      Type 'string | undefined' is not assignable to type 'string'.
-        Type 'undefined' is not assignable to type 'string'.
+apps/web/src/features/shop/ShopPage.tsx:102:9 - error TS2322: Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string; total_stock: number; variation_count: number; variations: CardVariation[]; }[]' is not assignable to type 'CardForDisplay[]'.
+  Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string; total_stock: number; variation_count: number; variations: CardVariation[]; }' is not assignable to type 'CardForDisplay'.
+    Types of property 'variations' are incompatible.
+      Type 'CardVariation[]' is not assignable to type '{ variation_key: string; quality: string; foil_type: string; language?: string; price: number; stock: number; inventory_id: number; }[]'.
+        Type 'CardVariation' is not assignable to type '{ variation_key: string; quality: string; foil_type: string; language?: string; price: number; stock: number; inventory_id: number; }'.
+          Types of property 'price' are incompatible.
+            Type 'number | null' is not assignable to type 'number'.
+              Type 'null' is not assignable to type 'number'.
 
 102   const displayCards: CardForDisplay[] = useMemo(() =>
             ~~~~~~~~~~~~
@@ -157,21 +82,20 @@ apps/web/src/features/shop/ShopPage.tsx:260:17 - error TS2322: Type '{ searchTer
 260                 resultsCount={cards.length}
                     ~~~~~~~~~~~~
 
-apps/web/src/features/shop/ShopPage.tsx:282:10 - error TS2741: Property 'currency' is missing in type '{ cards: StorefrontCard[]; showCart: boolean; setShowCart: Dispatch<SetStateAction<boolean>>; showMiniCart: boolean; setShowMiniCart: Dispatch<SetStateAction<...>>; showCheckout: boolean; setShowCheckout: Dispatch<...>; }' but required in type 'ShopCartProps'.
+apps/web/src/features/shop/ShopPage.tsx:274:17 - error TS2322: Type '{ cards: StorefrontCard[]; viewMode: ViewMode; currency: Currency; selectedVariations: Record<number, string>; filters: { quality: string; ... 7 more ...; set: string; }; onVariationChange: (cardId: number) => (e: ChangeEvent<...>) => void; onAddToCart: (card: StorefrontCard, selectedVariation: CardVariation) => () ...' is not assignable to type 'IntrinsicAttributes & CardDisplayAreaProps'.
+  Property 'onAddToCart' does not exist on type 'IntrinsicAttributes & CardDisplayAreaProps'.
 
-282         <ShopCart
-             ~~~~~~~~
+274                 onAddToCart={handleAddToCart}
+                    ~~~~~~~~~~~
 
-  apps/web/src/features/shop/components/ShopCart.tsx:9:3
-    9   currency: Currency;
-        ~~~~~~~~
-    'currency' is declared here.
-
-apps/web/src/features/shop/ShopPageRefactored.tsx:103:9 - error TS2322: Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string | undefined; total_stock: number | undefined; variation_count: number | undefined; variations: CardVariation[]; }[]' is not assignable to type 'CardForDisplay[]'.
-  Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string | undefined; total_stock: number | undefined; variation_count: number | undefined; variations: CardVariation[]; }' is not assignable to type 'CardForDisplay' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
-    Types of property 'rarity' are incompatible.
-      Type 'string | undefined' is not assignable to type 'string'.
-        Type 'undefined' is not assignable to type 'string'.
+apps/web/src/features/shop/ShopPageRefactored.tsx:103:9 - error TS2322: Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string; total_stock: number; variation_count: number; variations: CardVariation[]; }[]' is not assignable to type 'CardForDisplay[]'.
+  Type '{ id: number; name: string; image_url: string; set_name: string; card_number: string; game_name: string; rarity: string; total_stock: number; variation_count: number; variations: CardVariation[]; }' is not assignable to type 'CardForDisplay'.
+    Types of property 'variations' are incompatible.
+      Type 'CardVariation[]' is not assignable to type '{ variation_key: string; quality: string; foil_type: string; language?: string; price: number; stock: number; inventory_id: number; }[]'.
+        Type 'CardVariation' is not assignable to type '{ variation_key: string; quality: string; foil_type: string; language?: string; price: number; stock: number; inventory_id: number; }'.
+          Types of property 'price' are incompatible.
+            Type 'number | null' is not assignable to type 'number'.
+              Type 'null' is not assignable to type 'number'.
 
 103   const displayCards: CardForDisplay[] = useMemo(() =>
             ~~~~~~~~~~~~
@@ -188,15 +112,11 @@ apps/web/src/features/shop/ShopPageRefactored.tsx:261:17 - error TS2322: Type '{
 261                 resultsCount={cards.length}
                     ~~~~~~~~~~~~
 
-apps/web/src/features/shop/ShopPageRefactored.tsx:283:10 - error TS2741: Property 'currency' is missing in type '{ cards: StorefrontCard[]; showCart: boolean; setShowCart: Dispatch<SetStateAction<boolean>>; showMiniCart: boolean; setShowMiniCart: Dispatch<SetStateAction<...>>; showCheckout: boolean; setShowCheckout: Dispatch<...>; }' but required in type 'ShopCartProps'.
+apps/web/src/features/shop/ShopPageRefactored.tsx:275:17 - error TS2322: Type '{ cards: StorefrontCard[]; viewMode: ViewMode; currency: Currency; selectedVariations: Record<number, string>; filters: { quality: string; ... 7 more ...; set: string; }; onVariationChange: (cardId: number) => (e: ChangeEvent<...>) => void; onAddToCart: (card: StorefrontCard, selectedVariation: CardVariation) => () ...' is not assignable to type 'IntrinsicAttributes & CardDisplayAreaProps'.
+  Property 'onAddToCart' does not exist on type 'IntrinsicAttributes & CardDisplayAreaProps'.
 
-283         <ShopCart
-             ~~~~~~~~
-
-  apps/web/src/features/shop/components/ShopCart.tsx:9:3
-    9   currency: Currency;
-        ~~~~~~~~
-    'currency' is declared here.
+275                 onAddToCart={handleAddToCart}
+                    ~~~~~~~~~~~
 
 apps/web/src/lib/constants/validation.ts:71:3 - error TS18004: No value exists in scope for the shorthand property 'VALIDATION_CONFIG'. Either declare one or provide an initializer.
 
@@ -220,39 +140,18 @@ apps/web/src/shared/layout/CardGrid.tsx:158:27 - error TS2379: Argument of type 
 158     if (!isStorefrontCard(card)) {
                               ~~~~
 
-apps/web/src/shared/layout/CardList.tsx:38:13 - error TS2322: Type 'string | undefined' is not assignable to type 'string'.
-  Type 'undefined' is not assignable to type 'string'.
+apps/web/src/shared/layout/CardList.tsx:35:11 - error TS2375: Type '{ id: number; name: string; gameName: string; setName: string; cardNumber: string; rarity: string | undefined; imageUrl: string | undefined; }' is not assignable to type 'CardIdentity' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.
+  Types of property 'rarity' are incompatible.
+    Type 'string | undefined' is not assignable to type 'string'.
+      Type 'undefined' is not assignable to type 'string'.
 
-38             gameName: card.game_name,
-               ~~~~~~~~
+35           identity={{
+             ~~~~~~~~
 
-  apps/web/src/shared/card/CardRow.tsx:8:3
-    8   gameName: string; // e.g., "Magic: The Gathering"
-        ~~~~~~~~
-    The expected type comes from property 'gameName' which is declared here on type 'CardIdentity'
-
-apps/web/src/shared/layout/CardList.tsx:40:13 - error TS2322: Type 'string | undefined' is not assignable to type 'string'.
-  Type 'undefined' is not assignable to type 'string'.
-
-40             cardNumber: card.card_number,
-               ~~~~~~~~~~
-
-  apps/web/src/shared/card/CardRow.tsx:10:3
-    10   cardNumber: string;
-         ~~~~~~~~~~
-    The expected type comes from property 'cardNumber' which is declared here on type 'CardIdentity'
-
-apps/web/src/shared/layout/CardList.tsx:70:9 - error TS2322: Type '(cardId: number) => void' is not assignable to type '(payload: { inventoryId: number; quantity: number; }) => void'.
-  Types of parameters 'cardId' and 'payload' are incompatible.
-    Type '{ inventoryId: number; quantity: number; }' is not assignable to type 'number'.
-
-70         onAdd={onAddToCart}
-           ~~~~~
-
-  apps/web/src/features/shop/components/Cart/AddToCartModal.tsx:28:3
-    28   onAdd: (payload: { inventoryId: number; quantity: number }) => void;
-         ~~~~~
-    The expected type comes from property 'onAdd' which is declared here on type 'IntrinsicAttributes & { cardId: number; isOpen: boolean; onClose: () => void; currency: Currency; onAdd: (payload: { inventoryId: number; quantity: number; }) => void; }'
+  apps/web/src/shared/card/CardRow.tsx:16:3
+    16   identity: CardIdentity;
+         ~~~~~~~~
+    The expected type comes from property 'identity' which is declared here on type 'IntrinsicAttributes & CardRowProps'
 
 
-Found 29 errors.
+Found 20 errors.
