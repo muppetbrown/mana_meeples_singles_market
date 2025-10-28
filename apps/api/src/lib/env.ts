@@ -1,11 +1,8 @@
 // apps/api/src/lib/env.ts
-import * as dotenv from "dotenv";
 import { z } from "zod";
 
-// ✅ Always load .env from the project root (whether running src/ or dist/)
-dotenv.config({
-  path: process.cwd() + "/.env",
-});
+// NO dotenv imports or config calls here!
+// Environment variables are loaded in server.ts before this file is imported
 
 // ---------- SCHEMA ----------
 const EnvSchema = z.object({
@@ -19,7 +16,7 @@ const EnvSchema = z.object({
   // Admin authentication
   ADMIN_USERNAME: z.string().min(1, "ADMIN_USERNAME is required"),
   ADMIN_PASSWORD_HASH: z.string().min(1, "ADMIN_PASSWORD_HASH is required"),
-  ADMIN_PASSWORD: z.string().optional(), // Optional for production
+  ADMIN_PASSWORD: z.string().optional(),
 
   // CORS settings
   ALLOWED_ORIGINS: z.string().default("http://localhost:5173"),
