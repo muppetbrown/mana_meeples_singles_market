@@ -110,7 +110,15 @@ const ShopPage: React.FC = () => {
       rarity: card.rarity ?? 'Unknown',
       total_stock: card.total_stock ?? 0,
       variation_count: card.variation_count ?? 0,
-      variations: card.variations
+      variations: card.variations.map(v => ({
+        variation_key: v.variation_key,
+        quality: v.quality,
+        foil_type: v.foil_type,
+        language: v.language,
+        price: v.price ?? 0,
+        stock: v.stock ?? 0,
+        inventory_id: v.inventory_id,
+      }))
     })), [cards]
   );
 
