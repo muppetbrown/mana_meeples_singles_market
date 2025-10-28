@@ -9,6 +9,7 @@ import { useVirtualScroll } from '@/lib/utils';
 import type { BrowseBaseCard, BrowseVariation } from '@/types';
 import { CardItem, CardSkeleton } from '@/shared/card';
 import { ChevronDown } from 'lucide-react';
+import { browseCardToCard } from '@/features/admin/utils/cardAdapters';
 
 // ============================================================================
 // TYPES
@@ -96,18 +97,21 @@ export const AdminCardGrid = ({
   // ADMIN CARD RENDERER - SPECIALIZED FOR BrowseBaseCard
   // ============================================================================
 
-  const renderAdminCard = (card: BrowseBaseCard) => {
+  const renderAdminCard = (browseCard: BrowseBaseCard) => {
+    // Convert BrowseBaseCard to Card for CardItem component
+    const card = browseCardToCard(browseCard);
+
     // For admin mode, we treat the card itself as the main entity
     // with its variations being the different card rows
     return (
       <CardItem
-        key={card.id}
+        key={browseCard.id}
         card={card}
         selectedVariationKey={null} // Not used in admin mode
         selectedVariation={null}     // Not used in admin mode
         currency={{ code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
         onVariationChange={() => {}} // No-op in admin mode
-        onAddToCart={() => onAddToInventory?.(card)}
+        onAddToCart={() => onAddToInventory?.(browseCard)}
         isAdminMode={true}
       />
     );
