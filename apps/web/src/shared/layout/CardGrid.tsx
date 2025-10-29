@@ -94,7 +94,12 @@ export const CardGrid: React.FC<CardGridProps> = ({
         case 'storefront':
           // For storefront, we need to open a modal to select quality/language
           // This would typically be handled by the parent component
-          console.log('Storefront list action for card:', card.name, 'variation:', variation);
+          // For now, pass the action up - parent should handle modal opening
+          onAddToCart?.({
+            card,
+            inventoryId: variation?.id || 0,
+            quantity: 1
+          });
           break;
       }
     };
