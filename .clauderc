@@ -1,0 +1,48 @@
+{
+  "project": {
+    "name": "Mana & Meeples Singles Market",
+    "root": "C:/Git_Repos/mana_meeples_singles_market",
+    "type": "fullstack",
+    "packageManager": "pnpm"
+  },
+  "workspace": {
+    "apps": [
+      "apps/api",
+      "apps/web"
+    ],
+    "packages": [
+      "utils/*",
+      "scripts/*",
+      "config",
+      "database"
+    ]
+  },
+  "conventions": {
+    "language": "TypeScript",
+    "framework": {
+      "frontend": "React + Vite",
+      "backend": "Express + Node.js"
+    },
+    "styling": "TailwindCSS",
+    "database": "PostgreSQL + Prisma"
+  },
+  "guidelines": [
+    "Search for existing implementations before creating new code",
+    "Modify existing code rather than duplicating functionality",
+    "Follow AI Software Development Principles in repository",
+    "Use TypeScript for all new files",
+    "Maintain WCAG AAA accessibility",
+    "Never commit .env files"
+  ],
+  "autoApprove": {
+    "commands": [
+      "pnpm install",
+      "pnpm run dev",
+      "pnpm run build",
+      "pnpm run test",
+      "git status",
+      "git diff",
+      "git log"
+    ]
+  }
+}

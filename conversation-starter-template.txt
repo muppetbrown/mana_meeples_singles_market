@@ -1,0 +1,82 @@
+# Conversation Starter Template for Claude Desktop
+
+Copy/paste this at the start of new conversations about your project:
+
+---
+
+**Project:** Mana & Meeples Singles Market  
+**Location:** `C:/Git_Repos/mana_meeples_singles_market`  
+**Config:** Read `.clauderc` in project root for full context
+
+**Quick Context:**
+- pnpm monorepo (apps/api + apps/web)
+- React/TypeScript frontend + Express/Node backend
+- Always search existing code before creating new implementations
+
+**Task:** [Describe what you need help with]
+
+---
+
+## Variations for Different Tasks
+
+### For Bug Fixes:
+```
+Project: Mana & Meeples @ C:/Git_Repos/mana_meeples_singles_market
+Read .clauderc for context
+
+Issue: [Describe the bug]
+Expected: [What should happen]
+Actual: [What's happening]
+
+Please investigate existing code first.
+```
+
+### For New Features:
+```
+Project: Mana & Meeples @ C:/Git_Repos/mana_meeples_singles_market
+Read .clauderc for context
+
+Feature Request: [Describe the feature]
+
+Before implementing:
+1. Check if similar functionality exists
+2. Review related modules and utilities
+3. Follow existing patterns
+
+Ready to proceed?
+```
+
+### For Code Review:
+```
+Project: Mana & Meeples @ C:/Git_Repos/mana_meeples_singles_market
+Read .clauderc for context
+
+Please review: [file path or describe code]
+
+Check for:
+- Adherence to project conventions
+- Existing similar implementations
+- Security and accessibility issues
+```
+
+### For Refactoring:
+```
+Project: Mana & Meeples @ C:/Git_Repos/mana_meeples_singles_market
+Read .clauderc for context
+
+Refactor target: [file/module path]
+
+Goals:
+- Improve clarity and maintainability
+- Follow Single Responsibility principle
+- Eliminate duplication
+
+Please analyze before suggesting changes.
+```
+
+## Save This Template
+
+Save this file somewhere easy to access:
+- Desktop: `mana-meeples-prompt.txt`
+- Browser bookmark with the text
+- Text expansion tool (AutoHotkey, TextExpander, etc.)
