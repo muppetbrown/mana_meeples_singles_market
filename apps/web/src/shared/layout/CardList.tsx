@@ -84,8 +84,39 @@ const CardList: React.FC<CardListProps> = ({
   };
 
   // --------------------------------------------------------------------------
-  // BADGE GENERATION
+  // BADGE GENERATION HELPERS
   // --------------------------------------------------------------------------
+
+  const determineVariantType = (variation: BrowseVariation, allVariations: BrowseVariation[]): 'neutral' | 'accent' | 'warning' => {
+    // Warning for out of stock in inventory mode
+    if (mode === 'inventory' && variation.in_stock === 0) {
+      return 'warning';
+    }
+
+    // Accent for premium treatments (foil, special borders, etc.)
+    const treatment = variation.treatment?.toLowerCase() || '';
+    const finish = variation.finish?.toLowerCase() || '';
+
+    if (finish.includes('foil') || treatment.includes('borderless') || treatment.includes('extended') ||
+        treatment.includes('showcase') || treatment.includes('textured')) {
+      return 'accent';
+    }
+
+    return 'neutral';
+  };
+
+  const buildVariationTitle = (variation: BrowseVariation): string => {
+    const parts = [];
+
+    if (variation.sku) parts.push(`SKU: ${variation.sku}`);
+    if (variation.price) parts.push(`Price: ${formatCurrencySimple(variation.price, currency)}`);
+    if (variation.treatment) parts.push(`Treatment: ${formatTreatment(variation.treatment)}`);
+    if (variation.finish) parts.push(`Finish: ${formatFinish(variation.finish)}`);
+    if (variation.border_color) parts.push(`Border: ${variation.border_color}`);
+    if (mode !== 'all') parts.push(`Stock: ${variation.in_stock}`);
+
+    return parts.join(' • ');
+  };
 
   const generateVariationBadges = (card: BrowseBaseCard): VariationBadge[] => {
     const visibleVariations = getVisibleVariations(card);
@@ -95,21 +126,18 @@ const CardList: React.FC<CardListProps> = ({
     }
 
     return visibleVariations.map(variation => {
-      const baseLabel = formatVariationLabel(variation, mode !== 'all');
-      let badge: VariationBadge = {
-        label: baseLabel,
-        variant: 'neutral',
-        title: `${formatTreatment(variation.treatment)} ${formatFinish(variation.finish)} variation`
-      };
+      const treatmentLabel = formatTreatment(variation.treatment);
+      const finishLabel = formatFinish(variation.finish);
 
-      // Add price info if available and not in 'all' mode
-      if (variation.price && mode !== 'all') {
-        badge.label += ` • ${formatCurrencySimple(variation.price, currency)}`;
-        badge.variant = 'accent';
-        badge.title += ` - ${formatCurrencySimple(variation.price, currency)}`;
+      let label = `${treatmentLabel} ${finishLabel}`;
+      if (mode !== 'all') {
+        label += ` (${variation.in_stock} in stock)`;
       }
 
-      return badge;
+      const variant = determineVariantType(variation, visibleVariations);
+      const title = buildVariationTitle(variation);
+
+      return { label, variant, title };
     });
   };
 
@@ -127,10 +155,27 @@ const CardList: React.FC<CardListProps> = ({
 
   const renderActionButton = (card: BrowseBaseCard) => {
     const visibleVariations = getVisibleVariations(card);
-    const isDisabled = mode !== 'all' && visibleVariations.length === 0;
+    const hasStock = visibleVariations.length > 0;
+    const hasMultipleVariations = visibleVariations.length > 1;
+    const isDisabled = mode === 'storefront' && !hasStock;
+
+    const handleButtonClick = () => {
+      if (visibleVariations.length === 1) {
+        onAction(card, visibleVariations[0]); // Pass variation for single variation
+      } else {
+        onAction(card, undefined); // Let parent handle selection for multiple variations
+      }
+    };
 
     return (
       <div className="flex items-center gap-3">
+        {/* Variation count indicator for multi-variation cards */}
+        {hasMultipleVariations && (
+          <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-slate-100 text-slate-600 border border-slate-200">
+            {visibleVariations.length} variations
+          </span>
+        )}
+
         {/* Price info */}
         {mode !== 'all' && card.lowest_price && (
           <span className="text-sm text-slate-600">
@@ -140,9 +185,9 @@ const CardList: React.FC<CardListProps> = ({
 
         {/* Action button */}
         <button
-          onClick={() => onAction(card, visibleVariations[0])}
+          onClick={handleButtonClick}
           disabled={isDisabled}
-          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors inline-flex items-center gap-1 ${
             isDisabled
               ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
               : 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
@@ -150,6 +195,7 @@ const CardList: React.FC<CardListProps> = ({
           aria-label={`${getActionButtonText()} for ${card.name}`}
         >
           {getActionButtonText()}
+          {hasMultipleVariations && <span className="ml-1">▼</span>}
         </button>
       </div>
     );
