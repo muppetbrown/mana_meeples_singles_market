@@ -29,6 +29,7 @@ export const CardFiltersQuery = z.object({
   treatment: z.string().trim().optional(), // expect canonical UPPERCASE (STANDARD, BORDERLESS, etc.)
   rarity: z.string().trim().optional(),
   search: z.string().trim().optional(),
+  has_inventory: z.enum(['true', 'false']).optional(),
 });
 
 export const CardsIndexQuery = CardFiltersQuery.extend({
@@ -76,6 +77,13 @@ function buildFilterSQL(alias: string, f: CardFilters) {
     const term = `%${f.search}%`;
     params.push(term, term);
     where.push(`(${alias}.name ILIKE $${params.length - 1} OR ${alias}.card_number ILIKE $${params.length})`);
+  }
+
+  if (f.has_inventory === 'true') {
+    joins.push(`
+      INNER JOIN card_inventory ci_filter ON ci_filter.card_id = ${alias}.id
+    `);
+    where.push(`ci_filter.stock_quantity > 0`);
   }
 
   return { where, joins, params };
