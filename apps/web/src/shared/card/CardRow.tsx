@@ -41,6 +41,13 @@ type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
  * - Visible focus ring and respects prefers-reduced-motion.
  */
 export function CardRow({ identity, rightNode, badges, onImageOpen, className, tableMode = false }: CardRowProps) {
+  const [imageError, setImageError] = React.useState(false);
+
+  const finalImageUrl = React.useMemo(() => {
+    if (imageError) return '/placeholder-card.png';
+    return identity.imageUrl ?? '/placeholder-card.png';
+  }, [identity.imageUrl, imageError]);
+
   if (tableMode) {
     // Table row mode - renders as table cells
     return (
@@ -49,12 +56,13 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
         <td className="px-4 py-4">
           <div className="w-12 h-16 flex-shrink-0 overflow-hidden rounded-md bg-slate-100">
             <img
-              src={identity.imageUrl ?? '/images/card-back-placeholder.svg'}
+              src={finalImageUrl}
               alt=""
               width={48}
               height={64}
               loading="lazy"
               decoding="async"
+              onError={() => setImageError(true)}
               className="object-cover"
             />
           </div>
@@ -136,19 +144,21 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
         type="button"
         onClick={onImageOpen}
         className={clsx(
-          'h-[72px] w-[72px] overflow-hidden rounded-xl border',
-          'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600'
+          'h-[72px] w-[72px] overflow-hidden rounded-xl border transition-all',
+          'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2',
+          'hover:shadow-md'
         )}
         aria-haspopup="dialog"
         aria-label={`Open larger image for ${identity.name}`}
       >
         <img
-          src={identity.imageUrl ?? '/placeholder-card.png'}
+          src={finalImageUrl}
           alt=""
           width={72}
           height={72}
           loading="lazy"
           decoding="async"
+          onError={() => setImageError(true)}
           className={clsx("object-cover", className)}
         />
       </button>
