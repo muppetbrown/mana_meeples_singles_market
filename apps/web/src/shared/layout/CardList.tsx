@@ -1,16 +1,16 @@
 // apps/web/src/shared/layout/CardList.tsx
 /**
- * Card List Component - IMPLEMENTATION OF NEW ARCHITECTURE
- * Displays cards in list/table view with variation badges
+ * Card List Component - REFACTORED TO USE CARDROW
+ * Displays cards in list/table view using CardRow component for each row
  *
  * ARCHITECTURE:
- * - List view: Table rows with variation badges (no dropdowns)
- * - Adapts display based on mode: storefront/inventory/all
- * - Shows treatment + finish + stock count per variation
- * - Action button opens modal for quality/language selection
+ * - Uses CardRow.tsx for consistent row rendering
+ * - Converts BrowseBaseCard to CardIdentity for CardRow
+ * - Generates variation badges using CardRow's badge system
+ * - Passes action buttons via CardRow's rightNode prop
  */
 import React from 'react';
-import OptimizedImage from '@/shared/media/OptimizedImage';
+import CardRow, { type CardIdentity, type VariationBadge } from '@/shared/card/CardRow';
 import { formatCurrencySimple } from '@/lib/utils';
 import type {
   BrowseBaseCard,
@@ -44,6 +44,22 @@ const CardList: React.FC<CardListProps> = ({
   onAction
 }) => {
   // --------------------------------------------------------------------------
+  // DATA CONVERSION HELPERS
+  // --------------------------------------------------------------------------
+
+  const convertToCardIdentity = (card: BrowseBaseCard): CardIdentity => {
+    return {
+      id: card.id,
+      name: card.name,
+      gameName: card.game_name || 'Unknown Game',
+      setName: card.set_name,
+      cardNumber: card.card_number || '',
+      rarity: card.rarity,
+      imageUrl: card.image_url
+    };
+  };
+
+  // --------------------------------------------------------------------------
   // VARIATION FILTERING HELPERS
   // --------------------------------------------------------------------------
 
@@ -61,10 +77,40 @@ const CardList: React.FC<CardListProps> = ({
     const label = `${treatment} ${finish}`;
 
     if (includeStock && mode !== 'all') {
-      return `${label} (${variation.in_stock} in stock)`;
+      return `${label} (${variation.in_stock})`;
     }
 
     return label;
+  };
+
+  // --------------------------------------------------------------------------
+  // BADGE GENERATION
+  // --------------------------------------------------------------------------
+
+  const generateVariationBadges = (card: BrowseBaseCard): VariationBadge[] => {
+    const visibleVariations = getVisibleVariations(card);
+
+    if (visibleVariations.length === 0) {
+      return [];
+    }
+
+    return visibleVariations.map(variation => {
+      const baseLabel = formatVariationLabel(variation, mode !== 'all');
+      let badge: VariationBadge = {
+        label: baseLabel,
+        variant: 'neutral',
+        title: `${formatTreatment(variation.treatment)} ${formatFinish(variation.finish)} variation`
+      };
+
+      // Add price info if available and not in 'all' mode
+      if (variation.price && mode !== 'all') {
+        badge.label += ` • ${formatCurrencySimple(variation.price, currency)}`;
+        badge.variant = 'accent';
+        badge.title += ` - ${formatCurrencySimple(variation.price, currency)}`;
+      }
+
+      return badge;
+    });
   };
 
   // --------------------------------------------------------------------------
@@ -79,51 +125,33 @@ const CardList: React.FC<CardListProps> = ({
     }
   };
 
-  // --------------------------------------------------------------------------
-  // RENDER HELPERS
-  // --------------------------------------------------------------------------
-
-  const renderVariationBadges = (card: BrowseBaseCard) => {
+  const renderActionButton = (card: BrowseBaseCard) => {
     const visibleVariations = getVisibleVariations(card);
-
-    if (visibleVariations.length === 0) {
-      return (
-        <div className="text-sm text-slate-500 italic">
-          No variations available
-        </div>
-      );
-    }
+    const isDisabled = mode !== 'all' && visibleVariations.length === 0;
 
     return (
-      <div className="flex flex-wrap gap-2">
-        {visibleVariations.map(variation => (
-          <div
-            key={variation.id}
-            className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-medium border border-slate-200"
-          >
-            <span>
-              {formatVariationLabel(variation, mode !== 'all')}
-            </span>
-            {variation.price && mode !== 'all' && (
-              <span className="text-xs text-slate-600">
-                {formatCurrencySimple(variation.price, currency)}
-              </span>
-            )}
-          </div>
-        ))}
+      <div className="flex items-center gap-3">
+        {/* Price info */}
+        {mode !== 'all' && card.lowest_price && (
+          <span className="text-sm text-slate-600">
+            From {formatCurrencySimple(card.lowest_price, currency)}
+          </span>
+        )}
+
+        {/* Action button */}
+        <button
+          onClick={() => onAction(card, visibleVariations[0])}
+          disabled={isDisabled}
+          className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            isDisabled
+              ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              : 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
+          }`}
+          aria-label={`${getActionButtonText()} for ${card.name}`}
+        >
+          {getActionButtonText()}
+        </button>
       </div>
-    );
-  };
-
-  const renderPriceInfo = (card: BrowseBaseCard) => {
-    if (mode === 'all' || !card.lowest_price) {
-      return null;
-    }
-
-    return (
-      <span className="text-sm text-slate-600">
-        From {formatCurrencySimple(card.lowest_price, currency)}
-      </span>
     );
   };
 
@@ -140,116 +168,26 @@ const CardList: React.FC<CardListProps> = ({
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-slate-50 border-b border-slate-200">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                Image
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                Game
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                Set
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                Name
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                #
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                Rarity
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                Variations
-              </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wide">
-                Action
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-200">
-            {cards.map(card => {
-              const visibleVariations = getVisibleVariations(card);
-              const imageUrl = card.image_url || '/images/card-back-placeholder.svg';
+    <div className="space-y-2">
+      {cards.map(card => {
+        const identity = convertToCardIdentity(card);
+        const badges = generateVariationBadges(card);
+        const rightNode = renderActionButton(card);
 
-              return (
-                <tr key={card.id} className="hover:bg-slate-50 transition-colors">
-                  {/* Image */}
-                  <td className="px-4 py-4">
-                    <div className="w-12 h-16 flex-shrink-0 overflow-hidden rounded-md bg-slate-100">
-                      <OptimizedImage
-                        src={imageUrl}
-                        alt={card.name}
-                        width={48}
-                        height={64}
-                        className="object-cover"
-                        priority={false}
-                      />
-                    </div>
-                  </td>
-
-                  {/* Game */}
-                  <td className="px-4 py-4 text-sm text-slate-700">
-                    {card.game_name || 'Unknown'}
-                  </td>
-
-                  {/* Set */}
-                  <td className="px-4 py-4 text-sm text-slate-700">
-                    {card.set_name}
-                  </td>
-
-                  {/* Name */}
-                  <td className="px-4 py-4">
-                    <div className="text-sm font-medium text-slate-900">
-                      {card.name}
-                    </div>
-                  </td>
-
-                  {/* Card Number */}
-                  <td className="px-4 py-4 text-sm text-slate-600">
-                    {card.card_number || '—'}
-                  </td>
-
-                  {/* Rarity */}
-                  <td className="px-4 py-4 text-sm text-slate-600">
-                    {card.rarity || '—'}
-                  </td>
-
-                  {/* Variations */}
-                  <td className="px-4 py-4">
-                    <div className="max-w-xs">
-                      {renderVariationBadges(card)}
-                    </div>
-                  </td>
-
-                  {/* Action */}
-                  <td className="px-4 py-4 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      {renderPriceInfo(card)}
-                      <button
-                        onClick={() => onAction(card, visibleVariations[0])}
-                        disabled={mode !== 'all' && visibleVariations.length === 0}
-                        className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                          mode !== 'all' && visibleVariations.length === 0
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                            : 'bg-blue-600 text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2'
-                        }`}
-                        aria-label={`${getActionButtonText()} for ${card.name}`}
-                      >
-                        {getActionButtonText()}
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+        return (
+          <CardRow
+            key={card.id}
+            identity={identity}
+            badges={badges}
+            rightNode={rightNode}
+            onImageOpen={() => {
+              // TODO: Implement image modal functionality
+              console.log('Open image modal for:', card.name);
+            }}
+            className="hover:bg-slate-50 transition-colors"
+          />
+        );
+      })}
     </div>
   );
 };
