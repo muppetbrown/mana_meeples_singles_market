@@ -567,7 +567,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                 (~{Math.round(displayCards.length / uniqueCards * 10) / 10} variations per card)
               </span>
             )}
-            {totalCardCount > uniqueCards && (
+            {!isInventoryMode && totalCardCount > uniqueCards && (
               <span className="text-amber-600 ml-2">
                 Showing {uniqueCards} of {Math.ceil(totalCardCount / (displayCards.length / uniqueCards || 1))} cards
                 <span className="text-xs block text-amber-500">
