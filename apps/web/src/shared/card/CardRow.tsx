@@ -12,10 +12,16 @@ export type CardIdentity = {
   imageUrl?: string;
 };
 
+export type VariationBadge = {
+  label: string;
+  title?: string;
+  variant?: 'neutral' | 'accent' | 'warning';
+};
+
 export type CardRowProps = {
   identity: CardIdentity;
   rightNode?: React.ReactNode; // place for price/CTA
-  badges?: Array<{ label: string; title?: string; variant?: 'neutral'|'accent'|'warning' }>; // small summary (e.g., treatments present)
+  badges?: Array<VariationBadge>; // variation badges (treatment+finish combinations with stock/price)
   onImageOpen?: () => void;
   className?: string;
 };
@@ -72,19 +78,19 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className }:
           {identity.rarity ? <> · <span aria-label="rarity">{identity.rarity}</span></> : null}
         </p>
         {badges && badges.length > 0 && (
-          <ul className="mt-1 flex flex-wrap gap-1" aria-label="variation summary">
-            {badges.map((b, i) => (
+          <ul className="mt-1 flex flex-wrap gap-1" aria-label="available variations">
+            {badges.map((badge, i) => (
               <li key={i}>
                 <span
                   className={clsx(
-                    'inline-flex items-center px-2 py-0.5 rounded-full text-xs border',
-                    b.variant === 'accent' && 'bg-indigo-50 border-indigo-200',
-                    b.variant === 'warning' && 'bg-amber-50 border-amber-200',
-                    (!b.variant || b.variant === 'neutral') && 'bg-zinc-50 border-zinc-200'
+                    'inline-flex items-center px-2 py-0.5 rounded-full text-xs border font-medium',
+                    badge.variant === 'accent' && 'bg-blue-50 text-blue-700 border-blue-200',
+                    badge.variant === 'warning' && 'bg-amber-50 text-amber-700 border-amber-200',
+                    (!badge.variant || badge.variant === 'neutral') && 'bg-slate-50 text-slate-600 border-slate-200'
                   )}
-                  title={b.title}
+                  title={badge.title || `Variation: ${badge.label}`}
                 >
-                  {b.label}
+                  {badge.label}
                 </span>
               </li>
             ))}
