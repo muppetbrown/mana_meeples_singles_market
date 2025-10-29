@@ -168,26 +168,61 @@ const CardList: React.FC<CardListProps> = ({
   }
 
   return (
-    <div className="space-y-2">
-      {cards.map(card => {
-        const identity = convertToCardIdentity(card);
-        const badges = generateVariationBadges(card);
-        const rightNode = renderActionButton(card);
+    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="w-full">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                Image
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                Game
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                Set
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                Name
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                #
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                Rarity
+              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                Variations
+              </th>
+              <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                Action
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {cards.map(card => {
+              const identity = convertToCardIdentity(card);
+              const badges = generateVariationBadges(card);
+              const rightNode = renderActionButton(card);
 
-        return (
-          <CardRow
-            key={card.id}
-            identity={identity}
-            badges={badges}
-            rightNode={rightNode}
-            onImageOpen={() => {
-              // TODO: Implement image modal functionality
-              console.log('Open image modal for:', card.name);
-            }}
-            className="hover:bg-slate-50 transition-colors"
-          />
-        );
-      })}
+              return (
+                <CardRow
+                  key={card.id}
+                  identity={identity}
+                  badges={badges}
+                  rightNode={rightNode}
+                  onImageOpen={() => {
+                    // TODO: Implement image modal functionality
+                    console.log('Open image modal for:', card.name);
+                  }}
+                  className="hover:bg-slate-50 transition-colors"
+                  tableMode={true}
+                />
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

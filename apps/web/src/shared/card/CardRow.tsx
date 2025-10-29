@@ -24,6 +24,7 @@ export type CardRowProps = {
   badges?: Array<VariationBadge>; // variation badges (treatment+finish combinations with stock/price)
   onImageOpen?: () => void;
   className?: string;
+  tableMode?: boolean; // if true, renders as table row cells
 };
 
 type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
@@ -39,7 +40,88 @@ type Props = React.ImgHTMLAttributes<HTMLImageElement> & {
  * - Focus order: thumbnail → title → action (right).
  * - Visible focus ring and respects prefers-reduced-motion.
  */
-export function CardRow({ identity, rightNode, badges, onImageOpen, className }: CardRowProps) {
+export function CardRow({ identity, rightNode, badges, onImageOpen, className, tableMode = false }: CardRowProps) {
+  if (tableMode) {
+    // Table row mode - renders as table cells
+    return (
+      <tr className={clsx(className)} aria-label={`${identity.name} — ${identity.gameName}`}>
+        {/* Image */}
+        <td className="px-4 py-4">
+          <div className="w-12 h-16 flex-shrink-0 overflow-hidden rounded-md bg-slate-100">
+            <img
+              src={identity.imageUrl ?? '/images/card-back-placeholder.svg'}
+              alt=""
+              width={48}
+              height={64}
+              loading="lazy"
+              decoding="async"
+              className="object-cover"
+            />
+          </div>
+        </td>
+
+        {/* Game */}
+        <td className="px-4 py-4 text-sm text-slate-700">
+          {identity.gameName}
+        </td>
+
+        {/* Set */}
+        <td className="px-4 py-4 text-sm text-slate-700">
+          {identity.setName}
+        </td>
+
+        {/* Name */}
+        <td className="px-4 py-4">
+          <div className="text-sm font-medium text-slate-900">
+            {identity.name}
+          </div>
+        </td>
+
+        {/* Card Number */}
+        <td className="px-4 py-4 text-sm text-slate-600">
+          {identity.cardNumber || '—'}
+        </td>
+
+        {/* Rarity */}
+        <td className="px-4 py-4 text-sm text-slate-600">
+          {identity.rarity || '—'}
+        </td>
+
+        {/* Variations */}
+        <td className="px-4 py-4">
+          <div className="max-w-xs">
+            {badges && badges.length > 0 && (
+              <div className="flex flex-wrap gap-1">
+                {badges.map((badge, i) => (
+                  <span
+                    key={i}
+                    className={clsx(
+                      'inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium',
+                      badge.variant === 'accent' && 'bg-blue-50 text-blue-700 border-blue-200',
+                      badge.variant === 'warning' && 'bg-amber-50 text-amber-700 border-amber-200',
+                      (!badge.variant || badge.variant === 'neutral') && 'bg-slate-50 text-slate-600 border-slate-200'
+                    )}
+                    title={badge.title || `Variation: ${badge.label}`}
+                  >
+                    {badge.label}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        </td>
+
+        {/* Action */}
+        <td className="px-4 py-4 text-right">
+          <div className="flex items-center justify-end gap-3">
+            {rightNode}
+          </div>
+        </td>
+      </tr>
+    );
+  }
+
+  // Card mode - renders as div (original implementation)
   return (
     <div
       className={clsx(
