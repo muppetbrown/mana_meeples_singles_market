@@ -266,34 +266,36 @@ router.get('/filters', async (req: Request, res: Response) => {
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
 
   // ============================================================================
-  // QUERY 1: Get all games with card counts
+  // QUERY 1: Get all games with card counts (ONLY cards with inventory)
   // ============================================================================
   const gamesSql = `
-    SELECT 
+    SELECT
       g.id,
       g.name,
       g.code,
       COUNT(DISTINCT c.id)::int AS card_count
     FROM games g
-    LEFT JOIN cards c ON c.game_id = g.id
+    INNER JOIN cards c ON c.game_id = g.id
+    INNER JOIN card_inventory ci ON ci.card_id = c.id AND ci.stock_quantity > 0
     WHERE g.active = true
     GROUP BY g.id, g.name, g.code
     ORDER BY g.name
   `;
 
   // ============================================================================
-  // QUERY 2: Get sets (optionally filtered by game_id)
+  // QUERY 2: Get sets (ONLY with inventory, optionally filtered by game_id)
   // ============================================================================
   const setsSqlParams: unknown[] = [];
   let setsSql = `
-    SELECT 
+    SELECT
       s.id,
       s.name,
       s.code,
       s.game_id,
       COUNT(DISTINCT c.id)::int AS card_count
     FROM card_sets s
-    LEFT JOIN cards c ON c.set_id = s.id
+    INNER JOIN cards c ON c.set_id = s.id
+    INNER JOIN card_inventory ci ON ci.card_id = c.id AND ci.stock_quantity > 0
   `;
   
   // If game_id provided, filter sets to that game
@@ -308,7 +310,7 @@ router.get('/filters', async (req: Request, res: Response) => {
   `;
 
   // ============================================================================
-  // QUERY 3: Get filter facets (treatments, qualities, foilTypes, etc.)
+  // QUERY 3: Get filter facets (ONLY for cards with inventory)
   // ============================================================================
   const filtersSql = `
     WITH base AS (
@@ -318,6 +320,7 @@ router.get('/filters', async (req: Request, res: Response) => {
         c.treatment
       FROM cards c
       JOIN games g ON g.id = c.game_id
+      INNER JOIN card_inventory ci ON ci.card_id = c.id AND ci.stock_quantity > 0
       ${whereSql}
     )
     SELECT
@@ -327,7 +330,7 @@ router.get('/filters', async (req: Request, res: Response) => {
       COALESCE(ARRAY_AGG(DISTINCT inv.foil_type) FILTER (WHERE inv.foil_type IS NOT NULL), ARRAY[]::text[]) AS foilTypes,
       MIN(inv.price) AS priceMin,
       MAX(inv.price) AS priceMax,
-      COUNT(DISTINCT CASE WHEN inv.stock_quantity > 0 THEN inv.id END)::int AS inStockCount
+      COUNT(DISTINCT inv.id)::int AS inStockCount
     FROM base b
     LEFT JOIN cards c ON c.id = b.id
     LEFT JOIN (
@@ -339,10 +342,10 @@ router.get('/filters', async (req: Request, res: Response) => {
         COALESCE(ci.language, 'English') AS language,
         ci.stock_quantity,
         COALESCE(
-          CASE 
-            WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil' 
-            THEN lp.foil_price 
-            ELSE lp.base_price 
+          CASE
+            WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil'
+            THEN lp.foil_price
+            ELSE lp.base_price
           END,
           ci.price
         ) AS price
@@ -353,6 +356,7 @@ router.get('/filters', async (req: Request, res: Response) => {
         FROM card_pricing
         ORDER BY card_id, updated_at DESC NULLS LAST
       ) lp ON lp.card_id = ci.card_id
+      WHERE ci.stock_quantity > 0
     ) inv ON inv.card_id = b.id
   `;
 
