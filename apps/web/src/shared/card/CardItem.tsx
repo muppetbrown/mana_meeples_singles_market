@@ -41,9 +41,9 @@ export interface CardItemProps {
 export interface ActionParams {
   card: BrowseBaseCard;
   variationId: number;
-  inventoryId?: number;
-  quality?: string;
-  language?: string;
+  inventoryId: number | undefined;
+  quality: string | undefined;
+  language: string | undefined;
 }
 
 interface InventoryItem {
