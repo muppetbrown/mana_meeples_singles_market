@@ -9,6 +9,56 @@
  * - Adapts display based on isAdminMode prop
  */
 import React from 'react';
+
+// Helper function to get variation badges for the card
+const getVariationBadges = (card: any): Array<{ label: string; color: string }> => {
+  const badges: Array<{ label: string; color: string }> = [];
+
+  // Treatment badge
+  if (card.treatment && card.treatment !== 'STANDARD') {
+    badges.push({
+      label: card.treatment.replace(/_/g, ' '),
+      color: 'bg-purple-100 text-purple-800'
+    });
+  }
+
+  // Finish badge
+  if (card.finish) {
+    const finishLabel = card.finish === 'foil' ? 'Foil' :
+                       card.finish === 'etched' ? 'Etched' :
+                       card.finish === 'nonfoil' ? 'Regular' : card.finish;
+    badges.push({
+      label: finishLabel,
+      color: 'bg-amber-100 text-amber-800'
+    });
+  }
+
+  // Border color badge (if not default black)
+  if (card.border_color && card.border_color !== 'black') {
+    badges.push({
+      label: `${card.border_color} border`,
+      color: 'bg-slate-100 text-slate-800'
+    });
+  }
+
+  // Promo badge
+  if (card.promo_type) {
+    badges.push({
+      label: card.promo_type.replace(/_/g, ' '),
+      color: 'bg-rose-100 text-rose-800'
+    });
+  }
+
+  // Frame effect badge
+  if (card.frame_effect) {
+    badges.push({
+      label: card.frame_effect,
+      color: 'bg-blue-100 text-blue-800'
+    });
+  }
+
+  return badges;
+};
 import OptimizedImage from '@/shared/media/OptimizedImage';
 import VariationBadge from '@/shared/ui/VariationBadge';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
@@ -107,11 +157,32 @@ const CardItem = React.memo<CardItemProps>(
           {/* Content */}
           <div className="p-4 sm:p-5 lg:p-5 flex flex-col gap-3 lg:gap-3 flex-grow min-w-0">
             <div className="flex-shrink-0">
-              <h3 className="font-semibold text-sm lg:text-lg leading-tight text-mm-darkForest mb-1 lg:mb-2 line-clamp-2">
-                {card.name}
-              </h3>
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <h3 className="font-semibold text-sm lg:text-lg leading-tight text-mm-darkForest mb-1 lg:mb-2 line-clamp-2">
+                  {card.name}
+                </h3>
+                {card.card_number && (
+                  <span className="text-xs lg:text-sm text-mm-teal">
+                    #{card.card_number}
+                  </span>
+                )}
+
+                {/* Variation badges in header */}
+                {getVariationBadges(card).length > 0 && (
+                  <div className="flex items-center gap-1.5 ml-2">
+                    {getVariationBadges(card).map((badge, idx) => (
+                      <span
+                        key={idx}
+                        className={`text-xs px-2 py-0.5 rounded-full font-medium ${badge.color}`}
+                      >
+                        {badge.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
               <p className="text-xs lg:text-sm text-mm-teal pb-2 lg:pb-3 border-b border-mm-warmAccent">
-                {card.set_name} • #{card.card_number}
+                {card.set_name}
               </p>
             </div>
 
