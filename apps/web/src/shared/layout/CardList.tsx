@@ -11,7 +11,6 @@
  */
 import React from 'react';
 import OptimizedImage from '@/shared/media/OptimizedImage';
-import VariationBadge from '@/shared/ui/VariationBadge';
 import { formatCurrencySimple } from '@/lib/utils';
 import type {
   BrowseBaseCard,
@@ -100,11 +99,16 @@ const CardList: React.FC<CardListProps> = ({
         {visibleVariations.map(variation => (
           <div
             key={variation.id}
-            className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-medium"
+            className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 px-3 py-1 rounded-full text-sm font-medium border border-slate-200"
           >
             <span>
               {formatVariationLabel(variation, mode !== 'all')}
             </span>
+            {variation.price && mode !== 'all' && (
+              <span className="text-xs text-slate-600">
+                {formatCurrencySimple(variation.price, currency)}
+              </span>
+            )}
           </div>
         ))}
       </div>
@@ -176,14 +180,14 @@ const CardList: React.FC<CardListProps> = ({
                 <tr key={card.id} className="hover:bg-slate-50 transition-colors">
                   {/* Image */}
                   <td className="px-4 py-4">
-                    <div className="w-12 h-16 flex-shrink-0 overflow-hidden rounded-md">
+                    <div className="w-12 h-16 flex-shrink-0 overflow-hidden rounded-md bg-slate-100">
                       <OptimizedImage
                         src={imageUrl}
                         alt={card.name}
                         width={48}
                         height={64}
-                        className="w-full h-full object-cover"
-                        sizes="48px"
+                        className="object-cover"
+                        priority={false}
                       />
                     </div>
                   </td>
@@ -227,7 +231,7 @@ const CardList: React.FC<CardListProps> = ({
                     <div className="flex items-center justify-end gap-3">
                       {renderPriceInfo(card)}
                       <button
-                        onClick={() => onAction(card)}
+                        onClick={() => onAction(card, visibleVariations[0])}
                         disabled={mode !== 'all' && visibleVariations.length === 0}
                         className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                           mode !== 'all' && visibleVariations.length === 0
