@@ -4,8 +4,9 @@
  * CRITICAL: All endpoints include the /api prefix because the Express app
  * mounts all routes under /api in app.ts
  * 
- * Example: ENDPOINTS.CARDS = '/api/cards/cards'
- * Results in: http://localhost:5000/api/cards/cards
+ * Example: ENDPOINTS.CARDS = '/cards/cards'
+ * IN APPS.TS, ALL ROUTES ARE MOUNTED ON = app.use("/api", routes);
+ * Results in: http://localhost:10000/api/cards/cards
  */
 
 export const ENDPOINTS = {
@@ -13,9 +14,9 @@ export const ENDPOINTS = {
   // AUTHENTICATION
   // ============================================================================
   AUTH: {
-    ADMIN_LOGIN: '/api/auth/admin/login',
-    ADMIN_LOGOUT: '/api/auth/admin/logout',
-    ADMIN_CHECK: '/api/auth/admin/check',
+    ADMIN_LOGIN: '/auth/admin/login',
+    ADMIN_LOGOUT: '/auth/admin/logout',
+    ADMIN_CHECK: '/auth/admin/check',
   },
 
   // ============================================================================
@@ -23,54 +24,54 @@ export const ENDPOINTS = {
   // ============================================================================
   
   // Cards - mounted under /cards
-  CARDS: '/api/cards/cards',                                    // List cards with variations
-  CARD_DETAIL: (id: string | number) => `/api/cards/cards/${id}`,
-  CARD_COUNT: '/api/cards/count',                              // Get total count with filters
-  FILTERS: '/api/cards/filters',                               // Get filter options + games + sets
+  CARDS: '/cards/cards',                                    // List cards with variations
+  CARD_DETAIL: (id: string | number) => `/cards/cards/${id}`,
+  CARD_COUNT: '/cards/count',                              // Get total count with filters
+  FILTERS: '/cards/filters',                               // Get filter options + games + sets
   
   // Storefront - mounted under /storefront (public-facing, includes inventory)
-  STOREFRONT_CARDS: '/api/storefront/cards',                   // Cards with inventory data
-  STOREFRONT_CARD: (id: string | number) => `/api/storefront/cards/${id}`,
+  STOREFRONT_CARDS: '/storefront/cards',                   // Cards with inventory data
+  STOREFRONT_CARD: (id: string | number) => `/storefront/cards/${id}`,
   
   // Games & Sets - mounted at root level
-  GAMES: '/api/games',                                         // List all games
-  GAME_DETAIL: (id: string | number) => `/api/games/${id}`,
-  SETS: '/api/sets',                                           // List all sets
-  SET_DETAIL: (id: string | number) => `/api/sets/${id}`,
+  GAMES: '/games',                                         // List all games
+  GAME_DETAIL: (id: string | number) => `/games/${id}`,
+  SETS: '/sets',                                           // List all sets
+  SET_DETAIL: (id: string | number) => `/sets/${id}`,
   
   // Search - mounted at root level
-  SEARCH: '/api/search',                                       // Full text search
-  SEARCH_AUTOCOMPLETE: '/api/search/autocomplete',             // Autocomplete suggestions
+  SEARCH: '/search',                                       // Full text search
+  SEARCH_AUTOCOMPLETE: '/search/autocomplete',             // Autocomplete suggestions
   
   // Variations - mounted under /variations
-  VARIATIONS: (cardId: string | number) => `/api/variations/variations/${cardId}`,
+  VARIATIONS: (cardId: string | number) => `/variations/variations/${cardId}`,
   
   // Orders - public order creation
-  ORDERS: '/api/orders',                                       // Create order (POST)
-  ORDER_DETAIL: (id: string | number) => `/api/orders/${id}`, // Get order details (GET)
+  ORDERS: '/orders',                                       // Create order (POST)
+  ORDER_DETAIL: (id: string | number) => `/orders/${id}`, // Get order details (GET)
 
   // ============================================================================
   // ADMIN ENDPOINTS (Require Authentication)
   // ============================================================================
   ADMIN: {
     // Order Management - ✅ IMPLEMENTED
-    ORDERS: '/api/admin/orders',                                        // List all orders
-    ORDER_DETAIL: (id: string | number) => `/api/admin/orders/${id}`,  // Get order with items
-    UPDATE_ORDER_STATUS: (id: string | number) => `/api/admin/orders/${id}/status`, // Update status
+    ORDERS: '/admin/orders',                                        // List all orders
+    ORDER_DETAIL: (id: string | number) => `/admin/orders/${id}`,  // Get order with items
+    UPDATE_ORDER_STATUS: (id: string | number) => `/admin/orders/${id}/status`, // Update status
 
     // Inventory Management - ✅ IMPLEMENTED
-    INVENTORY: '/api/admin/inventory',                                  // List inventory (paginated)
-    INVENTORY_ITEM: (id: string | number) => `/api/admin/inventory/${id}`, // Update/delete inventory
-    INVENTORY_EXPORT: '/api/admin/inventory/export',                    // Export to CSV
-    INVENTORY_BULK_IMPORT: '/api/admin/inventory/bulk-import',         // Bulk import from CSV/JSON
+    INVENTORY: '/admin/inventory',                                  // List inventory (paginated)
+    INVENTORY_ITEM: (id: string | number) => `/admin/inventory/${id}`, // Update/delete inventory
+    INVENTORY_EXPORT: '/admin/inventory/export',                    // Export to CSV
+    INVENTORY_BULK_IMPORT: '/admin/inventory/bulk-import',         // Bulk import from CSV/JSON
   },
 
   // ============================================================================
   // HEALTH & DIAGNOSTICS
   // ============================================================================
   HEALTH: '/health',                                           // Basic health check
-  HEALTHZ: '/api/healthz',                                     // Kubernetes-style health
-  READYZ: '/api/readyz',                                       // Readiness check
+  HEALTHZ: '/healthz',                                     // Kubernetes-style health
+  READYZ: '/readyz',                                       // Readiness check
 } as const;
 
 /**

@@ -127,7 +127,7 @@ export function useShopFilters() {
       setError(null);
 
       try {
-        const options = await api.get<FilterOptions>(ENDPOINTS.CARDS);
+        const options = await api.get<FilterOptions>(ENDPOINTS.FILTERS);
         
         // Prevent state update if component unmounted
         if (isCancelled) return;
