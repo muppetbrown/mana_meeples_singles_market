@@ -3,7 +3,8 @@
     "name": "Mana & Meeples Singles Market",
     "root": "C:/Git_Repos/mana_meeples_singles_market",
     "type": "fullstack",
-    "packageManager": "pnpm"
+    "packageManager": "pnpm",
+    "platform": "windows"
   },
   "workspace": {
     "apps": [
@@ -24,7 +25,11 @@
       "backend": "Express + Node.js"
     },
     "styling": "TailwindCSS",
-    "database": "PostgreSQL + Prisma"
+    "database": "PostgreSQL + Prisma",
+    "paths": {
+      "style": "forward-slash",
+      "note": "Always use forward slashes (/) in file paths, even on Windows. Example: C:/Git_Repos/... NOT C:\\Git_Repos\\"
+    }
   },
   "guidelines": [
     "Search for existing implementations before creating new code",
@@ -32,8 +37,16 @@
     "Follow AI Software Development Principles in repository",
     "Use TypeScript for all new files",
     "Maintain WCAG AAA accessibility",
-    "Never commit .env files"
+    "Never commit .env files",
+    "CRITICAL: Always use forward slashes (/) in file paths for cross-platform compatibility"
   ],
+  "commands": {
+    "pathFormat": "Use forward slashes: C:/Git_Repos/mana_meeples_singles_market/apps/web/src",
+    "examples": {
+      "correct": "ls -la C:/Git_Repos/mana_meeples_singles_market/apps/web/src",
+      "incorrect": "ls -la C:\\\\Git_Repos\\\\mana_meeples_singles_market\\\\apps\\\\web\\\\src"
+    }
+  },
   "autoApprove": {
     "commands": [
       "pnpm install",

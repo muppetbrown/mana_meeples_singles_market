@@ -7,6 +7,10 @@ Copy/paste this at the start of new conversations about your project:
 **Project:** Mana & Meeples Singles Market  
 **Location:** `C:/Git_Repos/mana_meeples_singles_market`  
 **Config:** Read `.clauderc` in project root for full context
+**System** We are on a Windows 11 system
+When running bash commands on Windows, please use FORWARD SLASHES only:
+✅ C:/Git_Repos/mana_meeples_singles_market/apps/web/src
+❌ C:\\Git_Repos\\mana_meeples_singles_market\\apps\\web\\src
 
 **Quick Context:**
 - pnpm monorepo (apps/api + apps/web)
