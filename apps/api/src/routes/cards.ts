@@ -152,7 +152,7 @@ router.get("/cards", async (req: Request, res: Response) => {
   const sql = `
     WITH card_identities AS (
       -- Phase 1: Get first N unique card identities (by name + card_number + set_id)
-      SELECT DISTINCT
+      SELECT
         c.name,
         c.card_number,
         c.set_id,
