@@ -1,48 +1,49 @@
-// features/shop/components/CardDisplay/CardGrid.tsx
+// apps/web/src/shared/layout/CardGrid.tsx
 /**
- * Unified Card Grid Component - REFACTORED FOR NEW ARCHITECTURE
- * Consolidates CardGrid.tsx and VirtualCardGrid.tsx
- * Automatically uses virtual scrolling for large datasets
- * 
- * NEW ARCHITECTURE:
- * - Admin mode: Cards have variation metadata directly (no variations array)
- * - Storefront mode: Cards have variations array for purchase options
- * - Adapts rendering based on card structure
+ * Unified Card Grid Component - IMPLEMENTATION OF NEW ARCHITECTURE
+ * Handles both grid and list views with proper mode switching
+ *
+ * ARCHITECTURE:
+ * - Uses new CardItem with 3-dropdown system for grid view
+ * - Uses new CardList with badge system for list view
+ * - Properly handles storefront/inventory/all modes
+ * - Supports virtual scrolling for large datasets
  */
-import React, { useRef, useMemo, useState } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { useVirtualScroll } from '@/lib/utils';
-import type { Card, CardVariation } from '@/types';
-import { isStorefrontCard } from '@/types';
 import { CardItem, CardSkeleton } from '@/shared/card';
+import { CardList } from '@/shared/layout';
 import { ChevronDown } from 'lucide-react';
+import type {
+  BrowseBaseCard,
+  BrowseVariation,
+  Currency
+} from '@/types';
 
 // ============================================================================
 // TYPES
 // ============================================================================
 
-// Minimal card shape that CardGrid actually uses
-export type MinimalCard = {
-  id: number;
-  name: string;
-  variations?: Array<CardVariation>; // flexible variations type
-};
-
-interface CardGridProps<T extends Card = Card> {
-  cards: T[];
+export interface CardGridProps {
+  cards: BrowseBaseCard[];
   viewMode?: 'grid' | 'list';
   isLoading?: boolean;
   columnCount?: number;
   cardHeight?: number;
   containerHeight?: number;
   enableVirtualScroll?: boolean;
-  onCardClick?: (card: T) => void;
-  renderCard?: (card: T) => React.ReactNode;
-  cardProps?: {
-    currency?: { code: string; symbol: string; rate: number; label: string };
-    onAddToCart?: (card: T, variation?: CardVariation) => void;
-  };
-  mode?: 'all' | 'inventory';
-  onAddToInventory?: (card: T) => void;
+  mode: 'storefront' | 'inventory' | 'all';
+  currency?: Currency;
+
+  // Mode-specific handlers
+  onAddToCart?: (params: {
+    card: BrowseBaseCard;
+    inventoryId: number;
+    quantity: number;
+  }) => void;
+
+  onAddToInventory?: (card: BrowseBaseCard) => void;
+  onManage?: (card: BrowseBaseCard) => void;
 }
 
 // ============================================================================
@@ -60,7 +61,7 @@ const DEFAULT_CONTAINER_HEIGHT = 800;
 // COMPONENT
 // ============================================================================
 
-export const CardGrid = <T extends Card = Card>({
+export const CardGrid: React.FC<CardGridProps> = ({
   cards,
   viewMode = 'grid',
   isLoading = false,
@@ -68,16 +69,49 @@ export const CardGrid = <T extends Card = Card>({
   cardHeight,
   containerHeight = DEFAULT_CONTAINER_HEIGHT,
   enableVirtualScroll: enableVirtualScrollProp,
-  onCardClick,
-  renderCard,
-  cardProps = {},
-  mode = 'all',
-  onAddToInventory
-}: CardGridProps<T>) => {
+  mode,
+  currency = { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' },
+  onAddToCart,
+  onAddToInventory,
+  onManage
+}) => {
   const containerRef = useRef<HTMLDivElement>(null);
-  
-  // Track selected variations per card (for storefront mode)
-  const [selectedVariations, setSelectedVariations] = useState<Record<number, string>>({});
+
+  // --------------------------------------------------------------------------
+  // LIST VIEW HANDLING
+  // --------------------------------------------------------------------------
+
+  // If list view, delegate to CardList component
+  if (viewMode === 'list') {
+    const handleListAction = (card: BrowseBaseCard, variation?: BrowseVariation) => {
+      switch (mode) {
+        case 'all':
+          onAddToInventory?.(card);
+          break;
+        case 'inventory':
+          onManage?.(card);
+          break;
+        case 'storefront':
+          // For storefront, we need to open a modal to select quality/language
+          // This would typically be handled by the parent component
+          console.log('Storefront list action for card:', card.name, 'variation:', variation);
+          break;
+      }
+    };
+
+    return (
+      <CardList
+        cards={cards}
+        mode={mode}
+        currency={currency}
+        onAction={handleListAction}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // GRID VIEW SETUP
+  // --------------------------------------------------------------------------
 
   // Determine if virtual scrolling should be enabled
   const shouldUseVirtualScroll = useMemo(() => {
@@ -88,7 +122,7 @@ export const CardGrid = <T extends Card = Card>({
   }, [cards.length, enableVirtualScrollProp]);
 
   // Calculate responsive column count
-  const responsiveColumns = columnCount || (viewMode === 'list' ? 1 : 4);
+  const responsiveColumns = columnCount || 4;
 
   // Effective card height
   const effectiveCardHeight = cardHeight || DEFAULT_CARD_HEIGHT[viewMode];
@@ -103,9 +137,8 @@ export const CardGrid = <T extends Card = Card>({
     overscan: 3
   });
 
-  // Get grid classes based on view mode and columns
+  // Get grid classes based on columns
   const getGridClasses = () => {
-    if (viewMode === 'list') return 'grid-cols-1';
     switch (responsiveColumns) {
       case 1: return 'grid-cols-1';
       case 2: return 'grid-cols-1 sm:grid-cols-2';
@@ -115,92 +148,49 @@ export const CardGrid = <T extends Card = Card>({
     }
   };
 
-  // Variation selection handler (for storefront mode)
-  const handleVariationChange = (cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSelectedVariations(prev => ({
-      ...prev,
-      [cardId]: e.target.value
-    }));
-  };
+  // --------------------------------------------------------------------------
+  // GRID CARD RENDERER
+  // --------------------------------------------------------------------------
 
-  // ============================================================================
-  // DEFAULT CARD RENDERER - HANDLES BOTH ADMIN AND STOREFRONT
-  // ============================================================================
-  
-  const defaultRenderCard = (card: T) => {
-    const isAdminMode = mode === 'all' || mode === 'inventory';
-    
-    // ========================================================================
-    // ADMIN MODE: Cards have variation metadata directly (no variations array)
-    // ========================================================================
-    if (isAdminMode) {
-      // In admin mode, cards don't have variations array
-      // Each card IS a variation, with metadata directly on it
-      return (
-        <CardItem
-          key={card.id}
-          card={card}
-          selectedVariationKey={null} // Not used in admin mode
-          selectedVariation={null}     // Not used in admin mode
-          currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
-          onVariationChange={() => {}} // No-op in admin mode
-          onAddToCart={() => onAddToInventory?.(card)}
-          isAdminMode={true}
-        />
-      );
-    }
-    
-    // ========================================================================
-    // STOREFRONT MODE: Cards have variations array for purchase options
-    // ========================================================================
-
-    // Handle cards without inventory gracefully - DON'T return null!
-    if (!isStorefrontCard(card) || !card.variations || card.variations.length === 0) {
-      const noInventoryProps = {
-        key: card.id,
-        card: card as Card,
-        selectedVariationKey: null as string | null,
-        selectedVariation: null as CardVariation | null,
-        currency: cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' },
-        onVariationChange: () => {}, // No-op
-        isAdminMode: false
-        // onAddToCart is intentionally omitted - don't pass undefined!
-      };
-
-      return <CardItem {...noInventoryProps} />;
-    }
-
-    // Get selected variation key for this card, or default to first variation
-    const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
-
-    // Find the selected variation object
-    const selectedVariation = card.variations.find(
-      (v: CardVariation) => v.variation_key === selectedVariationKey
-    ) || card.variations[0];
+  const renderGridCard = (card: BrowseBaseCard) => {
+    const handleCardAction = (params: any) => {
+      switch (mode) {
+        case 'all':
+          onAddToInventory?.(card);
+          break;
+        case 'inventory':
+          onManage?.(card);
+          break;
+        case 'storefront':
+          if (params.inventoryId) {
+            onAddToCart?.({
+              card,
+              inventoryId: params.inventoryId,
+              quantity: 1
+            });
+          }
+          break;
+      }
+    };
 
     return (
       <CardItem
         key={card.id}
-        card={card as Card}
-        selectedVariationKey={selectedVariationKey}
-        selectedVariation={selectedVariation}
-        currency={cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
-        onVariationChange={handleVariationChange(card.id)}
-        onAddToCart={() => cardProps?.onAddToCart?.(card, selectedVariation)}
-        isAdminMode={false}
+        card={card}
+        mode={mode}
+        currency={currency}
+        onAction={handleCardAction}
       />
     );
   };
 
-  const cardRenderer = renderCard || defaultRenderCard;
-
-  // ========================================================================
+  // --------------------------------------------------------------------------
   // LOADING STATE
-  // ========================================================================
+  // --------------------------------------------------------------------------
 
   if (isLoading) {
     return (
-      <div 
+      <div
         className={`grid ${getGridClasses()} gap-4 sm:gap-5 lg:gap-6`}
         role="status"
         aria-label="Loading cards"
@@ -212,9 +202,9 @@ export const CardGrid = <T extends Card = Card>({
     );
   }
 
-  // ========================================================================
+  // --------------------------------------------------------------------------
   // VIRTUAL SCROLL RENDERING
-  // ========================================================================
+  // --------------------------------------------------------------------------
 
   if (shouldUseVirtualScroll) {
     const {
@@ -226,7 +216,7 @@ export const CardGrid = <T extends Card = Card>({
     } = virtualScroll;
 
     return (
-      <div 
+      <div
         ref={containerRef}
         className="relative overflow-auto"
         style={{ height: `${containerHeight}px` }}
@@ -245,11 +235,11 @@ export const CardGrid = <T extends Card = Card>({
             }}
           >
             <div className={`grid ${getGridClasses()} gap-4 sm:gap-5 lg:gap-6`}>
-              {visibleItems.map((card) => cardRenderer(card))}
+              {visibleItems.map((card) => renderGridCard(card))}
             </div>
           </div>
         </div>
-        
+
         {/* Scroll indicator - show if not at end */}
         {visibleRange.endIndex < cards.length - 1 && (
           <div className="flex justify-center py-4">
@@ -260,16 +250,16 @@ export const CardGrid = <T extends Card = Card>({
     );
   }
 
-  // ========================================================================
+  // --------------------------------------------------------------------------
   // STANDARD RENDERING (no virtual scroll)
-  // ========================================================================
+  // --------------------------------------------------------------------------
 
   return (
-    <div 
+    <div
       ref={containerRef}
       className={`grid ${getGridClasses()} gap-4 sm:gap-5 lg:gap-6`}
     >
-      {cards.map((card) => cardRenderer(card))}
+      {cards.map((card) => renderGridCard(card))}
     </div>
   );
 };

@@ -37,6 +37,5 @@ jobs:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
           claude_args: |
             --model claude-sonnet-4-20250514
-            --max-turns 15
             --allowedTools "Bash(pnpm install),Bash(pnpm install *),Bash(pnpm run *),Bash(pnpm build),Bash(pnpm test),Bash(pnpm test:*),Bash(git status),Bash(git log),Bash(git diff),Bash(git show *),Bash(node *),Bash(cat *),Bash(ls *),Bash(pwd),Bash(which *)"
             --system-prompt "Follow the AI Software Development Principles documented in the repository. Always search for existing implementations before creating new code. Ensure all code follows existing patterns and conventions. Use TypeScript for new files. Maintain consistency with the project structure."
