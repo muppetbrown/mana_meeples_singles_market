@@ -54,8 +54,8 @@ const CardList: React.FC<CardListProps> = ({
       gameName: card.game_name || 'Unknown Game',
       setName: card.set_name,
       cardNumber: card.card_number || '',
-      rarity: card.rarity,
-      imageUrl: card.image_url
+      rarity: card.rarity || undefined,
+      imageUrl: card.image_url || undefined
     };
   };
 

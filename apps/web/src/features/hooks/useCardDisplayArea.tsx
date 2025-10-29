@@ -10,7 +10,7 @@ import {
   SectionHeader
 } from '@/shared/ui';
 import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
-import type { StorefrontCard, CardVariation, Currency } from '@/types';
+import type { StorefrontCard, CardVariation, Currency, BrowseBaseCard } from '@/types';
 
 
 interface SelectedVariations {
@@ -40,20 +40,54 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
   setAddToCartModal,
   loading
 }) => {
+  // Convert StorefrontCard to BrowseBaseCard
+  const convertStorefrontToBrowseCard = (card: StorefrontCard): BrowseBaseCard => {
+    const variations = card.variations.map(variation => ({
+      id: variation.card_id || card.id,
+      sku: `${card.id}-${variation.quality}-${variation.foil_type}-${variation.language}`,
+      treatment: variation.treatment || 'STANDARD',
+      finish: variation.finish || 'nonfoil',
+      border_color: null,
+      frame_effect: null,
+      promo_type: null,
+      image: card.image_url || null,
+      in_stock: variation.stock || 0,
+      price: variation.price || null
+    }));
+
+    const totalStock = variations.reduce((sum, v) => sum + v.in_stock, 0);
+    const lowestPrice = variations.reduce((lowest, v) => {
+      if (v.price === null) return lowest;
+      return lowest === null ? v.price : Math.min(lowest, v.price);
+    }, null as number | null);
+
+    return {
+      ...card,
+      variations,
+      variation_count: variations.length,
+      total_stock: totalStock,
+      lowest_price: lowestPrice
+    };
+  };
+
+  const browseCards = useMemo(() => {
+    return cards.map(convertStorefrontToBrowseCard);
+  }, [cards]);
+
   // Card grouping and sorting logic extracted from ShopPage
   const groupedCards = useMemo(() => {
-    if (!cards.length) return [];
+    if (!browseCards.length) return [];
 
     const { sortBy } = filters;
 
     // If no grouping needed, return ungrouped
     if (!['name', 'set', 'rarity', 'price', 'price_low', 'price_high'].includes(sortBy)) {
-      return [{ section: null, cards }];
+      return [{ section: null, cards: browseCards }];
     }
 
-    const groups = new Map<string, StorefrontCard[]>();
+    const groups = new Map<string, BrowseBaseCard[]>();
 
-    cards.forEach(card => {
+    browseCards.forEach(card => {
       let sectionKey: string;
       let sectionTitle: string;
 
@@ -69,7 +103,7 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
         sectionKey = rarity;
         sectionTitle = rarity;
       } else if (['price', 'price_low', 'price_high'].includes(sortBy)) {
-        const price = card.variations?.[0]?.price ?? 0;
+        const price = card.lowest_price ?? 0;
 
         if (price < 1) {
           sectionKey = 'Under $1';
@@ -146,7 +180,7 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
     });
 
     return sortedGroups;
-  }, [cards, filters]);
+  }, [browseCards, filters]);
 
   if (cards.length === 0 && !loading) {
     return (
@@ -160,13 +194,13 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
     <div className={`w-full ${viewMode === 'list' ? 'max-w-6xl mx-auto' : ''}`}>
       {viewMode === 'grid' ? (
         /* Grid View */
-        cards.length > VIRTUAL_SCROLL_CONFIG.INITIAL_BATCH_SIZE ? (
+        browseCards.length > VIRTUAL_SCROLL_CONFIG.INITIAL_BATCH_SIZE ? (
           <ErrorBoundary>
             <CardGrid
-              cards={cards}
+              cards={browseCards}
               cardProps={{
                 currency,
-                onAddToCart: (card: StorefrontCard, variation?: CardVariation) => {
+                onAddToCart: (card: BrowseBaseCard, variation?: CardVariation) => {
                   setAddToCartModal({ open: true, cardId: card.id });
                 }
               }}
@@ -181,18 +215,22 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
                 )}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
                   {group.cards.map((card) => {
-                    const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
-                    const selectedVariation = card.variations.find(v => v.variation_key === selectedVariationKey) || card.variations[0];
+                    // Find original StorefrontCard for CardItem
+                    const originalCard = cards.find(c => c.id === card.id);
+                    if (!originalCard) return null;
+
+                    const selectedVariationKey = selectedVariations[card.id] || originalCard.variations[0]?.variation_key;
+                    const selectedVariation = originalCard.variations.find(v => v.variation_key === selectedVariationKey) || originalCard.variations[0];
 
                     return (
                       <CardItem
                         key={card.id}
                         card={card}
-                        selectedVariationKey={selectedVariationKey}
-                        selectedVariation={selectedVariation}
+                        mode="storefront"
                         currency={currency}
-                        onVariationChange={onVariationChange(card.id)}
-                        onAddToCart={() => setAddToCartModal({ open: true, cardId: card.id })}
+                        onAction={(params) => {
+                          setAddToCartModal({ open: true, cardId: card.id });
+                        }}
                       />
                     );
                   })}
@@ -211,10 +249,10 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
               )}
               <CardList
                 cards={group.cards}
+                mode="storefront"
                 currency={currency}
-                onAddToCart={(payload: { inventoryId: number; quantity: number }) => {
-                  // TODO: This needs to be connected to the actual cart handler
-                  console.warn('CardList onAddToCart called with payload:', payload);
+                onAction={(card, variation) => {
+                  setAddToCartModal({ open: true, cardId: card.id });
                 }}
               />
             </div>

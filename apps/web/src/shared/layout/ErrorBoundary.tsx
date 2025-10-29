@@ -15,11 +15,12 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     // Log error with context and return error ID
-    const errorId = errorLogger.logReactError(error, {
+    errorLogger.logReactError(error, {
       componentStack: info.componentStack ?? '',
-      url: window.location.href,
-      userAgent: navigator.userAgent,
     });
+
+    // Generate a simple error ID for user reference
+    const errorId = `ERR-${Date.now().toString(36)}`;
 
     // Store error ID in state to show to user
     this.setState({ errorId });
