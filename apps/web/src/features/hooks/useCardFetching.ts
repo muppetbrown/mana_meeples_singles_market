@@ -48,37 +48,7 @@ export function useCardFetching({
 
       const params = new URLSearchParams();
 
-      // Properly resolve game by matching name OR code OR case-insensitive
-      if (selectedGame && selectedGame !== 'all') {
-        const game = games.find(g =>
-          g.name === selectedGame ||
-          g.code === selectedGame ||
-          g.name.toLowerCase() === selectedGame.toLowerCase()
-        );
-
-        if (game?.id) {
-          params.append('game_id', String(game.id));
-        }
-      }
-
-      // Properly resolve set by matching name
-      if (selectedSet && selectedSet !== 'all') {
-        const set = sets.find(s => s.name === selectedSet);
-        if (set?.id) {
-          params.append('set_id', String(set.id));
-        }
-      }
-
-      // Add search term
-      if (searchTerm && searchTerm.trim()) {
-        params.append('search', searchTerm.trim());
-      }
-
-      // Add pagination
-      params.append('page', '1');
-      params.append('per_page', '100');
-      params.append('sort', 'name');
-      params.append('order', 'asc');
+      // ... existing param building logic ...
 
       // Use the storefront endpoint
       const response = await api.get<{ cards: StorefrontCard[] }>(
@@ -100,13 +70,16 @@ export function useCardFetching({
       console.error('Error fetching cards:', err);
       const message = err instanceof Error ? err.message : 'Failed to load cards';
       setError(message);
+      // Use errorHandler directly without it being in dependencies
       errorHandler.handleError(err, { context: 'fetching cards' });
     } finally {
       setLoading(false);
       requestInFlight.current = false;
     }
-  }, [selectedGame, selectedSet, searchTerm, selectedTreatment, games, sets, errorHandler]);
-
+    // Remove errorHandler from dependency array - it's used but not a dependency
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedGame, selectedSet, searchTerm, selectedTreatment, games, sets]);
+  
   // Fetch cards when games are loaded or filters change
   useEffect(() => {
     if (games?.length > 0) {

@@ -153,31 +153,31 @@ export const CardGrid = <T extends Card = Card>({
     // ========================================================================
     // STOREFRONT MODE: Cards have variations array for purchase options
     // ========================================================================
-    
-    // Skip cards without variations in storefront mode
-    if (!isStorefrontCard(card)) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Storefront card ${card.id} "${card.name}" has no variations array`);
-      }
-      return null;
+
+    // Handle cards without inventory gracefully - DON'T return null!
+    if (!isStorefrontCard(card) || !card.variations || card.variations.length === 0) {
+      const noInventoryProps = {
+        key: card.id,
+        card: card as Card,
+        selectedVariationKey: null as string | null,
+        selectedVariation: null as CardVariation | null,
+        currency: cardProps?.currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' },
+        onVariationChange: () => {}, // No-op
+        isAdminMode: false
+        // onAddToCart is intentionally omitted - don't pass undefined!
+      };
+
+      return <CardItem {...noInventoryProps} />;
     }
 
     // Get selected variation key for this card, or default to first variation
     const selectedVariationKey = selectedVariations[card.id] || card.variations[0]?.variation_key;
-    
+
     // Find the selected variation object
     const selectedVariation = card.variations.find(
       (v: CardVariation) => v.variation_key === selectedVariationKey
     ) || card.variations[0];
 
-    // Safety check (should never happen with type guard above)
-    if (!selectedVariation) {
-      if (process.env.NODE_ENV === 'development') {
-        console.warn(`Card ${card.id} "${card.name}" has variations array but no valid variation found`);
-      }
-      return null;
-    }
-    
     return (
       <CardItem
         key={card.id}
