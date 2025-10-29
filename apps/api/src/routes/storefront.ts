@@ -158,6 +158,7 @@ router.get('/cards', async (req: Request, res: Response) => {
       ) lp ON lp.card_id = ci.card_id
       WHERE ci.card_id = c.id
     ) inv ON TRUE
+    WHERE inv.variation_count > 0;
   `;
 
   try {

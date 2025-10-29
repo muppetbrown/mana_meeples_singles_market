@@ -6,6 +6,29 @@ let pool: Pool | null = null;
 try { types.setTypeParser(1700, (v) => (v === null ? null : parseFloat(v))); } catch {}
 
 /**
+ * Determine if SSL should be enabled based on connection string and environment
+ */
+function shouldUseSSL(connectionString: string): { rejectUnauthorized: boolean } | undefined {
+  // Always use SSL for Render databases
+  if (connectionString.includes('.render.com')) {
+    return { rejectUnauthorized: false };
+  }
+  
+  // Use SSL if explicitly required in connection string
+  if (connectionString.includes('sslmode=require')) {
+    return { rejectUnauthorized: false };
+  }
+  
+  // Use SSL in production environment
+  if (process.env.NODE_ENV === "production") {
+    return { rejectUnauthorized: false };
+  }
+  
+  // Local development without SSL
+  return undefined;
+}
+
+/**
  * Get or create the connection pool
  * In test mode, this allows the test to set DATABASE_URL before pool creation
  */
@@ -16,16 +39,21 @@ function getPool(): Pool {
       throw new Error("DATABASE_URL environment variable is not set");
     }
 
+    const sslConfig = shouldUseSSL(connectionString);
+
     pool = new Pool({
       connectionString,
-      ssl:
-        process.env.NODE_ENV === "production"
-          ? { rejectUnauthorized: false }
-          : undefined,
+      ssl: sslConfig,
       max: parseInt(process.env.DB_POOL_MAX || "20", 10),
       idleTimeoutMillis: 30_000,
       connectionTimeoutMillis: 10_000,
     });
+
+    // Log connection configuration
+    console.log("🔧 Database pool configuration:");
+    console.log(`   SSL enabled: ${sslConfig ? "✅ YES" : "❌ NO"}`);
+    console.log(`   Max connections: ${pool.options.max}`);
+    console.log(`   Timeout: ${pool.options.connectionTimeoutMillis}ms`);
 
     // Log pool errors to avoid unhandled exceptions
     pool.on("error", (err) => {
@@ -105,27 +133,42 @@ export async function withConn<T>(
 
 /**
  * Health check for uptime monitoring.
+ * Returns true if database is responsive.
  */
-export async function healthcheck(): Promise<boolean> {
+export async function healthCheck(): Promise<boolean> {
   try {
-    const { rows } = await getPool().query<{ ok: number | string }>('SELECT 1::int AS ok');
-    const v = rows[0]?.ok;
-    return v === 1 || v === '1';
-  } catch {
+    await getPool().query("SELECT 1");
+    return true;
+  } catch (error) {
+    console.error("❌ Health check failed:", error);
     return false;
   }
 }
 
 /**
- * Get connection pool statistics for monitoring.
+ * Get current pool statistics.
  */
 export function getPoolStats() {
-  const p = getPool();
+  if (!pool) {
+    return { total: 0, idle: 0, waiting: 0 };
+  }
   return {
-    total: p.totalCount,
-    idle: p.idleCount,
-    waiting: p.waitingCount,
+    total: pool.totalCount,
+    idle: pool.idleCount,
+    waiting: pool.waitingCount,
   };
+}
+
+/**
+ * Graceful shutdown - close all connections.
+ */
+export async function closePool(): Promise<void> {
+  if (pool) {
+    console.log("🔌 Closing database pool...");
+    await pool.end();
+    pool = null;
+    console.log("✅ Database pool closed");
+  }
 }
 
 // Export the pool getter for routes that need direct access

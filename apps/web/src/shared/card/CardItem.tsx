@@ -201,9 +201,6 @@ const CardItem = React.memo<CardItemProps>(
     
     // If no variation in storefront mode, show error
     if (!effectiveVariation || !card.variations || card.variations.length === 0) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error(`CardItem: No variation available for card ${card.id} "${card.name}"`);
-      }
       return (
         <div className="card-mm flex flex-col h-full border-2 border-red-300 bg-red-50">
           <div className="p-4">
@@ -231,100 +228,110 @@ const CardItem = React.memo<CardItemProps>(
     const foilType = effectiveVariation?.foil_type || 'Regular';
     const isVariationFoil = foilType !== 'Regular';
 
-    return (
-      <div className="card-mm flex flex-row lg:flex-col h-full">
-        {/* Image */}
-        <div className="relative flex-shrink-0 w-28 sm:w-36 lg:w-full overflow-hidden rounded-mm-sm">
-          <OptimizedImage
-            src={imageUrl}
-            alt={card.name}
-            width={250}
-            height={350}
-            className={`w-full h-32 sm:h-44 lg:h-64 object-cover bg-gradient-to-br from-mm-warmAccent to-mm-tealLight ${
-              isVariationFoil
-                ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
-                : ''
-            }`}
-            placeholder="blur"
-            sizes="(max-width: 640px) 128px, (max-width: 1024px) 192px, 100%"
-          />
-          {isVariationFoil && (
-            <div className="absolute top-1 left-1 lg:top-2 lg:left-2 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white text-xs font-bold px-1.5 py-0.5 lg:px-2 lg:py-1 rounded-mm-sm shadow-md border border-yellow-300">
-              ✨ {foilType}
+    // If no variations in storefront mode, show unavailable state (NOT an error)
+    if (!effectiveVariation || !card.variations || card.variations.length === 0) {
+      const isCardFoil = isFoilCard(card);
+      const hasSpecial = hasSpecialTreatment(card);
+      
+      return (
+        <div className="card-mm flex flex-col h-full opacity-75">
+          {/* Image */}
+          <div className="relative flex-shrink-0 overflow-hidden rounded-t-mm-sm">
+            <OptimizedImage
+              src={imageUrl}
+              alt={card.name}
+              width={250}
+              height={350}
+              className="w-full h-48 sm:h-56 lg:h-64 object-cover"
+            />
+          
+            {/* Variation badges overlay */}
+            <div className="absolute top-1 left-1 lg:top-2 lg:left-2 flex flex-col gap-1">
+              {isCardFoil && (
+                <VariationBadge
+                  finish={formatFinish(card.finish)}
+                />
+              )}
+              {hasSpecial && (
+                <VariationBadge
+                  finish=""
+                  treatment={formatTreatment(card.treatment)}
+                />
+              )}
+              {card.promo_type && (
+                <VariationBadge
+                  finish=""
+                  promoType={card.promo_type}
+                />
+              )}
             </div>
-          )}
-        </div>
 
-        {/* Content */}
-        <div className="p-4 sm:p-5 lg:p-5 flex flex-col gap-3 lg:gap-3 flex-grow min-w-0">
-          <div className="flex-shrink-0">
-            <h3 className="font-semibold text-sm lg:text-lg leading-tight text-mm-darkForest mb-1 lg:mb-2 line-clamp-2">
+            {/* "No Stock" badge */}
+            <div className="absolute top-3 right-3">
+              <span className="text-xs font-semibold bg-gray-500 text-white px-2 py-1 rounded">
+                No Stock
+              </span>
+            </div>
+          </div>
+
+          {/* Content */}
+          <div className="flex flex-col flex-grow p-3 lg:p-4 bg-gray-50">
+            <h3 className="font-semibold text-sm lg:text-base text-mm-darkForest line-clamp-2 mb-1">
               {card.name}
             </h3>
-            <p className="text-xs lg:text-sm text-mm-teal pb-2 lg:pb-3 border-b border-mm-warmAccent">
-              {card.set_name} • #{card.card_number}
-            </p>
-          </div>
-
-          {/* Condition Selector */}
-          <div className="space-y-1 lg:space-y-2 flex-shrink-0">
-            <label htmlFor={`condition-${card.id}`} className="block text-xs font-semibold text-mm-forest uppercase tracking-wide">
-              Condition
-            </label>
-            <select
-              id={`condition-${card.id}`}
-              value={selectedVariationKey || ''}
-              onChange={onVariationChange}
-              className="input-mm w-full text-sm lg:text-sm"
-              style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
-            >
-              {card.variations.map((variation) => (
-                <option key={`${card.id}-${variation.variation_key}`} value={variation.variation_key}>
-                  {variation.quality}
-                  {variation.foil_type !== 'Regular' ? ` ✨` : ''}
-                  {variation.language && variation.language !== 'English' ? ` • ${variation.language}` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Availability */}
-          <div className="flex items-center gap-2 pb-2 lg:pb-3 border-b border-mm-warmAccent flex-shrink-0" aria-live="polite">
-            {inStock ? (
-              <>
-                <span className="w-2 h-2 bg-green-500 rounded-full" aria-hidden="true" />
-                <span className="text-xs lg:text-sm text-mm-forest font-medium">
-                  {effectiveVariation.stock} in stock
-                </span>
-              </>
-            ) : (
-              <>
-                <span className="w-2 h-2 bg-red-500 rounded-full" aria-hidden="true" />
-                <span className="text-xs lg:text-sm text-red-600 font-medium">Out of stock</span>
-              </>
+            
+            {card.set_name && (
+              <p className="text-xs text-mm-forest/70 mb-1">
+                {card.set_name}
+              </p>
             )}
-          </div>
-
-          {/* Price & Action */}
-          <div className="flex items-center justify-between gap-3 mt-auto">
-            <span className="text-xl lg:text-2xl font-bold text-mm-darkForest">
-              {price}
-            </span>
-            {onAddToCart && (
-              <button
-                onClick={onAddToCart}
-                disabled={!inStock}
-                className="btn-mm-primary text-xs lg:text-sm px-3 py-2 lg:px-4 lg:py-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                style={{ minHeight: `${ACCESSIBILITY_CONFIG.MIN_TOUCH_TARGET}px` }}
-                aria-label={`Add ${card.name} to cart`}
-              >
-                Add to Cart
-              </button>
+            
+            {card.card_number && (
+              <p className="text-xs text-mm-forest/60 mb-2">
+                #{card.card_number}
+              </p>
             )}
+
+            {/* Variation metadata as inline badges */}
+            {(card.treatment || card.finish || card.border_color) && (
+              <div className="flex flex-wrap gap-1 mb-2">
+                {card.treatment && card.treatment !== 'STANDARD' && (
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    hasSpecial 
+                      ? 'bg-purple-100 text-purple-700' 
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {formatTreatment(card.treatment)}
+                  </span>
+                )}
+                {card.finish && card.finish !== 'nonfoil' && (
+                  <span className={`px-2 py-1 rounded text-xs font-medium ${
+                    isCardFoil 
+                      ? 'bg-yellow-100 text-yellow-700' 
+                      : 'bg-gray-100 text-gray-700'
+                  }`}>
+                    {formatFinish(card.finish)}
+                  </span>
+                )}
+                {card.border_color && card.border_color !== 'black' && (
+                  <span className="px-2 py-1 rounded text-xs font-medium bg-blue-100 text-blue-700">
+                    {card.border_color} border
+                  </span>
+                )}
+              </div>
+            )}
+            
+            {/* Availability */}
+            <div className="flex items-center gap-2 mt-auto pt-3 border-t border-gray-200">
+              <span className="w-2 h-2 bg-gray-400 rounded-full" aria-hidden="true" />
+              <span className="text-xs text-gray-600">
+                Currently unavailable
+              </span>
+            </div>
           </div>
         </div>
-      </div>
-    );
+      );
+    }
   },
   (prevProps, nextProps) => {
     // Memoization comparison
