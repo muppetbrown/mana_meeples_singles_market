@@ -138,10 +138,28 @@ router.get("/cards", async (req: Request, res: Response) => {
   const orderBy = `ORDER BY ${col} ${safeOrder}`;
 
   // ============================================================================
-  // SIMPLIFIED QUERY - NO VARIATIONS ARRAY
-  // Returns card metadata + stock aggregates only
+  // FIXED QUERY - ENSURES ALL CARD VARIATIONS ARE RETURNED TOGETHER
+  // Uses two-phase approach: get unique card identities first, then all their variations
   // ============================================================================
   const sql = `
+    WITH card_identities AS (
+      -- Phase 1: Get first N unique card identities (by name + card_number + set_id)
+      SELECT DISTINCT
+        c.name,
+        c.card_number,
+        c.set_id,
+        -- Use aggregation for ordering since we're using DISTINCT
+        MIN(c.id) as min_id,
+        MIN(c.rarity) as rarity,
+        MIN(c.created_at) as created_at
+      FROM cards c
+      ${joins.join(" ")}
+      ${whereSql}
+      GROUP BY c.name, c.card_number, c.set_id
+      ${orderBy.replace('c.name', 'MIN(c.name)').replace('c.card_number', 'MIN(c.card_number)').replace('c.rarity', 'MIN(c.rarity)').replace('c.created_at', 'MIN(c.created_at)')}
+      ${limitSql}  -- ✅ Limit applies to unique card identities only
+    )
+    -- Phase 2: Get ALL variations for those card identities
     SELECT
       c.id,
       c.name,
@@ -149,40 +167,37 @@ router.get("/cards", async (req: Request, res: Response) => {
       cs.name AS set_name,
       c.rarity,
       c.image_url,
-      
+
       -- NEW: Return variation metadata directly from cards table
       c.treatment,
       c.border_color,
       c.finish,
       c.frame_effect,
       c.promo_type,
-      
+
       g.name AS game_name,
       c.game_id,
       c.set_id,
-      
+
       -- Stock aggregates from card_inventory (but NO variations array)
       COALESCE(inv.total_stock, 0)::int AS total_stock,
       COALESCE(inv.variation_count, 0)::int AS variation_count,
       COALESCE(inv.has_inventory, false) AS has_inventory
-    FROM (
-      SELECT c.*
-      FROM cards c
-      ${joins.join(" ")}
-      ${whereSql}
-      ${orderBy}
-      ${limitSql}
-    ) c
+    FROM card_identities ci
+    JOIN cards c ON c.name = ci.name
+      AND c.card_number = ci.card_number
+      AND c.set_id = ci.set_id
     JOIN games g ON g.id = c.game_id
     JOIN card_sets cs ON cs.id = c.set_id
     LEFT JOIN LATERAL (
       SELECT
-        COUNT(ci.id)::int AS variation_count,
-        COALESCE(SUM(ci.stock_quantity), 0)::int AS total_stock,
-        BOOL_OR(ci.stock_quantity > 0) AS has_inventory
-      FROM card_inventory ci
-      WHERE ci.card_id = c.id
+        COUNT(cinv.id)::int AS variation_count,
+        COALESCE(SUM(cinv.stock_quantity), 0)::int AS total_stock,
+        BOOL_OR(cinv.stock_quantity > 0) AS has_inventory
+      FROM card_inventory cinv
+      WHERE cinv.card_id = c.id
     ) inv ON TRUE
+    ${orderBy}  -- Apply ordering to final result
   `;
 
   try {
