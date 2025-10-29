@@ -79,6 +79,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const [filtersLoading, setFiltersLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [totalCardCount, setTotalCardCount] = useState<number>(0);
   
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -184,75 +185,171 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   // --------------------------------------------------------------------------
   // DATA FETCHING
   // --------------------------------------------------------------------------
-  
+
+  const fetchCardCount = useCallback(async () => {
+    try {
+      const params = new URLSearchParams();
+
+      // Apply same filters as main query
+      if (selectedGame && selectedGame !== 'all') {
+        const game = filterOptions.games.find(g => g.name === selectedGame);
+        if (game?.id) {
+          params.set('game_id', String(game.id));
+        }
+      }
+
+      if (selectedSet && selectedSet !== 'all') {
+        const set = filterOptions.sets.find(s => s.name === selectedSet);
+        if (set?.id) {
+          params.set('set_id', String(set.id));
+        }
+      }
+
+      if (searchTerm?.trim()) {
+        params.set('search', searchTerm.trim());
+      }
+
+      if (selectedTreatment && selectedTreatment !== 'all') {
+        params.set('treatment', selectedTreatment);
+      }
+
+      if (selectedBorderColor && selectedBorderColor !== 'all') {
+        params.set('border_color', selectedBorderColor);
+      }
+
+      if (selectedFinish && selectedFinish !== 'all') {
+        params.set('finish', selectedFinish);
+      }
+
+      if (selectedPromoType && selectedPromoType !== 'all') {
+        params.set('promo_type', selectedPromoType);
+      }
+
+      if (selectedFrameEffect && selectedFrameEffect !== 'all') {
+        params.set('frame_effect', selectedFrameEffect);
+      }
+
+      // Add inventory filter for inventory mode
+      if (isInventoryMode) {
+        params.set('has_inventory', 'true');
+      }
+
+      const url = `${ENDPOINTS.CARD_COUNT}?${params.toString()}`;
+      const data = await api.get<{ count: number }>(url);
+      setTotalCardCount(data?.count ?? 0);
+    } catch (err) {
+      console.error('❌ Error fetching card count:', err);
+      setTotalCardCount(0);
+    }
+  }, [
+    selectedGame,
+    selectedSet,
+    searchTerm,
+    selectedTreatment,
+    selectedBorderColor,
+    selectedFinish,
+    selectedPromoType,
+    selectedFrameEffect,
+    isInventoryMode,
+    filterOptions
+  ]);
+
   useEffect(() => {
     // Don't fetch until filters are loaded
-    if (filtersLoading) {
+    if (filtersLoading || !filterOptions.games.length) {
       return;
     }
-    
-    const fetchCards = async () => {
+
+    const fetchData = async () => {
       setLoading(true);
-      setError(null);
-      
-      try {
-        const params = new URLSearchParams();
-        params.set('limit', '1000');
-        
-        // Resolve game NAME to game ID
-        if (selectedGame && selectedGame !== 'all') {
-          const game = filterOptions.games.find(g => g.name === selectedGame);
-          if (game?.id) {
-            params.set('game_id', String(game.id));
-          }
-        }
-        
-        // Resolve set NAME to set ID
-        if (selectedSet && selectedSet !== 'all') {
-          const set = filterOptions.sets.find(s => s.name === selectedSet);
-          if (set?.id) {
-            params.set('set_id', String(set.id));
-          }
-        }
-        
-        // Add search term
-        if (searchTerm?.trim()) {
-          params.set('search', searchTerm.trim());
-        }
-        
-        // Add treatment filter
-        if (selectedTreatment && selectedTreatment !== 'all') {
-          params.set('treatment', selectedTreatment);
-        }
-
-        // Add additional variation filters
-        if (selectedBorderColor && selectedBorderColor !== 'all') {
-          params.set('border_color', selectedBorderColor);
-        }
-        if (selectedFinish && selectedFinish !== 'all') {
-          params.set('finish', selectedFinish);
-        }
-        if (selectedPromoType && selectedPromoType !== 'all') {
-          params.set('promo_type', selectedPromoType);
-        }
-        if (selectedFrameEffect && selectedFrameEffect !== 'all') {
-          params.set('frame_effect', selectedFrameEffect);
-        }
-
-        const url = `${ENDPOINTS.CARDS}?${params.toString()}`;
-        const data = await api.get<{ cards?: Card[] }>(url);
-        setCards(data?.cards ?? []);
-      } catch (err) {
-        console.error('❌ Error fetching cards:', err);
-        setCards([]);
-        setError(err instanceof Error ? err.message : 'Failed to fetch cards');
-      } finally {
-        setLoading(false);
-      }
+      await Promise.all([
+        fetchCards(),
+        fetchCardCount()
+      ]);
+      setLoading(false);
     };
-    
-    fetchCards();
-  }, [selectedGame, selectedSet, searchTerm, selectedTreatment, selectedBorderColor, selectedFinish, selectedPromoType, selectedFrameEffect, filtersLoading, filterOptions]);
+
+    fetchData();
+  }, [
+    selectedGame,
+    selectedSet,
+    searchTerm,
+    selectedTreatment,
+    selectedBorderColor,
+    selectedFinish,
+    selectedPromoType,
+    selectedFrameEffect,
+    filtersLoading,
+    filterOptions,
+    fetchCardCount
+  ]);
+
+  const fetchCards = useCallback(async () => {
+    setError(null);
+
+    try {
+      const params = new URLSearchParams();
+      params.set('limit', '1000');
+
+      // Resolve game NAME to game ID
+      if (selectedGame && selectedGame !== 'all') {
+        const game = filterOptions.games.find(g => g.name === selectedGame);
+        if (game?.id) {
+          params.set('game_id', String(game.id));
+        }
+      }
+
+      // Resolve set NAME to set ID
+      if (selectedSet && selectedSet !== 'all') {
+        const set = filterOptions.sets.find(s => s.name === selectedSet);
+        if (set?.id) {
+          params.set('set_id', String(set.id));
+        }
+      }
+
+      // Add search term
+      if (searchTerm?.trim()) {
+        params.set('search', searchTerm.trim());
+      }
+
+      // Add treatment filter
+      if (selectedTreatment && selectedTreatment !== 'all') {
+        params.set('treatment', selectedTreatment);
+      }
+
+      // Add additional variation filters
+      if (selectedBorderColor && selectedBorderColor !== 'all') {
+        params.set('border_color', selectedBorderColor);
+      }
+      if (selectedFinish && selectedFinish !== 'all') {
+        params.set('finish', selectedFinish);
+      }
+      if (selectedPromoType && selectedPromoType !== 'all') {
+        params.set('promo_type', selectedPromoType);
+      }
+      if (selectedFrameEffect && selectedFrameEffect !== 'all') {
+        params.set('frame_effect', selectedFrameEffect);
+      }
+
+      const url = `${ENDPOINTS.CARDS}?${params.toString()}`;
+      const data = await api.get<{ cards?: Card[] }>(url);
+      setCards(data?.cards ?? []);
+    } catch (err) {
+      console.error('❌ Error fetching cards:', err);
+      setCards([]);
+      setError(err instanceof Error ? err.message : 'Failed to fetch cards');
+    }
+  }, [
+    selectedGame,
+    selectedSet,
+    searchTerm,
+    selectedTreatment,
+    selectedBorderColor,
+    selectedFinish,
+    selectedPromoType,
+    selectedFrameEffect,
+    filterOptions
+  ]);
 
   // --------------------------------------------------------------------------
   // DERIVED DATA - SIMPLIFIED!
@@ -460,8 +557,23 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
             {isInventoryMode ? 'Inventory Management' : 'All Cards Database'}
           </h2>
           <p className="text-slate-600 mt-1">
-            {displayCards.length} card variations • {uniqueCards} unique cards
-            {isInventoryMode && ` • ${totalStock} in stock`}
+            <span className="font-semibold text-slate-900">{uniqueCards}</span>
+            <span> unique cards</span>
+            {' • '}
+            <span className="font-semibold text-slate-900">{displayCards.length}</span>
+            <span> displayed</span>
+            {totalCardCount > 1000 && (
+              <span className="text-amber-600 ml-2">
+                (of {totalCardCount} total)
+              </span>
+            )}
+            {isInventoryMode && (
+              <span>
+                {' • '}
+                <span className="font-semibold text-slate-900">{totalStock}</span>
+                <span> in stock</span>
+              </span>
+            )}
           </p>
         </div>
         
