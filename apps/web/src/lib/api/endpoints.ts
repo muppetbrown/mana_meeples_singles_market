@@ -13,6 +13,7 @@ export const ENDPOINTS = {
   AUTH: {
     LOGIN: `${BASE_URL}/auth/login`,
     ADMIN_LOGIN: `${BASE_URL}/auth/admin/login`, // Correct admin login endpoint
+    ADMIN_CHECK: `${BASE_URL}/auth/admin/check`, // Admin authentication check endpoint
     LOGOUT: `${BASE_URL}/auth/admin/logout`,
     REGISTER: `${BASE_URL}/auth/register`,
     VERIFY: `${BASE_URL}/auth/verify`,
