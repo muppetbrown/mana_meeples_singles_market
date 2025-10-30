@@ -20,8 +20,8 @@ export const CartItemDisplay: React.FC<CartItemDisplayProps> = ({
 
   // Create variation display text
   const variations = [];
-  if (item.foil_type && item.foil_type !== 'Regular') {
-    variations.push(item.foil_type);
+  if (item.finish && item.finish === 'foil') {
+    variations.push('Foil');
   }
   if (item.quality && item.quality !== 'Near Mint') {
     variations.push(item.quality);
