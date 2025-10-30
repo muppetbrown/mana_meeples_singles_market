@@ -1,6 +1,6 @@
 // apps/web/src/features/admin/components/Dashboard.tsx
 import { useState, useEffect } from 'react';
-import { Package, DollarSign, ShoppingCart, Loader2, LogOut } from 'lucide-react';
+import { Package, DollarSign, ShoppingCart, Loader2, LogOut, BookOpen } from 'lucide-react';
 import { api } from '@/lib/api';
 import { ENDPOINTS } from '@/lib/api';
 import CurrencySelector from '@/shared/ui/CurrencySelector';
@@ -8,6 +8,8 @@ import CurrencySelector from '@/shared/ui/CurrencySelector';
 import UnifiedCardsTab from './components/Cards/CardsTab';
 import OrdersTab from './components//Orders/OrdersTab';
 import AnalyticsTab from './components/Analytics/AnalyticsTab';
+import InstructionsTab from './components/InstructionsTab';
+import PriceManagementHeaderButtons from './components/PriceManagementHeaderButtons';
 
 interface Currency {
   code: string;
@@ -19,12 +21,12 @@ interface Currency {
 const Dashboard = () => {
   const [authChecking, setAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'inventory' | 'all-cards' | 'analytics' | 'orders'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'all-cards' | 'analytics' | 'orders' | 'instructions'>('inventory');
   const [currency, setCurrency] = useState<Currency>({
-    code: 'USD',
-    symbol: '$',
-    label: 'US Dollar (USD)',
-    rate: 0.625
+    code: 'NZD',
+    symbol: 'NZ$',
+    label: 'New Zealand Dollar (NZD)',
+    rate: 1.0
   });
 
   useEffect(() => {
@@ -59,6 +61,11 @@ const Dashboard = () => {
     setCurrency(newCurrency);
   };
 
+  const handlePriceOperationComplete = (result: any, buttonType: string) => {
+    console.log('Price operation complete:', buttonType, result);
+    alert(`✅ Price operation complete!\n\nUpdated: ${result.updated}\nSkipped: ${result.skipped}\nFailed: ${result.failed}`);
+  };
+
   if (authChecking) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -78,8 +85,12 @@ const Dashboard = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
-            
+
             <div className="flex items-center gap-3">
+              <PriceManagementHeaderButtons
+                onOperationComplete={handlePriceOperationComplete}
+              />
+              <div className="h-6 w-px bg-slate-300" />
               <CurrencySelector
                 currency={currency}
                 onCurrencyChange={handleCurrencyChange}
@@ -152,6 +163,20 @@ const Dashboard = () => {
               <ShoppingCart className="w-4 h-4" />
               Orders
             </button>
+
+            <button
+              onClick={() => setActiveTab('instructions')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap border ${
+                activeTab === 'instructions'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'text-slate-700 hover:bg-slate-100 border-transparent'
+              }`}
+              aria-label="Instructions tab"
+              aria-current={activeTab === 'instructions' ? 'page' : undefined}
+            >
+              <BookOpen className="w-4 h-4" />
+              Instructions
+            </button>
           </div>
         </div>
       </header>
@@ -162,6 +187,7 @@ const Dashboard = () => {
         {activeTab === 'all-cards' && <UnifiedCardsTab mode="all" />}
         {activeTab === 'analytics' && <AnalyticsTab />}
         {activeTab === 'orders' && <OrdersTab />}
+        {activeTab === 'instructions' && <InstructionsTab />}
       </main>
     </div>
   );
