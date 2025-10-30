@@ -593,7 +593,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       {/* Price Refresh Manager (All Cards mode only) */}
       {mode === 'all' && (
         <PriceRefreshManager 
-          cards={cards}
+          cards={cards as Array<Card & { scryfall_id: string | null; finish: string }>}
           onRefreshComplete={handleRefreshComplete}
         />
       )}
@@ -759,7 +759,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       )}
 
       {/* Add to Inventory Modal */}
-      {showAddModal && addModalCard && (
+      {showAddModal && addModalCard && selectedVariation && (
         <AddToInventoryModal
           card={addModalCard}
           selectedVariation={selectedVariation}
