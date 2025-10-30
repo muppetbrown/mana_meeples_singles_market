@@ -12,6 +12,7 @@
 import React from 'react';
 import { X, Package, DollarSign, Sparkles } from 'lucide-react';
 import type { Card, BrowseBaseCard, BrowseVariation } from '@/types';
+import { SingleCardPriceRefresh } from './SingleCardPriceRefresh';
 
 // ---------- Types ----------
 type AddFormData = {
@@ -273,23 +274,50 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
 
             {/* Price and Stock Quantity (Side by Side) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Price */}
+              {/* Price with Refresh Button */}
               <div>
                 <label htmlFor="price" className="block text-sm font-medium text-slate-700 mb-2">
                   <DollarSign className="w-4 h-4 inline mr-1" />
                   Price (NZD) <span className="text-red-500">*</span>
                 </label>
-                <input
-                  id="price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.price}
-                  onChange={(e) => handleChange('price', e.target.value)}
-                  className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0.00"
-                  required
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    id="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    value={formData.price}
+                    onChange={(e) => handleChange('price', e.target.value)}
+                    className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="0.00"
+                    required
+                  />
+                  {/* Price refresh button - Only works for MTG cards with Scryfall data */}
+                  {selectedVariation && card.game_name?.toLowerCase().includes('magic') && (
+                    <SingleCardPriceRefresh 
+                      card={{
+                        id: selectedVariation.id,
+                        name: card.name,
+                        set_name: card.set_name,
+                        set_id: 0,
+                        scryfall_id: null,
+                        finish: selectedVariation.finish || 'nonfoil',
+                        ...(selectedVariation.price !== null && selectedVariation.price !== undefined && { price: selectedVariation.price }),
+                      }}
+                      onRefreshComplete={(success, count) => {
+                        if (success) {
+                          alert(`Successfully refreshed prices for ${count} variation(s). Please manually update the price field.`);
+                        }
+                      }}
+                      variant="icon"
+                    />
+                  )}
+                </div>
+                {selectedVariation && !card.game_name?.toLowerCase().includes('magic') && (
+                  <p className="text-xs text-slate-500 mt-1">
+                    Price refresh only available for Magic: The Gathering cards
+                  </p>
+                )}
               </div>
 
               {/* Stock Quantity */}
@@ -309,7 +337,7 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                   required
                 />
               </div>
-            </div>
+            </div> 
           </div>
 
           {/* Actions */}

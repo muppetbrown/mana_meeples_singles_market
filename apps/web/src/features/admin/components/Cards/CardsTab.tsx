@@ -31,7 +31,7 @@ import { VariationFilter } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
 import { EmptyState } from '@/shared/ui';
-import { PriceRefreshManager } from './PriceRefreshManager';
+import { PriceRefreshButtons } from './PriceRefreshButtons';
 import type {
   Card,
   CardVariation,
@@ -592,7 +592,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     <div className="space-y-6">
       {/* Price Refresh Manager (All Cards mode only) */}
       {mode === 'all' && (
-        <PriceRefreshManager 
+        <PriceRefreshButtons  
           cards={cards as Array<Card & { scryfall_id: string | null; finish: string }>}
           onRefreshComplete={handleRefreshComplete}
         />
