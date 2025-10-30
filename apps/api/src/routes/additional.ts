@@ -307,7 +307,6 @@ router.get("/search", async (req: Request, res: Response): Promise<void> => {
           SELECT json_agg(json_build_object(
             'id', ci.id,
             'quality', ci.quality,
-            'foil_type', ci.foil_type,
             'price', ci.price,
             'stock', ci.stock_quantity
           ))

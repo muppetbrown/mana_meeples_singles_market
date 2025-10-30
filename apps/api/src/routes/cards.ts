@@ -350,7 +350,6 @@ router.get('/filters', async (req: Request, res: Response) => {
       -- Inventory-level filters (only from cards with inventory)
       COALESCE(ARRAY_AGG(DISTINCT inv.language) FILTER (WHERE inv.language IS NOT NULL), ARRAY[]::text[]) AS languages,
       COALESCE(ARRAY_AGG(DISTINCT inv.quality) FILTER (WHERE inv.quality IS NOT NULL), ARRAY[]::text[]) AS qualities,
-      COALESCE(ARRAY_AGG(DISTINCT inv.foil_type) FILTER (WHERE inv.foil_type IS NOT NULL), ARRAY[]::text[]) AS foilTypes,
       MIN(inv.price) AS priceMin,
       MAX(inv.price) AS priceMax,
 

@@ -139,35 +139,6 @@ class CardVariationsManager {
   }
 
   /**
-   * Create foil variants for existing cards
-   */
-  async createFoilVariants(cardIds: any, priceMultiplier = 2.5) {
-    try {
-      console.log(`✨ Creating foil variants for ${cardIds.length} cards...`);
-
-      const response = await api.post('/api/admin/bulk-create-foils', {
-        card_ids: cardIds,
-        foil_type: 'Foil',
-        price_multiplier: priceMultiplier
-      });
-
-      if (response.data.success) {
-        console.log(`✅ Foil variants created!`);
-        console.log(`   Success: ${response.data.success}`);
-
-        this.results.created_variations += response.data.success;
-        return response.data;
-      }
-    } catch (error) {
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
-      console.error(`❌ Foil variant creation failed:`, error.response?.data || error.message);
-      // @ts-expect-error TS(2571): Object is of type 'unknown'.
-      this.results.errors.push(`Foil variants failed: ${error.message}`);
-      throw error;
-    }
-  }
-
-  /**
    * Search for cards
    */
   async searchCards(params: any) {
