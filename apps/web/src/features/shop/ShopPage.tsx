@@ -19,6 +19,7 @@ import {
 import { CardDisplayArea } from '@/features/hooks/useCardDisplayArea';
 import { ErrorBoundary } from '@/shared/layout';
 import { CardSkeleton } from '@/shared/card';
+import { api, ENDPOINTS } from '@/lib/api';
 import type { Currency } from '@/types';
 
 // Local type definitions (simplified)
@@ -350,8 +351,7 @@ const ShopPage: React.FC = () => {
 
             try {
               // Fetch the inventory details to get the complete variation info
-              const response = await fetch(`/api/cards/${addToCartModal.cardId}/inventory`);
-              const inventoryData = await response.json();
+              const inventoryData = await api.get(ENDPOINTS.CARDS.INVENTORY(addToCartModal.cardId));
               const selectedInventory = inventoryData.options?.find(
                 (opt: any) => opt.inventoryId === payload.inventoryId
               );
