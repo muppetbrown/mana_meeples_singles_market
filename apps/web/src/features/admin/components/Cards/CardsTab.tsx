@@ -136,7 +136,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     const loadFilters = async () => {
       setFiltersLoading(true);
       try {
-        const data = await api.get<FilterOptions>(ENDPOINTS.FILTERS);
+        const data = await api.get<FilterOptions>(ENDPOINTS.CARDS.FILTERS);
         
         setFilterOptions({
           games: data.games || [],
@@ -255,7 +255,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         params.set('has_inventory', 'true');
       }
 
-      const url = `${ENDPOINTS.CARD_COUNT}?${params.toString()}`;
+      const url = `/api/cards/count?${params.toString()}`;
       const data = await api.get<{ count: number }>(url);
       setTotalCardCount(data?.count ?? 0);
     } catch (err) {
