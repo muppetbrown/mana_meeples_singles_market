@@ -75,7 +75,7 @@ const OrdersTab = () => {
     try {
       setLoading(true);
       // Expect { orders: Order[] } from backend
-      const data = await api.get<{ orders?: Order[] }>(ENDPOINTS.ADMIN.ORDERS);
+      const data = await api.get<{ orders?: Order[] }>(ENDPOINTS.ORDERS.LIST);
       setOrders(Array.isArray(data?.orders) ? data.orders : []);
       setError(null);
     } catch (err: unknown) {
@@ -89,12 +89,12 @@ const OrdersTab = () => {
 
   const fetchOrderDetails = useCallback(async (orderId: number) => {
     // Expect full order object with items
-    return api.get<Order>(ENDPOINTS.ADMIN.ORDER_DETAIL(orderId));
+    return api.get<Order>(ENDPOINTS.ORDERS.BY_ID(orderId));
   }, []);
 
   const patchOrderStatus = useCallback(async (orderId: number, newStatus: OrderStatus) => {
     // Backend: PATCH /admin/orders/:id/status with { status }
-    return api.patch(ENDPOINTS.ADMIN.UPDATE_ORDER_STATUS(orderId), { status: newStatus });
+    return api.patch(ENDPOINTS.ORDERS.UPDATE_STATUS(orderId), { status: newStatus });
   }, []);
 
   useEffect(() => {
