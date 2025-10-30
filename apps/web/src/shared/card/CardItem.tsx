@@ -10,6 +10,7 @@
  */
 import React, { useState, useMemo, useEffect } from 'react';
 import OptimizedImage from '@/shared/media/OptimizedImage';
+import { X } from 'lucide-react';
 import VariationBadge from '@/shared/ui/VariationBadge';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
 import { formatCurrencySimple } from '@/lib/utils';
@@ -74,6 +75,9 @@ const CardItem: React.FC<CardItemProps> = ({
   const [selectedLanguage, setSelectedLanguage] = useState<string>();
   const [inventory, setInventory] = useState<InventoryItem[]>([]);
   const [inventoryLoading, setInventoryLoading] = useState(false);
+
+  // State for image modal
+  const [showImageModal, setShowImageModal] = useState(false);
 
   // --------------------------------------------------------------------------
   // FILTER VARIATIONS BASED ON MODE
@@ -384,6 +388,17 @@ const CardItem: React.FC<CardItemProps> = ({
   // --------------------------------------------------------------------------
 
   const imageUrl = card.image_url || '/images/card-back-placeholder.svg';
+
+  // DEBUG: Log image URL to help troubleshoot Issue #4
+  useEffect(() => {
+    console.log('CardItem - card data:', {
+      id: card.id,
+      name: card.name,
+      image_url: card.image_url,
+      hasImage: !!card.image_url,
+      imageUrl: imageUrl
+    });
+  }, [card.id, card.name, card.image_url, imageUrl]);
   const isCardFoil = selectedVariation ? selectedVariation.finish === 'foil' : false;
   const hasSpecial = selectedVariation ? hasSpecialTreatment({ treatment: selectedVariation.treatment } as any) : false;
 
@@ -391,17 +406,22 @@ const CardItem: React.FC<CardItemProps> = ({
     <div className="card-mm flex flex-col h-full bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image Section */}
       <div className="relative flex-shrink-0 overflow-hidden">
-        <OptimizedImage
-          src={imageUrl}
-          alt={card.name}
-          width={250}
-          height={350}
-          className={`w-full h-48 sm:h-56 lg:h-64 object-cover ${
-            isCardFoil
-              ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
-              : ''
-          }`}
-          placeholder="blur"
+        <button
+          onClick={() => setShowImageModal(true)}
+          className="block w-full focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg overflow-hidden"
+          aria-label={`View larger image of ${card.name}`}
+        >
+          <OptimizedImage
+            src={imageUrl}
+            alt={card.name}
+            width={250}
+            height={350}
+            className={`w-full h-48 sm:h-56 lg:h-64 object-cover hover:scale-105 transition-transform ${
+              isCardFoil
+                ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
+                : ''
+            }`}
+            placeholder="blur"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
 
@@ -427,6 +447,7 @@ const CardItem: React.FC<CardItemProps> = ({
             )}
           </div>
         )}
+        </button>
       </div>
 
       {/* Content Section */}
@@ -470,6 +491,30 @@ const CardItem: React.FC<CardItemProps> = ({
           {renderActionButton()}
         </div>
       </div>
+
+      {/* Image Modal */}
+      {showImageModal && (
+        <div
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowImageModal(false)}
+        >
+          <div className="relative max-w-4xl max-h-[90vh]">
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute -top-10 right-0 text-white hover:text-gray-300"
+              aria-label="Close image modal"
+            >
+              <X className="w-8 h-8" />
+            </button>
+            <img
+              src={imageUrl}
+              alt={card.name}
+              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

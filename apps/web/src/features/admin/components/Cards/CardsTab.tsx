@@ -27,7 +27,8 @@ import { EmptyState } from '@/shared/ui';
 import type {
   Card,
   CardVariation,
-  BrowseBaseCard
+  BrowseBaseCard,
+  BrowseVariation
 } from '@/types';
 
 // ============================================================================
@@ -45,7 +46,7 @@ interface FilterOptions {
 
 type AddFormData = {
   quality: string;
-  foil_type: string;
+  // foil_type removed - finish comes from the card variation itself
   price: string;
   stock_quantity: number;
   language: string;
@@ -82,10 +83,11 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
-  const [addModalCard, setAddModalCard] = useState<Card | null>(null);
+  const [addModalCard, setAddModalCard] = useState<BrowseBaseCard | null>(null);
+  const [selectedVariation, setSelectedVariation] = useState<BrowseVariation | undefined>();
   const [addFormData, setAddFormData] = useState<AddFormData>({
     quality: 'Near Mint',
-    foil_type: 'Regular',
+    // foil_type removed
     price: '',
     stock_quantity: 1,
     language: 'English',
@@ -435,7 +437,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         card_number: card.card_number ?? '',
         rarity: card.rarity ?? '',
         quality: 'NM', // Default quality for cards being exported
-        foil_type: card.finish === 'foil' ? 'Foil' : 'Regular',
+        // foil_type removed - finish info comes from card directly
         language: 'English', // Default language
         price: 0, // Default price
         stock_quantity: card.total_stock ?? 0,
@@ -478,7 +480,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       inventory_id: v.id,
       card_id: browseCard.id,
       quality: 'NM',
-      foil_type: v.finish === 'foil' ? 'Foil' : 'Regular',
+      // foil_type removed - finish info is in v.finish
       language: 'EN',
       price: v.price ?? 0,
       stock: v.in_stock ?? 0,
@@ -488,28 +490,33 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     }))
   }), []);
 
-  const openAddModal = useCallback((card: Card | BrowseBaseCard) => {
-    // Convert BrowseBaseCard to Card if needed
-    const cardData = 'variations' in card && Array.isArray(card.variations) && card.variations.length > 0 && 'in_stock' in card.variations[0]
-      ? toCard(card as BrowseBaseCard)
-      : card as Card;
-    setAddModalCard(cardData);
+  const openAddModal = useCallback((card: BrowseBaseCard) => {
+    setAddModalCard(card);
+
+    // Auto-select first variation if only one exists
+    if (card.variations && card.variations.length === 1) {
+      setSelectedVariation(card.variations[0]);
+    } else {
+      setSelectedVariation(undefined);  // User must select
+    }
+
     setAddFormData({
       quality: 'Near Mint',
-      foil_type: cardData.finish === 'foil' ? 'Foil' : 'Regular',
+      // foil_type removed - finish is already on the card variation
       price: '',
       stock_quantity: 1,
       language: 'English',
     });
     setShowAddModal(true);
-  }, [toCard]);
+  }, []);
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
     setAddModalCard(null);
+    setSelectedVariation(undefined);
     setAddFormData({
       quality: 'Near Mint',
-      foil_type: 'Regular',
+      // foil_type removed
       price: '',
       stock_quantity: 1,
       language: 'English',
@@ -519,29 +526,35 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const handleAddToInventory = useCallback(async () => {
     if (!addModalCard) return;
 
+    // Validation: Must have a selected variation
+    if (!selectedVariation) {
+      alert('Please select a card variation');
+      return;
+    }
+
     setSaving(true);
     try {
       const inventoryData = {
-        card_id: addModalCard.id,
+        card_id: selectedVariation.id,  // Use the specific variation's card ID
         quality: addFormData.quality,
-        foil_type: addFormData.foil_type,
+        // foil_type removed - not needed because card_id identifies the finish
         price: parseFloat(addFormData.price) || 0,
         stock_quantity: addFormData.stock_quantity,
         language: addFormData.language,
       };
 
       await api.post(ENDPOINTS.ADMIN.INVENTORY, inventoryData);
-      
+
       closeAddModal();
       handleRefresh();
-      
+
     } catch (err) {
       console.error('Failed to add to inventory:', err);
       alert('Failed to add to inventory. Please try again.');
     } finally {
       setSaving(false);
     }
-  }, [addModalCard, addFormData, closeAddModal, handleRefresh]);
+  }, [addModalCard, selectedVariation, addFormData, closeAddModal, handleRefresh]);
 
   // --------------------------------------------------------------------------
   // RENDER
@@ -713,6 +726,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       {showAddModal && addModalCard && (
         <AddToInventoryModal
           card={addModalCard}
+          selectedVariation={selectedVariation}
+          onVariationChange={setSelectedVariation}
           formData={addFormData}
           onFormChange={setAddFormData}
           onSave={handleAddToInventory}
