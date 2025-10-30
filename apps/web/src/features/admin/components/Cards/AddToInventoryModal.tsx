@@ -11,19 +11,21 @@
 
 import React from 'react';
 import { X, Package, DollarSign, Sparkles } from 'lucide-react';
-import type { Card } from '@/types';
+import type { Card, BrowseBaseCard, BrowseVariation } from '@/types';
 
 // ---------- Types ----------
 type AddFormData = {
   quality: string;
-  foil_type: string;
+  // foil_type removed - finish comes from the card variation itself
   price: string;
   stock_quantity: number;
   language: string;
 };
 
 interface AddToInventoryModalProps {
-  card: Card;
+  card: BrowseBaseCard;                 // Card with variations array
+  selectedVariation?: BrowseVariation;  // Currently selected variation
+  onVariationChange: (variation: BrowseVariation) => void;  // Handle variation change
   formData: AddFormData;
   onFormChange: (data: AddFormData) => void;
   onSave: () => void;
@@ -40,7 +42,7 @@ const QUALITY_OPTIONS = [
   'Damaged'
 ];
 
-const FOIL_OPTIONS = ['Regular', 'Foil'];
+// FOIL_OPTIONS removed - foil information comes from card.finish
 
 const LANGUAGE_OPTIONS = [
   'English',
@@ -61,6 +63,16 @@ const formatVariationLabel = (value?: string | null): string => {
     .join(' ');
 };
 
+const formatTreatment = (treatment?: string | null): string => {
+  if (!treatment) return 'Standard';
+  return formatVariationLabel(treatment);
+};
+
+const formatFinish = (finish?: string | null): string => {
+  if (!finish) return 'Nonfoil';
+  return formatVariationLabel(finish);
+};
+
 const getFinishBadgeStyle = (finish?: string | null): string => {
   if (!finish) return 'bg-slate-200 text-slate-700';
   const lowerFinish = finish.toLowerCase();
@@ -73,6 +85,8 @@ const getFinishBadgeStyle = (finish?: string | null): string => {
 // ---------- Component ----------
 const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
   card,
+  selectedVariation,
+  onVariationChange,
   formData,
   onFormChange,
   onSave,
@@ -98,9 +112,9 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
     onSave();
   };
 
-  // Determine if card is special/premium based on treatment or finish
-  const isSpecialCard = card.treatment && card.treatment !== 'STANDARD' && card.treatment !== 'standard';
-  const isFoilCard = card.finish && (card.finish.toLowerCase().includes('foil') || card.finish.toLowerCase().includes('etched'));
+  // Determine if selected variation is special/premium based on treatment or finish
+  const isSpecialCard = selectedVariation?.treatment && selectedVariation.treatment !== 'STANDARD' && selectedVariation.treatment !== 'standard';
+  const isFoilCard = selectedVariation?.finish && (selectedVariation.finish.toLowerCase().includes('foil') || selectedVariation.finish.toLowerCase().includes('etched'));
 
   return (
     <div 
@@ -144,65 +158,69 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Card Variation Info */}
+          {/* Variation Selector - Only show if multiple variations exist */}
+          {card.variations && card.variations.length > 1 && (
+            <div className="mb-4">
+              <label htmlFor="variation" className="block text-sm font-medium text-slate-700 mb-2">
+                Variation <span className="text-red-500">*</span>
+              </label>
+              <select
+                id="variation"
+                value={selectedVariation?.id || ''}
+                onChange={(e) => {
+                  const variation = card.variations.find(v => v.id === Number(e.target.value));
+                  if (variation) onVariationChange(variation);
+                }}
+                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                required
+              >
+                <option value="">Select variation...</option>
+                {card.variations.map((variation) => (
+                  <option key={variation.id} value={variation.id}>
+                    {formatTreatment(variation.treatment)} {formatFinish(variation.finish)}
+                    {variation.border_color && variation.border_color !== 'black' && ` - ${variation.border_color} border`}
+                    {variation.in_stock > 0 && ` (${variation.in_stock} in stock)`}
+                  </option>
+                ))}
+              </select>
+              <p className="text-xs text-slate-500 mt-1">
+                Select which card variation to add to inventory
+              </p>
+            </div>
+          )}
+
+          {/* Show selected variation details */}
+          {selectedVariation && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+              <p className="text-sm font-medium text-blue-900 mb-2">Selected Variation:</p>
+              <div className="space-y-1 text-sm text-blue-800">
+                <div><span className="font-medium">Treatment:</span> {formatTreatment(selectedVariation.treatment)}</div>
+                <div><span className="font-medium">Finish:</span> {formatFinish(selectedVariation.finish)}</div>
+                {selectedVariation.border_color && (
+                  <div><span className="font-medium">Border:</span> {selectedVariation.border_color}</div>
+                )}
+                {selectedVariation.frame_effect && (
+                  <div><span className="font-medium">Frame:</span> {selectedVariation.frame_effect}</div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Card Basic Info */}
           <div className="bg-slate-50 rounded-lg p-4 space-y-3">
-            <h3 className="text-sm font-semibold text-slate-700 mb-2">Card Variation Details</h3>
-            
+            <h3 className="text-sm font-semibold text-slate-700 mb-2">Card Details</h3>
+
             {/* Card Number */}
             <div className="flex items-center gap-2 text-sm">
               <span className="text-slate-600 min-w-[100px]">Card Number:</span>
               <span className="font-medium text-slate-900">{card.card_number}</span>
             </div>
 
-            {/* Treatment */}
-            {card.treatment && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-slate-600 min-w-[100px]">Treatment:</span>
-                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                  isSpecialCard 
-                    ? 'bg-purple-100 text-purple-700' 
-                    : 'bg-slate-200 text-slate-700'
-                }`}>
-                  {formatVariationLabel(card.treatment)}
-                </span>
-              </div>
-            )}
-
-            {/* Finish */}
-            {card.finish && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-slate-600 min-w-[100px]">Finish:</span>
-                <span className={`px-2 py-1 rounded text-xs font-medium ${getFinishBadgeStyle(card.finish)}`}>
-                  {formatVariationLabel(card.finish)}
-                </span>
-              </div>
-            )}
-
-            {/* Border Color */}
-            {card.border_color && card.border_color !== 'black' && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-slate-600 min-w-[100px]">Border:</span>
-                <span className="font-medium text-slate-900">{formatVariationLabel(card.border_color)}</span>
-              </div>
-            )}
-
-            {/* Frame Effect */}
-            {card.frame_effect && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-slate-600 min-w-[100px]">Frame Effect:</span>
-                <span className="font-medium text-slate-900">{formatVariationLabel(card.frame_effect)}</span>
-              </div>
-            )}
-
-            {/* Promo Type */}
-            {card.promo_type && (
-              <div className="flex items-center gap-2 text-sm">
-                <span className="text-slate-600 min-w-[100px]">Promo:</span>
-                <span className="px-2 py-1 rounded text-xs font-medium bg-pink-100 text-pink-700">
-                  {formatVariationLabel(card.promo_type)}
-                </span>
-              </div>
-            )}
+            {/* Set Name */}
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-slate-600 min-w-[100px]">Set:</span>
+              <span className="font-medium text-slate-900">{card.set_name}</span>
+            </div>
           </div>
 
           <div className="border-t border-slate-200 pt-4">
@@ -231,28 +249,7 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
               </p>
             </div>
 
-            {/* Foil Type */}
-            <div className="mb-4">
-              <label htmlFor="foil_type" className="block text-sm font-medium text-slate-700 mb-2">
-                Foil Type <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="foil_type"
-                value={formData.foil_type}
-                onChange={(e) => handleChange('foil_type', e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                {FOIL_OPTIONS.map((foilType) => (
-                  <option key={foilType} value={foilType}>
-                    {foilType}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-slate-500 mt-1">
-                Whether this specific inventory item is foil or regular
-              </p>
-            </div>
+            {/* Foil Type section removed - finish is already displayed in card variation details above */}
 
             {/* Language */}
             <div className="mb-4">

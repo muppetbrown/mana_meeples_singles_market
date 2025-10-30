@@ -18,6 +18,11 @@ import type {
   Currency
 } from '@/types';
 import {
+  analyzeVariations,
+  formatVariationDifference,
+  formatVariationFullTitle
+} from '@/lib/utils/variationComparison';
+import {
   formatTreatment,
   formatFinish
 } from '@/types';
@@ -118,6 +123,10 @@ const CardList: React.FC<CardListProps> = ({
     return parts.join(' • ');
   };
 
+  /**
+   * Generate variation badges showing only different fields
+   * FIXED: Now analyzes which fields differ and shows only those
+   */
   const generateVariationBadges = (card: BrowseBaseCard): VariationBadge[] => {
     const visibleVariations = getVisibleVariations(card);
 
@@ -125,19 +134,29 @@ const CardList: React.FC<CardListProps> = ({
       return [];
     }
 
-    return visibleVariations.map(variation => {
-      const treatmentLabel = formatTreatment(variation.treatment);
-      const finishLabel = formatFinish(variation.finish);
+    // Analyze which fields are common vs different
+    const analysis = analyzeVariations(visibleVariations);
 
-      let label = `${treatmentLabel} ${finishLabel}`;
+    return visibleVariations.map(variation => {
+      // Use smart formatting that shows only different fields
+      let label = formatVariationDifference(variation, analysis);
+
+      // Add stock count based on mode
       if (mode !== 'all') {
         label += ` (${variation.in_stock} in stock)`;
       }
 
+      // Determine variant based on commonality and stock
       const variant = determineVariantType(variation, visibleVariations);
-      const title = buildVariationTitle(variation);
 
-      return { label, variant, title };
+      // Build hover title with FULL details (always show everything in hover)
+      const title = formatVariationFullTitle(variation);
+
+      return {
+        label,
+        variant,
+        title
+      };
     });
   };
 

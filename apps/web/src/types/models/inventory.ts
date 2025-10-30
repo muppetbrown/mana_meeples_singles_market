@@ -1,10 +1,10 @@
 // 3. types/models/inventory.ts - Inventory models
 export interface InventoryItem {
   inventory_id: number;
-  card_id: number;
+  card_id: number;        // This points to a specific card variation with finish info
   variation_id?: number | null;
   quality: string;
-  foil_type: string;
+  // foil_type removed - get finish from cards.finish via card_id
   language: string;
   price: number;
   stock_quantity: number;

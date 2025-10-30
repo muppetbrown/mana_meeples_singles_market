@@ -92,7 +92,7 @@ router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response)
 const AddInventorySchema = z.object({
   card_id: z.coerce.number().int().positive(),
   quality: z.string().trim().min(1),
-  foil_type: z.string().trim().min(1),
+  // foil_type removed - finish comes from cards table via card_id
   price: z.coerce.number().min(0).default(0),
   stock_quantity: z.coerce.number().int().min(0).default(0),
   language: z.string().trim().min(1),
@@ -112,7 +112,7 @@ router.post("/admin/inventory", adminAuthJWT, async (req: Request, res: Response
   }
 
   const {
-    card_id, quality, foil_type, price, stock_quantity, language,
+    card_id, quality, price, stock_quantity, language,
     cost, markup_percentage, auto_price_enabled, low_stock_threshold,
     tcgplayer_id, price_source, sku
   } = parsed.data;
@@ -123,15 +123,15 @@ router.post("/admin/inventory", adminAuthJWT, async (req: Request, res: Response
     return res.status(400).json({ error: "Invalid card_id" });
   }
 
-  // Upsert with explicit target matching your unique index
+  // Upsert with updated schema (foil_type removed)
   const sql = `
     INSERT INTO card_inventory (
-      card_id, variation_id, quality, foil_type, language, price, stock_quantity,
+      card_id, variation_id, quality, language, price, stock_quantity,
       cost, markup_percentage, auto_price_enabled, low_stock_threshold,
       tcgplayer_id, price_source, sku
     )
-    VALUES ($1, NULL, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
-    ON CONFLICT (card_id, variation_id, quality, foil_type, language)
+    VALUES ($1, NULL, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    ON CONFLICT (card_id, variation_id, quality, language)
     DO UPDATE SET
       price = EXCLUDED.price,
       stock_quantity = EXCLUDED.stock_quantity,
@@ -148,7 +148,7 @@ router.post("/admin/inventory", adminAuthJWT, async (req: Request, res: Response
 
   try {
     const rows = await db.query(sql, [
-      card_id, quality, foil_type, language, price, stock_quantity,
+      card_id, quality, language, price, stock_quantity,
       cost, markup_percentage, auto_price_enabled, low_stock_threshold,
       tcgplayer_id, price_source, sku
     ]);
@@ -171,7 +171,7 @@ const UpdateInventorySchema = z.object({
   stock_quantity: z.coerce.number().int().min(0).optional(),
   price: z.coerce.number().min(0).optional(),
   quality: z.string().trim().min(1).optional(),
-  foil_type: z.string().trim().min(1).optional(),
+  // foil_type removed - cannot be changed (that would be a different variation)
   language: z.string().trim().min(1).optional(),
   cost: z.coerce.number().min(0).optional(),
   markup_percentage: z.coerce.number().min(0).max(999).optional(),
@@ -363,15 +363,15 @@ router.post("/admin/inventory/bulk-import", adminAuthJWT, async (req: Request, r
         continue;
       }
 
-      const { card_id, quality, foil_type, price, stock_quantity, language } = parsed.data;
+      const { card_id, quality, price, stock_quantity, language } = parsed.data;
 
       try {
         await db.query(`
-          INSERT INTO card_inventory (card_id, variation_id, quality, foil_type, language, price, stock_quantity)
-          VALUES ($1, NULL, $2, $3, $4, $5, $6)
-          ON CONFLICT (card_id, variation_id, quality, foil_type, language)
+          INSERT INTO card_inventory (card_id, variation_id, quality, language, price, stock_quantity)
+          VALUES ($1, NULL, $2, $3, $4, $5)
+          ON CONFLICT (card_id, variation_id, quality, language)
           DO UPDATE SET price = EXCLUDED.price, stock_quantity = EXCLUDED.stock_quantity, updated_at = NOW()
-        `, [card_id, quality, foil_type, language, price, stock_quantity]);
+        `, [card_id, quality, language, price, stock_quantity]);
         
         successCount++;
       } catch (err) {

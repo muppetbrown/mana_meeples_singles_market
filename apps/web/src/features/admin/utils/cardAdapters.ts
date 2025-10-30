@@ -12,11 +12,11 @@ function browseVariationToCardVariation(variation: BrowseVariation): CardVariati
   return {
     inventory_id: variation.id, // Use card row ID as inventory_id
     quality: 'Near Mint', // Default quality for admin display
-    foil_type: variation.finish === 'foil' ? 'Foil' : 'Regular', // Map finish to foil_type
+    // foil_type removed - finish info is in variation.finish
     language: 'English', // Default language for admin display
     price: variation.price || 0,
     stock: variation.in_stock || 0, // Map in_stock to stock
-    variation_key: `Near Mint-${variation.finish === 'foil' ? 'Foil' : 'Regular'}-English`,
+    variation_key: `Near Mint-${variation.finish || 'nonfoil'}-English`,
 
     // Include backward compatibility fields
     finish: variation.finish,
