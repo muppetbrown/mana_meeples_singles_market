@@ -81,10 +81,15 @@ export const ENDPOINTS = {
 
   // -------------------- Orders --------------------
   ORDERS: {
+    // Public endpoints
     LIST: `${BASE_URL}/orders`,
     BY_ID: (id: number) => `${BASE_URL}/orders/${id}`,
     CREATE: `${BASE_URL}/orders`,
-    UPDATE_STATUS: (id: number) => `${BASE_URL}/orders/${id}/status`,
+
+    // Admin endpoints
+    ADMIN_LIST: `${BASE_URL}/admin/orders`,
+    ADMIN_BY_ID: (id: number) => `${BASE_URL}/admin/orders/${id}`,
+    UPDATE_STATUS: (id: number) => `${BASE_URL}/admin/orders/${id}/status`,
   },
 
   // -------------------- Users --------------------

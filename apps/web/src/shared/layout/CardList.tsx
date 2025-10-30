@@ -49,6 +49,11 @@ const CardList: React.FC<CardListProps> = ({
   onAction
 }) => {
   // --------------------------------------------------------------------------
+  // IMAGE MODAL STATE
+  // --------------------------------------------------------------------------
+  const [expandedImage, setExpandedImage] = React.useState<{ url: string; name: string } | null>(null);
+
+  // --------------------------------------------------------------------------
   // DATA CONVERSION HELPERS
   // --------------------------------------------------------------------------
 
@@ -188,13 +193,6 @@ const CardList: React.FC<CardListProps> = ({
 
     return (
       <div className="flex items-center gap-3">
-        {/* Variation count indicator for multi-variation cards */}
-        {hasMultipleVariations && (
-          <span className="inline-flex items-center px-2 py-1 rounded-md text-xs bg-slate-100 text-slate-600 border border-slate-200">
-            {visibleVariations.length} variations
-          </span>
-        )}
-
         {/* Price info */}
         {mode !== 'all' && card.lowest_price && (
           <span className="text-sm text-slate-600">
@@ -250,16 +248,16 @@ const CardList: React.FC<CardListProps> = ({
               <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                 Name
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                 #
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                 Rarity
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
                 Variations
               </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="hidden xl:table-cell px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wide">
                 Action
               </th>
             </tr>
@@ -277,8 +275,10 @@ const CardList: React.FC<CardListProps> = ({
                   badges={badges}
                   rightNode={rightNode}
                   onImageOpen={() => {
-                    // TODO: Implement image modal functionality
-                    console.log('Open image modal for:', card.name);
+                    setExpandedImage({
+                      url: card.image_url || '/placeholder-card.png',
+                      name: card.name
+                    });
                   }}
                   className="hover:bg-slate-50 transition-colors"
                   tableMode={true}
@@ -288,6 +288,36 @@ const CardList: React.FC<CardListProps> = ({
           </tbody>
         </table>
       </div>
+
+      {/* Image Modal */}
+      {expandedImage && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setExpandedImage(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Full size image of ${expandedImage.name}`}
+        >
+          <div className="relative max-w-5xl max-h-[90vh] flex flex-col">
+            <button
+              onClick={() => setExpandedImage(null)}
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 text-2xl font-bold px-4 py-2 focus:outline-none focus-visible:ring-2 focus-visible:ring-white rounded"
+              aria-label="Close image"
+            >
+              ✕
+            </button>
+            <img
+              src={expandedImage.url}
+              alt={expandedImage.name}
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+            <p className="text-white text-center mt-4 text-lg font-medium">
+              {expandedImage.name}
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
