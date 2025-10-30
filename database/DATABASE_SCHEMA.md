@@ -1,6 +1,6 @@
 # Database Schema — `public`
 
-**Generated:** 28/10/2025, 7:50:40 pm
+**Generated:** 30/10/2025, 1:21:34 pm
 
 **Tables:** 11
 
@@ -134,7 +134,7 @@ CREATE INDEX idx_inventory_card_quality ON public.card_inventory USING btree (ca
 
 -  `idx_inventory_filters`
 ```sql
-CREATE INDEX idx_inventory_filters ON public.card_inventory USING btree (quality, foil_type, language)
+CREATE INDEX idx_inventory_filters ON public.card_inventory USING btree (quality, language)
 ```
 
 -  `idx_inventory_price`

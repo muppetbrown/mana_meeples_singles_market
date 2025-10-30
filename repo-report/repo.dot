@@ -7,6 +7,7 @@ digraph repo {
   n45013f35 [label="@typescript-eslint/parser", shape=box];
   n7377130 [label="globals", shape=box];
   n4614a627 [label="@eslint/js", shape=box];
+  n88b45c63 [label="eslint-plugin-import", shape=box];
   n44c10a89 [label="C:/Git_Repos/mana_meeples_singles_market/prettier.config.cjs", shape=box];
   ne3661334 [label="C:/Git_Repos/mana_meeples_singles_market/scripts/analyze-repo.mjs", shape=box];
   nccd [label="fs", shape=box];
@@ -42,13 +43,13 @@ digraph repo {
   n65c6c061 [label="node:timers/promises", shape=box];
   nf85ff691 [label="C:/Git_Repos/mana_meeples_singles_market/scripts/test-db-connected.ts", shape=box];
   n8cb617d0 [label="C:/Git_Repos/mana_meeples_singles_market/scripts/test-password.ts", shape=box];
+  neccb2a91 [label="C:/Git_Repos/mana_meeples_singles_market/scripts/test-render-connection.cjs", shape=box];
   n5ab62922 [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/vitest.config.ts", shape=box];
   n3270acc [label="vitest/config", shape=box];
   ndae7ff91 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/postcss.config.cjs", shape=box];
   nff12907b [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/tailwind.config.ts", shape=box];
   nfaf4c6ab [label="tailwindcss", shape=box];
   n2609d487 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/vite.config.ts", shape=box];
-  n373c64 [label="vite", shape=box];
   n7ab93447 [label="@vitejs/plugin-react", shape=box];
   n88201cbf [label="C:/Git_Repos/mana_meeples_singles_market/docs/samples/api_driven_variations.ts", shape=box];
   n58f0c76 [label="axios", shape=box];
@@ -75,6 +76,7 @@ digraph repo {
   n1babf3e7 [label="../src/services/emailService.js", shape=box];
   nce1d9c1b [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/App.tsx", shape=box];
   n983fc1cc [label="react-router-dom", shape=box];
+  nc5e0f4b2 [label="@tanstack/react-query", shape=box];
   n98f33a1b [label="@/features/shop/ShopPage", shape=box];
   nd22b5826 [label="@/features/admin/Login", shape=box];
   nc703acd1 [label="@/features/admin/Dashboard", shape=box];
@@ -86,7 +88,7 @@ digraph repo {
   n29e98a0 [label="./App", shape=box];
   nb52c8f37 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/reportWebVitals.ts", shape=box];
   ned28aa80 [label="web-vitals", shape=box];
-  n811a5a87 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/vit-env.d.ts", shape=box];
+  ncd287c62 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/vite-env.d.ts", shape=box];
   nb1669019 [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/lib/authUtils.ts", shape=box];
   n89dd680d [label="jsonwebtoken", shape=box];
   n1358deeb [label="./env.js", shape=box];
@@ -234,7 +236,7 @@ digraph repo {
   nfe3587de [label="./CardSkeleton", shape=box];
   ne163a88d [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/layout/CardGrid.tsx", shape=box];
   n1ea361e5 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/layout/CardList.tsx", shape=box];
-  n6a267d97 [label="@/lib/utils/", shape=box];
+  n15b3b9a6 [label="@/shared/card/CardRow", shape=box];
   na0170d91 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/layout/ErrorBoundary.tsx", shape=box];
   nd82ffbc1 [label="@/lib/utils/errorLogger", shape=box];
   n2d7e5127 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/layout/index.ts", shape=box];
@@ -259,7 +261,6 @@ digraph repo {
   ndf32bca8 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/VariationFilter.tsx", shape=box];
   n92453a38 [label="./VariationFilterCache", shape=box];
   nd51613c8 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/VariationFilterCache.ts", shape=box];
-  na3555c1f [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/Button.tsx", shape=box];
   n40f1627d [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/CurrencySelector.tsx", shape=box];
   n78992231 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/EmptyState.tsx", shape=box];
   n9e40b06d [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/FilterSidebar.tsx", shape=box];
@@ -272,10 +273,7 @@ digraph repo {
   nfc6ebc52 [label="./MobileFilterModal", shape=box];
   n1f60cc83 [label="./FilterSidebar", shape=box];
   ne1f24ef1 [label="./CurrencySelector", shape=box];
-  nd8020453 [label="./Button", shape=box];
-  nd603756c [label="./Modal", shape=box];
   n1338c93c [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/MobileFilterModal.tsx", shape=box];
-  na6e0abd6 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/Modal.tsx", shape=box];
   n46e0c67b [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/SectionHeader.tsx", shape=box];
   n3534fa50 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/Toast.tsx", shape=box];
   n4348313d [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/VariationBadge.tsx", shape=box];
@@ -286,6 +284,7 @@ digraph repo {
   n83f592fd [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/models/order.ts", shape=box];
   n30436419 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/ui/cart.ts", shape=box];
   nca6a6a6e [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/types/ui/common.ts", shape=box];
+  n71e7303a [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/utils/cardAdapters.ts", shape=box];
   n646137dc [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/index.ts", shape=box];
   nd77b7dc4 [label="./ShopHeader", shape=box];
   n776e05e2 [label="./ResultsHeader", shape=box];
@@ -312,7 +311,7 @@ digraph repo {
   n9196d4c [label="./AddToInventoryModal", shape=box];
   n9340c369 [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Orders/OrdersTab.tsx", shape=box];
   n30e288aa [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/Cart/AddToCartModal.tsx", shape=box];
-  nc5e0f4b2 [label="@tanstack/react-query", shape=box];
+  n6a267d97 [label="@/lib/utils/", shape=box];
   n7d775cac [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/Cart/CartItem.tsx", shape=box];
   n8c1a84e [label="@/lib/utils/format", shape=box];
   n350994aa [label="C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/Cart/CartModal.tsx", shape=box];
@@ -325,6 +324,7 @@ digraph repo {
   n719cd52b -> n45013f35;
   n719cd52b -> n7377130;
   n719cd52b -> n4614a627;
+  n719cd52b -> n88b45c63;
   ne3661334 -> nccd;
   ne3661334 -> n346425;
   ne3661334 -> nfb9f9849;
@@ -364,9 +364,12 @@ digraph repo {
   n8cb617d0 -> nb0f71304;
   n8cb617d0 -> nace3aa4c;
   n8cb617d0 -> ncc554e8a;
+  neccb2a91 -> ndf7;
+  neccb2a91 -> n346425;
+  neccb2a91 -> nb0f71304;
   n5ab62922 -> n3270acc;
   nff12907b -> nfaf4c6ab;
-  n2609d487 -> n373c64;
+  n2609d487 -> n3270acc;
   n2609d487 -> n7ab93447;
   n2609d487 -> n42e4fff7;
   n88201cbf -> n58f0c76;
@@ -402,11 +405,11 @@ digraph repo {
   n5c7b2a46 -> n2eafad;
   n5c7b2a46 -> nb73a046d;
   n5c7b2a46 -> n140b0529;
-  n5757a53f -> n5686a4ad;
   n5757a53f -> nc9ef137;
   n5757a53f -> nc40bc535;
   ncaaaa61b -> n1babf3e7;
   nce1d9c1b -> n983fc1cc;
+  nce1d9c1b -> nc5e0f4b2;
   nce1d9c1b -> n98f33a1b;
   nce1d9c1b -> nd22b5826;
   nce1d9c1b -> nc703acd1;
@@ -423,8 +426,10 @@ digraph repo {
   nb1669019 -> n1358deeb;
   n215c2a1a -> ndf7;
   n215c2a1a -> ndf7;
-  nca6c055 -> nb0f71304;
   nca6c055 -> n1d7cf;
+  nca6c055 -> nb0f71304;
+  nca6c055 -> n346425;
+  nca6c055 -> n1c56f;
   nfdbbc248 -> n34817a;
   n19f52873 -> nb1fa8f70;
   n19f52873 -> naf6ef0c1;
@@ -616,6 +621,7 @@ digraph repo {
   nff171574 -> n235ece10;
   nff171574 -> n7592eab6;
   nff171574 -> nd1e03598;
+  nff171574 -> n2d3cacc1;
   nff171574 -> n905dedea;
   nff171574 -> n905dedea;
   nc3e6400f -> n675d97f;
@@ -626,14 +632,14 @@ digraph repo {
   nb84159c1 -> nfe3587de;
   ne163a88d -> n675d97f;
   ne163a88d -> nd1e03598;
-  ne163a88d -> n905dedea;
-  ne163a88d -> n905dedea;
   ne163a88d -> n2764132b;
+  ne163a88d -> nee0af885;
   ne163a88d -> n59fa91e2;
+  ne163a88d -> n905dedea;
   n1ea361e5 -> n675d97f;
-  n1ea361e5 -> n2764132b;
-  n1ea361e5 -> ne15d94ec;
-  n1ea361e5 -> n6a267d97;
+  n1ea361e5 -> n15b3b9a6;
+  n1ea361e5 -> nd1e03598;
+  n1ea361e5 -> n905dedea;
   n1ea361e5 -> n905dedea;
   na0170d91 -> n675d97f;
   na0170d91 -> n675d97f;
@@ -680,8 +686,6 @@ digraph repo {
   ndac5f07d -> nfc6ebc52;
   ndac5f07d -> n1f60cc83;
   ndac5f07d -> ne1f24ef1;
-  ndac5f07d -> nd8020453;
-  ndac5f07d -> nd603756c;
   n1338c93c -> n675d97f;
   n1338c93c -> n59fa91e2;
   n1338c93c -> nfa2a6303;
@@ -693,6 +697,7 @@ digraph repo {
   n3534fa50 -> n675d97f;
   n3534fa50 -> n59fa91e2;
   n3534fa50 -> n7592eab6;
+  n71e7303a -> n905dedea;
   n646137dc -> nd77b7dc4;
   n646137dc -> n776e05e2;
   n646137dc -> n2c8d5df6;
@@ -703,6 +708,10 @@ digraph repo {
   n646137dc -> n2fa7f441;
   n646137dc -> nc58ca73f;
   n646137dc -> nde342a05;
+  n646137dc -> n8ae46734;
+  n646137dc -> nd77b7dc4;
+  n646137dc -> n776e05e2;
+  n646137dc -> n2c8d5df6;
   n646137dc -> n8ae46734;
   n7cca63e1 -> n675d97f;
   n7cca63e1 -> n59fa91e2;

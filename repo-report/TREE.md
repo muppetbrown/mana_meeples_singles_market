@@ -479,8 +479,8 @@ mana_meeples_singles_market
 │ │ │ └── testresults.txt
 │ │ ├── .env
 │ │ ├── .env.example
+│ │ ├── .env.local
 │ │ ├── .tsbuildinfo
-│ │ ├── package-lock.json
 │ │ ├── package.json
 │ │ ├── tsconfig.build.json
 │ │ ├── tsconfig.json
@@ -511,6 +511,8 @@ mana_meeples_singles_market
 │  │ │ │ │ │ └── CardsTab.tsx
 │  │ │ │ │ └── Orders/
 │  │ │ │ │  └── OrdersTab.tsx
+│  │ │ │ ├── utils/
+│  │ │ │ │ └── cardAdapters.ts
 │  │ │ │ ├── Dashboard.tsx
 │  │ │ │ └── Login.tsx
 │  │ │ ├── hooks/
@@ -586,13 +588,11 @@ mana_meeples_singles_market
 │  │ │ │ ├── VariationFilter.tsx
 │  │ │ │ └── VariationFilterCache.ts
 │  │ │ └── ui/
-│  │ │  ├── Button.tsx
 │  │ │  ├── CurrencySelector.tsx
 │  │ │  ├── EmptyState.tsx
 │  │ │  ├── FilterSidebar.tsx
 │  │ │  ├── index.ts
 │  │ │  ├── MobileFilterModal.tsx
-│  │ │  ├── Modal.tsx
 │  │ │  ├── SectionHeader.tsx
 │  │ │  ├── Toast.tsx
 │  │ │  └── VariationBadge.tsx
@@ -613,7 +613,7 @@ mana_meeples_singles_market
 │  │ ├── App.tsx
 │  │ ├── main.tsx
 │  │ ├── reportWebVitals.ts
-│  │ └── vit-env.d.ts
+│  │ └── vite-env.d.ts
 │  ├── .env.local
 │  ├── .env.local.example
 │  ├── .tsbuildinfo
@@ -631,10 +631,9 @@ mana_meeples_singles_market
 │ └── database-stats.json
 ├── docs/
 │ ├── samples/
-│ │ ├── api_driven_variations.ts
-│ │ ├── mtg_card_variations_sample.json
-│ │ ├── onepiece_card_variations_sample.json
-│ │ └── sv_card_variations_sample.json
+│ │ └── api_driven_variations.ts
+│ ├── ai_dev_principles.md
+│ ├── CARD_DISPLAY_ARCHITECTURE_FINAL.md
 │ ├── Complete File Documentation for apps.docx
 │ ├── openapi.yaml
 │ ├── pokemon_set_codes.txt
@@ -663,12 +662,15 @@ mana_meeples_singles_market
 │ ├── smoke.mjs
 │ ├── test-db-connected.ts
 │ ├── test-login.sh
-│ └── test-password.ts
+│ ├── test-password.ts
+│ └── test-render-connection.cjs
+├── .clauderc
 ├── .dependency-cruiser.cjs
 ├── .env.example
 ├── .gitignore
-├── ai_dev_principles.md
+├── .npmrc
 ├── api.effective.tsconfig.json
+├── conversation-starter-template.txt
 ├── deps.svg
 ├── eslint.config.cjs
 ├── package.json
