@@ -79,42 +79,42 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
         </td>
 
         {/* Game */}
-        <td className="px-4 py-4 text-sm text-slate-700">
+        <td className="px-4 py-4 text-sm text-slate-700 whitespace-nowrap">
           {identity.gameName}
         </td>
 
         {/* Set */}
-        <td className="px-4 py-4 text-sm text-slate-700">
+        <td className="px-4 py-4 text-sm text-slate-700 whitespace-nowrap">
           {identity.setName}
         </td>
 
         {/* Name */}
-        <td className="px-4 py-4">
+        <td className="px-4 py-4 whitespace-nowrap">
           <div className="text-sm font-medium text-slate-900">
             {identity.name}
           </div>
         </td>
 
-        {/* Card Number - Hidden on mobile */}
-        <td className="hidden sm:table-cell px-4 py-4 text-sm text-slate-600">
+        {/* Card Number */}
+        <td className="px-4 py-4 text-sm text-slate-600 whitespace-nowrap">
           {identity.cardNumber || '—'}
         </td>
 
-        {/* Rarity - Hidden on mobile and small screens */}
-        <td className="hidden md:table-cell px-4 py-4 text-sm text-slate-600">
+        {/* Rarity */}
+        <td className="px-4 py-4 text-sm text-slate-600 whitespace-nowrap">
           {identity.rarity || '—'}
         </td>
 
-        {/* Variations - Hidden on mobile, small, and medium screens */}
-        <td className="hidden lg:table-cell px-4 py-4">
-          <div className="max-w-xs">
+        {/* Variations */}
+        <td className="px-4 py-4">
+          <div className="min-w-max">
             {badges && badges.length > 0 && (
               <div className="flex flex-wrap gap-1">
                 {badges.map((badge, i) => (
                   <span
                     key={i}
                     className={clsx(
-                      'inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium',
+                      'inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium whitespace-nowrap',
                       badge.variant === 'accent' && 'bg-blue-50 text-blue-700 border-blue-200',
                       badge.variant === 'warning' && 'bg-amber-50 text-amber-700 border-amber-200',
                       (!badge.variant || badge.variant === 'neutral') && 'bg-slate-50 text-slate-600 border-slate-200'
@@ -129,8 +129,8 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
           </div>
         </td>
 
-        {/* Action - Hidden on mobile, small, and medium screens */}
-        <td className="hidden xl:table-cell px-4 py-4 text-right">
+        {/* Action */}
+        <td className="px-4 py-4 text-right whitespace-nowrap">
           <div className="flex items-center justify-end gap-3">
             {rightNode}
           </div>
