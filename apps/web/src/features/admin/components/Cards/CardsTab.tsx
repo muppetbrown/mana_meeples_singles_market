@@ -31,25 +31,12 @@ import { VariationFilter } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
 import { EmptyState } from '@/shared/ui';
-import { PriceRefreshButtons } from './PriceRefreshButtons';
 import type {
   Card,
   CardVariation,
   BrowseBaseCard,
   BrowseVariation
 } from '@/types';
-
-// Type for price update results (matches PriceRefreshManager)
-interface PriceUpdateResult {
-  total: number;
-  updated: number;
-  skipped: number;
-  failed: number;
-  details: {
-    updated_card_pricing: number;
-    updated_inventory: number;
-  };
-}
 
 // ============================================================================
 // TYPES
@@ -427,14 +414,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setSearchParams(prev => new URLSearchParams(prev));
   }, [setSearchParams]);
 
-  const handleRefreshComplete = useCallback((result: PriceUpdateResult) => {
-    console.log('Price refresh complete:', result);
-    // Show success message
-    alert(`✅ Price refresh complete!\n\nUpdated: ${result.updated}\nSkipped: ${result.skipped}\nFailed: ${result.failed}`);
-    // Refresh cards to show new prices
-    handleRefresh();
-  }, [handleRefresh]);
-
   const handleExportCSV = useCallback(async () => {
     if (loading || cards.length === 0) {
       console.warn('No cards available for export');
@@ -589,14 +568,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
   return (
     <div className="space-y-6">
-      {/* Price Refresh Manager (All Cards mode only) */}
-      {mode === 'all' && (
-        <PriceRefreshButtons  
-          cards={cards as Array<Card & { scryfall_id: string | null; finish: string }>}
-          onRefreshComplete={handleRefreshComplete}
-        />
-      )}
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
