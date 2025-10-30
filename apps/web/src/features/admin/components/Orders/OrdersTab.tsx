@@ -75,7 +75,7 @@ const OrdersTab = () => {
     try {
       setLoading(true);
       // Expect { orders: Order[] } from backend
-      const data = await api.get<{ orders?: Order[] }>(ENDPOINTS.ORDERS.LIST);
+      const data = await api.get<{ orders?: Order[] }>(ENDPOINTS.ORDERS.ADMIN_LIST);
       setOrders(Array.isArray(data?.orders) ? data.orders : []);
       setError(null);
     } catch (err: unknown) {
@@ -89,7 +89,7 @@ const OrdersTab = () => {
 
   const fetchOrderDetails = useCallback(async (orderId: number) => {
     // Expect full order object with items
-    return api.get<Order>(ENDPOINTS.ORDERS.BY_ID(orderId));
+    return api.get<Order>(ENDPOINTS.ORDERS.ADMIN_BY_ID(orderId));
   }, []);
 
   const patchOrderStatus = useCallback(async (orderId: number, newStatus: OrderStatus) => {

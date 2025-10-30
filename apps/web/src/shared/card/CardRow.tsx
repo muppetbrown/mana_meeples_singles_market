@@ -54,7 +54,17 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
       <tr className={clsx(className)} aria-label={`${identity.name} — ${identity.gameName}`}>
         {/* Image */}
         <td className="px-4 py-4">
-          <div className="w-12 h-16 flex-shrink-0 overflow-hidden rounded-md bg-slate-100">
+          <button
+            type="button"
+            onClick={onImageOpen}
+            className={clsx(
+              'w-12 h-16 flex-shrink-0 overflow-hidden rounded-md bg-slate-100 transition-all',
+              'focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2',
+              'hover:shadow-md cursor-pointer'
+            )}
+            aria-haspopup="dialog"
+            aria-label={`Open larger image for ${identity.name}`}
+          >
             <img
               src={finalImageUrl}
               alt=""
@@ -63,9 +73,9 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
               loading="lazy"
               decoding="async"
               onError={() => setImageError(true)}
-              className="object-cover"
+              className="object-cover w-full h-full"
             />
-          </div>
+          </button>
         </td>
 
         {/* Game */}
@@ -85,18 +95,18 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
           </div>
         </td>
 
-        {/* Card Number */}
-        <td className="px-4 py-4 text-sm text-slate-600">
+        {/* Card Number - Hidden on mobile */}
+        <td className="hidden sm:table-cell px-4 py-4 text-sm text-slate-600">
           {identity.cardNumber || '—'}
         </td>
 
-        {/* Rarity */}
-        <td className="px-4 py-4 text-sm text-slate-600">
+        {/* Rarity - Hidden on mobile and small screens */}
+        <td className="hidden md:table-cell px-4 py-4 text-sm text-slate-600">
           {identity.rarity || '—'}
         </td>
 
-        {/* Variations */}
-        <td className="px-4 py-4">
+        {/* Variations - Hidden on mobile, small, and medium screens */}
+        <td className="hidden lg:table-cell px-4 py-4">
           <div className="max-w-xs">
             {badges && badges.length > 0 && (
               <div className="flex flex-wrap gap-1">
@@ -119,8 +129,8 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
           </div>
         </td>
 
-        {/* Action */}
-        <td className="px-4 py-4 text-right">
+        {/* Action - Hidden on mobile, small, and medium screens */}
+        <td className="hidden xl:table-cell px-4 py-4 text-right">
           <div className="flex items-center justify-end gap-3">
             {rightNode}
           </div>
