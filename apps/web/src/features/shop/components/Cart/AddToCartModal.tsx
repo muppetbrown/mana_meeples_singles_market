@@ -2,6 +2,7 @@
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils/';
+import { api, ENDPOINTS } from '@/lib/api';
 import type { Currency } from '@/types';
 
 export type InventoryOption = {
@@ -30,9 +31,7 @@ export function AddToCartModal({
   const { data, isLoading, isError } = useQuery({
     queryKey: ['inventory-options', cardId],
     queryFn: async () => {
-      const res = await fetch(`/api/cards/${cardId}/inventory`);
-      if (!res.ok) throw new Error('Failed to load inventory');
-      return (await res.json()) as { options: InventoryOption[] };
+      return await api.get<{ options: InventoryOption[] }>(ENDPOINTS.CARDS.INVENTORY(cardId));
     },
     enabled: isOpen,
     staleTime: 60_000,

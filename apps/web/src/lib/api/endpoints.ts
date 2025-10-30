@@ -56,6 +56,8 @@ export const ENDPOINTS = {
     BY_ID: (id: number) => `${BASE_URL}/cards/${id}`,
     SEARCH: `${BASE_URL}/cards/search`,
     FILTERS: `${BASE_URL}/cards/filters`,
+    COUNT: `${BASE_URL}/cards/count`,
+    INVENTORY: (id: number) => `${BASE_URL}/cards/${id}/inventory`,
   },
 
   // -------------------- Inventory --------------------

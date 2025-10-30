@@ -44,8 +44,14 @@ export class ApiError extends Error {
 
 /**
  * API Client Configuration
+ *
+ * IMPORTANT: This is the base URL for all API requests
+ * - Development: http://localhost:10000 (API server on port 10000)
+ * - Production: Set via VITE_API_URL environment variable
+ *
+ * DO NOT default to localhost:5173 (that's the Vite dev server, not the API!)
  */
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5173';
+const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:10000';
 
 /**
  * Type-safe API client
@@ -80,17 +86,28 @@ class ApiClient {
    * Build full URL
    */
   private buildUrl(endpoint: string, params?: Record<string, unknown>): string {
-    const url = new URL(`${this.baseUrl}${endpoint}`);
-    
-    if (params) {
-      Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          url.searchParams.append(key, String(value));
-        }
-      });
-    }
+    try {
+      const url = new URL(`${this.baseUrl}${endpoint}`);
 
-    return url.toString();
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            url.searchParams.append(key, String(value));
+          }
+        });
+      }
+
+      return url.toString();
+    } catch (error) {
+      // Enhanced error for invalid URL construction
+      console.error('❌ Failed to build URL:', {
+        baseUrl: this.baseUrl,
+        endpoint,
+        params,
+        error
+      });
+      throw new Error(`Invalid API URL: ${this.baseUrl}${endpoint}`);
+    }
   }
 
   /**
@@ -139,6 +156,17 @@ class ApiClient {
 
         // Extract error message with proper type guards
         const errorMessage = extractErrorMessage(errorData, response.statusText);
+
+        // Enhanced logging for debugging
+        console.error('❌ API Error:', {
+          method,
+          endpoint,
+          status: response.status,
+          statusText: response.statusText,
+          url: response.url,
+          errorMessage,
+          params: options.params
+        });
 
         throw new ApiError(
           response.status,
