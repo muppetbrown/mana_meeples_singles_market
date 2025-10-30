@@ -50,14 +50,17 @@ export const ENDPOINTS = {
     IMPORT_STATUS: `${BASE_URL}/admin/import/status`,
   },
 
-  // -------------------- Cards --------------------
+  // -------------------- Cards (Admin endpoints) --------------------
   CARDS: {
-    LIST: `${BASE_URL}/cards`,
-    BY_ID: (id: number) => `${BASE_URL}/cards/${id}`,
-    SEARCH: `${BASE_URL}/cards/search`,
+    LIST: `${BASE_URL}/cards/cards`,        // Backend mounts at /cards with route /cards -> /api/cards/cards
     FILTERS: `${BASE_URL}/cards/filters`,
     COUNT: `${BASE_URL}/cards/count`,
-    INVENTORY: (id: number) => `${BASE_URL}/cards/${id}/inventory`,
+  },
+
+  // -------------------- Storefront (Public shop endpoints) --------------------
+  STOREFRONT: {
+    CARDS: `${BASE_URL}/storefront/cards`,
+    CARD_BY_ID: (id: number) => `${BASE_URL}/storefront/cards/${id}`,
   },
 
   // -------------------- Inventory --------------------

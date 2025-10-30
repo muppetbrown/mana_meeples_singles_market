@@ -350,13 +350,25 @@ const ShopPage: React.FC = () => {
             if (!card) return;
 
             try {
-              // Fetch the inventory details to get the complete variation info
-              const inventoryData = await api.get(ENDPOINTS.CARDS.INVENTORY(addToCartModal.cardId));
-              const selectedInventory = inventoryData.options?.find(
-                (opt: any) => opt.inventoryId === payload.inventoryId
+              // Fetch the inventory details from storefront endpoint
+              const response = await api.get<{
+                card: {
+                  variations: Array<{
+                    inventory_id: number;
+                    quality: string;
+                    foil_type: string;
+                    language: string;
+                    stock: number;
+                    price: number;
+                  }>;
+                };
+              }>(ENDPOINTS.STOREFRONT.CARD_BY_ID(addToCartModal.cardId));
+
+              const selectedVariation = response.card.variations?.find(
+                (v: any) => v.inventory_id === payload.inventoryId
               );
 
-              if (!selectedInventory) {
+              if (!selectedVariation) {
                 console.error('Could not find inventory details');
                 return;
               }
@@ -366,12 +378,12 @@ const ShopPage: React.FC = () => {
                 card_id: card.id,
                 inventory_id: payload.inventoryId,
                 card_name: card.name,
-                variation_key: `${selectedInventory.quality}-${selectedInventory.finish || 'nonfoil'}-${selectedInventory.language}`,
-                quality: selectedInventory.quality,
-                finish: selectedInventory.finish || 'nonfoil',
-                language: selectedInventory.language,
-                price: selectedInventory.priceCents / 100, // Convert cents to dollars
-                stock: selectedInventory.inStock,
+                variation_key: `${selectedVariation.quality}-${selectedVariation.foil_type || 'nonfoil'}-${selectedVariation.language}`,
+                quality: selectedVariation.quality,
+                finish: selectedVariation.foil_type || 'nonfoil',
+                language: selectedVariation.language,
+                price: selectedVariation.price, // Price is already in dollars
+                stock: selectedVariation.stock,
                 image_url: card.image_url || '',
                 set_name: card.set_name,
                 card_number: card.card_number,

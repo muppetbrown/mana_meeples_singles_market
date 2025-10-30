@@ -31,7 +31,33 @@ export function AddToCartModal({
   const { data, isLoading, isError } = useQuery({
     queryKey: ['inventory-options', cardId],
     queryFn: async () => {
-      return await api.get<{ options: InventoryOption[] }>(ENDPOINTS.CARDS.INVENTORY(cardId));
+      // Fetch from storefront endpoint which returns card with variations
+      const response = await api.get<{
+        card: {
+          id: number;
+          variations: Array<{
+            inventory_id: number;
+            quality: string;
+            foil_type: string;
+            language: string;
+            stock: number;
+            price: number;
+          }>;
+        };
+      }>(ENDPOINTS.STOREFRONT.CARD_BY_ID(cardId));
+
+      // Map variations to InventoryOption format
+      const options: InventoryOption[] = (response.card.variations || []).map(v => ({
+        inventoryId: v.inventory_id,
+        treatment: 'STANDARD', // TODO: Add treatment field to backend response if needed
+        foilType: v.foil_type || 'NONFOIL',
+        quality: v.quality,
+        language: v.language,
+        priceCents: Math.round((v.price || 0) * 100), // Convert to cents
+        inStock: v.stock || 0,
+      }));
+
+      return { options };
     },
     enabled: isOpen,
     staleTime: 60_000,
