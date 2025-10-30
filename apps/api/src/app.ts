@@ -73,11 +73,12 @@ export function createApp() {
 
   /** ===============================
    *  ✅ Enhanced static + header handling
-   *  SKIP IN TEST MODE to avoid missing dist errors
+   *  SKIP IN TEST MODE AND DEVELOPMENT to avoid missing dist errors
    *  =============================== */
   const isTestMode = process.env.NODE_ENV === 'test';
-  
-  if (!isTestMode) {
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  if (!isTestMode && !isDevelopment) {
     const __dirname = path.resolve();
     const frontendDist = path.join(__dirname, "../web/dist");
 
