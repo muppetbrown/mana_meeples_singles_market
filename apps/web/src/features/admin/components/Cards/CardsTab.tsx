@@ -352,7 +352,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         params.set('frame_effect', selectedFrameEffect);
       }
 
-      const url = `${ENDPOINTS.CARDS}?${params.toString()}`;
+      const url = `${ENDPOINTS.CARDS.LIST}?${params.toString()}`;
       const data = await api.get<{ cards?: Card[] }>(url);
       setCards(data?.cards ?? []);
     } catch (err) {

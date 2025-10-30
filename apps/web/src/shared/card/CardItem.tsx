@@ -105,7 +105,7 @@ const CardItem: React.FC<CardItemProps> = ({
       setInventoryLoading(true);
       try {
         const response = await api.get<{ inventory: InventoryItem[] }>(
-          `${ENDPOINTS.CARDS}/${selectedVariation.id}/inventory`
+          `${ENDPOINTS.CARDS.BY_ID(selectedVariation.id)}/inventory`
         );
         setInventory(response.inventory || []);
       } catch (error) {
