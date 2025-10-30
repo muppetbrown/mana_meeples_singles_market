@@ -48,7 +48,7 @@ const Dashboard = () => {
 
   const handleLogout = async () => {
     try {
-      await api.post('/auth/admin/logout');
+      await api.post(ENDPOINTS.AUTH.LOGOUT);
       window.location.href = '/admin/login';
     } catch (error) {
       console.error('Logout failed:', error);
