@@ -64,6 +64,10 @@ export const ENDPOINTS = {
     INVENTORY_ITEM: (id: string | number) => `/admin/inventory/${id}`, // Update/delete inventory
     INVENTORY_EXPORT: '/admin/inventory/export',                    // Export to CSV
     INVENTORY_BULK_IMPORT: '/admin/inventory/bulk-import',         // Bulk import from CSV/JSON
+
+    // Pricing Management - Scryfall Integration
+    UPDATE_PRICES: '/admin/pricing/update',                    // Bulk price update
+    SCRYFALL_ELIGIBLE: '/admin/pricing/scryfall-eligible',     // Get eligible cards
   },
 
   // ============================================================================

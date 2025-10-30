@@ -9,6 +9,7 @@ import ordersRoutes from "./orders.js";
 import inventoryRoutes from "./inventory.js";
 import additionalRoutes from "./additional.js";
 import storefrontRouter from './storefront.js';
+import pricingRouter from './pricing.js';
 
 const router = express.Router();
 
@@ -20,6 +21,7 @@ router.use('/storefront', storefrontRouter);
 router.use("/", ordersRoutes);
 router.use("/", inventoryRoutes); // exposes /admin/inventory
 router.use("/", additionalRoutes);
+router.use('/admin/pricing', pricingRouter);
 
 /**
  * Augment Express Request to hold validated values without heavy typing.

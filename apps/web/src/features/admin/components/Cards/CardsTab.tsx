@@ -9,6 +9,13 @@
  * - Each card row represents a unique variation
  * - No more card_variations table or variations array for "All Cards" view
  * - Inventory mode filters cards by has_inventory/total_stock from card_inventory aggregation
+ * 
+ * FIXES APPLIED (2025-10-30):
+ * - Added PriceUpdateResult interface definition
+ * - Fixed handleRefreshComplete callback (removed missing showToast/refetchCards)
+ * - Moved handleRefreshComplete after handleRefresh (dependency fix)
+ * - Fixed JSX structure - PriceRefreshManager now renders as full-width section above header
+ * - Removed duplicate PriceRefreshManager rendering
  */
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
@@ -24,12 +31,25 @@ import { VariationFilter } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
 import { EmptyState } from '@/shared/ui';
+import { PriceRefreshManager } from './PriceRefreshManager';
 import type {
   Card,
   CardVariation,
   BrowseBaseCard,
   BrowseVariation
 } from '@/types';
+
+// Type for price update results (matches PriceRefreshManager)
+interface PriceUpdateResult {
+  total: number;
+  updated: number;
+  skipped: number;
+  failed: number;
+  details: {
+    updated_card_pricing: number;
+    updated_inventory: number;
+  };
+}
 
 // ============================================================================
 // TYPES
@@ -408,6 +428,14 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setSearchParams(prev => new URLSearchParams(prev));
   }, [setSearchParams]);
 
+  const handleRefreshComplete = useCallback((result: PriceUpdateResult) => {
+    console.log('Price refresh complete:', result);
+    // Show success message
+    alert(`✅ Price refresh complete!\n\nUpdated: ${result.updated}\nSkipped: ${result.skipped}\nFailed: ${result.failed}`);
+    // Refresh cards to show new prices
+    handleRefresh();
+  }, [handleRefresh]);
+
   const handleExportCSV = useCallback(async () => {
     if (loading || cards.length === 0) {
       console.warn('No cards available for export');
@@ -562,6 +590,14 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
   return (
     <div className="space-y-6">
+      {/* Price Refresh Manager (All Cards mode only) */}
+      {mode === 'all' && (
+        <PriceRefreshManager 
+          cards={cards}
+          onRefreshComplete={handleRefreshComplete}
+        />
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -596,7 +632,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
             )}
           </p>
         </div>
-        
+
         <div className="flex items-center gap-3">
           {/* View Mode Toggle */}
           <div className="flex items-center gap-2">
