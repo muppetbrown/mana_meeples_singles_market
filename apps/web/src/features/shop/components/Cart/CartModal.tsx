@@ -134,11 +134,11 @@ const CartItemRow: React.FC<CartItemRowProps> = ({
           <div className="font-medium">{item.game_name}</div>
           <div>{item.set_name} #{item.card_number}</div>
           <div>{item.quality}</div>
-          {item.foil_type && item.foil_type !== 'Regular' && (
+          {item.finish && item.finish === 'foil' && (
             <div className="flex items-center gap-1">
               <span>✨</span>
               <span className="font-medium text-yellow-600">
-                {item.foil_type}
+                Foil
               </span>
             </div>
           )}

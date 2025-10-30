@@ -61,13 +61,13 @@ export const ShopCart: React.FC<ShopCartProps> = ({
       quality: selectedVariation.quality,
       price: selectedVariation.price ?? 0,
       stock: selectedVariation.stock ?? 0,
-      foil_type: selectedVariation.foil_type,
+      finish: selectedVariation.finish || 'nonfoil',
       language: selectedVariation.language || 'English',
       game_name: card.game_name,
       set_name: card.set_name,
       rarity: card.rarity || 'Unknown',
       card_number: card.card_number,
-      variation_key: `${selectedVariation.quality}-${selectedVariation.foil_type}-${selectedVariation.language}`
+      variation_key: `${selectedVariation.quality}-${selectedVariation.finish || 'nonfoil'}-${selectedVariation.language}`
     });
   }, [addToCart]);
 
@@ -149,13 +149,13 @@ export const useShopCartUtils = (cards: StorefrontCard[]) => {
       quality: selectedVariation.quality,
       price: selectedVariation.price ?? 0,
       stock: selectedVariation.stock ?? 0,
-      foil_type: selectedVariation.foil_type,
+      finish: selectedVariation.finish || 'nonfoil',
       language: selectedVariation.language || 'English',
       game_name: card.game_name,
       set_name: card.set_name,
       rarity: card.rarity || 'Unknown',
       card_number: card.card_number,
-      variation_key: `${selectedVariation.quality}-${selectedVariation.foil_type}-${selectedVariation.language}`
+      variation_key: `${selectedVariation.quality}-${selectedVariation.finish || 'nonfoil'}-${selectedVariation.language}`
     });
   }, [addToCart]);
 

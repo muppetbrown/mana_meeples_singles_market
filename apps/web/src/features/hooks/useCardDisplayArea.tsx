@@ -44,7 +44,7 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
   const convertStorefrontToBrowseCard = (card: StorefrontCard): BrowseBaseCard => {
     const variations = card.variations.map(variation => ({
       id: variation.card_id || card.id,
-      sku: `${card.id}-${variation.quality}-${variation.foil_type}-${variation.language}`,
+      sku: `${card.id}-${variation.quality}-${variation.finish || 'nonfoil'}-${variation.language}`,
       treatment: variation.treatment || 'STANDARD',
       finish: variation.finish || 'nonfoil',
       border_color: null,
@@ -198,11 +198,10 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
           <ErrorBoundary>
             <CardGrid
               cards={browseCards}
-              cardProps={{
-                currency,
-                onAddToCart: (card: BrowseBaseCard, variation?: CardVariation) => {
-                  setAddToCartModal({ open: true, cardId: card.id });
-                }
+              mode="storefront"
+              currency={currency}
+              onAddToCart={({ card, inventoryId, quantity }) => {
+                setAddToCartModal({ open: true, cardId: card.id });
               }}
             />
           </ErrorBoundary>

@@ -5,7 +5,7 @@ export interface CartItem {
   card_name: string;
   variation_key: string;
   quality: string;
-  // foil_type removed - get finish from card
+  finish: string; // Added to replace foil_type - contains 'foil' or 'nonfoil'
   language: string;
   price: number;
   quantity: number;
