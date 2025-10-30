@@ -35,7 +35,7 @@ interface CardForDisplay {
   variations: Array<{
     variation_key: string;
     quality: string;
-    foil_type: string;
+    finish: string;
     language?: string;
     price: number;
     stock: number;
@@ -116,7 +116,7 @@ const ShopPage: React.FC = () => {
       variations: card.variations.map(v => ({
         variation_key: v.variation_key,
         quality: v.quality,
-        foil_type: v.foil_type,
+        finish: v.finish || 'nonfoil',
         language: v.language,
         price: v.price ?? 0,
         stock: v.stock ?? 0,
@@ -366,9 +366,9 @@ const ShopPage: React.FC = () => {
                 card_id: card.id,
                 inventory_id: payload.inventoryId,
                 card_name: card.name,
-                variation_key: `${selectedInventory.quality}-${selectedInventory.foilType}-${selectedInventory.language}`,
+                variation_key: `${selectedInventory.quality}-${selectedInventory.finish || 'nonfoil'}-${selectedInventory.language}`,
                 quality: selectedInventory.quality,
-                foil_type: selectedInventory.foilType,
+                finish: selectedInventory.finish || 'nonfoil',
                 language: selectedInventory.language,
                 price: selectedInventory.priceCents / 100, // Convert cents to dollars
                 stock: selectedInventory.inStock,

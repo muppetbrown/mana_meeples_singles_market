@@ -70,8 +70,8 @@ export const MiniCart: React.FC<MiniCartProps> = ({
                   {item.set_name} #{item.card_number}
                 </div>
                 <div>{item.quality} × {item.quantity}</div>
-                {item.foil_type && item.foil_type !== 'Regular' && (
-                  <div className="text-yellow-600">✨ {item.foil_type}</div>
+                {item.finish && item.finish === 'foil' && (
+                  <div className="text-yellow-600">✨ Foil</div>
                 )}
               </div>
             </div>

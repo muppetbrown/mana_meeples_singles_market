@@ -629,10 +629,10 @@ const Checkout = ({
                     <div>{item.set_name} #{item.card_number}</div>
                     {item.rarity && <div className="text-slate-500">{item.rarity}</div>}
                     <div>{item.quality}</div>
-                    {item.foil_type && item.foil_type !== 'Regular' && (
+                    {item.finish && item.finish === 'foil' && (
                       <div className="flex items-center gap-1">
                         <span>✨</span>
-                        <span className="font-medium text-yellow-600">{item.foil_type}</span>
+                        <span className="font-medium text-yellow-600">Foil</span>
                       </div>
                     )}
                     {item.language && item.language !== 'English' && (
