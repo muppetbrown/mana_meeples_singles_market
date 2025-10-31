@@ -233,31 +233,31 @@ const CardList: React.FC<CardListProps> = ({
   return (
     <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full">
+        <table className="min-w-full">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
                 Image
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
                 Game
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
                 Set
               </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
                 Name
               </th>
-              <th className="hidden sm:table-cell px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
                 #
               </th>
-              <th className="hidden md:table-cell px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
                 Rarity
               </th>
-              <th className="hidden lg:table-cell px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="px-4 py-3 text-left text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
                 Variations
               </th>
-              <th className="hidden xl:table-cell px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wide">
+              <th className="px-4 py-3 text-right text-xs font-semibold text-slate-600 uppercase tracking-wide whitespace-nowrap">
                 Action
               </th>
             </tr>
