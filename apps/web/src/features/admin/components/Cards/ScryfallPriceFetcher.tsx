@@ -43,29 +43,93 @@ interface UseScryfallPriceFetcherReturn {
 
 const SCRYFALL_API_BASE = 'https://api.scryfall.com';
 const RATE_LIMIT_DELAY = 100; // Scryfall recommends 50-100ms between requests
+const MAX_RETRIES = 3; // Maximum number of retry attempts for failed requests
+const RETRY_DELAY_BASE = 1000; // Base delay for exponential backoff (1 second)
+const REQUEST_TIMEOUT = 10000; // 10 second timeout for fetch requests
 
 // -------------------- Helper Functions --------------------
 
 /**
  * Delay execution for rate limiting
  */
-const delay = (ms: number): Promise<void> => 
+const delay = (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
 /**
- * Fetch card data from Scryfall by ID
+ * Fetch with timeout
+ * Wraps fetch with a timeout to prevent hanging requests
+ */
+async function fetchWithTimeout(url: string, timeoutMs: number = REQUEST_TIMEOUT): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    return response;
+  } catch (error) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Request timeout - Scryfall API took too long to respond');
+    }
+    throw error;
+  }
+}
+
+/**
+ * Fetch card data from Scryfall by ID with retry logic
+ * Implements exponential backoff for transient failures
  */
 async function fetchCardFromScryfall(scryfallId: string): Promise<any> {
-  const response = await fetch(`${SCRYFALL_API_BASE}/cards/${scryfallId}`);
-  
-  if (!response.ok) {
-    if (response.status === 404) {
-      throw new Error('Card not found on Scryfall');
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      const response = await fetchWithTimeout(`${SCRYFALL_API_BASE}/cards/${scryfallId}`);
+
+      if (!response.ok) {
+        // Don't retry 404s - card doesn't exist
+        if (response.status === 404) {
+          throw new Error('Card not found on Scryfall');
+        }
+
+        // Don't retry 400s - bad request won't fix itself
+        if (response.status === 400) {
+          throw new Error(`Invalid Scryfall ID: ${scryfallId}`);
+        }
+
+        // Retry 429 (rate limit) and 5xx (server errors)
+        if (response.status === 429 || response.status >= 500) {
+          throw new Error(`Scryfall API error: ${response.status} ${response.statusText}`);
+        }
+
+        // Other errors - don't retry
+        throw new Error(`Scryfall API error: ${response.status} ${response.statusText}`);
+      }
+
+      return await response.json();
+    } catch (error) {
+      lastError = error instanceof Error ? error : new Error('Unknown error');
+
+      // Don't retry if it's a non-retryable error
+      if (lastError.message.includes('not found') || lastError.message.includes('Invalid Scryfall ID')) {
+        throw lastError;
+      }
+
+      // If this was the last attempt, throw the error
+      if (attempt === MAX_RETRIES) {
+        throw lastError;
+      }
+
+      // Calculate exponential backoff delay: 1s, 2s, 4s
+      const delayMs = RETRY_DELAY_BASE * Math.pow(2, attempt);
+      console.warn(`⚠️  Scryfall fetch failed for ${scryfallId} (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying in ${delayMs}ms...`, lastError.message);
+      await delay(delayMs);
     }
-    throw new Error(`Scryfall API error: ${response.status} ${response.statusText}`);
   }
-  
-  return await response.json();
+
+  // Should never reach here, but TypeScript needs this
+  throw lastError || new Error('Failed to fetch from Scryfall');
 }
 
 /**
