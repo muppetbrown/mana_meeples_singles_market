@@ -34,12 +34,12 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
 }) => {
   const [loadState, setLoadState] = useState<'idle' | 'loading' | 'loaded' | 'error'>('idle');
   const [currentSrc, setCurrentSrc] = useState<string>('');
-  const imgRef = useRef<HTMLImageElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Intersection Observer for lazy loading (non-priority images)
   useEffect(() => {
-    if (!imgRef.current || priority) return;
+    if (!containerRef.current || priority) return;
 
     observerRef.current = new IntersectionObserver(
       (entries) => {
@@ -56,7 +56,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       }
     );
 
-    observerRef.current.observe(imgRef.current);
+    observerRef.current.observe(containerRef.current);
 
     return () => {
       observerRef.current?.disconnect();
@@ -93,7 +93,7 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
   const blurPlaceholder = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='560'%3E%3Crect fill='%23f1f5f9' width='400' height='560'/%3E%3C/svg%3E`;
 
   return (
-    <div className={`relative overflow-hidden ${className}`} style={{ width, height }}>
+    <div ref={containerRef} className={`relative overflow-hidden ${className}`} style={{ width, height }}>
       {/* Blur Placeholder - shown while loading */}
       {(loadState === 'idle' || loadState === 'loading') && (
         <img
@@ -107,7 +107,6 @@ const OptimizedImage: React.FC<OptimizedImageProps> = ({
       {/* Main Image */}
       {currentSrc && (
         <img
-          ref={imgRef}
           src={currentSrc}
           alt={alt}
           className={`w-full h-full object-contain transition-opacity duration-300 ${
