@@ -57,6 +57,7 @@ export function groupCardsForBrowse(cards: Card[]): BrowseBaseCard[] {
       .map((c) => ({
         id: c.id,
         sku: c.sku,
+        scryfall_id: c.scryfall_id ?? null,
         treatment: c.treatment ?? '',
         finish: c.finish ?? '',
         border_color: c.border_color ?? null,
@@ -64,6 +65,10 @@ export function groupCardsForBrowse(cards: Card[]): BrowseBaseCard[] {
         promo_type: c.promo_type ?? null,
         image: c.image_url?? null,
         in_stock: Number(c.total_stock ?? 0),
+        price: null, // Individual variation price (not used in browse view)
+        base_price: c.base_price ?? null,
+        foil_price: c.foil_price ?? null,
+        price_source: c.price_source ?? null,
       }))
       .sort((a, b) => {
         const fr = finishRank(a.finish) - finishRank(b.finish);
