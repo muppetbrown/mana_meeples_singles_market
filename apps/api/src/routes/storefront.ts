@@ -13,14 +13,17 @@ const IdSchema = z.object({
   id: z.string().regex(/^\d+$/, "id must be numeric") 
 });
 
+// STANDARDIZED: Query schema matching frontend SearchFilters interface
 const StorefrontQuery = z.object({
   page: z.coerce.number().int().min(1).default(1),
   per_page: z.coerce.number().int().min(1).max(200).default(100),
   sort: z.enum(['name', 'number', 'rarity', 'created_at']).default('name'),
   order: z.enum(['asc', 'desc']).default('asc'),
-  search: z.string().trim().max(200).optional(),
+  search: z.string().trim().max(200).optional(), // Searches: name, card_number, set name, treatment
   game_id: z.coerce.number().int().optional(),
   set_id: z.coerce.number().int().optional(),
+  treatment: z.string().trim().max(50).optional(), // Card treatment filter
+  finish: z.string().trim().max(50).optional(), // Card finish filter
   rarity: z.string().trim().max(50).optional(),
 });
 
@@ -61,20 +64,20 @@ function sortToSql(alias: string, sort: string, order: 'asc' | 'desc'): string {
  */
 router.get('/cards', async (req: Request, res: Response) => {
   const parsed = StorefrontQuery.safeParse(req.query);
-  
+
   if (!parsed.success) {
-    return res.status(400).json({ 
-      error: 'Invalid query parameters', 
-      details: parsed.error.flatten() 
+    return res.status(400).json({
+      error: 'Invalid query parameters',
+      details: parsed.error.flatten()
     });
   }
 
-  const { page, per_page, sort, order, search, game_id, set_id, rarity } = parsed.data;
+  const { page, per_page, sort, order, search, game_id, set_id, treatment, finish, rarity } = parsed.data;
 
   const where: string[] = [];
   const params: unknown[] = [];
 
-  // Build WHERE conditions
+  // Build WHERE conditions - STANDARDIZED
   if (typeof game_id === 'number') {
     params.push(game_id);
     where.push(`c.game_id = $${params.length}`);
@@ -85,20 +88,38 @@ router.get('/cards', async (req: Request, res: Response) => {
     where.push(`c.set_id = $${params.length}`);
   }
 
+  if (treatment) {
+    params.push(treatment.toUpperCase()); // Normalize to uppercase
+    where.push(`c.treatment = $${params.length}`);
+  }
+
+  if (finish) {
+    params.push(finish); // Card finish from cards table
+    where.push(`c.finish = $${params.length}`);
+  }
+
   if (rarity) {
     params.push(rarity);
     where.push(`c.rarity = $${params.length}`);
   }
 
+  // ENHANCED SEARCH: name, card_number, set name, and treatment
   if (search && search.length > 1) {
     params.push(`%${search}%`);
-    where.push(`(c.name ILIKE $${params.length} OR c.card_number ILIKE $${params.length})`);
+    const searchParam = `$${params.length}`;
+    where.push(`(
+      c.name ILIKE ${searchParam} OR
+      c.card_number ILIKE ${searchParam} OR
+      cs.name ILIKE ${searchParam} OR
+      c.treatment ILIKE ${searchParam}
+    )`);
   }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
   const orderByOut = sortToSql('c', sort, order);
   const offset = (page - 1) * per_page;
 
+  // FIXED: Join card_sets in subquery for search functionality
   const sql = `
     SELECT
       c.id,
@@ -107,6 +128,8 @@ router.get('/cards', async (req: Request, res: Response) => {
       cs.name AS set_name,
       c.rarity,
       c.image_url,
+      c.treatment,
+      c.finish,
       g.name AS game_name,
       COALESCE(inv.total_stock, 0)::int AS total_stock,
       COALESCE(inv.variation_count, 0)::int AS variation_count,
@@ -114,6 +137,7 @@ router.get('/cards', async (req: Request, res: Response) => {
     FROM (
       SELECT c.*
       FROM cards c
+      JOIN card_sets cs ON cs.id = c.set_id
       ${whereSql}
       ${orderByOut}
       LIMIT $${params.push(per_page)} OFFSET $${params.push(offset)}
