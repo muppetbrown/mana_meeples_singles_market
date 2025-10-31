@@ -27,7 +27,6 @@ import {
   groupCardsForBrowse
 } from '@/lib/utils';
 import { CardSearchBar } from '@/shared/search';
-import { VariationFilter } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
 import { EmptyState } from '@/shared/ui';
@@ -109,10 +108,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const selectedGame = searchParams.get('game') || 'all';
   const selectedSet = searchParams.get('set') || 'all';
   const selectedTreatment = searchParams.get('treatment') || 'all';
-  const selectedBorderColor = searchParams.get('borderColor') || 'all';
   const selectedFinish = searchParams.get('finish') || 'all';
-  const selectedPromoType = searchParams.get('promoType') || 'all';
-  const selectedFrameEffect = searchParams.get('frameEffect') || 'all';
   const isInventoryMode = mode === 'inventory';
 
   // --------------------------------------------------------------------------
@@ -185,9 +181,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     updateParam('treatment', treatment);
   }, [updateParam]);
 
-  // Variation filter change handler for DynamicVariationFilter
-  const handleVariationFilterChange = useCallback((filterName: string, value: string) => {
-    updateParam(filterName, value);
+  const handleFinishChange = useCallback((finish: string) => {
+    updateParam('finish', finish);
   }, [updateParam]);
 
   // --------------------------------------------------------------------------
@@ -221,20 +216,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         params.treatment = selectedTreatment;
       }
 
-      if (selectedBorderColor && selectedBorderColor !== 'all') {
-        params.border_color = selectedBorderColor;
-      }
-
       if (selectedFinish && selectedFinish !== 'all') {
         params.finish = selectedFinish;
-      }
-
-      if (selectedPromoType && selectedPromoType !== 'all') {
-        params.promo_type = selectedPromoType;
-      }
-
-      if (selectedFrameEffect && selectedFrameEffect !== 'all') {
-        params.frame_effect = selectedFrameEffect;
       }
 
       // Add inventory filter for inventory mode
@@ -253,10 +236,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     selectedSet,
     searchTerm,
     selectedTreatment,
-    selectedBorderColor,
     selectedFinish,
-    selectedPromoType,
-    selectedFrameEffect,
     isInventoryMode,
     filterOptions
   ]);
@@ -282,10 +262,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     selectedSet,
     searchTerm,
     selectedTreatment,
-    selectedBorderColor,
     selectedFinish,
-    selectedPromoType,
-    selectedFrameEffect,
     filtersLoading,
     filterOptions,
     fetchCardCount
@@ -325,18 +302,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         params.treatment = selectedTreatment;
       }
 
-      // Add additional variation filters
-      if (selectedBorderColor && selectedBorderColor !== 'all') {
-        params.border_color = selectedBorderColor;
-      }
+      // Add finish filter
       if (selectedFinish && selectedFinish !== 'all') {
         params.finish = selectedFinish;
-      }
-      if (selectedPromoType && selectedPromoType !== 'all') {
-        params.promo_type = selectedPromoType;
-      }
-      if (selectedFrameEffect && selectedFrameEffect !== 'all') {
-        params.frame_effect = selectedFrameEffect;
       }
 
       const data = await api.get<{ cards?: Card[] }>(ENDPOINTS.CARDS.LIST, params);
@@ -351,10 +319,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     selectedSet,
     searchTerm,
     selectedTreatment,
-    selectedBorderColor,
     selectedFinish,
-    selectedPromoType,
-    selectedFrameEffect,
     filterOptions
   ]);
 
@@ -402,8 +367,17 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         value: treatment,
         label: treatment.replace(/_/g, ' ')
       }))
+    },
+    finish: {
+      value: selectedFinish,
+      onChange: handleFinishChange,
+      label: 'Finish',
+      options: filterOptions.foilTypes?.map(finish => ({
+        value: finish,
+        label: finish.charAt(0).toUpperCase() + finish.slice(1)
+      })) || []
     }
-  }), [selectedTreatment, handleTreatmentChange, filterOptions.treatments]);
+  }), [selectedTreatment, handleTreatmentChange, selectedFinish, handleFinishChange, filterOptions.treatments, filterOptions.foilTypes]);
 
   // --------------------------------------------------------------------------
   // ACTIONS
@@ -659,44 +633,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         additionalFilters={additionalFilters}
         isAdminMode={true}
       />
-
-      {/* Advanced Variation Filters */}
-      {(selectedGame !== 'all' || selectedSet !== 'all') && (
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-slate-700 mb-3">Advanced Filters</h3>
-          <VariationFilter
-            selectedGame={(() => {
-              if (selectedGame === 'all') return undefined;
-              // Try to parse as number first, otherwise find by name
-              const gameIdNum = Number(selectedGame);
-              if (!isNaN(gameIdNum)) return gameIdNum;
-              const game = filterOptions.games.find(g => g.name === selectedGame);
-              return game?.id;
-            })()}
-            selectedSet={(() => {
-              if (selectedSet === 'all') return undefined;
-              // Try to parse as number first, otherwise find by name
-              const setIdNum = Number(selectedSet);
-              if (!isNaN(setIdNum)) return setIdNum;
-              const set = filterOptions.sets.find(s => s.name === selectedSet);
-              return set?.id;
-            })()}
-            filters={(() => {
-              const raw = {
-                treatment: selectedTreatment !== 'all' ? selectedTreatment : undefined,
-                borderColor: selectedBorderColor !== 'all' ? selectedBorderColor : undefined,
-                finish: selectedFinish !== 'all' ? selectedFinish : undefined,
-                promoType: selectedPromoType !== 'all' ? selectedPromoType : undefined,
-                frameEffect: selectedFrameEffect !== 'all' ? selectedFrameEffect : undefined,
-              } as const;
-              return Object.fromEntries(
-                Object.entries(raw).filter(([,v]) => v !== undefined)
-              ) as { treatment?: string; borderColor?: string; finish?: string; promoType?: string; frameEffect?: string };
-            })()}
-            onFilterChange={handleVariationFilterChange}
-          />
-        </div>
-      )}
 
       {/* Cards Display */}
       {loading || filtersLoading ? (

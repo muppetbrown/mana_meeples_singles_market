@@ -4,7 +4,6 @@ import { z } from "zod";
 
 import authRoutes from "./auth.js";
 import cardsRoutes from "./cards.js";
-import variationsRoutes from "./variations.js";
 import ordersRoutes from "./orders.js";
 import inventoryRoutes from "./inventory.js";
 import additionalRoutes from "./additional.js";
@@ -15,7 +14,6 @@ const router = express.Router();
 
 // --- Route grouping ---
 router.use("/auth", authRoutes);
-router.use("/variations", variationsRoutes);
 router.use("/cards", cardsRoutes); // exposes /cards/cards, /cards/count, /cards/filters
 router.use('/storefront', storefrontRouter);
 router.use("/", ordersRoutes);
