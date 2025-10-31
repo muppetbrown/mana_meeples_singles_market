@@ -42,6 +42,7 @@ export type CardSearchBarProps = {
   minSearchLength?: number;
   placeholder?: string;
   isAdminMode?: boolean; // NEW: enables admin-specific layout
+  onClearFilters?: () => void; // NEW: callback for clearing all filters
 };
 
 const CardSearchBar: React.FC<CardSearchBarProps> = ({
@@ -59,7 +60,8 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
   debounceMs = FILTER_CONFIG.DEBOUNCE_DELAY,
   minSearchLength = FILTER_CONFIG.MIN_SEARCH_LENGTH,
   placeholder = 'Search by name, number, or set...',
-  isAdminMode = false
+  isAdminMode = false,
+  onClearFilters
 }) => {
   const [searchSuggestions, setSearchSuggestions] = useState<Suggestion[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -269,76 +271,92 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
           )}
         </div>
 
-        {/* Filter Dropdowns - Horizontal Row */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Game Filter */}
-          <div className="flex flex-col">
-            <label htmlFor="filter-game" className="text-sm font-medium text-slate-700 mb-1">
-              Game
-            </label>
-            <select
-              id="filter-game"
-              value={selectedGame}
-              onChange={(e) => onGameChange(e.target.value)}
-              className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-              aria-label="Filter by game"
-            >
-              <option value="all">All Games</option>
-              {games.map((game) => (
-                <option key={game.id} value={game.name}>
-                  {game.name}
-                  {game.card_count && game.card_count > 0 ? ` (${game.card_count})` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Set Filter */}
-          <div className="flex flex-col">
-            <label htmlFor="filter-set" className="text-sm font-medium text-slate-700 mb-1">
-              Set
-            </label>
-            <select
-              id="filter-set"
-              value={selectedSet}
-              onChange={(e) => onSetChange(e.target.value)}
-              disabled={selectedGame === 'all'}
-              className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed bg-white"
-              aria-label="Filter by set"
-            >
-              <option value="all">{selectedGame === 'all' ? 'Select a game first' : 'All Sets'}</option>
-              {sets.map((set) => (
-                <option key={set.id} value={set.name}>
-                  {set.name}
-                  {set.card_count && set.card_count > 0 ? ` (${set.card_count})` : ''}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Additional Filters */}
-          {Object.entries(additionalFilters).map(([key, filter]) => (
-            <div key={key} className="flex flex-col">
-              <label className="text-sm font-medium text-slate-700 mb-1" htmlFor={`filter-${key}`}>
-                {filter.label ?? key}
+        {/* Filter Dropdowns - Horizontal Row with Clear Button */}
+        <div className="flex flex-col gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Game Filter */}
+            <div className="flex flex-col">
+              <label htmlFor="filter-game" className="text-sm font-medium text-slate-700 mb-1">
+                Game
               </label>
               <select
-                id={`filter-${key}`}
-                value={filter.value}
-                onChange={(e) => filter.onChange(e.target.value)}
-                disabled={filter.disabled}
-                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed bg-white"
+                id="filter-game"
+                value={selectedGame}
+                onChange={(e) => onGameChange(e.target.value)}
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+                aria-label="Filter by game"
               >
-                <option value="all">All {filter.label ?? key}</option>
-                {/* FIX: Add key prop here */}
-                {filter.options?.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
+                <option value="all">All Games</option>
+                {games.map((game) => (
+                  <option key={game.id} value={game.name}>
+                    {game.name}
+                    {game.card_count && game.card_count > 0 ? ` (${game.card_count})` : ''}
                   </option>
                 ))}
               </select>
             </div>
-          ))}
+
+            {/* Set Filter */}
+            <div className="flex flex-col">
+              <label htmlFor="filter-set" className="text-sm font-medium text-slate-700 mb-1">
+                Set
+              </label>
+              <select
+                id="filter-set"
+                value={selectedSet}
+                onChange={(e) => onSetChange(e.target.value)}
+                disabled={selectedGame === 'all'}
+                className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed bg-white"
+                aria-label="Filter by set"
+              >
+                <option value="all">{selectedGame === 'all' ? 'Select a game first' : 'All Sets'}</option>
+                {sets.map((set) => (
+                  <option key={set.id} value={set.name}>
+                    {set.name}
+                    {set.card_count && set.card_count > 0 ? ` (${set.card_count})` : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Additional Filters */}
+            {Object.entries(additionalFilters).map(([key, filter]) => (
+              <div key={key} className="flex flex-col">
+                <label className="text-sm font-medium text-slate-700 mb-1" htmlFor={`filter-${key}`}>
+                  {filter.label ?? key}
+                </label>
+                <select
+                  id={`filter-${key}`}
+                  value={filter.value}
+                  onChange={(e) => filter.onChange(e.target.value)}
+                  disabled={filter.disabled}
+                  className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed bg-white"
+                >
+                  <option value="all">All {filter.label ?? key}</option>
+                  {/* FIX: Add key prop here */}
+                  {filter.options?.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ))}
+          </div>
+
+          {/* Clear Filters Button */}
+          {onClearFilters && (
+            <div className="flex justify-end">
+              <button
+                onClick={onClearFilters}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm border border-slate-300 rounded-lg bg-white text-slate-700 hover:bg-slate-50 transition-colors"
+                aria-label="Clear all filters"
+              >
+                <X className="w-4 h-4" />
+                Clear Filters
+              </button>
+            </div>
+          )}
         </div>
       </div>
     );

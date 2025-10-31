@@ -185,6 +185,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     updateParam('finish', finish);
   }, [updateParam]);
 
+  const handleClearFilters = useCallback(() => {
+    setSearchParams(new URLSearchParams());
+  }, [setSearchParams]);
+
   // --------------------------------------------------------------------------
   // DATA FETCHING
   // --------------------------------------------------------------------------
@@ -632,6 +636,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         onSetChange={handleSetChange}
         additionalFilters={additionalFilters}
         isAdminMode={true}
+        onClearFilters={handleClearFilters}
       />
 
       {/* Cards Display */}
@@ -679,7 +684,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       )}
 
       {/* Add to Inventory Modal */}
-      {showAddModal && addModalCard && selectedVariation && (
+      {showAddModal && addModalCard && (
         <AddToInventoryModal
           card={addModalCard}
           selectedVariation={selectedVariation}
