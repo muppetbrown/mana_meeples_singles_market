@@ -500,12 +500,17 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
     const finish = variation.finish?.toLowerCase() || 'nonfoil';
 
+    // Check for nonfoil first (before checking for 'foil' substring)
+    if (finish.includes('non') || finish === 'nonfoil') {
+      return variation.base_price ?? null;
+    }
+
     // For foil/etched finishes, use foil_price
     if (finish.includes('foil') || finish.includes('etched')) {
       return variation.foil_price ?? null;
     }
 
-    // For nonfoil, use base_price
+    // Default to base_price for unknown finishes
     return variation.base_price ?? null;
   }, []);
 
