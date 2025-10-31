@@ -57,6 +57,7 @@ type AddFormData = {
   price: string;
   stock_quantity: number;
   language: string;
+  useAutomatedPrice: boolean; // Whether to use the automated price from price source
 };
 
 interface UnifiedCardsTabProps { 
@@ -98,6 +99,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     price: '',
     stock_quantity: 1,
     language: 'English',
+    useAutomatedPrice: false,
   });
   const [saving, setSaving] = useState(false);
 
@@ -140,6 +142,23 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
     loadFilters();
   }, []);
+
+  // Auto-populate price when variation changes
+  useEffect(() => {
+    if (selectedVariation && showAddModal) {
+      const automatedPrice = getAutomatedPrice(selectedVariation);
+      const hasAutomatedPrice = automatedPrice !== null && selectedVariation.price_source;
+
+      // Only update if useAutomatedPrice is true or if it's the first time setting up
+      if (addFormData.useAutomatedPrice || !addFormData.price) {
+        setAddFormData(prev => ({
+          ...prev,
+          price: hasAutomatedPrice ? automatedPrice.toString() : '',
+          useAutomatedPrice: hasAutomatedPrice,
+        }));
+      }
+    }
+  }, [selectedVariation, showAddModal]); // Don't include addFormData to avoid infinite loop
 
   // --------------------------------------------------------------------------
   // URL STATE HANDLERS
@@ -475,25 +494,47 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     }))
   }), []);
 
+  // Helper function to get automated price for a variation
+  const getAutomatedPrice = useCallback((variation?: BrowseVariation): number | null => {
+    if (!variation) return null;
+
+    const finish = variation.finish?.toLowerCase() || 'nonfoil';
+
+    // For foil/etched finishes, use foil_price
+    if (finish.includes('foil') || finish.includes('etched')) {
+      return variation.foil_price ?? null;
+    }
+
+    // For nonfoil, use base_price
+    return variation.base_price ?? null;
+  }, []);
+
   const openAddModal = useCallback((card: BrowseBaseCard) => {
     setAddModalCard(card);
 
     // Auto-select first variation if only one exists
+    let firstVariation: BrowseVariation | undefined;
     if (card.variations && card.variations.length === 1) {
-      setSelectedVariation(card.variations[0]);
+      firstVariation = card.variations[0];
+      setSelectedVariation(firstVariation);
     } else {
       setSelectedVariation(undefined);  // User must select
     }
 
+    // Check if there's an automated price available
+    const automatedPrice = getAutomatedPrice(firstVariation);
+    const hasAutomatedPrice = automatedPrice !== null && firstVariation?.price_source;
+
     setAddFormData({
       quality: 'Near Mint',
       // foil_type removed - finish is already on the card variation
-      price: '',
+      price: hasAutomatedPrice ? automatedPrice.toString() : '',
       stock_quantity: 1,
       language: 'English',
+      useAutomatedPrice: hasAutomatedPrice,
     });
     setShowAddModal(true);
-  }, []);
+  }, [getAutomatedPrice]);
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
@@ -505,6 +546,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       price: '',
       stock_quantity: 1,
       language: 'English',
+      useAutomatedPrice: false,
     });
   }, []);
 

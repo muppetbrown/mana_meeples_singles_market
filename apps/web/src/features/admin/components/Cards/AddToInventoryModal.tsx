@@ -22,6 +22,7 @@ type AddFormData = {
   price: string;
   stock_quantity: number;
   language: string;
+  useAutomatedPrice: boolean; // Whether to use the automated price from price source
 };
 
 interface AddToInventoryModalProps {
@@ -84,6 +85,23 @@ const getFinishBadgeStyle = (finish?: string | null): string => {
   return 'bg-slate-200 text-slate-700';
 };
 
+/**
+ * Get the appropriate automated price for a variation based on its finish
+ */
+const getAutomatedPrice = (variation?: BrowseVariation): number | null => {
+  if (!variation) return null;
+
+  const finish = variation.finish?.toLowerCase() || 'nonfoil';
+
+  // For foil/etched finishes, use foil_price
+  if (finish.includes('foil') || finish.includes('etched')) {
+    return variation.foil_price ?? null;
+  }
+
+  // For nonfoil, use base_price
+  return variation.base_price ?? null;
+};
+
 // ---------- Component ----------
 const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
   card,
@@ -101,11 +119,25 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
   };
 
   // Handle form field changes
-  const handleChange = (field: keyof AddFormData, value: string | number) => {
-    onFormChange({
+  const handleChange = (field: keyof AddFormData, value: string | number | boolean) => {
+    const newFormData = {
       ...formData,
       [field]: value,
-    });
+    };
+
+    // If toggling useAutomatedPrice, update the price accordingly
+    if (field === 'useAutomatedPrice') {
+      if (value === true) {
+        // Populate with automated price
+        const automatedPrice = getAutomatedPrice(selectedVariation);
+        newFormData.price = automatedPrice !== null ? automatedPrice.toString() : '';
+      } else {
+        // Clear the price for manual entry
+        newFormData.price = '';
+      }
+    }
+
+    onFormChange(newFormData);
   };
 
   // Handle form submission
@@ -310,6 +342,29 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                   <DollarSign className="w-4 h-4 inline mr-1" />
                   Price (NZD) <span className="text-red-500">*</span>
                 </label>
+
+                {/* Automated price checkbox */}
+                {selectedVariation && (selectedVariation.base_price !== null || selectedVariation.foil_price !== null) && selectedVariation.price_source && (
+                  <div className="mb-2">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={formData.useAutomatedPrice}
+                        onChange={(e) => handleChange('useAutomatedPrice', e.target.checked)}
+                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-slate-700">
+                        Use {formatVariationLabel(selectedVariation.price_source)} price
+                        {getAutomatedPrice(selectedVariation) !== null && (
+                          <span className="font-semibold ml-1">
+                            (${getAutomatedPrice(selectedVariation)?.toFixed(2)})
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  </div>
+                )}
+
                 <div className="flex items-center gap-2">
                   <input
                     id="price"
@@ -318,25 +373,29 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                     min="0"
                     value={formData.price}
                     onChange={(e) => handleChange('price', e.target.value)}
-                    className="flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    disabled={formData.useAutomatedPrice}
+                    className={`flex-1 px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                      formData.useAutomatedPrice ? 'bg-slate-100 cursor-not-allowed' : ''
+                    }`}
                     placeholder="0.00"
                     required
                   />
                   {/* Price refresh button - Only works for MTG cards with Scryfall data */}
-                  {selectedVariation && card.game_name?.toLowerCase().includes('magic') && (
-                    <SingleCardPriceRefresh 
+                  {selectedVariation && card.game_name?.toLowerCase().includes('magic') && selectedVariation.scryfall_id && (
+                    <SingleCardPriceRefresh
                       card={{
                         id: selectedVariation.id,
                         name: card.name,
                         set_name: card.set_name,
-                        set_id: 0,
-                        scryfall_id: null,
+                        set_id: card.set_id || 0,
+                        scryfall_id: selectedVariation.scryfall_id,
                         finish: selectedVariation.finish || 'nonfoil',
                         ...(selectedVariation.price !== null && selectedVariation.price !== undefined && { price: selectedVariation.price }),
                       }}
                       onRefreshComplete={(success, count) => {
                         if (success) {
-                          alert(`Successfully refreshed prices for ${count} variation(s). Please manually update the price field.`);
+                          // After refresh, re-enable automated price checkbox
+                          alert(`Successfully refreshed prices for ${count} variation(s). Reload the page to see updated prices.`);
                         }
                       }}
                       variant="icon"
@@ -346,6 +405,11 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                 {selectedVariation && !card.game_name?.toLowerCase().includes('magic') && (
                   <p className="text-xs text-slate-500 mt-1">
                     Price refresh only available for Magic: The Gathering cards
+                  </p>
+                )}
+                {selectedVariation && card.game_name?.toLowerCase().includes('magic') && !selectedVariation.scryfall_id && (
+                  <p className="text-xs text-slate-500 mt-1">
+                    This card has no Scryfall ID and cannot be refreshed
                   </p>
                 )}
               </div>
