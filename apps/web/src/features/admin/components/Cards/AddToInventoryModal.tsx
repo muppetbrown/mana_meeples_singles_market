@@ -144,6 +144,7 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                 height={128}
                 className="w-full h-full object-cover"
                 placeholder="blur"
+                priority={true}
               />
               {/* Icon overlay on card image */}
               <div className={`absolute top-1 right-1 p-1.5 rounded-md ${isSpecialCard || isFoilCard ? 'bg-gradient-to-br from-amber-100 to-yellow-100' : 'bg-blue-100'}`}>
