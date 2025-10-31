@@ -26,19 +26,25 @@ export interface Card {
   set_id?: number;
   rarity?: string;
   image_url?: string;
-  
+  scryfall_id?: string | null;
+
   // NEW: Variation metadata directly on card (from cards table)
   treatment?: string;        // e.g., "STANDARD", "BORDERLESS", "EXTENDED_ART"
   border_color?: string;     // e.g., "black", "white", "silver", "gold"
   finish?: string;           // e.g., "nonfoil", "foil", "etched"
   frame_effect?: string;     // e.g., "legendary", "showcase", "extended"
   promo_type?: string;       // e.g., "prerelease", "stamped", "datestamped"
-  
+
   // Inventory aggregates (from card_inventory LEFT JOIN)
   total_stock?: number;      // Total stock across all inventory entries
   variation_count?: number;  // Count of inventory entries (quality/foil/language combos)
   has_inventory?: boolean;   // Whether any inventory exists for this card
-  
+
+  // Pricing information (from card_pricing LEFT JOIN)
+  base_price?: number | null;    // Price for nonfoil version
+  foil_price?: number | null;    // Price for foil version
+  price_source?: string | null;  // Source of price (e.g., 'scryfall', 'manual')
+
   // OPTIONAL: Only present in storefront context
   // (Admin views don't need this - they show raw card data)
   variations?: CardVariation[];
@@ -155,6 +161,7 @@ export interface CardSearchResult {
 export type BrowseVariation = {
   id: number;           // card row id
   sku: string;
+  scryfall_id?: string | null;
   treatment: string;
   finish: string;
   border_color?: string | null;
@@ -163,6 +170,9 @@ export type BrowseVariation = {
   image?: string | null;
   in_stock: number;     // aggregated across qualities/languages for this card row
   price?: number | null;
+  base_price?: number | null;    // Price for nonfoil version
+  foil_price?: number | null;    // Price for foil version
+  price_source?: string | null;  // Source of price (e.g., 'scryfall', 'manual')
 };
 
 export type BrowseBaseCard = Omit<Card, 'variations'> & {

@@ -175,6 +175,7 @@ router.get("/cards", async (req: Request, res: Response) => {
       cs.name AS set_name,
       c.rarity,
       c.image_url,
+      c.scryfall_id,
 
       -- NEW: Return variation metadata directly from cards table
       c.treatment,
@@ -190,13 +191,19 @@ router.get("/cards", async (req: Request, res: Response) => {
       -- Stock aggregates from card_inventory (but NO variations array)
       COALESCE(inv.total_stock, 0)::int AS total_stock,
       COALESCE(inv.variation_count, 0)::int AS variation_count,
-      COALESCE(inv.has_inventory, false) AS has_inventory
+      COALESCE(inv.has_inventory, false) AS has_inventory,
+
+      -- Pricing information
+      cp.base_price,
+      cp.foil_price,
+      cp.price_source
     FROM card_identities ci
     JOIN cards c ON c.name = ci.name
       AND c.card_number = ci.card_number
       AND c.set_id = ci.set_id
     JOIN games g ON g.id = c.game_id
     JOIN card_sets cs ON cs.id = c.set_id
+    LEFT JOIN card_pricing cp ON cp.card_id = c.id
     LEFT JOIN LATERAL (
       SELECT
         COUNT(cinv.id)::int AS variation_count,
