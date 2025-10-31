@@ -15,11 +15,11 @@ const router = express.Router();
 // --- Route grouping ---
 router.use("/auth", authRoutes);
 router.use("/cards", cardsRoutes); // exposes /cards/cards, /cards/count, /cards/filters
-router.use('/storefront', storefrontRouter);
+router.use("/storefront", storefrontRouter);
 router.use("/", ordersRoutes);
 router.use("/", inventoryRoutes); // exposes /admin/inventory
 router.use("/", additionalRoutes);
-router.use('/admin/pricing', pricingRouter);
+router.use("/", pricingRouter);
 
 /**
  * Augment Express Request to hold validated values without heavy typing.
