@@ -62,13 +62,32 @@ export const PriceManagementHeaderButtons: React.FC<PriceManagementHeaderButtons
   };
 
   /**
-   * Fetch all cards from backend
+   * Fetch all cards from backend with pagination support
    */
   const fetchAllCards = async (): Promise<ScryfallCard[]> => {
     try {
-      const response = await api.get<{ cards: any[] }>(ENDPOINTS.CARDS.LIST, { limit: 10000 });
+      const allCards: any[] = [];
+      let page = 1;
+      const perPage = 1000; // Maximum allowed by backend
+      let hasMore = true;
 
-      return (response.cards || [])
+      // Fetch cards in pages until we get all of them
+      while (hasMore) {
+        const response = await api.get<{ cards: any[] }>(ENDPOINTS.CARDS.LIST, {
+          page,
+          per_page: perPage
+        });
+
+        if (response.cards && response.cards.length > 0) {
+          allCards.push(...response.cards);
+          hasMore = response.cards.length === perPage; // If we got less than perPage, we're done
+          page++;
+        } else {
+          hasMore = false;
+        }
+      }
+
+      return allCards
         .filter(card => card.scryfall_id !== null)
         .map(card => ({
           card_id: card.id,
