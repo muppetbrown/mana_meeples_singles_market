@@ -110,14 +110,14 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
         </td>
 
         {/* Variations */}
-        <td className="px-4 py-4">
+        <td className="px-4 py-4 max-w-xs">
           {badges && badges.length > 0 && (
             <div className="flex flex-wrap gap-1">
               {badges.map((badge, i) => (
                 <span
                   key={i}
                   className={clsx(
-                    'inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium whitespace-nowrap',
+                    'inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium',
                     badge.variant === 'accent' && 'bg-blue-50 text-blue-700 border-blue-200',
                     badge.variant === 'warning' && 'bg-amber-50 text-amber-700 border-amber-200',
                     (!badge.variant || badge.variant === 'neutral') && 'bg-slate-50 text-slate-600 border-slate-200'
