@@ -231,8 +231,8 @@ const CardList: React.FC<CardListProps> = ({
   }
 
   return (
-    <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-      <div className="overflow-x-auto w-full">
+    <div className="bg-white border border-slate-200 rounded-lg overflow-x-auto">
+      <div className="w-full">
         <table className="min-w-full w-max table-auto border-collapse">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
