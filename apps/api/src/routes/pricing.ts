@@ -175,15 +175,27 @@ async function updateInventoryPricing(
  */
 router.post('/admin/pricing/initialize', adminAuthJWT, async (req: Request, res: Response) => {
   const parsed = UpdatePricesSchema.safeParse(req.body);
-  
+
   if (!parsed.success) {
-    return res.status(400).json({ 
-      error: 'Invalid request body', 
-      details: parsed.error.flatten() 
+    console.error('❌ Initialize prices validation failed:', parsed.error.flatten());
+    return res.status(400).json({
+      error: 'Invalid request body',
+      details: parsed.error.flatten()
     });
   }
 
   const { prices, price_source = 'scryfall' } = parsed.data;
+
+  console.log(`📊 Initialize Prices: Processing ${prices.length} price updates from ${price_source}`);
+
+  // Validate we have prices to process
+  if (prices.length === 0) {
+    console.warn('⚠️  Initialize prices called with empty prices array');
+    return res.status(400).json({
+      error: 'No prices provided',
+      message: 'The prices array cannot be empty'
+    });
+  }
 
   const result: PriceUpdateResult = {
     total: prices.length,
@@ -200,6 +212,13 @@ router.post('/admin/pricing/initialize', adminAuthJWT, async (req: Request, res:
   for (const priceData of prices) {
     try {
       const { card_id, finish, usd, usd_foil } = priceData;
+
+      // Validate that we have at least one price
+      if (usd === null && usd_foil === null) {
+        console.warn(`⚠️  Skipping card_id ${card_id}: No prices available (usd and usd_foil are both null)`);
+        result.skipped++;
+        continue;
+      }
 
       // Upsert card_pricing (will create if doesn't exist)
       const pricingResult = await upsertCardPricing(
@@ -221,10 +240,12 @@ router.post('/admin/pricing/initialize', adminAuthJWT, async (req: Request, res:
       }
 
     } catch (error) {
-      console.error(`Failed to initialize price for card_id ${priceData.card_id}:`, error);
+      console.error(`❌ Failed to initialize price for card_id ${priceData.card_id}:`, error);
       result.failed++;
     }
   }
+
+  console.log(`✅ Initialize Prices complete: ${result.updated} updated, ${result.skipped} skipped, ${result.failed} failed`);
 
   return res.json(result);
 });
@@ -245,15 +266,27 @@ router.post('/admin/pricing/initialize', adminAuthJWT, async (req: Request, res:
  */
 router.post('/admin/pricing/refresh-inventory', adminAuthJWT, async (req: Request, res: Response) => {
   const parsed = UpdatePricesSchema.safeParse(req.body);
-  
+
   if (!parsed.success) {
-    return res.status(400).json({ 
-      error: 'Invalid request body', 
-      details: parsed.error.flatten() 
+    console.error('❌ Refresh inventory validation failed:', parsed.error.flatten());
+    return res.status(400).json({
+      error: 'Invalid request body',
+      details: parsed.error.flatten()
     });
   }
 
   const { prices, price_source = 'scryfall' } = parsed.data;
+
+  console.log(`📊 Refresh Inventory: Processing ${prices.length} price updates from ${price_source}`);
+
+  // Validate we have prices to process
+  if (prices.length === 0) {
+    console.warn('⚠️  Refresh inventory called with empty prices array');
+    return res.status(400).json({
+      error: 'No prices provided',
+      message: 'The prices array cannot be empty'
+    });
+  }
 
   const result: PriceUpdateResult = {
     total: prices.length,
@@ -270,9 +303,16 @@ router.post('/admin/pricing/refresh-inventory', adminAuthJWT, async (req: Reques
   for (const priceData of prices) {
     try {
       const { card_id, finish, usd, usd_foil } = priceData;
-      
+
       // Determine the price to use for inventory
       const inventoryPrice = finish === 'foil' ? usd_foil : usd;
+
+      // Validate that we have a price for this finish
+      if (inventoryPrice === null) {
+        console.warn(`⚠️  Skipping card_id ${card_id} (${finish}): No price available for this finish`);
+        result.skipped++;
+        continue;
+      }
 
       // Update card_pricing table
       const pricingResult = await upsertCardPricing(
@@ -309,10 +349,12 @@ router.post('/admin/pricing/refresh-inventory', adminAuthJWT, async (req: Reques
       }
 
     } catch (error) {
-      console.error(`Failed to refresh price for card_id ${priceData.card_id}:`, error);
+      console.error(`❌ Failed to refresh price for card_id ${priceData.card_id}:`, error);
       result.failed++;
     }
   }
+
+  console.log(`✅ Refresh Inventory complete: ${result.updated} updated, ${result.skipped} skipped, ${result.failed} failed`);
 
   return res.json(result);
 });
@@ -414,8 +456,9 @@ router.post('/admin/pricing/refresh-card', adminAuthJWT, async (req: Request, re
  */
 router.get('/admin/pricing/cards-without-pricing', adminAuthJWT, async (req: Request, res: Response) => {
   try {
+    console.log('📋 Fetching cards without pricing...');
     const cards = await db.query(`
-      SELECT 
+      SELECT
         c.id as card_id,
         c.scryfall_id,
         c.name,
@@ -430,9 +473,10 @@ router.get('/admin/pricing/cards-without-pricing', adminAuthJWT, async (req: Req
       ORDER BY c.name, c.finish
     `);
 
+    console.log(`✅ Found ${cards.length} cards without pricing`);
     return res.json({ cards, count: cards.length });
   } catch (error) {
-    console.error('Failed to fetch cards without pricing:', error);
+    console.error('❌ Failed to fetch cards without pricing:', error);
     return res.status(500).json({ error: 'Failed to fetch cards' });
   }
 });
@@ -445,6 +489,7 @@ router.get('/admin/pricing/cards-without-pricing', adminAuthJWT, async (req: Req
  */
 router.get('/admin/pricing/inventory-cards', adminAuthJWT, async (req: Request, res: Response) => {
   try {
+    console.log('📋 Fetching inventory cards...');
     const cards = await db.query(`
       SELECT DISTINCT
         c.id as card_id,
@@ -463,9 +508,10 @@ router.get('/admin/pricing/inventory-cards', adminAuthJWT, async (req: Request, 
       ORDER BY c.name, c.finish
     `);
 
+    console.log(`✅ Found ${cards.length} inventory cards`);
     return res.json({ cards, count: cards.length });
   } catch (error) {
-    console.error('Failed to fetch inventory cards:', error);
+    console.error('❌ Failed to fetch inventory cards:', error);
     return res.status(500).json({ error: 'Failed to fetch inventory cards' });
   }
 });
