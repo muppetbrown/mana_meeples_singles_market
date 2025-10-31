@@ -13,6 +13,7 @@ import React from 'react';
 import { X, Package, DollarSign, Sparkles } from 'lucide-react';
 import type { Card, BrowseBaseCard, BrowseVariation } from '@/types';
 import { SingleCardPriceRefresh } from './SingleCardPriceRefresh';
+import OptimizedImage from '@/shared/media/OptimizedImage';
 
 // ---------- Types ----------
 type AddFormData = {
@@ -115,7 +116,9 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
 
   // Determine if selected variation is special/premium based on treatment or finish
   const isSpecialCard = selectedVariation?.treatment && selectedVariation.treatment !== 'STANDARD' && selectedVariation.treatment !== 'standard';
-  const isFoilCard = selectedVariation?.finish && (selectedVariation.finish.toLowerCase().includes('foil') || selectedVariation.finish.toLowerCase().includes('etched'));
+  const isFoilCard = selectedVariation?.finish &&
+    selectedVariation.finish.toLowerCase() !== 'nonfoil' &&
+    (selectedVariation.finish.toLowerCase().includes('foil') || selectedVariation.finish.toLowerCase().includes('etched'));
 
   return (
     <div 
@@ -130,27 +133,53 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
         onClick={handleModalClick}
       >
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${isSpecialCard || isFoilCard ? 'bg-gradient-to-br from-amber-100 to-yellow-100' : 'bg-blue-100'}`}>
-              {isSpecialCard || isFoilCard ? (
-                <Sparkles className="w-5 h-5 text-amber-600" />
-              ) : (
-                <Package className="w-5 h-5 text-blue-600" />
-              )}
+        <div className="flex items-start justify-between p-6 border-b border-slate-200 gap-4">
+          {/* Left: Card Image */}
+          <div className="flex-shrink-0">
+            <div className="relative w-24 h-32 rounded-lg overflow-hidden border-2 border-slate-200 shadow-md">
+              <OptimizedImage
+                src={card.image_url || '/images/card-back-placeholder.svg'}
+                alt={card.name}
+                width={96}
+                height={128}
+                className="w-full h-full object-cover"
+                placeholder="blur"
+              />
+              {/* Icon overlay on card image */}
+              <div className={`absolute top-1 right-1 p-1.5 rounded-md ${isSpecialCard || isFoilCard ? 'bg-gradient-to-br from-amber-100 to-yellow-100' : 'bg-blue-100'}`}>
+                {isSpecialCard || isFoilCard ? (
+                  <Sparkles className="w-4 h-4 text-amber-600" />
+                ) : (
+                  <Package className="w-4 h-4 text-blue-600" />
+                )}
+              </div>
             </div>
-            <div>
-              <h2 id="modal-title" className="text-xl font-bold text-slate-900">
-                Add to Inventory
-              </h2>
-              <p className="text-sm text-slate-600 mt-1">
-                {card.name} • {card.set_name}
+          </div>
+
+          {/* Center: Card Info */}
+          <div className="flex-1 min-w-0">
+            <h2 id="modal-title" className="text-xl font-bold text-slate-900">
+              Add to Inventory
+            </h2>
+            <div className="mt-2 space-y-1">
+              <p className="text-base font-semibold text-slate-800">
+                {card.name}
+              </p>
+              {card.game_name && (
+                <p className="text-sm text-slate-600">
+                  <span className="font-medium">Game:</span> {card.game_name}
+                </p>
+              )}
+              <p className="text-sm text-slate-600">
+                <span className="font-medium">Set:</span> {card.set_name}
               </p>
             </div>
           </div>
+
+          {/* Right: Close Button */}
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
+            className="flex-shrink-0 p-2 hover:bg-slate-100 rounded-lg transition-colors"
             aria-label="Close modal"
           >
             <X className="w-5 h-5 text-slate-600" />
