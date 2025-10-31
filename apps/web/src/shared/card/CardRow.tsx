@@ -78,13 +78,13 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
           </button>
         </td>
 
-        {/* Game */}
-        <td className="px-4 py-4 text-sm text-slate-700">
+        {/* Game - Hidden on tablet and below */}
+        <td className="hidden lg:table-cell px-4 py-4 text-sm text-slate-700">
           {identity.gameName}
         </td>
 
-        {/* Set */}
-        <td className="px-4 py-4 text-sm text-slate-700">
+        {/* Set - Hidden on tablet and below */}
+        <td className="hidden lg:table-cell px-4 py-4 text-sm text-slate-700">
           {identity.setName}
         </td>
 
@@ -93,15 +93,19 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
           <div className="text-sm font-medium text-slate-900">
             {identity.name}
           </div>
+          {/* Show Game and Set info on tablet/mobile as subtitle */}
+          <div className="lg:hidden text-xs text-slate-600 mt-1">
+            {identity.gameName} · {identity.setName}
+          </div>
         </td>
 
-        {/* Card Number */}
-        <td className="px-4 py-4 text-sm text-slate-600 whitespace-nowrap">
+        {/* Card Number - Hidden on tablet and below */}
+        <td className="hidden lg:table-cell px-4 py-4 text-sm text-slate-600 whitespace-nowrap">
           {identity.cardNumber || '—'}
         </td>
 
-        {/* Rarity */}
-        <td className="px-4 py-4 text-sm text-slate-600 whitespace-nowrap">
+        {/* Rarity - Hidden on small screens */}
+        <td className="hidden md:table-cell px-4 py-4 text-sm text-slate-600 whitespace-nowrap">
           {identity.rarity || '—'}
         </td>
 
