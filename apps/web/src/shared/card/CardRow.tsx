@@ -79,17 +79,17 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
         </td>
 
         {/* Game */}
-        <td className="px-4 py-4 text-sm text-slate-700 whitespace-nowrap">
+        <td className="px-4 py-4 text-sm text-slate-700">
           {identity.gameName}
         </td>
 
         {/* Set */}
-        <td className="px-4 py-4 text-sm text-slate-700 whitespace-nowrap">
+        <td className="px-4 py-4 text-sm text-slate-700">
           {identity.setName}
         </td>
 
         {/* Name */}
-        <td className="px-4 py-4 whitespace-nowrap">
+        <td className="px-4 py-4">
           <div className="text-sm font-medium text-slate-900">
             {identity.name}
           </div>
@@ -107,26 +107,24 @@ export function CardRow({ identity, rightNode, badges, onImageOpen, className, t
 
         {/* Variations */}
         <td className="px-4 py-4">
-          <div className="min-w-max">
-            {badges && badges.length > 0 && (
-              <div className="flex flex-wrap gap-1">
-                {badges.map((badge, i) => (
-                  <span
-                    key={i}
-                    className={clsx(
-                      'inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium whitespace-nowrap',
-                      badge.variant === 'accent' && 'bg-blue-50 text-blue-700 border-blue-200',
-                      badge.variant === 'warning' && 'bg-amber-50 text-amber-700 border-amber-200',
-                      (!badge.variant || badge.variant === 'neutral') && 'bg-slate-50 text-slate-600 border-slate-200'
-                    )}
-                    title={badge.title || `Variation: ${badge.label}`}
-                  >
-                    {badge.label}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+          {badges && badges.length > 0 && (
+            <div className="flex flex-wrap gap-1">
+              {badges.map((badge, i) => (
+                <span
+                  key={i}
+                  className={clsx(
+                    'inline-flex items-center px-2 py-1 rounded-md text-xs border font-medium whitespace-nowrap',
+                    badge.variant === 'accent' && 'bg-blue-50 text-blue-700 border-blue-200',
+                    badge.variant === 'warning' && 'bg-amber-50 text-amber-700 border-amber-200',
+                    (!badge.variant || badge.variant === 'neutral') && 'bg-slate-50 text-slate-600 border-slate-200'
+                  )}
+                  title={badge.title || `Variation: ${badge.label}`}
+                >
+                  {badge.label}
+                </span>
+              ))}
+            </div>
+          )}
         </td>
 
         {/* Action */}
