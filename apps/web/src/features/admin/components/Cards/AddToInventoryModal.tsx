@@ -93,12 +93,17 @@ const getAutomatedPrice = (variation?: BrowseVariation): number | null => {
 
   const finish = variation.finish?.toLowerCase() || 'nonfoil';
 
+  // Check for nonfoil first (before checking for 'foil' substring)
+  if (finish.includes('non') || finish === 'nonfoil') {
+    return variation.base_price ?? null;
+  }
+
   // For foil/etched finishes, use foil_price
   if (finish.includes('foil') || finish.includes('etched')) {
     return variation.foil_price ?? null;
   }
 
-  // For nonfoil, use base_price
+  // Default to base_price for unknown finishes
   return variation.base_price ?? null;
 };
 
@@ -221,8 +226,8 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Variation Selector - Only show if multiple variations exist */}
-          {card.variations && card.variations.length > 1 && (
+          {/* Variation Selector - Always show, but disable if only one variation */}
+          {card.variations && card.variations.length > 0 && (
             <div className="mb-4">
               <label htmlFor="variation" className="block text-sm font-medium text-slate-700 mb-2">
                 Variation <span className="text-red-500">*</span>
@@ -234,10 +239,13 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                   const variation = card.variations.find(v => v.id === Number(e.target.value));
                   if (variation) onVariationChange(variation);
                 }}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                disabled={card.variations.length === 1}
+                className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                  card.variations.length === 1 ? 'bg-slate-100 cursor-not-allowed' : ''
+                }`}
                 required
               >
-                <option value="">Select variation...</option>
+                {!selectedVariation && <option value="">Select variation...</option>}
                 {card.variations.map((variation) => (
                   <option key={variation.id} value={variation.id}>
                     {formatTreatment(variation.treatment)} {formatFinish(variation.finish)}
@@ -247,7 +255,9 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                 ))}
               </select>
               <p className="text-xs text-slate-500 mt-1">
-                Select which card variation to add to inventory
+                {card.variations.length === 1
+                  ? 'This card has only one variation'
+                  : 'Select which card variation to add to inventory'}
               </p>
             </div>
           )}
@@ -343,28 +353,6 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                   Price (NZD) <span className="text-red-500">*</span>
                 </label>
 
-                {/* Automated price checkbox */}
-                {selectedVariation && (selectedVariation.base_price !== null || selectedVariation.foil_price !== null) && selectedVariation.price_source && (
-                  <div className="mb-2">
-                    <label className="flex items-center gap-2 text-sm">
-                      <input
-                        type="checkbox"
-                        checked={formData.useAutomatedPrice}
-                        onChange={(e) => handleChange('useAutomatedPrice', e.target.checked)}
-                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span className="text-slate-700">
-                        Use {formatVariationLabel(selectedVariation.price_source)} price
-                        {getAutomatedPrice(selectedVariation) !== null && (
-                          <span className="font-semibold ml-1">
-                            (${getAutomatedPrice(selectedVariation)?.toFixed(2)})
-                          </span>
-                        )}
-                      </span>
-                    </label>
-                  </div>
-                )}
-
                 <div className="flex items-center gap-2">
                   <input
                     id="price"
@@ -402,6 +390,29 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                     />
                   )}
                 </div>
+
+                {/* Automated price checkbox - Below the price input */}
+                {selectedVariation && (selectedVariation.base_price !== null || selectedVariation.foil_price !== null) && selectedVariation.price_source && (
+                  <div className="mt-2">
+                    <label className="flex items-center gap-2 text-sm">
+                      <input
+                        type="checkbox"
+                        checked={formData.useAutomatedPrice}
+                        onChange={(e) => handleChange('useAutomatedPrice', e.target.checked)}
+                        className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-2 focus:ring-blue-500"
+                      />
+                      <span className="text-slate-700">
+                        Use {formatVariationLabel(selectedVariation.price_source)} price
+                        {getAutomatedPrice(selectedVariation) !== null && (
+                          <span className="font-semibold ml-1">
+                            (${getAutomatedPrice(selectedVariation)?.toFixed(2)})
+                          </span>
+                        )}
+                      </span>
+                    </label>
+                  </div>
+                )}
+
                 {selectedVariation && !card.game_name?.toLowerCase().includes('magic') && (
                   <p className="text-xs text-slate-500 mt-1">
                     Price refresh only available for Magic: The Gathering cards
