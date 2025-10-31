@@ -338,7 +338,8 @@ router.get('/filters', async (req: Request, res: Response) => {
       SELECT
         c.id,
         c.set_id,
-        c.treatment
+        c.treatment,
+        c.finish
       FROM cards c
       JOIN games g ON g.id = c.game_id
       ${whereSql}
@@ -346,6 +347,7 @@ router.get('/filters', async (req: Request, res: Response) => {
     SELECT
       -- Card-level filters (from ALL cards)
       COALESCE(ARRAY_AGG(DISTINCT c.treatment) FILTER (WHERE c.treatment IS NOT NULL), ARRAY[]::text[]) AS treatments,
+      COALESCE(ARRAY_AGG(DISTINCT c.finish) FILTER (WHERE c.finish IS NOT NULL), ARRAY[]::text[]) AS finishes,
 
       -- Inventory-level filters (only from cards with inventory)
       COALESCE(ARRAY_AGG(DISTINCT inv.language) FILTER (WHERE inv.language IS NOT NULL), ARRAY[]::text[]) AS languages,
@@ -418,9 +420,10 @@ router.get('/filters', async (req: Request, res: Response) => {
       
       // Filter facets
       treatments: filterRow?.treatments ?? [],
+      finishes: filterRow?.finishes ?? [],
       languages: filterRow?.languages ?? [],
       qualities: filterRow?.qualities ?? [],
-      foilTypes: filterRow?.foilTypes ?? [],
+      foilTypes: filterRow?.finishes ?? [], // Alias for backwards compatibility
 
       // Price range
       priceMin: filterRow?.priceMin ?? null,
