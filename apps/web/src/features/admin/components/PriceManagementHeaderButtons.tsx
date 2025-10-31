@@ -1,5 +1,5 @@
 // apps/web/src/features/admin/components/PriceManagementHeaderButtons.tsx
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Zap, Package, RefreshCw } from 'lucide-react';
 import { useScryfallPriceFetcher } from './Cards/ScryfallPriceFetcher.js';
 import type { ScryfallCard, ScryfallPriceData } from './Cards/ScryfallPriceFetcher.js';
@@ -62,53 +62,63 @@ export const PriceManagementHeaderButtons: React.FC<PriceManagementHeaderButtons
   };
 
   /**
-   * Fetch all cards from backend with pagination support
+   * Fetch cards for Initialize Prices (Button 1)
+   * Uses dedicated endpoint that returns cards without pricing
    */
-  const fetchAllCards = async (): Promise<ScryfallCard[]> => {
+  const fetchCardsWithoutPricing = async (): Promise<ScryfallCard[]> => {
     try {
-      const allCards: any[] = [];
-      let page = 1;
-      const perPage = 1000; // Maximum allowed by backend
-      let hasMore = true;
+      const response = await api.get<{ cards: any[] }>(
+        ENDPOINTS.ADMIN.CARDS_WITHOUT_PRICING
+      );
 
-      // Fetch cards in pages until we get all of them
-      while (hasMore) {
-        const response = await api.get<{ cards: any[] }>(ENDPOINTS.CARDS.LIST, {
-          page,
-          per_page: perPage
-        });
-
-        if (response.cards && response.cards.length > 0) {
-          allCards.push(...response.cards);
-          hasMore = response.cards.length === perPage; // If we got less than perPage, we're done
-          page++;
-        } else {
-          hasMore = false;
-        }
+      if (!response.cards || response.cards.length === 0) {
+        console.log('ℹ️  No cards found without pricing');
+        return [];
       }
 
-      return allCards
-        .filter(card => {
-          // Filter out cards without valid Scryfall IDs
-          const hasValidScryfallId = card.scryfall_id && 
-                                      typeof card.scryfall_id === 'string' && 
-                                      card.scryfall_id.trim().length > 0;
-          
-          if (!hasValidScryfallId) {
-            console.warn(`⚠️  Skipping card ${card.id} (${card.name}): Invalid or missing Scryfall ID`);
-          }
-          
-          return hasValidScryfallId;
-        })
-        .map(card => ({
-          card_id: card.id,
-          scryfall_id: card.scryfall_id as string,
-          card_name: card.name,
-          set_code: card.set_name,
-          finish: card.finish?.toLowerCase() as 'nonfoil' | 'foil' | 'etched',
-        }));
+      console.log(`✅ Found ${response.cards.length} cards without pricing`);
+
+      // The backend returns the exact structure we need
+      return response.cards.map(card => ({
+        card_id: card.card_id,
+        scryfall_id: card.scryfall_id,
+        card_name: card.name,
+        set_code: card.set_code || card.set_name,
+        finish: card.finish?.toLowerCase() as 'nonfoil' | 'foil' | 'etched',
+      }));
     } catch (error) {
-      console.error('Failed to fetch cards:', error);
+      console.error('Failed to fetch cards without pricing:', error);
+      return [];
+    }
+  };
+
+  /**
+   * Fetch cards for Refresh Inventory (Button 2)
+   * Uses dedicated endpoint that returns inventory cards
+   */
+  const fetchInventoryCards = async (): Promise<ScryfallCard[]> => {
+    try {
+      const response = await api.get<{ cards: any[] }>(
+        ENDPOINTS.ADMIN.INVENTORY_CARDS
+      );
+
+      if (!response.cards || response.cards.length === 0) {
+        console.log('ℹ️  No inventory cards found');
+        return [];
+      }
+
+      console.log(`✅ Found ${response.cards.length} inventory cards`);
+
+      // The backend returns the exact structure we need
+      return response.cards.map(card => ({
+        card_id: card.card_id,
+        scryfall_id: card.scryfall_id,
+        card_name: card.name,
+        set_code: card.set_code || card.set_name,
+        finish: card.finish?.toLowerCase() as 'nonfoil' | 'foil' | 'etched',
+      }));
+    } catch (error) {
+      console.error('Failed to fetch inventory cards:', error);
       return [];
     }
   };
@@ -116,19 +126,27 @@ export const PriceManagementHeaderButtons: React.FC<PriceManagementHeaderButtons
   /**
    * Main refresh handler
    */
-  const handleRefresh = async (buttonType: ButtonType, endpoint: string): Promise<void> => {
+  const handleRefresh = async (
+    buttonType: ButtonType,
+    endpoint: string,
+    fetchCardsFn: () => Promise<ScryfallCard[]>
+  ): Promise<void> => {
     try {
       setActiveButton(buttonType);
       setErrorMessage(null);
 
-      // Fetch all cards
-      const eligibleCards = await fetchAllCards();
+      console.log(`🔄 Starting ${buttonType} operation...`);
+
+      // Fetch cards using the appropriate function
+      const eligibleCards = await fetchCardsFn();
 
       if (eligibleCards.length === 0) {
-        setErrorMessage('No cards found with Scryfall IDs.');
+        setErrorMessage('No eligible cards found.');
         setActiveButton('idle');
         return;
       }
+
+      console.log(`📦 Processing ${eligibleCards.length} cards in batches of ${BATCH_SIZE}...`);
 
       // Process cards in batches
       const allSuccessfulPrices: ScryfallPriceData[] = [];
@@ -136,30 +154,48 @@ export const PriceManagementHeaderButtons: React.FC<PriceManagementHeaderButtons
 
       for (let i = 0; i < eligibleCards.length; i += BATCH_SIZE) {
         const batch = eligibleCards.slice(i, i + BATCH_SIZE);
+        const batchNum = Math.floor(i / BATCH_SIZE) + 1;
+        const totalBatches = Math.ceil(eligibleCards.length / BATCH_SIZE);
+        
+        console.log(`📦 Processing batch ${batchNum}/${totalBatches} (${batch.length} cards)...`);
+        
         const fetchResult = await fetchPrices(batch);
 
         allSuccessfulPrices.push(...fetchResult.success);
         allFailures.push(...fetchResult.failed);
+        
+        console.log(`  ✅ Success: ${fetchResult.success.length}, ❌ Failed: ${fetchResult.failed.length}`);
       }
 
+      console.log(`\n📊 Final Results:`);
+      console.log(`  ✅ Successfully fetched: ${allSuccessfulPrices.length} prices`);
+      console.log(`  ❌ Failed to fetch: ${allFailures.length} prices`);
+
       // Update prices in database
-      const updateResult = await updatePricesInDatabase(allSuccessfulPrices, endpoint);
+      if (allSuccessfulPrices.length > 0) {
+        console.log(`💾 Updating prices in database...`);
+        const updateResult = await updatePricesInDatabase(allSuccessfulPrices, endpoint);
 
-      // Set final result
-      const finalResult: PriceUpdateResult = {
-        ...updateResult,
-        failed: allFailures.length,
-      };
+        // Set final result
+        const finalResult: PriceUpdateResult = {
+          ...updateResult,
+          failed: updateResult.failed + allFailures.length, // Include Scryfall fetch failures
+        };
 
-      // Notify parent component
-      if (onOperationComplete) {
-        onOperationComplete(finalResult, buttonType);
+        console.log(`✅ Database update complete:`, finalResult);
+
+        // Notify parent component
+        if (onOperationComplete) {
+          onOperationComplete(finalResult, buttonType);
+        }
+      } else {
+        setErrorMessage('No prices were successfully fetched from Scryfall.');
       }
 
     } catch (error) {
       const message = error instanceof Error ? error.message : 'An unknown error occurred';
       setErrorMessage(message);
-      console.error('Price refresh failed:', error);
+      console.error(`❌ ${buttonType} operation failed:`, error);
       alert(`❌ Price operation failed: ${message}`);
     } finally {
       setTimeout(() => setActiveButton('idle'), 2000);
@@ -168,16 +204,26 @@ export const PriceManagementHeaderButtons: React.FC<PriceManagementHeaderButtons
 
   /**
    * Button 1: Initialize Prices
+   * Fetches cards without pricing and creates initial price records
    */
   const handleInitializePrices = () => {
-    handleRefresh('initialize', ENDPOINTS.ADMIN.INITIALIZE_PRICES);
+    handleRefresh(
+      'initialize',
+      ENDPOINTS.ADMIN.INITIALIZE_PRICES,
+      fetchCardsWithoutPricing
+    );
   };
 
   /**
    * Button 2: Refresh Inventory Prices
+   * Fetches inventory cards and updates their prices
    */
   const handleRefreshInventory = () => {
-    handleRefresh('refresh-inventory', ENDPOINTS.ADMIN.REFRESH_INVENTORY_PRICES);
+    handleRefresh(
+      'refresh-inventory',
+      ENDPOINTS.ADMIN.REFRESH_INVENTORY_PRICES,
+      fetchInventoryCards
+    );
   };
 
   const isRefreshing = activeButton !== 'idle';
@@ -233,6 +279,13 @@ export const PriceManagementHeaderButtons: React.FC<PriceManagementHeaderButtons
         )}
         <span className="hidden lg:inline">Refresh Inventory</span>
       </button>
+
+      {/* Error Display */}
+      {errorMessage && (
+        <div className="ml-2 text-sm text-red-600">
+          {errorMessage}
+        </div>
+      )}
     </div>
   );
 };
