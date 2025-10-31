@@ -665,8 +665,22 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
           <h3 className="text-sm font-semibold text-slate-700 mb-3">Advanced Filters</h3>
           <VariationFilter
-            selectedGame={selectedGame !== 'all' ? selectedGame : undefined}
-            selectedSet={selectedSet !== 'all' ? selectedSet : undefined}
+            selectedGame={(() => {
+              if (selectedGame === 'all') return undefined;
+              // Try to parse as number first, otherwise find by name
+              const gameIdNum = Number(selectedGame);
+              if (!isNaN(gameIdNum)) return gameIdNum;
+              const game = filterOptions.games.find(g => g.name === selectedGame);
+              return game?.id;
+            })()}
+            selectedSet={(() => {
+              if (selectedSet === 'all') return undefined;
+              // Try to parse as number first, otherwise find by name
+              const setIdNum = Number(selectedSet);
+              if (!isNaN(setIdNum)) return setIdNum;
+              const set = filterOptions.sets.find(s => s.name === selectedSet);
+              return set?.id;
+            })()}
             filters={(() => {
               const raw = {
                 treatment: selectedTreatment !== 'all' ? selectedTreatment : undefined,
