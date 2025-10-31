@@ -88,7 +88,18 @@ export const PriceManagementHeaderButtons: React.FC<PriceManagementHeaderButtons
       }
 
       return allCards
-        .filter(card => card.scryfall_id !== null)
+        .filter(card => {
+          // Filter out cards without valid Scryfall IDs
+          const hasValidScryfallId = card.scryfall_id && 
+                                      typeof card.scryfall_id === 'string' && 
+                                      card.scryfall_id.trim().length > 0;
+          
+          if (!hasValidScryfallId) {
+            console.warn(`⚠️  Skipping card ${card.id} (${card.name}): Invalid or missing Scryfall ID`);
+          }
+          
+          return hasValidScryfallId;
+        })
         .map(card => ({
           card_id: card.id,
           scryfall_id: card.scryfall_id as string,
