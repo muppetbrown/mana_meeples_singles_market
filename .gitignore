@@ -8,6 +8,9 @@ node_modules/
 npm-debug.log*
 logs
 Thumbs.db
+# Lock files (pnpm monorepo uses pnpm-lock.yaml only)
+package-lock.json
+yarn.lock
 # Test logs
 test-logs/
 /apps/api/test-logs/
