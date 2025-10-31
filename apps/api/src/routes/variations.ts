@@ -31,7 +31,7 @@ const VariationsQuery = z
  * Expected columns in mv_set_variation_filters:
  *   set_id, game_id, treatments, border_colors, finishes, promo_types, frame_effects
  */
-router.get("/variations", async (req: Request, res: Response) => {
+router.get("/", async (req: Request, res: Response) => {
   const parsed = VariationsQuery.safeParse(req.query);
   if (!parsed.success) {
     return res.status(400).json({
