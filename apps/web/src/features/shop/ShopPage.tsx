@@ -48,13 +48,14 @@ const ShopPage: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   // URL State - extracted from search params
+  // STANDARDIZED: Using treatment and finish
   const searchTerm = searchParams.get('search') || '';
   const selectedGame = searchParams.get('game') || 'all';
   const selectedSet = searchParams.get('set') || 'all';
   const selectedTreatment = searchParams.get('treatment') || 'all';
+  const selectedFinish = searchParams.get('finish') || 'all';
   const selectedRarity = searchParams.get('rarity') || 'all';
   const selectedQuality = searchParams.get('quality') || 'all';
-  const selectedFoilType = searchParams.get('foilType') || 'all';
 
   // Hooks for data fetching
   const {
@@ -73,6 +74,7 @@ const ShopPage: React.FC = () => {
     selectedGame,
     selectedSet,
     selectedTreatment,
+    selectedFinish,
     games,
     sets
   });
@@ -127,17 +129,19 @@ const ShopPage: React.FC = () => {
   );
 
   // Derived state for filters
+  // STANDARDIZED: Using treatment and finish
   const filters = useMemo(() => ({
     quality: selectedQuality,
     rarity: selectedRarity,
-    foilType: selectedFoilType,
+    treatment: selectedTreatment,
+    finish: selectedFinish,
     language: searchParams.get('language') || 'English',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
     sortBy: searchParams.get('sortBy') || 'name',
     sortOrder: searchParams.get('sortOrder') || 'asc',
     set: selectedSet
-  }), [searchParams, selectedQuality, selectedRarity, selectedFoilType, selectedSet]);
+  }), [searchParams, selectedQuality, selectedRarity, selectedTreatment, selectedFinish, selectedSet]);
 
   // Currency change handler
   const handleCurrencyChange = (newCurrency: Currency) => {
@@ -256,9 +260,9 @@ const ShopPage: React.FC = () => {
                 selectedGame={selectedGame}
                 selectedSet={selectedSet}
                 selectedTreatment={selectedTreatment}
+                selectedFinish={selectedFinish}
                 selectedRarity={selectedRarity}
                 selectedQuality={selectedQuality}
-                selectedFoilType={selectedFoilType}
               />
             </aside>
 

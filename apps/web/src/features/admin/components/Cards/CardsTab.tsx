@@ -41,13 +41,14 @@ import type {
 // TYPES
 // ============================================================================
 
+// STANDARDIZED: Filter options using finishes instead of foilTypes
 interface FilterOptions {
   games: Array<{ id: number; name: string; code?: string }>;
   sets: Array<{ id: number; name: string; code?: string; game_id: number }>;
   treatments: string[];
+  finishes: string[];
   rarities: string[];
   qualities: string[];
-  foilTypes: string[];
 }
 
 type AddFormData = {
@@ -77,9 +78,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     games: [],
     sets: [],
     treatments: [],
+    finishes: [],
     rarities: [],
-    qualities: [],
-    foilTypes: []
+    qualities: []
   });
   const [loading, setLoading] = useState(false);
   const [filtersLoading, setFiltersLoading] = useState(true);
@@ -125,9 +126,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           games: data.games || [],
           sets: data.sets || [],
           treatments: data.treatments || [],
+          finishes: data.finishes || data.foilTypes || [], // Support both field names for backward compatibility
           rarities: data.rarities || [],
-          qualities: data.qualities || [],
-          foilTypes: data.foilTypes || []
+          qualities: data.qualities || []
         });
       } catch (err) {
         console.error('❌ Error loading filters:', err);
@@ -376,12 +377,12 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       value: selectedFinish,
       onChange: handleFinishChange,
       label: 'Finish',
-      options: filterOptions.foilTypes?.map(finish => ({
+      options: filterOptions.finishes?.map(finish => ({
         value: finish,
         label: finish.charAt(0).toUpperCase() + finish.slice(1)
       })) || []
     }
-  }), [selectedTreatment, handleTreatmentChange, selectedFinish, handleFinishChange, filterOptions.treatments, filterOptions.foilTypes]);
+  }), [selectedTreatment, handleTreatmentChange, selectedFinish, handleFinishChange, filterOptions.treatments, filterOptions.finishes]);
 
   // --------------------------------------------------------------------------
   // ACTIONS

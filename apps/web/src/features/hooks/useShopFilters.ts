@@ -28,13 +28,14 @@ interface FilterOption {
   count: number;
 }
 
+// STANDARDIZED: Filter options interface
 interface FilterOptions {
   games: Game[];
   sets: Set[];
+  treatments: FilterOption[];
+  finishes: FilterOption[];
   rarities: FilterOption[];
   qualities: FilterOption[];
-  foilTypes: FilterOption[];
-  treatments: FilterOption[];
 }
 
 // ============================================================================
@@ -44,10 +45,10 @@ interface FilterOptions {
 const EMPTY_FILTER_OPTIONS: FilterOptions = {
   games: [],
   sets: [],
+  treatments: [],
+  finishes: [],
   rarities: [],
-  qualities: [],
-  foilTypes: [],
-  treatments: []
+  qualities: []
 };
 
 const BOOLEAN_TRUE = 'true';
@@ -58,14 +59,16 @@ const BOOLEAN_TRUE = 'true';
 
 /**
  * Parse search params into typed SearchFilters object
+ * STANDARDIZED: Uses treatment and finish instead of foilType
  */
 function parseFiltersFromParams(searchParams: URLSearchParams): SearchFilters {
   return {
     game: searchParams.get('game') || undefined,
     set: searchParams.get('set') || undefined,
+    treatment: searchParams.get('treatment') || undefined,
+    finish: searchParams.get('finish') || undefined,
     rarity: searchParams.getAll('rarity'),
     quality: searchParams.getAll('quality'),
-    foilType: searchParams.getAll('foilType'),
     minPrice: parseOptionalNumber(searchParams.get('minPrice')),
     maxPrice: parseOptionalNumber(searchParams.get('maxPrice')),
     inStockOnly: searchParams.get('inStockOnly') === BOOLEAN_TRUE
@@ -140,10 +143,10 @@ export function useShopFilters() {
         setFilterOptions({
           games: options.games ?? [],
           sets: options.sets ?? [],
+          treatments: options.treatments ?? [],
+          finishes: options.finishes ?? options.foilTypes ?? [], // Support both field names
           rarities: options.rarities ?? [],
-          qualities: options.qualities ?? [],
-          foilTypes: options.foilTypes ?? [],
-          treatments: options.treatments ?? []
+          qualities: options.qualities ?? []
         });
       } catch (err) {
         if (isCancelled) return;
@@ -254,21 +257,21 @@ export function useShopFilters() {
   return {
     // Current active filters
     filters,
-    
+
     // Filter manipulation
     updateFilters,
     clearFilters,
-    
+
     // Filter options data
     games: filterOptions.games,
     sets: filterOptions.sets,
+    treatments: filterOptions.treatments,
+    finishes: filterOptions.finishes,
     rarities: filterOptions.rarities,
     qualities: filterOptions.qualities,
-    foilTypes: filterOptions.foilTypes,
-    treatments: filterOptions.treatments,
     filterOptions,
     getFilterOptions,
-    
+
     // Loading state
     isLoading,
     loading: isLoading, // Alias for backward compatibility

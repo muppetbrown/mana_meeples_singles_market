@@ -5,6 +5,7 @@ import { FilterSidebar, MobileFilterModal } from '@/shared/ui';
 import { MobileFilterButton } from '@/shared/search';
 import { useShopFilters } from '@/features/hooks';
 
+// STANDARDIZED: Props using treatment and finish
 interface ShopFiltersProps {
   showMobileFilters: boolean;
   setShowMobileFilters: (show: boolean) => void;
@@ -12,9 +13,9 @@ interface ShopFiltersProps {
   selectedGame: string;
   selectedSet: string;
   selectedTreatment: string;
+  selectedFinish: string;
   selectedRarity: string;
   selectedQuality: string;
-  selectedFoilType: string;
 }
 
 export const ShopFilters: React.FC<ShopFiltersProps> = ({
@@ -24,9 +25,9 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
   selectedGame,
   selectedSet,
   selectedTreatment,
+  selectedFinish,
   selectedRarity,
-  selectedQuality,
-  selectedFoilType
+  selectedQuality
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const {
@@ -87,16 +88,17 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
   const filters = useMemo(() => ({
     quality: selectedQuality,
     rarity: selectedRarity,
-    foilType: selectedFoilType,
+    treatment: selectedTreatment,
+    finish: selectedFinish,
     language: searchParams.get('language') || 'English',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
     sortBy: searchParams.get('sortBy') || 'name',
     sortOrder: searchParams.get('sortOrder') || 'asc',
     set: selectedSet
-  }), [searchParams, selectedQuality, selectedRarity, selectedFoilType, selectedSet]);
+  }), [searchParams, selectedQuality, selectedRarity, selectedTreatment, selectedFinish, selectedSet]);
 
-  // Additional filters config
+  // STANDARDIZED: Additional filters config
   const additionalFilters = useMemo(() => ({
     treatment: {
       value: selectedTreatment,
@@ -108,17 +110,17 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
         count: t.count
       }))
     },
-    foilType: {
-      value: selectedFoilType,
-      onChange: (value: string) => updateParam('foilType', value),
-      label: 'Foil Type',
-      options: filterOptions.foilTypes.map(f => ({
+    finish: {
+      value: selectedFinish,
+      onChange: (value: string) => updateParam('finish', value),
+      label: 'Finish',
+      options: filterOptions.finishes.map(f => ({
         value: f.value,
         label: f.label,
         count: f.count
       }))
     }
-  }), [selectedTreatment, selectedFoilType, filterOptions, updateParam]);
+  }), [selectedTreatment, selectedFinish, filterOptions, updateParam]);
 
   // Active filters for display
   const activeFilters = useMemo(() => {
@@ -130,8 +132,11 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
         let displayValue = value;
 
         switch (key) {
-          case 'foilType':
-            displayName = 'Foil';
+          case 'finish':
+            displayName = 'Finish';
+            break;
+          case 'treatment':
+            displayName = 'Treatment';
             break;
           case 'minPrice':
             displayName = 'Min Price';
