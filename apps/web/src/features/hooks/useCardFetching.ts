@@ -38,14 +38,22 @@ export function useCardFetching({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const errorHandler = useErrorHandler();
+  
+  // Track in-flight requests to prevent duplicates
   const requestInFlight = useRef(false);
+  
+  // 🔥 NEW: Debounce timer for search term only
+  const searchDebounceTimer = useRef<NodeJS.Timeout | null>(null);
+  
+  // 🔥 NEW: Track last fetched params to prevent unnecessary refetches
+  const lastFetchedParams = useRef<string>('');
 
   const fetchCards = useCallback(async () => {
     // Prevent duplicate requests
     if (requestInFlight.current) return;
-    requestInFlight.current = true;
-
+    
     try {
+      requestInFlight.current = true;
       setLoading(true);
       setError(null);
 
@@ -83,33 +91,83 @@ export function useCardFetching({
         params.set('finish', selectedFinish);
       }
 
-      // Use the storefront endpoint
+      // 🔥 NEW: Check if params actually changed
+      const currentParams = params.toString();
+      if (currentParams === lastFetchedParams.current) {
+        // Same params, skip fetch
+        setLoading(false);
+        requestInFlight.current = false;
+        return;
+      }
+      
+      // Store current params
+      lastFetchedParams.current = currentParams;
+
+      // Use the storefront endpoint with trigram search
       const response = await api.get<{ cards: StorefrontCard[] }>(
         `/storefront/cards?${params.toString()}`
       );
 
-      // REMOVED: Client-side treatment filtering - now handled by server
       setCards(response.cards ?? []);
     } catch (err: unknown) {
       console.error('Error fetching cards:', err);
       const message = err instanceof Error ? err.message : 'Failed to load cards';
       setError(message);
-      // Use errorHandler directly without it being in dependencies
       errorHandler.handleError(err, { context: 'fetching cards' });
     } finally {
       setLoading(false);
       requestInFlight.current = false;
     }
-    // Remove errorHandler from dependency array - it's used but not a dependency
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedGame, selectedSet, searchTerm, selectedTreatment, selectedFinish, games, sets]);
+  }, [
+    selectedGame, 
+    selectedSet, 
+    searchTerm, 
+    selectedTreatment, 
+    selectedFinish, 
+    games, 
+    sets,
+    errorHandler
+  ]);
   
-  // Fetch cards when games are loaded or filters change
+  // 🔥 NEW: Separate effect for debounced search
   useEffect(() => {
-    if (games?.length > 0) {
-      fetchCards();
+    // Clear existing debounce timer
+    if (searchDebounceTimer.current) {
+      clearTimeout(searchDebounceTimer.current);
     }
-  }, [fetchCards, games]);
+
+    // If we have games loaded, debounce the search
+    if (games?.length > 0) {
+      // For search term changes, debounce for 400ms
+      // For other filter changes, fetch immediately
+      const isSearchChange = searchTerm.length > 0;
+      
+      if (isSearchChange) {
+        // Debounce search term changes
+        searchDebounceTimer.current = setTimeout(() => {
+          fetchCards();
+        }, 400); // 400ms debounce for search
+      } else {
+        // Immediate fetch for filter changes or empty search
+        fetchCards();
+      }
+    }
+
+    // Cleanup on unmount
+    return () => {
+      if (searchDebounceTimer.current) {
+        clearTimeout(searchDebounceTimer.current);
+      }
+    };
+  }, [
+    searchTerm,
+    selectedGame,
+    selectedSet,
+    selectedTreatment,
+    selectedFinish,
+    games,
+    fetchCards
+  ]);
 
   return { cards, loading, error, refetch: fetchCards };
 }
