@@ -517,18 +517,25 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const openAddModal = useCallback((card: BrowseBaseCard) => {
     setAddModalCard(card);
 
-    // Auto-select first variation if only one exists
-    let firstVariation: BrowseVariation | undefined;
-    if (card.variations && card.variations.length === 1) {
-      firstVariation = card.variations[0];
-      setSelectedVariation(firstVariation);
+    // Auto-select a variation (prefer non-foil, otherwise use first)
+    let selectedVar: BrowseVariation | undefined;
+    if (card.variations && card.variations.length > 0) {
+      // Try to find non-foil variation
+      const nonfoilVariation = card.variations.find(v => {
+        const finish = v.finish?.toLowerCase() || '';
+        return finish.includes('non') || finish === 'nonfoil';
+      });
+
+      // Use non-foil if found, otherwise use first variation
+      selectedVar = nonfoilVariation || card.variations[0];
+      setSelectedVariation(selectedVar);
     } else {
-      setSelectedVariation(undefined);  // User must select
+      setSelectedVariation(undefined);
     }
 
     // Check if there's an automated price available
-    const automatedPrice = getAutomatedPrice(firstVariation);
-    const hasAutomatedPrice = automatedPrice !== null && firstVariation?.price_source;
+    const automatedPrice = getAutomatedPrice(selectedVar);
+    const hasAutomatedPrice = automatedPrice !== null && selectedVar?.price_source;
 
     setAddFormData({
       quality: 'Near Mint',
