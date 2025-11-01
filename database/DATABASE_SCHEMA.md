@@ -1,10 +1,10 @@
 # Database Schema — `public`
 
-**Generated:** 30/10/2025, 1:21:34 pm
+**Generated:** 2/11/2025, 5:57:03 am
 
 **Tables:** 11
 
-**Total Rows:** 1,111
+**Total Rows:** 2,443
 
 ---
 
@@ -60,23 +60,16 @@ CREATE UNIQUE INDEX audit_log_pkey ON public.audit_log USING btree (id)
 | `price` | `numeric` | `NO` | `` | `10,2` |
 | `price_source` | `character varying` | `YES` | `` | `50` |
 | `last_price_update` | `timestamp without time zone` | `YES` | `` | `` |
-| `sku` | `character varying` | `YES` | `` | `100` |
 | `created_at` | `timestamp without time zone` | `YES` | `CURRENT_TIMESTAMP` | `` |
 | `updated_at` | `timestamp without time zone` | `YES` | `CURRENT_TIMESTAMP` | `` |
-| `foil_type` | `character varying` | `YES` | `'Regular'::character varying` | `50` |
 | `language` | `character varying` | `YES` | `'English'::character varying` | `50` |
 | `cost` | `numeric` | `YES` | `` | `10,2` |
 | `markup_percentage` | `numeric` | `NO` | `0` | `5,2` |
 | `auto_price_enabled` | `boolean` | `NO` | `false` | `` |
 | `low_stock_threshold` | `integer` | `NO` | `3` | `32,0` |
-| `tcgplayer_id` | `character varying` | `YES` | `` | `255` |
 
 ### Constraints
 
-- **CHECK** `chk_foil_type_nonempty`
-```sql
-CHECK ((length((foil_type)::text) > 0))
-```
 - **CHECK** `chk_language_nonempty`
 ```sql
 CHECK ((length((language)::text) > 0))
@@ -101,10 +94,6 @@ FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE
 ```sql
 PRIMARY KEY (id)
 ```
-- **UNIQUE** `card_inventory_sku_key`
-```sql
-UNIQUE (sku)
-```
 
 ### Foreign Keys
 
@@ -115,11 +104,6 @@ UNIQUE (sku)
 - **PRIMARY** **UNIQUE** `card_inventory_pkey`
 ```sql
 CREATE UNIQUE INDEX card_inventory_pkey ON public.card_inventory USING btree (id)
-```
-
-- **UNIQUE** `card_inventory_sku_key`
-```sql
-CREATE UNIQUE INDEX card_inventory_sku_key ON public.card_inventory USING btree (sku)
 ```
 
 -  `idx_inventory_card`
@@ -176,7 +160,7 @@ CREATE INDEX idx_inventory_updated ON public.card_inventory USING btree (updated
 
 ## 📋 card_pricing
 
-**Row Count:** 0
+**Row Count:** 1,199
 
 ### Columns
 
@@ -225,6 +209,58 @@ CREATE INDEX idx_card_pricing_source ON public.card_pricing USING btree (price_s
 -  `idx_card_pricing_updated`
 ```sql
 CREATE INDEX idx_card_pricing_updated ON public.card_pricing USING btree (updated_at DESC)
+```
+
+### Sample Rows
+
+```json
+[
+  {
+    "id": 828,
+    "card_id": 1045,
+    "base_price": "0.00",
+    "foil_price": "19.97",
+    "price_source": "scryfall",
+    "updated_at": "2025-10-31T08:30:33.222Z",
+    "created_at": "2025-10-31T08:30:33.222Z"
+  },
+  {
+    "id": 829,
+    "card_id": 1043,
+    "base_price": "0.00",
+    "foil_price": "6.99",
+    "price_source": "scryfall",
+    "updated_at": "2025-10-31T08:30:33.526Z",
+    "created_at": "2025-10-31T08:30:33.526Z"
+  },
+  {
+    "id": 830,
+    "card_id": 1042,
+    "base_price": "4.78",
+    "foil_price": "0.00",
+    "price_source": "scryfall",
+    "updated_at": "2025-10-31T08:30:33.846Z",
+    "created_at": "2025-10-31T08:30:33.846Z"
+  },
+  {
+    "id": 831,
+    "card_id": 1044,
+    "base_price": "10.59",
+    "foil_price": "0.00",
+    "price_source": "scryfall",
+    "updated_at": "2025-10-31T08:30:34.139Z",
+    "created_at": "2025-10-31T08:30:34.139Z"
+  },
+  {
+    "id": 832,
+    "card_id": 1049,
+    "base_price": "0.00",
+    "foil_price": "10.97",
+    "price_source": "scryfall",
+    "updated_at": "2025-10-31T08:30:34.436Z",
+    "created_at": "2025-10-31T08:30:34.436Z"
+  }
+]
 ```
 
 ---
@@ -295,6 +331,16 @@ CREATE INDEX idx_card_sets_name_trgm ON public.card_sets USING gin (name gin_trg
     "active": true,
     "created_at": "2025-10-13T19:01:32.046Z",
     "updated_at": "2025-10-13T19:01:32.046Z"
+  },
+  {
+    "id": 12,
+    "game_id": 1,
+    "name": "Final Fantasy: Through the Ages",
+    "code": "FCA",
+    "release_date": "2025-06-12T12:00:00.000Z",
+    "active": true,
+    "created_at": "2025-10-31T11:34:27.552Z",
+    "updated_at": "2025-10-31T11:34:27.552Z"
   }
 ]
 ```
@@ -303,7 +349,7 @@ CREATE INDEX idx_card_sets_name_trgm ON public.card_sets USING gin (name gin_trg
 
 ## 📋 cards
 
-**Row Count:** 1,110
+**Row Count:** 1,243
 
 ### Columns
 
@@ -659,11 +705,7 @@ CREATE INDEX idx_game_variations_treatments ON public.game_variations_metadata U
       "extendedart",
       "inverted"
     ],
-    "special_foils": [
-      "surgefoil",
-      "chocobotrackfoil",
-      "neonink"
-    ],
+    "special_foils": [],
     "border_colors": [
       "black",
       "borderless"
@@ -682,12 +724,12 @@ CREATE INDEX idx_game_variations_treatments ON public.game_variations_metadata U
       "BORDERLESS",
       "BORDERLESS_NEONINK"
     ],
-    "total_sets": 1,
-    "total_cards": 1114,
-    "total_variations": 1114,
-    "last_analyzed": "2025-10-13T19:13:13.244Z",
+    "total_sets": 2,
+    "total_cards": 1243,
+    "total_variations": 1243,
+    "last_analyzed": "2025-10-31T11:35:12.083Z",
     "created_at": "2025-10-13T19:13:13.244Z",
-    "updated_at": "2025-10-13T19:13:13.244Z"
+    "updated_at": "2025-10-31T11:35:12.083Z"
   }
 ]
 ```
@@ -1087,6 +1129,29 @@ CREATE UNIQUE INDEX set_variations_metadata_set_id_game_id_key ON public.set_var
     "last_analyzed": "2025-10-13T19:13:12.383Z",
     "created_at": "2025-10-13T19:01:32.357Z",
     "updated_at": "2025-10-13T19:13:12.383Z"
+  },
+  {
+    "id": 3679,
+    "set_id": 12,
+    "game_id": 1,
+    "visual_treatments": [
+      "inverted"
+    ],
+    "special_foils": [],
+    "border_colors": [
+      "borderless"
+    ],
+    "frame_effects": [
+      "inverted"
+    ],
+    "treatment_codes": [
+      "BORDERLESS_INVERTED"
+    ],
+    "total_cards": 129,
+    "total_variations": 129,
+    "last_analyzed": "2025-10-31T11:35:11.271Z",
+    "created_at": "2025-10-31T11:34:27.863Z",
+    "updated_at": "2025-10-31T11:35:11.271Z"
   }
 ]
 ```

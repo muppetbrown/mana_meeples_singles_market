@@ -23,12 +23,14 @@ mana_meeples_singles_market
 │ │ │ │ ├── additional.ts
 │ │ │ │ ├── auth.ts
 │ │ │ │ ├── cards.ts
+│ │ │ │ ├── import.ts
 │ │ │ │ ├── index.ts
 │ │ │ │ ├── inventory.ts
 │ │ │ │ ├── orders.ts
-│ │ │ │ ├── storefront.ts
-│ │ │ │ └── variations.ts
+│ │ │ │ ├── pricing.ts
+│ │ │ │ └── storefront.ts
 │ │ │ ├── services/
+│ │ │ │ ├── cardImport.ts
 │ │ │ │ ├── emailService.ts
 │ │ │ │ └── variationAnalysis.ts
 │ │ │ ├── types/
@@ -508,9 +510,16 @@ mana_meeples_singles_market
 │  │ │ │ │ ├── Cards/
 │  │ │ │ │ │ ├── AddToInventoryModal.tsx
 │  │ │ │ │ │ ├── BulkManager.tsx
-│  │ │ │ │ │ └── CardsTab.tsx
-│  │ │ │ │ └── Orders/
-│  │ │ │ │  └── OrdersTab.tsx
+│  │ │ │ │ │ ├── CardsTab.tsx
+│  │ │ │ │ │ ├── PriceRefreshButtons.tsx
+│  │ │ │ │ │ ├── ScryfallPriceFetcher.tsx
+│  │ │ │ │ │ └── SingleCardPriceRefresh.tsx
+│  │ │ │ │ ├── Import/
+│  │ │ │ │ │ └── ImportSetModal.tsx
+│  │ │ │ │ ├── Orders/
+│  │ │ │ │ │ └── OrdersTab.tsx
+│  │ │ │ │ ├── InstructionsTab.tsx
+│  │ │ │ │ └── PriceManagementHeaderButtons.tsx
 │  │ │ │ ├── utils/
 │  │ │ │ │ └── cardAdapters.ts
 │  │ │ │ ├── Dashboard.tsx
@@ -546,7 +555,8 @@ mana_meeples_singles_market
 │  │ │ ├── api/
 │  │ │ │ ├── client.ts
 │  │ │ │ ├── endpoints.ts
-│  │ │ │ └── index.ts
+│  │ │ │ ├── index.ts
+│  │ │ │ └── README.md
 │  │ │ ├── constants/
 │  │ │ │ ├── index.ts
 │  │ │ │ └── validation.ts
@@ -557,6 +567,8 @@ mana_meeples_singles_market
 │  │ │  ├── groupCards.ts
 │  │ │  ├── index.ts
 │  │ │  ├── sanitization.ts
+│  │ │  ├── sortCards.ts
+│  │ │  ├── variationComparison.ts
 │  │ │  └── virtualScroll.ts
 │  │ ├── services/
 │  │ │ ├── error/
@@ -584,9 +596,7 @@ mana_meeples_singles_market
 │  │ │ │ ├── FiltersPanel.tsx
 │  │ │ │ ├── index.ts
 │  │ │ │ ├── MobileFilterButton.tsx
-│  │ │ │ ├── SearchBar.tsx
-│  │ │ │ ├── VariationFilter.tsx
-│  │ │ │ └── VariationFilterCache.ts
+│  │ │ │ └── SearchBar.tsx
 │  │ │ └── ui/
 │  │ │  ├── CurrencySelector.tsx
 │  │ │  ├── EmptyState.tsx
@@ -594,6 +604,7 @@ mana_meeples_singles_market
 │  │ │  ├── index.ts
 │  │ │  ├── MobileFilterModal.tsx
 │  │ │  ├── SectionHeader.tsx
+│  │ │  ├── SortDropdown.tsx
 │  │ │  ├── Toast.tsx
 │  │ │  └── VariationBadge.tsx
 │  │ ├── styles/

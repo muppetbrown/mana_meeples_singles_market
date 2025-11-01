@@ -1,10 +1,10 @@
 # Repository Dependency Report
-_Generated: 2025-10-30T00:21:09.365Z_
+_Generated: 2025-11-01T16:56:47.029Z_
 
 ## Summary
 - Files scanned: 1
-- External packages referenced: 317
-- Edges: 467
+- External packages referenced: 337
+- Edges: 514
 
 ## Hotspots (fan-in × lines)
 | File | Fan-in | Fan-out | Lines | Score |
