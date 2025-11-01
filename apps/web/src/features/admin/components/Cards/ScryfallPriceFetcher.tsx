@@ -133,21 +133,31 @@ async function fetchCardFromScryfall(scryfallId: string): Promise<any> {
 }
 
 /**
+ * Safely parse a price string to a number, handling NaN cases
+ * Returns null if the value is missing, empty, or invalid
+ */
+function safeParsePrice(priceString: string | null | undefined): number | null {
+  if (!priceString) return null;
+  const parsed = parseFloat(priceString);
+  return !isNaN(parsed) ? parsed : null;
+}
+
+/**
  * Extract price based on finish type
  */
 function extractPrice(scryfallData: any, finish: string): number | null {
   const prices = scryfallData.prices;
-  
+
   if (!prices) return null;
-  
+
   switch (finish.toLowerCase()) {
     case 'foil':
-      return prices.usd_foil ? parseFloat(prices.usd_foil) : null;
+      return safeParsePrice(prices.usd_foil);
     case 'etched':
-      return prices.usd_etched ? parseFloat(prices.usd_etched) : null;
+      return safeParsePrice(prices.usd_etched);
     case 'nonfoil':
     default:
-      return prices.usd ? parseFloat(prices.usd) : null;
+      return safeParsePrice(prices.usd);
   }
 }
 
@@ -195,9 +205,9 @@ export function useScryfallPriceFetcher(): UseScryfallPriceFetcherReturn {
         const priceData: ScryfallPriceData = {
           card_id: card.card_id,
           scryfall_id: card.scryfall_id,
-          usd: scryfallData.prices?.usd ? parseFloat(scryfallData.prices.usd) : null,
-          usd_foil: scryfallData.prices?.usd_foil ? parseFloat(scryfallData.prices.usd_foil) : null,
-          usd_etched: scryfallData.prices?.usd_etched ? parseFloat(scryfallData.prices.usd_etched) : null,
+          usd: safeParsePrice(scryfallData.prices?.usd),
+          usd_foil: safeParsePrice(scryfallData.prices?.usd_foil),
+          usd_etched: safeParsePrice(scryfallData.prices?.usd_etched),
           finish: card.finish,
           last_updated: new Date().toISOString(),
         };
