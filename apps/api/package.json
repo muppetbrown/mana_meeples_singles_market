@@ -2,7 +2,7 @@
   "name": "@mana-meeples/api",
   "type": "module",
   "scripts": {
-    "build": "tsc -p tsconfig.build.json --declaration false",
+    "build": "tsc -p tsconfig.build.json",
     "start": "node dist/server.js",
     "clean": "rimraf dist",
     "dev": "tsx watch src/server.ts",
