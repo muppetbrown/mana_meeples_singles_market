@@ -376,13 +376,17 @@ router.get('/filters', async (req: Request, res: Response) => {
         ci.stock_quantity,
         COALESCE(
           CASE
-            WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil'
+            WHEN COALESCE(cf.finish, 'nonfoil') = 'foil'
             THEN lp.foil_price
             ELSE lp.base_price
           END,
           ci.price
         ) AS price
       FROM card_inventory ci
+      LEFT JOIN (
+        SELECT DISTINCT ON (card_id)
+          id, finish
+      ) cf on cf.id = ci.card_id
       LEFT JOIN (
         SELECT DISTINCT ON (card_id)
                card_id, base_price, foil_price

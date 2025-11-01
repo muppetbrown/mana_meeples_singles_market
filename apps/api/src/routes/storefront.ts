@@ -156,7 +156,7 @@ router.get('/cards', async (req: Request, res: Response) => {
               'language', COALESCE(ci.language, 'English'),
               'price', COALESCE(
                 CASE 
-                  WHEN COALESCE(ci.foil_type, 'Regular') ILIKE 'foil' 
+                  WHEN COALESCE(cf.finish, 'nonfoil') = 'foil'
                   THEN lp.foil_price 
                   ELSE lp.base_price 
                 END,
@@ -172,6 +172,10 @@ router.get('/cards', async (req: Request, res: Response) => {
           '[]'::jsonb
         ) AS variations
       FROM card_inventory ci
+      LEFT JOIN (
+        SELECT DISTINCT ON (card_id)
+          id, finish
+      ) cf on cf.id = ci.card_id
       LEFT JOIN (
         SELECT DISTINCT ON (card_id)
                card_id, base_price, foil_price, price_source, updated_at
