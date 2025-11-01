@@ -1,5 +1,5 @@
 // apps\web\src\features\shop\ShopPage.tsx
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   useShopViewMode,
@@ -45,7 +45,7 @@ interface CardForDisplay {
 }
 
 const ShopPage: React.FC = () => {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // URL State - extracted from search params
   // STANDARDIZED: Using treatment and finish
