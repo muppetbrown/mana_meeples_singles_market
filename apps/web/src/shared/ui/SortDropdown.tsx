@@ -44,12 +44,12 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
         <span className="text-sm text-mm-teal font-medium hidden sm:inline">Sort by:</span>
       )}
 
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-2">
         {/* Dropdown */}
         <select
           value={sortBy}
           onChange={(e) => onSortByChange(e.target.value as SortOption)}
-          className="px-3 py-2 border border-mm-warmAccent rounded-l-lg bg-white text-mm-teal hover:bg-mm-tealLight focus:outline-none focus:ring-2 focus:ring-mm-forest transition-colors"
+          className="h-10 px-3 py-2 border border-mm-warmAccent rounded-lg bg-white text-mm-teal hover:bg-mm-tealLight focus:outline-none focus:ring-2 focus:ring-mm-forest transition-colors"
           aria-label="Sort by"
         >
           {options.map((option) => (
@@ -62,7 +62,7 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
         {/* Sort Order Toggle Button */}
         <button
           onClick={toggleSortOrder}
-          className="px-3 py-2 border border-l-0 border-mm-warmAccent rounded-r-lg bg-white text-mm-teal hover:bg-mm-tealLight focus:outline-none focus:ring-2 focus:ring-mm-forest transition-colors"
+          className="h-10 w-10 flex items-center justify-center border border-mm-warmAccent rounded-lg bg-white text-mm-teal hover:bg-mm-tealLight focus:outline-none focus:ring-2 focus:ring-mm-forest transition-colors"
           aria-label={`Sort order: ${sortOrder === 'asc' ? 'Ascending' : 'Descending'}`}
           title={sortOrder === 'asc' ? 'Ascending' : 'Descending'}
         >
