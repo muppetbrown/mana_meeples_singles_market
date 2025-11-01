@@ -1,6 +1,8 @@
 import React from 'react';
 import { X, LayoutGrid, List } from 'lucide-react';
+import { SortDropdown } from '@/shared/ui';
 import type { ViewMode } from '../../hooks/useShopViewMode';
+import type { SortOption, SortOrder } from '@/lib/utils';
 
 interface ActiveFilter {
   key: string;
@@ -17,6 +19,10 @@ interface ResultsHeaderProps {
   activeFilters: ActiveFilter[];
   onClearFilter: (filterKey: string) => void;
   onClearAllFilters: () => void;
+  sortBy: SortOption;
+  sortOrder: SortOrder;
+  onSortByChange: (sortBy: SortOption) => void;
+  onSortOrderChange: (sortOrder: SortOrder) => void;
 }
 
 export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
@@ -27,18 +33,31 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
   setViewMode,
   activeFilters,
   onClearFilter,
-  onClearAllFilters
+  onClearAllFilters,
+  sortBy,
+  sortOrder,
+  onSortByChange,
+  onSortOrderChange
 }) => {
   const count = resultsCount ?? cardCount ?? 0;
   return (
     <>
-      {/* Results Count and View Toggle */}
-      <div className="flex items-center mb-4">
-        <div className="flex-1 pr-4">
+      {/* Results Count, Sort, and View Toggle */}
+      <div className="flex items-center justify-between mb-4 gap-4 flex-wrap">
+        <div className="flex-1 pr-4 min-w-0">
           <p className="text-mm-teal" aria-live="polite">
             <span className="font-medium">{count}</span> cards found
           </p>
         </div>
+
+        {/* Sort Dropdown */}
+        <SortDropdown
+          sortBy={sortBy}
+          sortOrder={sortOrder}
+          onSortByChange={onSortByChange}
+          onSortOrderChange={onSortOrderChange}
+          className="flex-shrink-0"
+        />
 
         {/* View Toggle */}
         <div className="flex items-center gap-2 flex-shrink-0" style={{ minWidth: '140px', width: '140px' }}>

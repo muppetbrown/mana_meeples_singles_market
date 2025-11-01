@@ -24,12 +24,14 @@ import { RefreshCw, Download, LayoutGrid, List, Package } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
 import AddToInventoryModal from './AddToInventoryModal';
 import {
-  groupCardsForBrowse
+  groupCardsForBrowse,
+  groupCardsBySort
 } from '@/lib/utils';
+import type { SortOption, SortOrder } from '@/lib/utils';
 import { CardSearchBar } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
-import { EmptyState } from '@/shared/ui';
+import { EmptyState, SectionHeader, SortDropdown } from '@/shared/ui';
 import type {
   Card,
   CardVariation,
@@ -112,6 +114,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const selectedSet = searchParams.get('set') || 'all';
   const selectedTreatment = searchParams.get('treatment') || 'all';
   const selectedFinish = searchParams.get('finish') || 'all';
+  const sortBy = (searchParams.get('sortBy') as SortOption) || 'name';
+  const sortOrder = (searchParams.get('sortOrder') as SortOrder) || 'asc';
   const isInventoryMode = mode === 'inventory';
 
   // --------------------------------------------------------------------------
@@ -203,6 +207,14 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
   const handleFinishChange = useCallback((finish: string) => {
     updateParam('finish', finish);
+  }, [updateParam]);
+
+  const handleSortByChange = useCallback((newSortBy: SortOption) => {
+    updateParam('sortBy', newSortBy);
+  }, [updateParam]);
+
+  const handleSortOrderChange = useCallback((newSortOrder: SortOrder) => {
+    updateParam('sortOrder', newSortOrder);
   }, [updateParam]);
 
   const handleClearFilters = useCallback(() => {
@@ -374,9 +386,14 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, [displayCards]);
 
   // Use the centralized grouping utility
-  const groupedCards: BrowseBaseCard[] = useMemo(() => {
+  const baseGroupedCards: BrowseBaseCard[] = useMemo(() => {
     return groupCardsForBrowse(displayCards);
   }, [displayCards]);
+
+  // Apply sorting and grouping with section headers
+  const sortedAndGroupedCards = useMemo(() => {
+    return groupCardsBySort(baseGroupedCards, sortBy, sortOrder);
+  }, [baseGroupedCards, sortBy, sortOrder]);
 
   // --------------------------------------------------------------------------
   // ADDITIONAL FILTERS (for SearchBar component)
@@ -636,7 +653,16 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           </p>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          {/* Sort Dropdown */}
+          <SortDropdown
+            sortBy={sortBy}
+            sortOrder={sortOrder}
+            onSortByChange={handleSortByChange}
+            onSortOrderChange={handleSortOrderChange}
+            showLabel={true}
+          />
+
           {/* View Mode Toggle */}
           <div className="flex items-center gap-2">
             <span className="text-sm text-slate-600 hidden sm:inline">View:</span>
@@ -703,28 +729,44 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         </div>
       ) : (
         <>
-          {groupedCards.length > 0 ? (
+          {sortedAndGroupedCards.length > 0 ? (
             viewMode === 'list' ? (
-              <CardList
-                cards={groupedCards}
-                mode={mode}
-                currency={{ code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
-                onAction={(card, variation) => {
-                  // In admin mode, open add to inventory modal
-                  if (mode === 'all') {
-                    openAddModal(card);
-                  } else {
-                    console.log('Manage inventory for card:', card.name);
-                  }
-                }}
-              />
+              /* List View with Section Headers */
+              <div>
+                {sortedAndGroupedCards.map((group, groupIndex) => (
+                  <div key={groupIndex} className="mb-8">
+                    <SectionHeader title={group.header} count={group.cards.length} isGrid={false} />
+                    <CardList
+                      cards={group.cards}
+                      mode={mode}
+                      currency={{ code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
+                      onAction={(card, variation) => {
+                        // In admin mode, open add to inventory modal
+                        if (mode === 'all') {
+                          openAddModal(card);
+                        } else {
+                          console.log('Manage inventory for card:', card.name);
+                        }
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
             ) : (
-              <CardGrid
-                cards={groupedCards}
-                mode={mode}
-                viewMode={viewMode}
-                {...(!isInventoryMode && { onAddToInventory: (card) => openAddModal(card) })}
-              />
+              /* Grid View with Section Headers */
+              <div>
+                {sortedAndGroupedCards.map((group, groupIndex) => (
+                  <div key={groupIndex} className="mb-8">
+                    <SectionHeader title={group.header} count={group.cards.length} isGrid={true} />
+                    <CardGrid
+                      cards={group.cards}
+                      mode={mode}
+                      viewMode={viewMode}
+                      {...(!isInventoryMode && { onAddToInventory: (card) => openAddModal(card) })}
+                    />
+                  </div>
+                ))}
+              </div>
             )
           ) : (
             <EmptyState

@@ -4,4 +4,6 @@ export { formatCurrency, formatPrice, formatCurrencySimple, formatOrderTotal /*,
 //export { searchCards, fuzzyMatch } from './search';
 export { groupCardsForBrowse } from './groupCards';
 export { sanitizeText, sanitizeHTML, sanitizeEmail, sanitizePhone, sanitizeAddress, sanitizeCustomerData } from './sanitization';
-export { useVirtualScroll } from './virtualScroll'
+export { useVirtualScroll } from './virtualScroll';
+export { sortCards, groupCardsBySort, getSortOptions, getSortOptionLabel } from './sortCards';
+export type { SortOption, SortOrder, CardGroup } from './sortCards';
