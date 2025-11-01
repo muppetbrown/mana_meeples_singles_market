@@ -51,8 +51,8 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
   additionalFilters
 }) => {
   return (
-    <aside className="hidden lg:block w-80 flex-shrink-0">
-      <div className="card-mm sticky top-24">
+    <div className="w-full overflow-hidden">
+      <div className="card-mm">
         <h2 className="text-lg font-semibold text-mm-darkForest mb-4">Search & Filters</h2>
         <CardSearchBar
           searchTerm={searchTerm}
@@ -69,7 +69,7 @@ export const FilterSidebar: React.FC<FilterSidebarProps> = ({
           minSearchLength={FILTER_CONFIG.MIN_SEARCH_LENGTH}
         />
       </div>
-    </aside>
+    </div>
   );
 };
 
