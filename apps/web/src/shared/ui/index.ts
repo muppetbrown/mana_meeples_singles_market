@@ -6,3 +6,4 @@ export { default as VariationBadge } from './VariationBadge';
 export { default as MobileFilterModal } from './MobileFilterModal';
 export { default as FilterSidebar } from './FilterSidebar';
 export { default as CurrencySelector } from './CurrencySelector';
+export { SortDropdown } from './SortDropdown';

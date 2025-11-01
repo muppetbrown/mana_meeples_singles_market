@@ -10,7 +10,9 @@ import {
   SectionHeader
 } from '@/shared/ui';
 import { VIRTUAL_SCROLL_CONFIG } from '@/lib/constants';
+import { groupCardsBySort } from '@/lib/utils';
 import type { StorefrontCard, CardVariation, Currency, BrowseBaseCard } from '@/types';
+import type { SortOption, SortOrder } from '@/lib/utils';
 
 
 interface SelectedVariations {
@@ -23,7 +25,8 @@ interface CardDisplayAreaProps {
   currency: Currency;
   selectedVariations: SelectedVariations;
   filters: {
-    sortBy: string;
+    sortBy: SortOption;
+    sortOrder: SortOrder;
   };
   onVariationChange: (cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => void;
   setAddToCartModal: (state: { open: boolean; cardId: number }) => void;
@@ -74,112 +77,20 @@ export const CardDisplayArea: React.FC<CardDisplayAreaProps> = ({
     return cards.map(convertStorefrontToBrowseCard);
   }, [cards]);
 
-  // Card grouping and sorting logic extracted from ShopPage
+  // Card grouping and sorting using new utility
   const groupedCards = useMemo(() => {
     if (!browseCards.length) return [];
 
-    const { sortBy } = filters;
+    const { sortBy, sortOrder } = filters;
 
-    // If no grouping needed, return ungrouped
-    if (!['name', 'set', 'rarity', 'price', 'price_low', 'price_high'].includes(sortBy)) {
-      return [{ section: null, cards: browseCards }];
-    }
+    // Use the new groupCardsBySort utility
+    const groups = groupCardsBySort(browseCards, sortBy, sortOrder);
 
-    const groups = new Map<string, BrowseBaseCard[]>();
-
-    browseCards.forEach(card => {
-      let sectionKey: string;
-      let sectionTitle: string;
-
-      if (sortBy === 'name') {
-        const firstLetter = card.name.charAt(0).toUpperCase();
-        sectionKey = firstLetter;
-        sectionTitle = firstLetter;
-      } else if (sortBy === 'set') {
-        sectionKey = card.set_name;
-        sectionTitle = card.set_name;
-      } else if (sortBy === 'rarity') {
-        const rarity = card.rarity || 'Unknown';
-        sectionKey = rarity;
-        sectionTitle = rarity;
-      } else if (['price', 'price_low', 'price_high'].includes(sortBy)) {
-        const price = card.lowest_price ?? 0;
-
-        if (price < 1) {
-          sectionKey = 'Under $1';
-          sectionTitle = 'Under $1';
-        } else if (price < 5) {
-          sectionKey = '$1 - $4.99';
-          sectionTitle = '$1 - $4.99';
-        } else if (price < 10) {
-          sectionKey = '$5 - $9.99';
-          sectionTitle = '$5 - $9.99';
-        } else if (price < 25) {
-          sectionKey = '$10 - $24.99';
-          sectionTitle = '$10 - $24.99';
-        } else if (price < 50) {
-          sectionKey = '$25 - $49.99';
-          sectionTitle = '$25 - $49.99';
-        } else if (price < 100) {
-          sectionKey = '$50 - $99.99';
-          sectionTitle = '$50 - $99.99';
-        } else {
-          sectionKey = '$100+';
-          sectionTitle = '$100+';
-        }
-      } else {
-        sectionKey = 'Other';
-        sectionTitle = 'Other';
-      }
-
-      if (!groups.has(sectionKey)) {
-        groups.set(sectionKey, []);
-      }
-      groups.get(sectionKey)!.push(card);
-    });
-
-    // Convert to array and sort groups
-    const sortedGroups = Array.from(groups.entries()).map(([section, cards]) => ({
-      section,
-      cards
+    // Convert to the format expected by the rest of the component
+    return groups.map(group => ({
+      section: group.header,
+      cards: group.cards
     }));
-
-    // Sort the groups themselves
-    sortedGroups.sort((a, b) => {
-      if (sortBy === 'name' || sortBy === 'set' || sortBy === 'rarity') {
-        return a.section.localeCompare(b.section);
-      }
-
-      if (['price', 'price_low', 'price_high'].includes(sortBy)) {
-        const priceOrder: Record<string, number> = {
-          'Under $1': 1,
-          '$1 - $4.99': 2,
-          '$5 - $9.99': 3,
-          '$10 - $24.99': 4,
-          '$25 - $49.99': 5,
-          '$50 - $99.99': 6,
-          '$100+': 7
-        };
-
-        const aOrder = priceOrder[a.section] || 8;
-        const bOrder = priceOrder[b.section] || 8;
-
-        // Reverse order for price_high
-        if (sortBy === 'price_high') {
-          return bOrder - aOrder;
-        }
-        return aOrder - bOrder;
-      }
-
-      return 0;
-    });
-
-    // Apply secondary alphabetical sorting within each group
-    sortedGroups.forEach(group => {
-      group.cards.sort((a, b) => a.name.localeCompare(b.name));
-    });
-
-    return sortedGroups;
   }, [browseCards, filters]);
 
   if (cards.length === 0 && !loading) {

@@ -128,6 +128,26 @@ const ShopPage: React.FC = () => {
     })), [cards]
   );
 
+  // Sorting state
+  const sortBy = (searchParams.get('sortBy') as 'name' | 'price' | 'set' | 'rarity') || 'name';
+  const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc';
+
+  const handleSortByChange = useCallback((newSortBy: 'name' | 'price' | 'set' | 'rarity') => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set('sortBy', newSortBy);
+      return newParams;
+    });
+  }, [setSearchParams]);
+
+  const handleSortOrderChange = useCallback((newSortOrder: 'asc' | 'desc') => {
+    setSearchParams(prev => {
+      const newParams = new URLSearchParams(prev);
+      newParams.set('sortOrder', newSortOrder);
+      return newParams;
+    });
+  }, [setSearchParams]);
+
   // Derived state for filters
   // STANDARDIZED: Using treatment and finish
   const filters = useMemo(() => ({
@@ -138,10 +158,10 @@ const ShopPage: React.FC = () => {
     language: searchParams.get('language') || 'English',
     minPrice: searchParams.get('minPrice') || '',
     maxPrice: searchParams.get('maxPrice') || '',
-    sortBy: searchParams.get('sortBy') || 'name',
-    sortOrder: searchParams.get('sortOrder') || 'asc',
+    sortBy,
+    sortOrder,
     set: selectedSet
-  }), [searchParams, selectedQuality, selectedRarity, selectedTreatment, selectedFinish, selectedSet]);
+  }), [searchParams, selectedQuality, selectedRarity, selectedTreatment, selectedFinish, selectedSet, sortBy, sortOrder]);
 
   // Currency change handler
   const handleCurrencyChange = (newCurrency: Currency) => {
@@ -278,6 +298,10 @@ const ShopPage: React.FC = () => {
                 activeFilters={[]}
                 onClearFilter={() => {}}
                 onClearAllFilters={() => {}}
+                sortBy={sortBy}
+                sortOrder={sortOrder}
+                onSortByChange={handleSortByChange}
+                onSortOrderChange={handleSortOrderChange}
               />
 
               <CardDisplayArea
