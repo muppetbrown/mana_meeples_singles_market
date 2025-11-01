@@ -27,12 +27,12 @@ export const ENDPOINTS = {
     INITIALIZE_PRICES: `${BASE_URL}/admin/pricing/initialize`,           // Button 1
     REFRESH_INVENTORY_PRICES: `${BASE_URL}/admin/pricing/refresh-inventory`, // Button 2
     REFRESH_CARD_PRICE: `${BASE_URL}/admin/pricing/refresh-card`,        // Button 3
-    
+
     // Pricing Queries
     CARDS_WITHOUT_PRICING: `${BASE_URL}/admin/pricing/cards-without-pricing`,
     INVENTORY_CARDS: `${BASE_URL}/admin/pricing/inventory-cards`,
     CARD_VARIATIONS: `${BASE_URL}/admin/pricing/card-variations`,
-    
+
     // Legacy endpoint (deprecated - use the 3 new endpoints above)
     UPDATE_PRICES: `${BASE_URL}/admin/pricing/update`,
     SCRYFALL_ELIGIBLE: `${BASE_URL}/admin/pricing/scryfall-eligible`,
@@ -40,14 +40,14 @@ export const ENDPOINTS = {
     // Card Management
     CARDS: `${BASE_URL}/admin/cards`,
     CARD_BY_ID: (id: number) => `${BASE_URL}/admin/cards/${id}`,
-    
+
     // Inventory Management
     INVENTORY: `${BASE_URL}/admin/inventory`,
     INVENTORY_BY_ID: (id: number) => `${BASE_URL}/admin/inventory/${id}`,
-    
-    // Import
-    IMPORT_SCRYFALL: `${BASE_URL}/admin/import/scryfall`,
-    IMPORT_STATUS: `${BASE_URL}/admin/import/status`,
+
+    // Import - New unified import system
+    IMPORT_SET: `${BASE_URL}/admin/import/set`,
+    IMPORT_GAMES: `${BASE_URL}/admin/import/games`,
   },
 
   // -------------------- Cards (Admin endpoints) --------------------
