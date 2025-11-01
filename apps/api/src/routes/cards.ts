@@ -384,8 +384,9 @@ router.get('/filters', async (req: Request, res: Response) => {
         ) AS price
       FROM card_inventory ci
       LEFT JOIN (
-        SELECT DISTINCT ON (card_id)
-          id, finish
+        SELECT
+          c.id, c.finish
+        from cards c
       ) cf on cf.id = ci.card_id
       LEFT JOIN (
         SELECT DISTINCT ON (card_id)

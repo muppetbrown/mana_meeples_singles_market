@@ -173,8 +173,9 @@ router.get('/cards', async (req: Request, res: Response) => {
         ) AS variations
       FROM card_inventory ci
       LEFT JOIN (
-        SELECT DISTINCT ON (card_id)
+        SELECT DISTINCT ON (id)
           id, finish
+          from cards
       ) cf on cf.id = ci.card_id
       LEFT JOIN (
         SELECT DISTINCT ON (card_id)
