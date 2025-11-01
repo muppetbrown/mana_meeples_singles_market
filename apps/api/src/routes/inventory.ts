@@ -92,79 +92,91 @@ router.get("/admin/inventory", adminAuthJWT, async (req: Request, res: Response)
 const AddInventorySchema = z.object({
   card_id: z.coerce.number().int().positive(),
   quality: z.string().trim().min(1),
-  price: z.coerce.number().min(0).default(0),
+  language: z.string().trim().min(1).default('English'),
+  price: z.coerce.number().min(0),                    // NOT NULL in table
   stock_quantity: z.coerce.number().int().min(0).default(0),
-  language: z.string().trim().min(1),
+  price_source: z.string().trim().optional(),
   cost: z.coerce.number().min(0).optional(),
   markup_percentage: z.coerce.number().min(0).max(999).default(0),
   auto_price_enabled: z.boolean().default(false),
   low_stock_threshold: z.coerce.number().int().min(0).default(3),
-  tcgplayer_id: z.string().trim().optional(),
-  price_source: z.string().trim().optional(),
-  sku: z.string().trim().optional(),
 });
 
-router.post("/admin/inventory", adminAuthJWT, async (req: Request, res: Response) => {
+router.post("/admin/inventory", adminAuthJWT, async (req, res) => {
   const parsed = AddInventorySchema.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: "Invalid body", details: parsed.error.flatten() });
   }
 
   const {
-    card_id, quality, price, stock_quantity, language,
-    cost, markup_percentage, auto_price_enabled, low_stock_threshold,
-    tcgplayer_id, price_source, sku
+    card_id, quality, language,
+    price, stock_quantity,
+    price_source,
+    cost, markup_percentage,
+    auto_price_enabled, low_stock_threshold,
   } = parsed.data;
 
-  // Check if card exists
+  // Ensure card exists
   const cardCheck = await db.query("SELECT id FROM cards WHERE id = $1", [card_id]);
   if (cardCheck.length === 0) {
     return res.status(400).json({ error: "Invalid card_id" });
   }
 
+  // Columns reflect your current schema
   const sql = `
     INSERT INTO card_inventory (
-      card_id, 
-      quality, 
-      language, 
-      price, 
+      card_id,
+      quality,
       stock_quantity,
-      cost, 
-      markup_percentage, 
-      auto_price_enabled, 
-      low_stock_threshold,
-      price_source
+      price,
+      price_source,
+      last_price_update,
+      language,
+      cost,
+      markup_percentage,
+      auto_price_enabled,
+      low_stock_threshold
     )
-    VALUES ($1, NULL, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+    VALUES ($1,$2,$3,$4,$5,NOW(),$6,$7,$8,$9,$10)
     ON CONFLICT (card_id, quality, language)
     DO UPDATE SET
-      price = EXCLUDED.price,
-      stock_quantity = EXCLUDED.stock_quantity,
-      cost = EXCLUDED.cost,
-      markup_percentage = EXCLUDED.markup_percentage,
+      stock_quantity     = EXCLUDED.stock_quantity,
+      price              = EXCLUDED.price,
+      price_source       = EXCLUDED.price_source,
+      last_price_update  = CASE
+                             WHEN EXCLUDED.price IS DISTINCT FROM card_inventory.price
+                             THEN NOW()
+                             ELSE card_inventory.last_price_update
+                           END,
+      cost               = EXCLUDED.cost,
+      markup_percentage  = EXCLUDED.markup_percentage,
       auto_price_enabled = EXCLUDED.auto_price_enabled,
-      low_stock_threshold = EXCLUDED.low_stock_threshold,
-      price_source = EXCLUDED.price_source,
-      updated_at = NOW()
-    RETURNING *
+      low_stock_threshold= EXCLUDED.low_stock_threshold,
+      updated_at         = NOW()
+    RETURNING *;
   `;
 
   try {
     const rows = await db.query(sql, [
-      card_id, quality, language, price, stock_quantity,
-      cost, markup_percentage, auto_price_enabled, low_stock_threshold,
-      tcgplayer_id, price_source, sku
+      card_id,
+      quality,
+      stock_quantity,
+      price,
+      price_source ?? null,
+      language,
+      cost ?? null,
+      markup_percentage ?? 0,
+      auto_price_enabled ?? false,
+      low_stock_threshold ?? 3,
     ]);
+
     return res.status(200).json({ inventory: rows[0] });
-  } catch (err: unknown) {
-    console.error("POST /admin/inventory failed", err instanceof Error ? {
-      code: (err && typeof err === 'object' && 'code' in err) ? (err as {code: unknown}).code : 'unknown',
-      message: err.message,
-      card_id
-    } : { err, card_id });
+  } catch (err: any) {
+    console.error("POST /admin/inventory failed", { code: err?.code, message: err?.message, card_id });
     return res.status(500).json({ error: "Failed to upsert inventory" });
   }
 });
+
 
 /**
  * PATCH /admin/inventory/:id

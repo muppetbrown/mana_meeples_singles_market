@@ -130,7 +130,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           games: data.games || [],
           sets: data.sets || [],
           treatments: data.treatments || [],
-          finishes: data.finishes || data.foilTypes || [], // Support both field names for backward compatibility
+          finishes: data.finishes || [], 
           rarities: data.rarities || [],
           qualities: data.qualities || []
         });
@@ -148,19 +148,20 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   // Auto-populate price when variation changes
   useEffect(() => {
     if (selectedVariation && showAddModal) {
-      const automatedPrice = getAutomatedPrice(selectedVariation);
-      const hasAutomatedPrice = automatedPrice !== null && selectedVariation.price_source;
+      const automatedPrice = getAutomatedPrice(selectedVariation); // number | null
+      const hasAutomatedPrice =
+        automatedPrice !== null && Boolean(selectedVariation.price_source); // ✅ boolean
 
       // Only update if useAutomatedPrice is true or if it's the first time setting up
       if (addFormData.useAutomatedPrice || !addFormData.price) {
         setAddFormData(prev => ({
           ...prev,
-          price: hasAutomatedPrice ? automatedPrice.toString() : '',
-          useAutomatedPrice: hasAutomatedPrice,
+          price: hasAutomatedPrice ? String(automatedPrice) : '',
+          useAutomatedPrice: hasAutomatedPrice, // ✅ boolean
         }));
       }
     }
-  }, [selectedVariation, showAddModal]); // Don't include addFormData to avoid infinite loop
+  }, [selectedVariation, showAddModal]);
 
   // --------------------------------------------------------------------------
   // URL STATE HANDLERS
@@ -530,35 +531,34 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const openAddModal = useCallback((card: BrowseBaseCard) => {
     setAddModalCard(card);
 
-    // Auto-select a variation (prefer non-foil, otherwise use first)
+    // Auto-select a variation (prefer non-foil, otherwise first)
     let selectedVar: BrowseVariation | undefined;
     if (card.variations && card.variations.length > 0) {
-      // Try to find non-foil variation
       const nonfoilVariation = card.variations.find(v => {
-        const finish = v.finish?.toLowerCase() || '';
-        return finish.includes('non') || finish === 'nonfoil';
+        const finish = (v.finish ?? '').toLowerCase();
+        return finish === 'nonfoil' || finish.includes('non'); // adjust if you want stricter match
       });
-
-      // Use non-foil if found, otherwise use first variation
-      selectedVar = nonfoilVariation || card.variations[0];
+      selectedVar = nonfoilVariation ?? card.variations[0];
       setSelectedVariation(selectedVar);
     } else {
       setSelectedVariation(undefined);
     }
 
-    // Check if there's an automated price available
-    const automatedPrice = getAutomatedPrice(selectedVar);
-    const hasAutomatedPrice = automatedPrice !== null && selectedVar?.price_source;
+    // Automated price (number | null)
+    const automatedPrice = selectedVar ? getAutomatedPrice(selectedVar) : null;
+    const hasAutomatedPrice = automatedPrice !== null && Boolean(selectedVar?.price_source); // ✅ boolean
 
     setAddFormData({
       quality: 'Near Mint',
-      price: hasAutomatedPrice ? automatedPrice.toString() : '',
+      price: hasAutomatedPrice ? String(automatedPrice) : '',
       stock_quantity: 1,
       language: 'English',
-      useAutomatedPrice: hasAutomatedPrice,
+      useAutomatedPrice: hasAutomatedPrice, // ✅ boolean
     });
+
     setShowAddModal(true);
   }, [getAutomatedPrice]);
+
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
@@ -583,27 +583,44 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     }
 
     setSaving(true);
-    try {
-      const inventoryData = {
-        card_id: selectedVariation.id,  // Use the specific variation's card ID
-        quality: addFormData.quality,
-        price: parseFloat(addFormData.price) || 0,
-        stock_quantity: addFormData.stock_quantity,
-        language: addFormData.language,
-      };
+  try {
+    const inventoryData = {
+      card_id: addModalCard.id,                         // ✅ card id, not variation id
+      quality: addFormData.quality,
+      language: addFormData.language || 'English',
+      price: Number.isFinite(parseFloat(addFormData.price))
+        ? parseFloat(addFormData.price)
+        : 0,
+      stock_quantity: Number(addFormData.stock_quantity) || 0,
 
-      await api.post(ENDPOINTS.ADMIN.INVENTORY, inventoryData);
+      // Optional but useful:
+      auto_price_enabled: !!addFormData.useAutomatedPrice,
+      price_source: selectedVariation?.price_source ?? undefined,
+      // cost: ..., markup_percentage: ..., low_stock_threshold: ...
+    } as const;
 
-      closeAddModal();
-      handleRefresh();
+    const res = await fetch(ENDPOINTS.ADMIN.INVENTORY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // if your adminAuthJWT uses cookies
+      body: JSON.stringify(inventoryData),
+    });
 
-    } catch (err) {
-      console.error('Failed to add to inventory:', err);
-      alert('Failed to add to inventory. Please try again.');
-    } finally {
-      setSaving(false);
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({} as any));
+      throw new Error(err?.error || `Upsert failed (${res.status})`);
     }
-  }, [addModalCard, selectedVariation, addFormData, closeAddModal, handleRefresh]);
+
+    // success
+    closeAddModal();
+    handleRefresh();
+  } catch (err) {
+    console.error('Failed to add to inventory:', err);
+    alert(err instanceof Error ? err.message : 'Failed to add to inventory. Please try again.');
+  } finally {
+    setSaving(false);
+  }
+}, [addModalCard, selectedVariation, addFormData, closeAddModal, handleRefresh]);
 
   // --------------------------------------------------------------------------
   // RENDER
@@ -773,12 +790,12 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         </>
       )}
 
-      {/* Add to Inventory Modal */}
       {showAddModal && addModalCard && (
         <AddToInventoryModal
+          key={addModalCard.id}
           card={addModalCard}
-          selectedVariation={selectedVariation}
-          onVariationChange={setSelectedVariation}
+          {...(selectedVariation ? { selectedVariation } : {})}   // 👈 only pass when defined
+          onVariationChange={(v) => setSelectedVariation(v)}       // keep signature simple
           formData={addFormData}
           onFormChange={setAddFormData}
           onSave={handleAddToInventory}

@@ -33,10 +33,6 @@ export const ENDPOINTS = {
     INVENTORY_CARDS: `${BASE_URL}/admin/pricing/inventory-cards`,
     CARD_VARIATIONS: `${BASE_URL}/admin/pricing/card-variations`,
 
-    // Legacy endpoint (deprecated - use the 3 new endpoints above)
-    UPDATE_PRICES: `${BASE_URL}/admin/pricing/update`,
-    SCRYFALL_ELIGIBLE: `${BASE_URL}/admin/pricing/scryfall-eligible`,
-
     // Card Management
     CARDS: `${BASE_URL}/admin/cards`,
     CARD_BY_ID: (id: number) => `${BASE_URL}/admin/cards/${id}`,
