@@ -60,17 +60,16 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
         />
 
         {/* View Toggle */}
-        <div className="flex items-center gap-2 flex-shrink-0" style={{ minWidth: '140px', width: '140px' }}>
-          <span className="text-sm text-mm-teal hidden sm:inline" style={{ width: '36px' }}>View:</span>
-          <div className="inline-flex rounded-lg border border-mm-warmAccent bg-white p-0.5" style={{ width: '96px' }}>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <span className="text-sm text-mm-teal font-medium hidden sm:inline">View:</span>
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setViewMode('grid')}
-              className={`px-3 py-2 rounded-md transition-colors motion-reduce:transition-none ${
+              className={`h-10 w-10 flex items-center justify-center rounded-lg border border-mm-warmAccent transition-colors motion-reduce:transition-none ${
                 viewMode === 'grid'
                   ? 'bg-mm-gold text-white shadow-sm'
-                  : 'text-mm-teal hover:text-mm-darkForest hover:bg-mm-tealLight'
-              }`}
-              style={{ width: '44px', minWidth: '44px' }}
+                  : 'bg-white text-mm-teal hover:bg-mm-tealLight'
+              } focus:outline-none focus:ring-2 focus:ring-mm-forest`}
               aria-pressed={viewMode === 'grid'}
               aria-label="Switch to grid view"
             >
@@ -78,12 +77,11 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
             </button>
             <button
               onClick={() => setViewMode('list')}
-              className={`px-3 py-2 rounded-md transition-colors motion-reduce:transition-none ${
+              className={`h-10 w-10 flex items-center justify-center rounded-lg border border-mm-warmAccent transition-colors motion-reduce:transition-none ${
                 viewMode === 'list'
                   ? 'bg-mm-gold text-white shadow-sm'
-                  : 'text-mm-teal hover:text-mm-darkForest hover:bg-mm-tealLight'
-              }`}
-              style={{ width: '44px', minWidth: '44px' }}
+                  : 'bg-white text-mm-teal hover:bg-mm-tealLight'
+              } focus:outline-none focus:ring-2 focus:ring-mm-forest`}
               aria-pressed={viewMode === 'list'}
               aria-label="Switch to list view"
             >
