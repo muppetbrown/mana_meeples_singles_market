@@ -94,10 +94,12 @@ export function AddToCartModal({
   if (!isOpen) return null;
 
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="addToCartTitle" className="fixed inset-0 z-50">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
-      <div className="absolute inset-x-0 bottom-0 sm:inset-y-0 sm:my-auto sm:mx-auto sm:max-w-lg w-full bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl p-4 shadow-xl">
-        <h2 id="addToCartTitle" className="text-lg font-semibold">Select variation & quantity</h2>
+    <div role="dialog" aria-modal="true" aria-labelledby="addToCartTitle" className="fixed inset-0 z-60">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} aria-hidden="true" />
+      <div className="absolute inset-x-0 bottom-0 sm:inset-y-0 sm:my-auto sm:mx-auto sm:max-w-lg w-full bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl animate-slide-in-up">
+        <h2 id="addToCartTitle" className="text-xl font-bold bg-gradient-to-r from-mm-gold to-mm-tealBright bg-clip-text text-transparent mb-1">
+          Select variation & quantity
+        </h2>
         <div aria-live="polite" aria-atomic="true" className="sr-only" ref={liveRef} />
 
         {isLoading && <p role="status">Loading inventory…</p>}
@@ -138,14 +140,20 @@ export function AddToCartModal({
               )}
             </label>
 
-            <div className="flex justify-end gap-2 pt-2">
-              <button type="button" onClick={onClose} className="rounded-xl border px-4 py-2">Cancel</button>
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                type="button"
+                onClick={onClose}
+                className="rounded-xl border-2 border-mm-warmAccent hover:border-mm-teal hover:bg-mm-tealLight px-6 py-2.5 font-medium transition-colors"
+              >
+                Cancel
+              </button>
               <button
                 type="submit"
                 disabled={!selected || selected.inStock === 0}
-                className="rounded-xl bg-indigo-600 text-white px-4 py-2 disabled:opacity-50"
+                className="rounded-xl bg-gradient-to-r from-mm-gold to-mm-teal text-white px-6 py-2.5 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
               >
-                Add {selected ? `(${formatCurrency(selected.priceCents, currency)})` : ''}
+                Add to Cart {selected ? `(${formatCurrency(selected.priceCents, currency)})` : ''}
               </button>
             </div>
           </form>

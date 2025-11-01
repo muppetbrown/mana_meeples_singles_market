@@ -54,6 +54,10 @@ const config: Config = {
       },
       animation: {
         'spin-slow': 'spin 2s linear infinite',
+      },
+      zIndex: {
+        '45': '45',
+        '60': '60',
       }
     },
   },

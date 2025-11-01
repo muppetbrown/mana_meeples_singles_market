@@ -34,16 +34,22 @@ export const CartModal: React.FC<CartModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col">
+    <div
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 flex items-center justify-center p-4 animate-fade-in"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden flex flex-col animate-scale-in"
+        onClick={(e) => e.stopPropagation()}
+      >
         {/* Header */}
-        <div className="p-6 border-b flex items-center justify-between">
-          <h2 className="text-2xl font-bold text-mm-darkForest">
+        <div className="p-6 border-b-2 border-mm-warmAccent flex items-center justify-between bg-gradient-to-r from-mm-cream to-white">
+          <h2 className="text-2xl font-bold bg-gradient-to-r from-mm-gold to-mm-tealBright bg-clip-text text-transparent">
             Shopping Cart
           </h2>
           <button
             onClick={onClose}
-            className="text-mm-teal hover:text-mm-darkForest focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none rounded"
+            className="text-mm-teal hover:text-mm-darkForest hover:bg-mm-tealLight rounded-full p-2 transition-colors focus:ring-4 focus:ring-mm-forest focus:ring-offset-2 focus:outline-none"
             aria-label="Close cart"
           >
             <X className="w-6 h-6" />
@@ -74,18 +80,18 @@ export const CartModal: React.FC<CartModalProps> = ({
 
         {/* Footer */}
         {itemCount > 0 && (
-          <div className="p-6 border-t bg-mm-cream">
+          <div className="p-6 border-t-2 border-mm-warmAccent bg-gradient-to-r from-mm-cream to-white">
             <div className="flex items-center justify-between mb-4">
               <span className="text-lg font-semibold text-mm-darkForest">
                 Total:
               </span>
-              <span className="text-2xl font-bold text-mm-forest">
+              <span className="text-3xl font-bold bg-gradient-to-r from-mm-gold to-mm-forest bg-clip-text text-transparent">
                 {formatCurrencySimple(total, currency)}
               </span>
             </div>
-            <button 
-              onClick={onCheckout} 
-              className="btn-mm-primary w-full"
+            <button
+              onClick={onCheckout}
+              className="btn-mm-primary w-full shadow-lg hover:shadow-xl transition-shadow text-lg py-3"
             >
               Proceed to Checkout
             </button>

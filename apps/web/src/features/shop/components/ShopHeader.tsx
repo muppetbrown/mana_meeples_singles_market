@@ -39,7 +39,7 @@ export const ShopHeader: React.FC<ShopHeaderProps> = ({
       )}
 
       {/* Header */}
-      <header className="bg-white shadow-sm sticky top-0 z-40 border-b border-mm-warmAccent">
+      <header className="bg-white shadow-md sticky top-0 z-50 border-b-2 border-mm-warmAccent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between gap-4">
             <h1 className="text-2xl font-bold bg-gradient-to-r from-mm-gold to-mm-tealBright bg-clip-text text-transparent">
@@ -59,7 +59,7 @@ export const ShopHeader: React.FC<ShopHeaderProps> = ({
               >
                 <ShoppingCart className="w-6 h-6 text-mm-forest" />
                 <span
-                  className={`absolute -top-1 -right-1 ${cartCount > 0 ? 'bg-mm-gold' : 'bg-mm-teal'} text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center`}
+                  className={`absolute -top-1 -right-1 ${cartCount > 0 ? 'bg-mm-gold' : 'bg-mm-teal'} text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-sm`}
                   aria-live="assertive"
                   aria-label={`${cartCount} items in cart`}
                 >

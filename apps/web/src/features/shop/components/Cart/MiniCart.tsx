@@ -31,23 +31,23 @@ export const MiniCart: React.FC<MiniCartProps> = ({
   if (!isOpen || itemCount === 0) return null;
 
   return (
-    <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-lg border border-mm-warmAccent p-4 z-40 max-w-sm">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="font-semibold text-mm-darkForest">
+    <div className="fixed bottom-4 right-4 bg-white rounded-xl shadow-2xl border-2 border-mm-warmAccent p-4 z-45 max-w-sm animate-slide-in-up">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-semibold text-mm-darkForest text-lg">
           Cart ({itemCount})
         </h3>
         {onClose && (
           <button
             onClick={onClose}
-            className="text-mm-teal hover:text-mm-darkForest focus:ring-2 focus:ring-mm-forest focus:outline-none rounded"
+            className="text-mm-teal hover:text-mm-darkForest hover:bg-mm-tealLight rounded-full p-1 transition-colors focus:ring-2 focus:ring-mm-forest focus:outline-none"
             aria-label="Close mini cart"
           >
-            <X className="w-4 h-4" />
+            <X className="w-5 h-5" />
           </button>
         )}
       </div>
 
-      <div className="space-y-2 max-h-48 overflow-y-auto">
+      <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
         {items.slice(0, 3).map((item) => (
           <div 
             key={`${item.card_id}-${item.variation_key}`} 
@@ -83,18 +83,20 @@ export const MiniCart: React.FC<MiniCartProps> = ({
       </div>
 
       {items.length > 3 && (
-        <p className="text-xs text-mm-teal mt-2">
-          + {items.length - 3} more items
+        <p className="text-xs text-mm-teal mt-2 font-medium">
+          + {items.length - 3} more item{items.length - 3 > 1 ? 's' : ''}
         </p>
       )}
 
       {(onViewCart || onOpenFullCart) && (
-        <button
-          onClick={onViewCart || onOpenFullCart}
-          className="btn-mm-primary w-full mt-3"
-        >
-          View Cart ({formatCurrencySimple(total, currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' })})
-        </button>
+        <div className="mt-4 pt-3 border-t border-mm-warmAccent">
+          <button
+            onClick={onViewCart || onOpenFullCart}
+            className="btn-mm-primary w-full shadow-lg hover:shadow-xl transition-shadow"
+          >
+            View Cart ({formatCurrencySimple(total, currency || { code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' })})
+          </button>
+        </div>
       )}
     </div>
   );
