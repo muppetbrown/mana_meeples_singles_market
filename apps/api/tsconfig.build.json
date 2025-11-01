@@ -3,22 +3,21 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "verbatimModuleSyntax": true,
-    "exactOptionalPropertyTypes": true,
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "strict": true,
     "skipLibCheck": true,
+    "noEmit": false,
     "declaration": false,
-    "resolveJsonModule": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "allowSyntheticDefaultImports": true,
     "baseUrl": ".",
     "paths": { "@api/*": ["./src/*"] },
     "types": ["node"],
     "rootDir": "src",
     "outDir": "dist",
-    "sourceMap": true,
-    "incremental": true,
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "sourceMap": true
   },
   "include": ["src"],
   "exclude": [
