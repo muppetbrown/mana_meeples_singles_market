@@ -1,6 +1,6 @@
 // apps/web/src/features/admin/components/Dashboard.tsx
 import { useState, useEffect } from 'react';
-import { Package, DollarSign, ShoppingCart, Loader2, LogOut, BookOpen } from 'lucide-react';
+import { Package, DollarSign, ShoppingCart, Loader2, LogOut, BookOpen, Download } from 'lucide-react';
 import { api } from '@/lib/api';
 import { ENDPOINTS } from '@/lib/api';
 import CurrencySelector from '@/shared/ui/CurrencySelector';
@@ -10,6 +10,7 @@ import OrdersTab from './components//Orders/OrdersTab';
 import AnalyticsTab from './components/Analytics/AnalyticsTab';
 import InstructionsTab from './components/InstructionsTab';
 import PriceManagementHeaderButtons from './components/PriceManagementHeaderButtons';
+import ImportSetModal from './components/Import/ImportSetModal';
 
 interface Currency {
   code: string;
@@ -28,6 +29,7 @@ const Dashboard = () => {
     label: 'New Zealand Dollar (NZD)',
     rate: 1.0
   });
+  const [showImportModal, setShowImportModal] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -66,6 +68,14 @@ const Dashboard = () => {
     alert(`✅ Price operation complete!\n\nUpdated: ${result.updated}\nSkipped: ${result.skipped}\nFailed: ${result.failed}`);
   };
 
+  const handleImportSuccess = () => {
+    setShowImportModal(false);
+    // Refresh the cards tab if we're on it
+    if (activeTab === 'all-cards' || activeTab === 'inventory') {
+      window.location.reload(); // Simple refresh for now
+    }
+  };
+
   if (authChecking) {
     return (
       <div className="min-h-screen bg-slate-50 flex items-center justify-center">
@@ -87,6 +97,15 @@ const Dashboard = () => {
             <h1 className="text-2xl font-bold text-slate-900">Admin Dashboard</h1>
 
             <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowImportModal(true)}
+                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white hover:bg-blue-700 rounded-lg transition-colors"
+                aria-label="Import set"
+              >
+                <Download className="w-4 h-4" />
+                Import Set
+              </button>
+              <div className="h-6 w-px bg-slate-300" />
               <PriceManagementHeaderButtons
                 onOperationComplete={handlePriceOperationComplete}
               />
@@ -189,6 +208,13 @@ const Dashboard = () => {
         {activeTab === 'orders' && <OrdersTab />}
         {activeTab === 'instructions' && <InstructionsTab />}
       </main>
+
+      {/* Import Set Modal */}
+      <ImportSetModal
+        isOpen={showImportModal}
+        onClose={() => setShowImportModal(false)}
+        onSuccess={handleImportSuccess}
+      />
     </div>
   );
 };
