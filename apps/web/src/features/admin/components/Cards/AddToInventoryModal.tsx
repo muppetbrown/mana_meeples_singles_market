@@ -5,7 +5,7 @@
  * NEW ARCHITECTURE:
  * - Cards now have variation metadata directly on them (treatment, finish, border_color, etc.)
  * - Modal displays card's native variation properties
- * - User selects quality/foil_type/language for inventory entry
+ * - User selects variation/quality/language for inventory entry
  * - No more CardVariation type needed - just use Card
  */
 
@@ -18,7 +18,6 @@ import OptimizedImage from '@/shared/media/OptimizedImage';
 // ---------- Types ----------
 type AddFormData = {
   quality: string;
-  // foil_type removed - finish comes from the card variation itself
   price: string;
   stock_quantity: number;
   language: string;

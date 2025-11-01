@@ -61,7 +61,6 @@ export interface CardVariation {
   
   // Inventory-specific attributes (what makes each inventory entry unique)
   quality: string;           // e.g., "Near Mint", "Lightly Played", "Damaged"
-  // foil_type removed - get finish from the card's finish field
   language: string;          // e.g., "English", "Japanese", "Spanish"
   
   // Pricing and stock

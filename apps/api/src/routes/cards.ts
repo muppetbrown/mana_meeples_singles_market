@@ -372,7 +372,6 @@ router.get('/filters', async (req: Request, res: Response) => {
         ci.card_id,
         ci.id,
         ci.quality,
-        COALESCE(ci.foil_type, 'Regular') AS foil_type,
         COALESCE(ci.language, 'English') AS language,
         ci.stock_quantity,
         COALESCE(

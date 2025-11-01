@@ -175,7 +175,7 @@ router.post("/orders", async (req: Request, res: Response): Promise<void> => {
       for (const item of items) {
         // Get current inventory details
         const inventoryInfo = await client.query(
-          `SELECT quality, foil_type, language, stock_quantity 
+          `SELECT quality, language, stock_quantity 
            FROM card_inventory 
            WHERE id = $1`,
           [item.inventory_id]

@@ -38,7 +38,6 @@ export function AddToCartModal({
           variations: Array<{
             inventory_id: number;
             quality: string;
-            foil_type: string;
             language: string;
             stock: number;
             price: number;
@@ -50,7 +49,7 @@ export function AddToCartModal({
       const options: InventoryOption[] = (response.card.variations || []).map(v => ({
         inventoryId: v.inventory_id,
         treatment: 'STANDARD', // TODO: Add treatment field to backend response if needed
-        foilType: v.foil_type || 'NONFOIL',
+        foilType: 'NONFOIL',
         quality: v.quality,
         language: v.language,
         priceCents: Math.round((v.price || 0) * 100), // Convert to cents

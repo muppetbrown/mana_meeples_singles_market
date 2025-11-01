@@ -153,7 +153,6 @@ router.get('/cards', async (req: Request, res: Response) => {
             JSONB_BUILD_OBJECT(
               'inventory_id', ci.id,
               'quality', ci.quality,
-              'foil_type', COALESCE(ci.foil_type, 'Regular'),
               'language', COALESCE(ci.language, 'English'),
               'price', COALESCE(
                 CASE 
@@ -165,7 +164,7 @@ router.get('/cards', async (req: Request, res: Response) => {
               ),
               'stock', ci.stock_quantity,
               'variation_key',
-                CONCAT(ci.quality,'-',COALESCE(ci.foil_type,'Regular'),'-',COALESCE(ci.language,'English')),
+                CONCAT(ci.quality,'-',COALESCE(ci.language,'English')),
               'price_source', COALESCE(lp.price_source, ci.price_source),
               'price_updated_at', lp.updated_at
             )
@@ -237,7 +236,6 @@ router.get("/cards/:id", async (req: Request, res: Response) => {
       `SELECT
         id AS inventory_id,
         quality,
-        foil_type,
         language,
         stock_quantity AS stock,
         price

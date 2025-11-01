@@ -130,21 +130,11 @@ async function updateInventoryPricing(
       return 0; // No price to update
     }
 
-    // Map finish to foil_type values in inventory
-    let foilTypeCondition = '';
-    if (finish === 'foil') {
-      foilTypeCondition = "foil_type = 'Foil'";
-    } else if (finish === 'nonfoil') {
-      foilTypeCondition = "(foil_type = 'Non-foil' OR foil_type = 'Regular')";
-    } else if (finish === 'etched') {
-      foilTypeCondition = "foil_type = 'Etched'";
-    }
-
     // Update all inventory entries for this card with matching finish
     const result = await db.query(
       `UPDATE card_inventory 
        SET price = $1, price_source = $2, updated_at = NOW()
-       WHERE card_id = $3 AND ${foilTypeCondition}
+       WHERE card_id = $3
        RETURNING id`,
       [price, priceSource, cardId]
     );

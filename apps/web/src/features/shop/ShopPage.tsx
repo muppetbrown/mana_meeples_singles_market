@@ -386,7 +386,6 @@ const ShopPage: React.FC = () => {
                   variations: Array<{
                     inventory_id: number;
                     quality: string;
-                    foil_type: string;
                     language: string;
                     stock: number;
                     price: number;
@@ -408,9 +407,9 @@ const ShopPage: React.FC = () => {
                 card_id: card.id,
                 inventory_id: payload.inventoryId,
                 card_name: card.name,
-                variation_key: `${selectedVariation.quality}-${selectedVariation.foil_type || 'nonfoil'}-${selectedVariation.language}`,
+                variation_key: `${selectedVariation.quality}-${selectedVariation.language}`,
                 quality: selectedVariation.quality,
-                finish: selectedVariation.foil_type || 'nonfoil',
+                finish: 'nonfoil',
                 language: selectedVariation.language,
                 price: selectedVariation.price, // Price is already in dollars
                 stock: selectedVariation.stock,
