@@ -485,7 +485,7 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
       <select
         value={selectedGame}
         onChange={(e) => onGameChange(e.target.value)}
-        className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent truncate"
         aria-label="Filter by game"
       >
         <option value="all">All Games</option>
@@ -503,7 +503,7 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
           value={selectedSet}
           onChange={(e) => onSetChange(e.target.value)}
           disabled={selectedGame === 'all'}
-          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
+          className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed truncate"
           aria-label="Filter by set"
         >
           <option value="all">{selectedGame === 'all' ? 'Select a game first' : 'All Sets'}</option>
@@ -530,7 +530,7 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
             value={filter.value}
             onChange={(e) => filter.onChange(e.target.value)}
             disabled={filter.disabled}
-            className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed"
+            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed truncate"
           >
             <option value="all">All {filter.label ?? key}</option>
             {filter.options?.map((opt) => (
