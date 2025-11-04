@@ -6,6 +6,7 @@ mana_meeples_singles_market
 ├── apps/
 │ ├── api/
 │ │ ├── scripts/
+│ │ │ ├── add-inventory-constraint.js
 │ │ │ └── print-coverage-summary.mjs
 │ │ ├── src/
 │ │ │ ├── lib/
@@ -657,8 +658,9 @@ mana_meeples_singles_market
 │ │ ├── import-pokemon-set.ts
 │ │ └── list-pokemon-sets.ts
 │ ├── migrations/
-│ │ ├── migrate-card-pricing.ts
-│ │ └── run-migration.ts
+│ │ ├── add-inventory-unique-constraint.sql
+│ │ ├── apply-inventory-constraint.ts
+│ │ └── FIX-INVENTORY-CONSTRAINT.md
 │ ├── analyze-repo.mjs
 │ ├── analyze-unused-code.js
 │ ├── copy-dist-to-api.js
@@ -684,6 +686,8 @@ mana_meeples_singles_market
 ├── conversation-starter-template.txt
 ├── deps.svg
 ├── eslint.config.cjs
+├── FIX-INVENTORY-README.md
+├── FIX-INVENTORY.sql
 ├── package.json
 ├── pnpm-lock.yaml
 ├── pnpm-workspace.yaml

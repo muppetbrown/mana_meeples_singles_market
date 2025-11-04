@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2025-11-01T16:56:47.023Z",
+  "generatedAt": "2025-11-04T20:33:42.752Z",
   "root": "C:\\Git_Repos\\mana_meeples_singles_market",
   "files": [
     {
@@ -488,19 +488,19 @@
       "isTest": false
     },
     {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/migrate-card-pricing.ts",
+      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/apply-inventory-constraint.ts",
       "isExternal": true,
-      "lines": 145,
-      "sizeBytes": 5395,
+      "lines": 113,
+      "sizeBytes": 3325,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
     },
     {
-      "id": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/run-migration.ts",
+      "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/scripts/add-inventory-constraint.js",
       "isExternal": true,
-      "lines": 117,
-      "sizeBytes": 3426,
+      "lines": 111,
+      "sizeBytes": 3126,
       "onlyReExports": false,
       "exports": [],
       "isTest": false
@@ -1170,8 +1170,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/api/src/routes/inventory.ts",
       "isExternal": true,
-      "lines": 399,
-      "sizeBytes": 13463,
+      "lines": 411,
+      "sizeBytes": 13649,
       "onlyReExports": false,
       "exports": [
         {
@@ -2035,8 +2035,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/lib/api/endpoints.ts",
       "isExternal": true,
-      "lines": 139,
-      "sizeBytes": 4748,
+      "lines": 135,
+      "sizeBytes": 4550,
       "onlyReExports": false,
       "exports": [
         {
@@ -3438,8 +3438,8 @@
     {
       "id": "C:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx",
       "isExternal": true,
-      "lines": 793,
-      "sizeBytes": 27995,
+      "lines": 810,
+      "sizeBytes": 28707,
       "onlyReExports": false,
       "exports": [
         {
@@ -3996,29 +3996,29 @@
       "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/migrate-card-pricing.ts",
-      "to": "pg",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/migrate-card-pricing.ts",
-      "to": "dotenv",
-      "kind": "require"
-    },
-    {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/run-migration.ts",
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/apply-inventory-constraint.ts",
       "to": "fs",
-      "kind": "require"
+      "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/run-migration.ts",
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/apply-inventory-constraint.ts",
       "to": "path",
-      "kind": "require"
+      "kind": "import"
     },
     {
-      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/run-migration.ts",
+      "from": "C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/apply-inventory-constraint.ts",
       "to": "pg",
-      "kind": "require"
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/scripts/add-inventory-constraint.js",
+      "to": "pg",
+      "kind": "import"
+    },
+    {
+      "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/scripts/add-inventory-constraint.js",
+      "to": "dotenv",
+      "kind": "import"
     },
     {
       "from": "C:/Git_Repos/mana_meeples_singles_market/apps/api/scripts/print-coverage-summary.mjs",

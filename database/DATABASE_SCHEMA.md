@@ -1,6 +1,6 @@
 # Database Schema — `public`
 
-**Generated:** 2/11/2025, 5:57:03 am
+**Generated:** 5/11/2025, 9:34:12 am
 
 **Tables:** 11
 
@@ -94,6 +94,10 @@ FOREIGN KEY (card_id) REFERENCES cards(id) ON DELETE CASCADE
 ```sql
 PRIMARY KEY (id)
 ```
+- **UNIQUE** `card_inventory_card_quality_language_key`
+```sql
+UNIQUE (card_id, quality, language)
+```
 
 ### Foreign Keys
 
@@ -104,6 +108,11 @@ PRIMARY KEY (id)
 - **PRIMARY** **UNIQUE** `card_inventory_pkey`
 ```sql
 CREATE UNIQUE INDEX card_inventory_pkey ON public.card_inventory USING btree (id)
+```
+
+- **UNIQUE** `card_inventory_card_quality_language_key`
+```sql
+CREATE UNIQUE INDEX card_inventory_card_quality_language_key ON public.card_inventory USING btree (card_id, quality, language)
 ```
 
 -  `idx_inventory_card`

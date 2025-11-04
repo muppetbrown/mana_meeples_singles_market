@@ -60,8 +60,8 @@ digraph repo {
   nb61e21d3 [label="C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import-pokemon-set.ts", shape=box];
   n83aba73 [label="C:/Git_Repos/mana_meeples_singles_market/scripts/imports/import_mtg_with_variations.ts", shape=box];
   n831bc96d [label="C:/Git_Repos/mana_meeples_singles_market/scripts/imports/list-pokemon-sets.ts", shape=box];
-  n2e829851 [label="C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/migrate-card-pricing.ts", shape=box];
-  n43721b92 [label="C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/run-migration.ts", shape=box];
+  nb6b010cf [label="C:/Git_Repos/mana_meeples_singles_market/scripts/migrations/apply-inventory-constraint.ts", shape=box];
+  nd8871536 [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/scripts/add-inventory-constraint.js", shape=box];
   n71e4edb0 [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/scripts/print-coverage-summary.mjs", shape=box];
   nacc77157 [label="C:/Git_Repos/mana_meeples_singles_market/apps/api/src/app.ts", shape=box];
   nb1fa8f70 [label="express", shape=box];
@@ -407,11 +407,11 @@ digraph repo {
   n83aba73 -> ndf7;
   n83aba73 -> n35df80bc;
   n83aba73 -> n5686a4ad;
-  n2e829851 -> ndf7;
-  n2e829851 -> nb0f71304;
-  n43721b92 -> nccd;
-  n43721b92 -> n346425;
-  n43721b92 -> ndf7;
+  nb6b010cf -> nccd;
+  nb6b010cf -> n346425;
+  nb6b010cf -> ndf7;
+  nd8871536 -> ndf7;
+  nd8871536 -> nb0f71304;
   n71e4edb0 -> n7e076145;
   nacc77157 -> nb1fa8f70;
   nacc77157 -> nb73a046d;
