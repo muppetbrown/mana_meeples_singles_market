@@ -96,6 +96,15 @@ const CardItem: React.FC<CardItemProps> = ({
   // --------------------------------------------------------------------------
 
   useEffect(() => {
+    // NOTE: This fetch is disabled because the API endpoint /cards/:id/inventory doesn't exist
+    // In admin mode, cards already have all necessary inventory data from the main query
+    // In storefront mode, variations already include in_stock information
+    // If needed in the future, implement the backend endpoint first
+
+    setInventory([]);
+    setInventoryLoading(false);
+
+    /* DISABLED - No backend endpoint exists
     if (!selectedVariation || mode === 'all') {
       setInventory([]);
       return;
@@ -105,7 +114,7 @@ const CardItem: React.FC<CardItemProps> = ({
       setInventoryLoading(true);
       try {
         const response = await api.get<{ inventory: InventoryItem[] }>(
-          `${ENDPOINTS.CARDS.BY_ID(selectedVariation.id)}/inventory`
+          `${ENDPOINTS.ADMIN.CARD_BY_ID(selectedVariation.id)}/inventory`
         );
         setInventory(response.inventory || []);
       } catch (error) {
@@ -117,6 +126,7 @@ const CardItem: React.FC<CardItemProps> = ({
     };
 
     fetchInventory();
+    */
   }, [selectedVariation, mode]);
 
   // --------------------------------------------------------------------------
