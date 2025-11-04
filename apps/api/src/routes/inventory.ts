@@ -381,11 +381,11 @@ router.post("/admin/inventory/bulk-import", adminAuthJWT, async (req: Request, r
       try {
         await db.query(`
           INSERT INTO card_inventory (card_id, quality, language, price, stock_quantity)
-          VALUES ($1, NULL, $2, $3, $4, $5)
+          VALUES ($1, $2, $3, $4, $5)
           ON CONFLICT (card_id, quality, language)
           DO UPDATE SET price = EXCLUDED.price, stock_quantity = EXCLUDED.stock_quantity, updated_at = NOW()
         `, [card_id, quality, language, price, stock_quantity]);
-        
+
         successCount++;
       } catch (err) {
         errorCount++;
