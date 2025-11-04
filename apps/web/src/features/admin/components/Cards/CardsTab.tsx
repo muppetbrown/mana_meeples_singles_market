@@ -614,6 +614,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     // success
     closeAddModal();
     handleRefresh();
+
+    // Show success message
+    alert(`✅ Successfully added ${addModalCard.name} to inventory!\n\nQuantity: ${addFormData.stock_quantity}\nPrice: $${addFormData.price}\nQuality: ${addFormData.quality}`);
   } catch (err) {
     console.error('Failed to add to inventory:', err);
     alert(err instanceof Error ? err.message : 'Failed to add to inventory. Please try again.');
@@ -751,12 +754,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                       mode={mode}
                       currency={{ code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
                       onAction={(card, variation) => {
-                        // In admin mode, open add to inventory modal
-                        if (mode === 'all') {
-                          openAddModal(card);
-                        } else {
-                          console.log('Manage inventory for card:', card.name);
-                        }
+                        // Open add/edit inventory modal for both modes
+                        // In inventory mode, this allows editing existing inventory
+                        // In all cards mode, this allows adding new inventory
+                        openAddModal(card);
                       }}
                     />
                   </div>
@@ -772,7 +773,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                       cards={group.cards}
                       mode={mode}
                       viewMode={viewMode}
-                      {...(!isInventoryMode && { onAddToInventory: (card) => openAddModal(card) })}
+                      onAddToInventory={(card) => openAddModal(card)}
+                      onManage={(card) => openAddModal(card)}
                     />
                   </div>
                 ))}
