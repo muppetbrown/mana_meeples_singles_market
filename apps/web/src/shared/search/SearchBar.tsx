@@ -360,8 +360,8 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
                 className="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed bg-white"
               >
                 <option value="all">All {filter.label ?? key}</option>
-                {filter.options?.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
+                {filter.options?.map((opt, index) => (
+                  <option key={`${key}-${opt.value}-${index}`} value={opt.value}>
                     {opt.label}
                   </option>
                 ))}
@@ -533,8 +533,8 @@ const CardSearchBar: React.FC<CardSearchBarProps> = ({
             className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-slate-100 disabled:cursor-not-allowed truncate"
           >
             <option value="all">All {filter.label ?? key}</option>
-            {filter.options?.map((opt) => (
-              <option key={opt.value} value={opt.value}>
+            {filter.options?.map((opt, index) => (
+              <option key={`${key}-${opt.value}-${index}`} value={opt.value}>
                 {opt.label}
               </option>
             ))}
