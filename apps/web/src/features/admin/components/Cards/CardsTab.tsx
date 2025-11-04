@@ -22,6 +22,7 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download, LayoutGrid, List, Package } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
+import { useToast } from '@/shared/ui/Toast';
 import AddToInventoryModal from './AddToInventoryModal';
 import {
   groupCardsForBrowse,
@@ -71,9 +72,10 @@ interface UnifiedCardsTabProps {
 
 const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   // --------------------------------------------------------------------------
-  // STATE
+  // HOOKS
   // --------------------------------------------------------------------------
-  
+
+  const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
   const [cards, setCards] = useState<Card[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
@@ -615,8 +617,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     closeAddModal();
     handleRefresh();
 
-    // Show success message
-    alert(`✅ Successfully added ${addModalCard.name} to inventory!\n\nQuantity: ${addFormData.stock_quantity}\nPrice: $${addFormData.price}\nQuality: ${addFormData.quality}`);
+    // Show success toast notification
+    toast.success(`Successfully added ${addModalCard.name} to inventory! (Qty: ${addFormData.stock_quantity}, Price: $${addFormData.price})`, 4000);
   } catch (err) {
     console.error('Failed to add to inventory:', err);
     alert(err instanceof Error ? err.message : 'Failed to add to inventory. Please try again.');
