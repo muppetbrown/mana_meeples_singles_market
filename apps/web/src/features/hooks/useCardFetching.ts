@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { api, ENDPOINTS } from '@/lib/api';
+import { api, ENDPOINTS, buildStorefrontQuery } from '@/lib/api';
 import { useErrorHandler } from '@/services/error/handler';
 import type { StorefrontCard, SearchFilters } from '@/types';
 
@@ -51,47 +51,26 @@ export function useCardFetching({
   const fetchCards = useCallback(async () => {
     // Prevent duplicate requests
     if (requestInFlight.current) return;
-    
+
     try {
       requestInFlight.current = true;
       setLoading(true);
       setError(null);
 
-      // STANDARDIZED: Build query params for storefront API
-      const params = new URLSearchParams();
+      // Use shared query builder to reduce duplication with backend
+      const params = buildStorefrontQuery(
+        {
+          searchTerm,
+          selectedGame,
+          selectedSet,
+          selectedTreatment,
+          selectedFinish
+        },
+        games,
+        sets
+      );
 
-      // Search term
-      if (searchTerm && searchTerm.trim()) {
-        params.set('search', searchTerm.trim());
-      }
-
-      // Game filter
-      if (selectedGame && selectedGame !== 'all') {
-        const game = games.find(g => g.name === selectedGame);
-        if (game) {
-          params.set('game_id', game.id.toString());
-        }
-      }
-
-      // Set filter
-      if (selectedSet && selectedSet !== 'all') {
-        const set = sets.find(s => s.name === selectedSet);
-        if (set) {
-          params.set('set_id', set.id.toString());
-        }
-      }
-
-      // Treatment filter (server-side)
-      if (selectedTreatment && selectedTreatment !== 'all') {
-        params.set('treatment', selectedTreatment);
-      }
-
-      // Finish filter (server-side)
-      if (selectedFinish && selectedFinish !== 'all') {
-        params.set('finish', selectedFinish);
-      }
-
-      // 🔥 NEW: Check if params actually changed
+      // Check if params actually changed
       const currentParams = params.toString();
       if (currentParams === lastFetchedParams.current) {
         // Same params, skip fetch
@@ -99,11 +78,11 @@ export function useCardFetching({
         requestInFlight.current = false;
         return;
       }
-      
+
       // Store current params
       lastFetchedParams.current = currentParams;
 
-      // Use the storefront endpoint with trigram search
+      // Use the storefront endpoint
       const response = await api.get<{ cards: StorefrontCard[] }>(
         `${ENDPOINTS.STOREFRONT.CARDS}?${params.toString()}`
       );
@@ -119,38 +98,36 @@ export function useCardFetching({
       requestInFlight.current = false;
     }
   }, [
-    selectedGame, 
-    selectedSet, 
-    searchTerm, 
-    selectedTreatment, 
-    selectedFinish, 
-    games, 
+    selectedGame,
+    selectedSet,
+    searchTerm,
+    selectedTreatment,
+    selectedFinish,
+    games,
     sets,
     errorHandler
   ]);
   
-  // 🔥 NEW: Separate effect for debounced search
+  // Fetch cards with debouncing for search
   useEffect(() => {
     // Clear existing debounce timer
     if (searchDebounceTimer.current) {
       clearTimeout(searchDebounceTimer.current);
     }
 
-    // If we have games loaded, debounce the search
-    if (games?.length > 0) {
-      // For search term changes, debounce for 400ms
-      // For other filter changes, fetch immediately
-      const isSearchChange = searchTerm.length > 0;
-      
-      if (isSearchChange) {
-        // Debounce search term changes
-        searchDebounceTimer.current = setTimeout(() => {
-          fetchCards();
-        }, 400); // 400ms debounce for search
-      } else {
-        // Immediate fetch for filter changes or empty search
+    // For search term changes, debounce for 400ms
+    // For other filter changes, fetch immediately
+    const isSearchChange = searchTerm.length > 0;
+
+    if (isSearchChange) {
+      // Debounce search term changes
+      searchDebounceTimer.current = setTimeout(() => {
         fetchCards();
-      }
+      }, 400); // 400ms debounce for search
+    } else {
+      // Immediate fetch for filter changes or empty search
+      // This allows initial load to work even if games aren't loaded yet
+      fetchCards();
     }
 
     // Cleanup on unmount
