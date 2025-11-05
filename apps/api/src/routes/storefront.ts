@@ -119,8 +119,20 @@ router.get('/cards', async (req: Request, res: Response) => {
   const orderByOut = sortToSql('c', sort, order);
   const offset = (page - 1) * per_page;
 
-  // FIXED: Apply inventory filter before pagination to show only cards with stock
+  // FIXED: Show all variations of cards that have inventory on ANY variation
+  // This ensures that if a card has regular and foil versions, and only regular has inventory,
+  // both versions will be returned so the frontend can properly group them
   const sql = `
+    WITH card_identities_with_inventory AS (
+      -- Find card identities (name, card_number, set_id) that have ANY inventory
+      SELECT DISTINCT
+        c.name,
+        c.card_number,
+        c.set_id
+      FROM cards c
+      JOIN card_inventory ci ON ci.card_id = c.id
+      WHERE ci.stock_quantity > 0
+    )
     SELECT *
     FROM (
       SELECT
@@ -149,6 +161,10 @@ router.get('/cards', async (req: Request, res: Response) => {
       FROM cards c
       JOIN games g ON g.id = c.game_id
       JOIN card_sets cs ON cs.id = c.set_id
+      -- Only include variations where the card identity has inventory
+      JOIN card_identities_with_inventory ciwi ON ciwi.name = c.name
+        AND ciwi.card_number = c.card_number
+        AND ciwi.set_id = c.set_id
       LEFT JOIN LATERAL (
         SELECT
           COUNT(ci.id)::int AS variation_count,
@@ -189,7 +205,7 @@ router.get('/cards', async (req: Request, res: Response) => {
         ) lp ON lp.card_id = c.id
         WHERE ci.card_id = c.id
       ) inv ON TRUE
-      ${whereSql ? `${whereSql} AND` : 'WHERE'} inv.variation_count > 0
+      ${whereSql ? whereSql : ''}
       ${orderByOut}
     ) cards_with_inventory
     LIMIT $${params.push(per_page)} OFFSET $${params.push(offset)};
