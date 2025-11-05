@@ -30,6 +30,9 @@ import type { Currency, BrowseBaseCard } from '@/types';
 const ShopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // Track if we've ever loaded cards successfully (to prevent full-page reload on filter changes)
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+
   // URL State - extracted from search params
   // STANDARDIZED: Using treatment and finish
   const searchTerm = searchParams.get('search') || '';
@@ -108,6 +111,44 @@ const ShopPage: React.FC = () => {
     return groupCardsForBrowse(transformedCards);
   }, [cards]);
 
+  // Filter dropdown options to only show values that have inventory
+  // This ensures customers only see filters for cards that are actually available
+  const availableGames = useMemo(() => {
+    if (cards.length === 0) return games; // Show all on initial load
+    const uniqueGameNames = new Set(cards.map(card => card.game_name));
+    return games.filter(game => uniqueGameNames.has(game.name));
+  }, [cards, games]);
+
+  const availableSets = useMemo(() => {
+    if (cards.length === 0) return sets; // Show all on initial load
+    const uniqueSetNames = new Set(cards.map(card => card.set_name));
+    return sets.filter(set => uniqueSetNames.has(set.name));
+  }, [cards, sets]);
+
+  const availableTreatments = useMemo(() => {
+    if (cards.length === 0) return undefined; // Use all on initial load
+    const uniqueTreatments = new Set(
+      cards.map(card => card.treatment).filter(Boolean)
+    );
+    return Array.from(uniqueTreatments).map(treatment => ({
+      value: treatment,
+      label: treatment?.replace(/_/g, ' ') || 'Standard',
+      count: 0
+    }));
+  }, [cards]);
+
+  const availableFinishes = useMemo(() => {
+    if (cards.length === 0) return undefined; // Use all on initial load
+    const uniqueFinishes = new Set(
+      cards.map(card => card.finish).filter(Boolean)
+    );
+    return Array.from(uniqueFinishes).map(finish => ({
+      value: finish,
+      label: finish ? finish.charAt(0).toUpperCase() + finish.slice(1) : 'Nonfoil',
+      count: 0
+    }));
+  }, [cards]);
+
   // Sorting state
   const sortBy = (searchParams.get('sortBy') as 'name' | 'price' | 'set' | 'rarity') || 'name';
   const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc';
@@ -182,9 +223,16 @@ const ShopPage: React.FC = () => {
     }
   }, [cart, showCart]);
 
-  // Initial loading state - only show full-page loading on first mount
-  // After that, show content with loading indicators
-  const isInitialLoad = (filtersLoading || cardsLoading) && browseCards.length === 0;
+  // Track when cards are successfully loaded
+  useEffect(() => {
+    if (cards.length > 0 && !hasLoadedOnce) {
+      setHasLoadedOnce(true);
+    }
+  }, [cards.length, hasLoadedOnce]);
+
+  // Initial loading state - only show full-page loading on very first load
+  // Once we've loaded successfully once, always show content with loading overlays
+  const isInitialLoad = (filtersLoading || cardsLoading) && !hasLoadedOnce;
 
   if (isInitialLoad) {
     return (
@@ -272,6 +320,10 @@ const ShopPage: React.FC = () => {
                   selectedFinish={selectedFinish}
                   selectedRarity={selectedRarity}
                   selectedQuality={selectedQuality}
+                  availableGames={availableGames}
+                  availableSets={availableSets}
+                  availableTreatments={availableTreatments}
+                  availableFinishes={availableFinishes}
                 />
               </div>
             </aside>
