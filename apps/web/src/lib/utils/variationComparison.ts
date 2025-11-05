@@ -1,4 +1,5 @@
 import type { BrowseVariation } from '@/types';
+import { formatTreatment, formatFinish } from '@/types/models/card';
 
 /**
  * Analyze which fields are common vs different across variations
@@ -104,21 +105,4 @@ export function formatVariationFullTitle(variation: BrowseVariation): string {
   if (variation.sku) parts.push(`SKU: ${variation.sku}`);
 
   return parts.join(' • ');
-}
-
-// Helper functions for formatting
-function formatTreatment(treatment?: string | null): string {
-  if (!treatment) return 'Standard';
-  return treatment
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-}
-
-function formatFinish(finish?: string | null): string {
-  if (!finish) return 'Nonfoil';
-  return finish
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
 }

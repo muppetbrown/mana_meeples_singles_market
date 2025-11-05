@@ -12,6 +12,12 @@
 import React from 'react';
 import { X, Package, DollarSign, Sparkles } from 'lucide-react';
 import type { Card, BrowseBaseCard, BrowseVariation } from '@/types';
+import {
+  formatTreatment,
+  formatFinish,
+  formatVariationLabel,
+  getFinishBadgeStyle
+} from '@/types/models/card';
 import { SingleCardPriceRefresh } from './SingleCardPriceRefresh';
 import OptimizedImage from '@/shared/media/OptimizedImage';
 
@@ -55,34 +61,6 @@ const LANGUAGE_OPTIONS = [
   'Portuguese',
   'Italian'
 ];
-
-// ---------- Helper Functions ----------
-const formatVariationLabel = (value?: string | null): string => {
-  if (!value) return 'Standard';
-  return value
-    .split('_')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-};
-
-const formatTreatment = (treatment?: string | null): string => {
-  if (!treatment) return 'Standard';
-  return formatVariationLabel(treatment);
-};
-
-const formatFinish = (finish?: string | null): string => {
-  if (!finish) return 'Nonfoil';
-  return formatVariationLabel(finish);
-};
-
-const getFinishBadgeStyle = (finish?: string | null): string => {
-  if (!finish) return 'bg-slate-200 text-slate-700';
-  const lowerFinish = finish.toLowerCase();
-  if (lowerFinish.includes('foil') || lowerFinish.includes('etched')) {
-    return 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-800';
-  }
-  return 'bg-slate-200 text-slate-700';
-};
 
 /**
  * Get the appropriate automated price for a variation based on its finish

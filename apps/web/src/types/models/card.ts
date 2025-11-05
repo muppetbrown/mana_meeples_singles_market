@@ -186,19 +186,28 @@ export type BrowseBaseCard = Omit<Card, 'variations'> & {
 // ============================================================================
 
 /**
- * Format treatment label for display
- * Example: "EXTENDED_ART" → "Extended Art"
+ * Generic formatter for variation field labels
+ * Converts snake_case or UPPER_CASE to Title Case
+ * Example: "EXTENDED_ART" → "Extended Art", "nonfoil" → "Nonfoil"
  */
-export function formatTreatment(treatment?: string | null): string {
-  if (!treatment) return 'Standard';
-  return treatment
+export function formatVariationLabel(value?: string | null, defaultValue: string = 'Standard'): string {
+  if (!value) return defaultValue;
+  return value
     .split('_')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 }
 
 /**
- * Format finish label for display
+ * Format treatment label for display
+ * Example: "EXTENDED_ART" → "Extended Art"
+ */
+export function formatTreatment(treatment?: string | null): string {
+  return formatVariationLabel(treatment, 'Standard');
+}
+
+/**
+ * Format finish label for display with smart defaults
  * Example: "nonfoil" → "Regular", "foil" → "Foil"
  */
 export function formatFinish(finish?: string | null): string {
@@ -207,6 +216,18 @@ export function formatFinish(finish?: string | null): string {
   if (lower.includes('foil') && !lower.includes('non')) return 'Foil';
   if (lower.includes('etched')) return 'Etched';
   return 'Regular';
+}
+
+/**
+ * Get CSS classes for finish badge styling
+ */
+export function getFinishBadgeStyle(finish?: string | null): string {
+  if (!finish) return 'bg-slate-200 text-slate-700';
+  const lowerFinish = finish.toLowerCase();
+  if (lowerFinish.includes('foil') || lowerFinish.includes('etched')) {
+    return 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-800';
+  }
+  return 'bg-slate-200 text-slate-700';
 }
 
 /**

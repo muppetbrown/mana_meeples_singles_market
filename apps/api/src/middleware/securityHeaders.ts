@@ -14,18 +14,21 @@ import type { RequestHandler } from 'express';
 export const securityHeaders: RequestHandler = (_req, res, next) => {
   // ✅ Content Security Policy (replaces deprecated X-Frame-Options)
   // This handles the frame-ancestors warning
+  // Note: 'unsafe-inline' and 'unsafe-eval' are necessary for Vite + React in development
+  // In production builds, Vite uses nonces for inline scripts
   res.setHeader(
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Allow inline scripts for React
-      "style-src 'self' 'unsafe-inline'", // Allow inline styles
-      "img-src 'self' data: https: blob:",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Required for Vite HMR and React
+      "style-src 'self' 'unsafe-inline'", // Required for styled-components/emotion/tailwind
+      "img-src 'self' data: https: blob:", // Allow images from all HTTPS sources
       "font-src 'self' data:",
-      "connect-src 'self' https://api.pokemontcg.io https://api.tcgplayer.com",
+      "connect-src 'self' https://api.scryfall.com https://api.pokemontcg.io https://api.tcgplayer.com", // Added Scryfall
       "frame-ancestors 'none'", // ✅ Replaces X-Frame-Options: DENY
       "base-uri 'self'",
-      "form-action 'self'"
+      "form-action 'self'",
+      "upgrade-insecure-requests" // Automatically upgrade HTTP to HTTPS
     ].join('; ')
   );
 
