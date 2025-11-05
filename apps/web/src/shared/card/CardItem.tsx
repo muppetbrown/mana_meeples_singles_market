@@ -122,6 +122,20 @@ const CardItem: React.FC<CardItemProps> = ({
   // State for image modal
   const [showImageModal, setShowImageModal] = useState(false);
 
+  // Close modal on Escape key
+  useEffect(() => {
+    if (!showImageModal) return;
+
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowImageModal(false);
+      }
+    };
+
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [showImageModal]);
+
   // --------------------------------------------------------------------------
   // FILTER VARIATIONS BASED ON MODE
   // --------------------------------------------------------------------------
@@ -484,25 +498,25 @@ const CardItem: React.FC<CardItemProps> = ({
     <div className="card-mm flex flex-col h-full bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image Section */}
       <div className="relative flex-shrink-0 overflow-hidden bg-slate-50" style={{ aspectRatio: '5/7' }}>
-        <button
-          onClick={() => setShowImageModal(true)}
-          className="block w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-hidden"
-          aria-label={`View larger image of ${card.name}`}
-        >
-          <OptimizedImage
-            src={imageUrl}
-            alt={card.name}
-            width={250}
-            height={350}
-            className={`w-full h-full object-cover hover:scale-105 transition-transform ${
-              isCardFoil
-                ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
-                : ''
-            }`}
-            placeholder="blur"
-          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-        />
-        </button>
+      <button
+      onClick={() => setShowImageModal(true)}
+      className="block w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-hidden"
+      aria-label={`View larger image of ${card.name}`}
+      >
+      <OptimizedImage
+      src={imageUrl}
+      alt={card.name}
+      width={250}
+      height={350}
+      className={`w-full h-full hover:scale-105 transition-transform ${
+      isCardFoil
+      ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
+      : ''
+      }`}
+      placeholder="blur"
+      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+      />
+      </button>
       </div>
 
       {/* Content Section */}
@@ -554,20 +568,32 @@ const CardItem: React.FC<CardItemProps> = ({
       {showImageModal && (
         <div
           className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
-          onClick={() => setShowImageModal(false)}
+          onClick={(e) => {
+            // Only close if clicking the backdrop, not the image or content
+            if (e.target === e.currentTarget) {
+              setShowImageModal(false);
+            }
+          }}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Image preview modal"
         >
           <div className="relative max-w-4xl max-h-[90vh]">
             <button
-              onClick={() => setShowImageModal(false)}
-              className="absolute -top-10 right-0 text-white hover:text-gray-300"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowImageModal(false);
+              }}
+              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded"
               aria-label="Close image modal"
+              type="button"
             >
               <X className="w-8 h-8" />
             </button>
             <img
               src={imageUrl}
               alt={card.name}
-              className="max-w-full max-h-[90vh] object-contain rounded-lg"
+              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
           </div>
