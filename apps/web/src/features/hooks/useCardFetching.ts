@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { api, buildQueryString } from '@/lib/api';
+import { api, ENDPOINTS } from '@/lib/api';
 import { useErrorHandler } from '@/services/error/handler';
 import type { StorefrontCard, SearchFilters } from '@/types';
 
@@ -105,7 +105,7 @@ export function useCardFetching({
 
       // Use the storefront endpoint with trigram search
       const response = await api.get<{ cards: StorefrontCard[] }>(
-        `/storefront/cards?${params.toString()}`
+        `${ENDPOINTS.STOREFRONT.CARDS}?${params.toString()}`
       );
 
       setCards(response.cards ?? []);
