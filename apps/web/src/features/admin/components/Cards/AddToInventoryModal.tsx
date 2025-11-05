@@ -30,16 +30,19 @@
  */
 
 import React from 'react';
-import { X, Package, DollarSign, Sparkles } from 'lucide-react';
+import { Package, DollarSign } from 'lucide-react';
 import type { Card, BrowseBaseCard, BrowseVariation } from '@/types';
 import {
-  formatTreatment,
-  formatFinish,
   formatVariationLabel,
-  getFinishBadgeStyle
 } from '@/types/models/card';
 import { SingleCardPriceRefresh } from './SingleCardPriceRefresh';
-import OptimizedImage from '@/shared/media/OptimizedImage';
+import {
+  CardVariationHeader,
+  VariationField,
+  VariationDetailsBox,
+  QualityLanguageSelectors,
+  type VariationOption,
+} from '@/shared/modal';
 
 // ---------- Types ----------
 /**
@@ -147,132 +150,72 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
     onSave();
   };
 
-  // Determine if selected variation is special/premium based on treatment or finish
-  const isSpecialCard = selectedVariation?.treatment && selectedVariation.treatment !== 'STANDARD' && selectedVariation.treatment !== 'standard';
-  const isFoilCard = selectedVariation?.finish &&
-    selectedVariation.finish.toLowerCase() !== 'nonfoil' &&
-    (selectedVariation.finish.toLowerCase().includes('foil') || selectedVariation.finish.toLowerCase().includes('etched'));
-
   return (
-    <div 
+    <div
       className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
     >
-      <div 
+      <div
         className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
         onClick={handleModalClick}
       >
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-slate-200 gap-4">
-          {/* Left: Card Image */}
-          <div className="flex-shrink-0">
-            <div className="relative w-24 h-32 rounded-lg overflow-hidden border-2 border-slate-200 shadow-md">
-              <OptimizedImage
-                src={card.image_url || '/images/card-back-placeholder.svg'}
-                alt={card.name}
-                width={96}
-                height={128}
-                className="w-full h-full object-cover"
-                placeholder="blur"
-                priority={true}
-              />
-              {/* Icon overlay on card image */}
-              <div className={`absolute top-1 right-1 p-1.5 rounded-md ${isSpecialCard || isFoilCard ? 'bg-gradient-to-br from-amber-100 to-yellow-100' : 'bg-blue-100'}`}>
-                {isSpecialCard || isFoilCard ? (
-                  <Sparkles className="w-4 h-4 text-amber-600" />
-                ) : (
-                  <Package className="w-4 h-4 text-blue-600" />
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Center: Card Info */}
-          <div className="flex-1 min-w-0">
-            <h2 id="modal-title" className="text-xl font-bold text-slate-900">
-              Add to Inventory
-            </h2>
-            <div className="mt-2 space-y-1">
-              <p className="text-base font-semibold text-slate-800">
-                {card.name}
-              </p>
-              {card.game_name && (
-                <p className="text-sm text-slate-600">
-                  <span className="font-medium">Game:</span> {card.game_name}
-                </p>
-              )}
-              <p className="text-sm text-slate-600">
-                <span className="font-medium">Set:</span> {card.set_name}
-              </p>
-            </div>
-          </div>
-
-          {/* Right: Close Button */}
-          <button
-            onClick={onClose}
-            className="flex-shrink-0 p-2 hover:bg-slate-100 rounded-lg transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5 text-slate-600" />
-          </button>
-        </div>
+        <CardVariationHeader
+          card={{
+            name: card.name,
+            image_url: card.image_url,
+            game_name: card.game_name,
+            set_name: card.set_name,
+            treatment: selectedVariation?.treatment,
+            finish: selectedVariation?.finish,
+          }}
+          title="Add to Inventory"
+          titleId="modal-title"
+          onClose={onClose}
+          iconType="inventory"
+        />
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Variation Selector - Always show, but disable if only one variation */}
+          {/* Variation Selector */}
           {card.variations && card.variations.length > 0 && (
-            <div className="mb-4">
-              <label htmlFor="variation" className="block text-sm font-medium text-slate-700 mb-2">
-                Variation <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="variation"
-                value={selectedVariation?.id || ''}
-                onChange={(e) => {
-                  const variation = card.variations.find(v => v.id === Number(e.target.value));
-                  if (variation) onVariationChange(variation);
-                }}
-                disabled={card.variations.length === 1}
-                className={`w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                  card.variations.length === 1 ? 'bg-slate-100 cursor-not-allowed' : ''
-                }`}
-                required
-              >
-                {!selectedVariation && <option value="">Select variation...</option>}
-                {card.variations.map((variation) => (
-                  <option key={variation.id} value={variation.id}>
-                    {formatTreatment(variation.treatment)} {formatFinish(variation.finish)}
-                    {variation.border_color && variation.border_color !== 'black' && ` - ${variation.border_color} border`}
-                    {variation.in_stock > 0 && ` (${variation.in_stock} in stock)`}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-slate-500 mt-1">
-                {card.variations.length === 1
-                  ? 'This card has only one variation'
-                  : 'Select which card variation to add to inventory'}
-              </p>
-            </div>
+            <VariationField
+              variations={card.variations.map(v => ({
+                id: v.id,
+                treatment: v.treatment,
+                finish: v.finish,
+                border_color: v.border_color,
+                in_stock: v.in_stock,
+              }))}
+              selectedVariation={selectedVariation ? {
+                id: selectedVariation.id,
+                treatment: selectedVariation.treatment,
+                finish: selectedVariation.finish,
+                border_color: selectedVariation.border_color,
+                in_stock: selectedVariation.in_stock,
+              } : undefined}
+              onVariationChange={(variation) => {
+                const fullVariation = card.variations.find(v => v.id === variation.id);
+                if (fullVariation) onVariationChange(fullVariation);
+              }}
+              locked={false}
+            />
           )}
 
           {/* Show selected variation details */}
           {selectedVariation && (
-            <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <p className="text-sm font-medium text-blue-900 mb-2">Selected Variation:</p>
-              <div className="space-y-1 text-sm text-blue-800">
-                <div><span className="font-medium">Treatment:</span> {formatTreatment(selectedVariation.treatment)}</div>
-                <div><span className="font-medium">Finish:</span> {formatFinish(selectedVariation.finish)}</div>
-                {selectedVariation.border_color && (
-                  <div><span className="font-medium">Border:</span> {selectedVariation.border_color}</div>
-                )}
-                {selectedVariation.frame_effect && (
-                  <div><span className="font-medium">Frame:</span> {selectedVariation.frame_effect}</div>
-                )}
-              </div>
-            </div>
+            <VariationDetailsBox
+              variation={{
+                treatment: selectedVariation.treatment,
+                finish: selectedVariation.finish,
+                border_color: selectedVariation.border_color,
+                frame_effect: selectedVariation.frame_effect,
+              }}
+              title="Selected Variation:"
+            />
           )}
 
           {/* Card Basic Info */}
@@ -295,54 +238,18 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
           <div className="border-t border-slate-200 pt-4">
             <h3 className="text-sm font-semibold text-slate-700 mb-4">Inventory Details</h3>
 
-            {/* Quality */}
+            {/* Quality and Language Selectors */}
             <div className="mb-4">
-              <label htmlFor="quality" className="block text-sm font-medium text-slate-700 mb-2">
-                Quality <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="quality"
-                value={formData.quality}
-                onChange={(e) => handleChange('quality', e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-                title={formData.quality ? getQualityDescription(formData.quality) : 'Select card quality'}
-              >
-                {QUALITY_OPTIONS.map((quality) => (
-                  <option key={quality} value={quality} title={getQualityDescription(quality)}>
-                    {quality}
-                  </option>
-                ))}
-              </select>
-              {/* Enhanced help text with dynamic description */}
-              <p className="text-xs text-slate-500 mt-1">
-                {formData.quality ? getQualityDescription(formData.quality) : 'Select the physical condition of the card'}
-              </p>
-            </div>
-
-            {/* Foil Type section removed - finish is already displayed in card variation details above */}
-
-            {/* Language */}
-            <div className="mb-4">
-              <label htmlFor="language" className="block text-sm font-medium text-slate-700 mb-2">
-                Language <span className="text-red-500">*</span>
-              </label>
-              <select
-                id="language"
-                value={formData.language}
-                onChange={(e) => handleChange('language', e.target.value)}
-                className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                required
-              >
-                {LANGUAGE_OPTIONS.map((language) => (
-                  <option key={language} value={language}>
-                    {getLanguageDisplayName(language)}
-                  </option>
-                ))}
-              </select>
-              <p className="text-xs text-slate-500 mt-1">
-                Language printed on the card
-              </p>
+              <QualityLanguageSelectors
+                qualities={QUALITY_OPTIONS}
+                selectedQuality={formData.quality}
+                onQualityChange={(quality) => handleChange('quality', quality)}
+                qualityHelpText={formData.quality ? getQualityDescription(formData.quality) : 'Select the physical condition of the card'}
+                languages={LANGUAGE_OPTIONS}
+                selectedLanguage={formData.language}
+                onLanguageChange={(language) => handleChange('language', language)}
+                formatLanguage={getLanguageDisplayName}
+              />
             </div>
 
             {/* Price and Stock Quantity (Side by Side) */}

@@ -4,9 +4,13 @@ import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils/';
 import { api, ENDPOINTS } from '@/lib/api';
 import type { Currency } from '@/types';
-import { X, ShoppingCart, Package, Sparkles } from 'lucide-react';
-import OptimizedImage from '@/shared/media/OptimizedImage';
-import { formatTreatment, formatFinish } from '@/types/models/card';
+import { ShoppingCart, Package } from 'lucide-react';
+import {
+  CardVariationHeader,
+  VariationField,
+  VariationDetailsBox,
+  QualityLanguageSelectors,
+} from '@/shared/modal';
 
 export type InventoryOption = {
   inventoryId: number; // card_inventory.id
@@ -141,15 +145,6 @@ export function AddToCartModal({
     )).sort();
   }, [data?.options, selectedQuality, languages]);
 
-  // Helper function to format labels
-  const formatLabel = (value: string): string => {
-    if (!value) return 'Standard';
-    return value
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-      .join(' ');
-  };
-
   const handleConfirm = (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!selected) return;
@@ -160,12 +155,6 @@ export function AddToCartModal({
   if (!isOpen) return null;
 
   const card = data?.card;
-
-  // Determine if card is special/premium based on treatment or finish
-  const isSpecialCard = card?.treatment && card.treatment !== 'STANDARD' && card.treatment !== 'standard';
-  const isFoilCard = card?.finish &&
-    card.finish.toLowerCase() !== 'nonfoil' &&
-    (card.finish.toLowerCase().includes('foil') || card.finish.toLowerCase().includes('etched'));
 
   return (
     <div
@@ -184,65 +173,15 @@ export function AddToCartModal({
         <div aria-live="polite" aria-atomic="true" className="sr-only" ref={liveRef} />
 
         {/* Header */}
-        <div className="flex items-start justify-between p-6 border-b border-zinc-200 dark:border-zinc-700 gap-4">
-          {/* Left: Card Image */}
-          {card && (
-            <div className="flex-shrink-0">
-              <div className="relative w-24 h-32 rounded-lg overflow-hidden border-2 border-zinc-200 dark:border-zinc-700 shadow-md">
-                <OptimizedImage
-                  src={card.image_url || '/images/card-back-placeholder.svg'}
-                  alt={card.name}
-                  width={96}
-                  height={128}
-                  className="w-full h-full object-cover"
-                  placeholder="blur"
-                  priority={true}
-                />
-                {/* Icon overlay */}
-                <div className={`absolute top-1 right-1 p-1.5 rounded-md ${isSpecialCard || isFoilCard ? 'bg-gradient-to-br from-amber-100 to-yellow-100' : 'bg-gradient-to-br from-mm-gold to-mm-teal'}`}>
-                  {isSpecialCard || isFoilCard ? (
-                    <Sparkles className="w-4 h-4 text-amber-600" />
-                  ) : (
-                    <ShoppingCart className="w-4 h-4 text-white" />
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Center: Card Info */}
-          <div className="flex-1 min-w-0">
-            <h2 id="addToCartTitle" className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
-              Add to Cart
-            </h2>
-            {card && (
-              <div className="mt-2 space-y-1">
-                <p className="text-base font-semibold text-zinc-800 dark:text-zinc-200">
-                  {card.name}
-                </p>
-                {card.game_name && (
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    <span className="font-medium">Game:</span> {card.game_name}
-                  </p>
-                )}
-                {card.set_name && (
-                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
-                    <span className="font-medium">Set:</span> {card.set_name}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Right: Close Button */}
-          <button
-            onClick={onClose}
-            className="flex-shrink-0 p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
-            aria-label="Close modal"
-          >
-            <X className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
-          </button>
-        </div>
+        {card && (
+          <CardVariationHeader
+            card={card}
+            title="Add to Cart"
+            titleId="addToCartTitle"
+            onClose={onClose}
+            iconType="special"
+          />
+        )}
 
         {/* Body */}
         <div className="p-6">
@@ -261,85 +200,47 @@ export function AddToCartModal({
 
           {!isLoading && !isError && (
             <form onSubmit={handleConfirm} className="space-y-6">
-              {/* Variation Selector - Locked/disabled since this is a single card */}
+              {/* Variation Field - Locked since this is a single card */}
               {card && (
-                <div>
-                  <label htmlFor="variation" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                    Variation <span className="text-red-500">*</span>
-                  </label>
-                  <div className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 cursor-not-allowed">
-                    {formatTreatment(card.treatment)} {formatFinish(card.finish)}
-                    {card.border_color && card.border_color !== 'black' && ` - ${card.border_color} border`}
-                  </div>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                    This card has only one variation
-                  </p>
-                </div>
+                <VariationField
+                  variations={[{
+                    id: card.id,
+                    treatment: card.treatment,
+                    finish: card.finish,
+                    border_color: card.border_color,
+                  }]}
+                  selectedVariation={{
+                    id: card.id,
+                    treatment: card.treatment,
+                    finish: card.finish,
+                    border_color: card.border_color,
+                  }}
+                  locked={true}
+                />
               )}
 
-              {/* Show variation details */}
+              {/* Variation Details Box */}
               {card && (
-                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Card Variation Details:</p>
-                  <div className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
-                    <div><span className="font-medium">Treatment:</span> {formatTreatment(card.treatment)}</div>
-                    <div><span className="font-medium">Finish:</span> {formatFinish(card.finish)}</div>
-                    {card.border_color && (
-                      <div><span className="font-medium">Border:</span> {card.border_color}</div>
-                    )}
-                    {card.frame_effect && (
-                      <div><span className="font-medium">Frame:</span> {card.frame_effect}</div>
-                    )}
-                  </div>
-                </div>
+                <VariationDetailsBox
+                  variation={{
+                    treatment: card.treatment,
+                    finish: card.finish,
+                    border_color: card.border_color,
+                    frame_effect: card.frame_effect,
+                  }}
+                />
               )}
 
-              <div className="space-y-4">
-                {/* Quality Selection */}
-                <div>
-                  <label htmlFor="quality" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                    Quality <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="quality"
-                    value={selectedQuality}
-                    onChange={(e) => setSelectedQuality(e.target.value)}
-                    className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:border-transparent"
-                    required
-                  >
-                    <option value="">Select quality...</option>
-                    {availableQualities.map((qual) => (
-                      <option key={qual} value={qual}>
-                        {qual}
-                      </option>
-                    ))}
-                  </select>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
-                    Condition of the physical card
-                  </p>
-                </div>
-
-                {/* Language Selection */}
-                <div>
-                  <label htmlFor="language" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                    Language <span className="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="language"
-                    value={selectedLanguage}
-                    onChange={(e) => setSelectedLanguage(e.target.value)}
-                    disabled={!selectedQuality}
-                    className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-                    required
-                  >
-                    <option value="">Select language...</option>
-                    {availableLanguages.map((lang) => (
-                      <option key={lang} value={lang}>
-                        {lang}
-                      </option>
-                    ))}
-                  </select>
-                </div>
+              {/* Quality and Language Selectors */}
+              <QualityLanguageSelectors
+                qualities={availableQualities}
+                selectedQuality={selectedQuality}
+                onQualityChange={setSelectedQuality}
+                languages={availableLanguages}
+                selectedLanguage={selectedLanguage}
+                onLanguageChange={setSelectedLanguage}
+                languageDisabled={!selectedQuality}
+              />
 
                 {/* Price & Stock Info */}
                 {selected && (
