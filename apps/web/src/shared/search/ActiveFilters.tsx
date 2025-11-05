@@ -64,20 +64,6 @@ export const ActiveFilters: React.FC<ActiveFiltersProps> = ({
     });
   }
 
-  // Foil type filters
-  if (filters.foilType && filters.foilType.length > 0) {
-    filters.foilType.forEach(foilType => {
-      activeFilters.push({
-        key: `foilType-${foilType}`,
-        label: 'Foil Type',
-        value: foilType,
-        onRemove: () => onClearFilter({
-          foilType: filters.foilType?.filter(f => f !== foilType)
-        })
-      });
-    });
-  }
-
   // Price range filter
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
     let priceLabel = 'Price: ';

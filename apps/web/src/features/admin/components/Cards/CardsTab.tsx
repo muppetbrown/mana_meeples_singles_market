@@ -38,7 +38,6 @@ import { CardList, CardGrid } from '@/shared/layout';
 import { EmptyState, SectionHeader, SortDropdown } from '@/shared/ui';
 import type {
   Card,
-  CardVariation,
   BrowseBaseCard,
   BrowseVariation
 } from '@/types';
@@ -89,6 +88,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [totalCardCount, setTotalCardCount] = useState<number>(0);
+  const [isExporting, setIsExporting] = useState(false);
   
   // Modal state
   const [showAddModal, setShowAddModal] = useState(false);
@@ -297,13 +297,13 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, [refetchCards, fetchCardCount]);
 
   const handleExportCSV = useCallback(async () => {
-    if (loading || cards.length === 0) {
+    if (loading || cards.length === 0 || isExporting) {
       console.warn('No cards available for export');
       return;
     }
 
     try {
-      setLoading(true);
+      setIsExporting(true);
 
       // For inventory mode, export current displayed cards with inventory data
       // For all cards mode, export all filtered cards
@@ -313,7 +313,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
       if (exportData.length === 0) {
         console.warn('No inventory data available for export');
-        setLoading(false);
+        setIsExporting(false);
         return;
       }
 
@@ -348,9 +348,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     } catch (error) {
       console.error('Failed to export CSV:', error);
     } finally {
-      setLoading(false);
+      setIsExporting(false);
     }
-  }, [cards, loading, mode]);
+  }, [cards, loading, mode, isExporting]);
 
   // --------------------------------------------------------------------------
   // MODAL HANDLERS - SIMPLIFIED!

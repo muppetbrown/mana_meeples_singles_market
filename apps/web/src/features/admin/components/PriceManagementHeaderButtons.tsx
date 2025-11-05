@@ -25,9 +25,9 @@ interface PriceManagementHeaderButtonsProps {
 
 interface OperationResult {
   success: boolean;
-  result?: PriceUpdateResult;
-  errorMessage?: string;
-  failureDetails?: Array<{ card_id: number; error: string }>;
+  result?: PriceUpdateResult | undefined;
+  errorMessage?: string | undefined;
+  failureDetails?: Array<{ card_id: number; error: string }> | undefined;
 }
 
 type ButtonType = 'initialize' | 'refresh-inventory' | 'idle';

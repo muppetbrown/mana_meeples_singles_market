@@ -107,7 +107,7 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
       options: filterOptions.treatments.map(t => ({
         value: t.value,
         label: t.label,
-        count: t.count
+        ...(t.count !== undefined && { count: t.count })
       }))
     },
     finish: {
@@ -117,7 +117,7 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
       options: filterOptions.finishes.map(f => ({
         value: f.value,
         label: f.label,
-        count: f.count
+        ...(f.count !== undefined && { count: f.count })
       }))
     }
   }), [selectedTreatment, selectedFinish, filterOptions, updateParam]);
