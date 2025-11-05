@@ -130,12 +130,22 @@ router.get('/cards', async (req: Request, res: Response) => {
         cs.name AS set_name,
         c.rarity,
         c.image_url,
+        c.scryfall_id,
+        c.sku,
         c.treatment,
         c.finish,
+        c.border_color,
+        c.frame_effect,
+        c.promo_type,
+        c.set_id,
+        c.game_id,
         g.name AS game_name,
         COALESCE(inv.total_stock, 0)::int AS total_stock,
         COALESCE(inv.variation_count, 0)::int AS variation_count,
-        COALESCE(inv.variations, '[]'::jsonb) AS variations
+        COALESCE(inv.variations, '[]'::jsonb) AS variations,
+        inv.base_price,
+        inv.foil_price,
+        inv.price_source
       FROM cards c
       JOIN games g ON g.id = c.game_id
       JOIN card_sets cs ON cs.id = c.set_id
@@ -165,7 +175,10 @@ router.get('/cards', async (req: Request, res: Response) => {
               )
             ) FILTER (WHERE ci.id IS NOT NULL),
             '[]'::jsonb
-          ) AS variations
+          ) AS variations,
+          MAX(lp.base_price) AS base_price,
+          MAX(lp.foil_price) AS foil_price,
+          MAX(lp.price_source) AS price_source
         FROM card_inventory ci
         LEFT JOIN (
           SELECT DISTINCT ON (card_id)

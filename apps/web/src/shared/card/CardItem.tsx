@@ -415,12 +415,12 @@ const CardItem: React.FC<CardItemProps> = ({
               {hasStock ? `Stock: ${selectedVariation.in_stock}` : 'Out of stock'}
             </span>
           </div>
-          {priceDisplay && (
-            <span className="text-lg font-bold text-slate-900">
-              {priceDisplay}
-            </span>
-          )}
         </div>
+        {priceDisplay && (
+          <div className="text-lg font-bold text-slate-900">
+            {priceDisplay}
+          </div>
+        )}
       </div>
     );
   };
@@ -469,7 +469,11 @@ const CardItem: React.FC<CardItemProps> = ({
   // MAIN RENDER
   // --------------------------------------------------------------------------
 
-  const imageUrl = card.image_url || '/images/card-back-placeholder.svg';
+  // Use the base card's image_url, or fall back to the first variation's image
+  const imageUrl = card.image_url || 
+                   (selectedVariation?.image) || 
+                   (card.variations?.[0]?.image) || 
+                   '/images/card-back-placeholder.svg';
 
   const isCardFoil = selectedVariation ? selectedVariation.finish === 'foil' : false;
   const hasSpecial = selectedVariation
