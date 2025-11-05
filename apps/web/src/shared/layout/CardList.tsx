@@ -193,8 +193,8 @@ const CardList: React.FC<CardListProps> = ({
 
     return (
       <div className="flex items-center gap-3">
-        {/* Price info - Show for inventory and all modes */}
-        {(mode === 'inventory' || mode === 'all') && (() => {
+        {/* Price info - Show for all modes */}
+        {(() => {
           const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
           return priceDisplay ? (
             <span className="text-sm text-slate-600">
@@ -379,8 +379,8 @@ const CardList: React.FC<CardListProps> = ({
 
                   {/* Action Button */}
                   <div className="flex items-center justify-between gap-2">
-                    {/* Price info - Show for inventory and all modes */}
-                    {(mode === 'inventory' || mode === 'all') && (() => {
+                    {/* Price info - Show for all modes */}
+                    {(() => {
                       const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
                       return priceDisplay ? (
                         <span className="text-sm font-medium text-slate-700">

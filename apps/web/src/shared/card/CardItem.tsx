@@ -356,13 +356,12 @@ const CardItem: React.FC<CardItemProps> = ({
       );
     }
 
-    // Show stock for selected variation and overall price range for inventory mode
+    // Show stock for selected variation and overall price range
     const hasStock = selectedVariation.in_stock > 0;
 
-    // For inventory mode, show overall price range; for storefront, show selected variation price
-    const priceDisplay = mode === 'inventory'
-      ? formatPriceDisplay(card.variations, currency, mode)
-      : (selectedVariation.price ? formatCurrencySimple(selectedVariation.price, currency) : null);
+    // For inventory/storefront modes, show overall price range if multiple variations
+    // For single variation, show the specific price
+    const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
 
     return (
       <div className="space-y-2">
