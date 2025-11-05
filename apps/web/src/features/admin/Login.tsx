@@ -58,46 +58,59 @@ const Login = () => {
         </div>
 
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+          <div 
+            id="login-error"
+            className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3"
+            role="alert"
+            aria-live="assertive"
+          >
+            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" aria-hidden="true" />
             <div className="text-sm text-red-800">{error}</div>
           </div>
         )}
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className="space-y-6" aria-label="Admin login form">
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label htmlFor="admin-username" className="block text-sm font-medium text-slate-700 mb-2">
               Username
             </label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" aria-hidden="true" />
               <input
                 type="text"
+                id="admin-username"
+                name="username"
                 value={credentials.username}
                 onChange={(e) => setCredentials({ ...credentials, username: e.target.value })}
                 className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter username"
                 required
                 autoComplete="username"
+                aria-required="true"
+                aria-describedby={error ? "login-error" : undefined}
                 style={{fontSize: '16px'}}
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
+            <label htmlFor="admin-password" className="block text-sm font-medium text-slate-700 mb-2">
               Password
             </label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" aria-hidden="true" />
               <input
                 type="password"
+                id="admin-password"
+                name="password"
                 value={credentials.password}
                 onChange={(e) => setCredentials({ ...credentials, password: e.target.value })}
                 className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter password"
                 required
                 autoComplete="current-password"
+                aria-required="true"
+                aria-describedby={error ? "login-error" : undefined}
                 style={{fontSize: '16px'}}
               />
             </div>
@@ -107,6 +120,7 @@ const Login = () => {
             type="submit"
             disabled={loading}
             className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 text-white font-semibold rounded-lg transition-colors focus:ring-4 focus:ring-blue-500 focus:ring-offset-2 focus:outline-none"
+            aria-label={loading ? 'Logging in, please wait' : 'Login to admin dashboard'}
           >
             {loading ? 'Logging in...' : 'Login'}
           </button>
