@@ -36,7 +36,7 @@ import {
   calculateVariationPrice
 } from '@/lib/utils';
 import type { SortOption, SortOrder } from '@/lib/utils';
-import { DEFAULT_QUALITY, DEFAULT_LANGUAGE } from '@/types/enums/inventory';
+import { DEFAULT_QUALITY, DEFAULT_LANGUAGE, type Quality, type Language } from '@/types/enums/inventory';
 import { CardSearchBar } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
@@ -52,10 +52,10 @@ import type {
 // ============================================================================
 
 type AddFormData = {
-  quality: string;
+  quality: Quality;  // Type-safe quality from enum
   price: string;
   stock_quantity: number;
-  language: string;
+  language: Language;  // Type-safe language from enum
   useAutomatedPrice: boolean; // Whether to use the automated price from price source
 };
 

@@ -133,19 +133,11 @@ export function transformStorefrontCard(
     total_stock: storefrontCard.total_stock ?? 0,
     variation_count: storefrontCard.variation_count ?? 0,
 
-    // Preserve pricing fields
-    base_price: storefrontCard.base_price,
-    foil_price: storefrontCard.foil_price,
-    price_source: storefrontCard.price_source,
+    // Preserve pricing fields (explicitly handle undefined for exactOptionalPropertyTypes)
+    base_price: storefrontCard.base_price ?? null,
+    foil_price: storefrontCard.foil_price ?? null,
+    price_source: storefrontCard.price_source ?? null,
   };
-
-  // Optionally calculate and add price field
-  if (calculatePrice) {
-    return {
-      ...card,
-      price: calculateCardPrice(card),
-    };
-  }
 
   return card;
 }
