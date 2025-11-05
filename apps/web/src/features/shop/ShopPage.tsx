@@ -322,8 +322,8 @@ const ShopPage: React.FC = () => {
                   selectedQuality={selectedQuality}
                   availableGames={availableGames}
                   availableSets={availableSets}
-                  availableTreatments={availableTreatments}
-                  availableFinishes={availableFinishes}
+                  {...(availableTreatments !== undefined && { availableTreatments })}
+                  {...(availableFinishes !== undefined && { availableFinishes })}
                 />
               </div>
             </aside>
