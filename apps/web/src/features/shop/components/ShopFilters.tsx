@@ -28,6 +28,11 @@ interface ShopFiltersProps {
   selectedFinish: string;
   selectedRarity: string;
   selectedQuality: string;
+  // Optional overrides for filtered options (storefront mode)
+  availableGames?: any[];
+  availableSets?: any[];
+  availableTreatments?: Array<{ value: string; label: string; count: number }>;
+  availableFinishes?: Array<{ value: string; label: string; count: number }>;
 }
 
 export const ShopFilters: React.FC<ShopFiltersProps> = ({
@@ -39,15 +44,19 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
   selectedTreatment,
   selectedFinish,
   selectedRarity,
-  selectedQuality
+  selectedQuality,
+  availableGames,
+  availableSets,
+  availableTreatments,
+  availableFinishes
 }) => {
   const [searchParams] = useSearchParams(); // Removed setSearchParams - using hook methods instead
 
   // REFACTORED (Third Sweep): Get all handlers from the hook instead of redefining
   const {
-    games,
-    sets,
-    filterOptions,
+    games: allGames,
+    sets: allSets,
+    filterOptions: allFilterOptions,
     loading: filtersLoading,
     error: filtersError,
     // Handler methods from hook - eliminates duplication!
@@ -57,6 +66,17 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
     handleSearchChange,
     getAdditionalFilters
   } = useShopFilters();
+
+  // Use filtered options if provided (storefront mode), otherwise use all options
+  const games = availableGames || allGames;
+  const sets = availableSets || allSets;
+
+  // Override filter options for treatments and finishes if available
+  const filterOptions = useMemo(() => ({
+    ...allFilterOptions,
+    treatments: availableTreatments || allFilterOptions.treatments,
+    finishes: availableFinishes || allFilterOptions.finishes
+  }), [allFilterOptions, availableTreatments, availableFinishes]);
 
   // Derived state
   const filters = useMemo(() => ({
