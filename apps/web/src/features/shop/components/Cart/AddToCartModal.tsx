@@ -205,15 +205,15 @@ export function AddToCartModal({
                 <VariationField
                   variations={[{
                     id: card.id,
-                    treatment: card.treatment,
-                    finish: card.finish,
-                    border_color: card.border_color,
+                    treatment: card.treatment ?? null,
+                    finish: card.finish ?? null,
+                    border_color: card.border_color ?? null,
                   }]}
                   selectedVariation={{
                     id: card.id,
-                    treatment: card.treatment,
-                    finish: card.finish,
-                    border_color: card.border_color,
+                    treatment: card.treatment ?? null,
+                    finish: card.finish ?? null,
+                    border_color: card.border_color ?? null,
                   }}
                   locked={true}
                 />
@@ -223,10 +223,10 @@ export function AddToCartModal({
               {card && (
                 <VariationDetailsBox
                   variation={{
-                    treatment: card.treatment,
-                    finish: card.finish,
-                    border_color: card.border_color,
-                    frame_effect: card.frame_effect,
+                    treatment: card.treatment ?? null,
+                    finish: card.finish ?? null,
+                    border_color: card.border_color ?? null,
+                    frame_effect: card.frame_effect ?? null,
                   }}
                 />
               )}
@@ -276,7 +276,6 @@ export function AddToCartModal({
                     required
                   />
                 </div>
-              </div>
 
               {/* Actions */}
               <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-700">
