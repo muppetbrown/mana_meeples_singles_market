@@ -1,12 +1,32 @@
 // apps/web/src/components/admin/AddToInventoryModal.tsx
 /**
- * Add to Inventory Modal - REFACTORED FOR NEW ARCHITECTURE
- * 
- * NEW ARCHITECTURE:
- * - Cards now have variation metadata directly on them (treatment, finish, border_color, etc.)
+ * Add to Inventory Modal - Unified and Refactored
+ *
+ * @module AddToInventoryModal
+ *
+ * ## Recent Improvements (Secondary Sweep)
+ * - **Shared Enums**: Now uses centralized QUALITY_OPTIONS and LANGUAGE_OPTIONS
+ * - **Type Safety**: Quality and Language types are now strongly typed enums
+ * - **Enhanced UX**: Dynamic quality descriptions and native language names
+ * - **Validation**: Uses shared validation utilities for consistency
+ * - **Consistency**: Matches shop-facing patterns where applicable
+ *
+ * ## Architecture
+ * - Cards have variation metadata (treatment, finish, border_color, etc.)
  * - Modal displays card's native variation properties
- * - User selects variation/quality/language for inventory entry
- * - No more CardVariation type needed - just use Card
+ * - User selects: Variation → Quality → Language → Price → Stock
+ * - Three-stage selection ensures proper inventory entry
+ *
+ * ## Data Flow
+ * 1. Receive BrowseBaseCard with variations array
+ * 2. User selects variation (treatment/finish combo)
+ * 3. User selects quality grade (from centralized enum)
+ * 4. User selects language (from centralized enum with native names)
+ * 5. Price auto-populates or manual entry
+ * 6. Submit creates card_inventory entry with all selections
+ *
+ * @see {@link /types/enums/inventory.ts} - Shared enums and validation
+ * @see {@link /lib/utils/inventoryUtils.ts} - Shared inventory utilities
  */
 
 import React from 'react';
@@ -22,12 +42,16 @@ import { SingleCardPriceRefresh } from './SingleCardPriceRefresh';
 import OptimizedImage from '@/shared/media/OptimizedImage';
 
 // ---------- Types ----------
+/**
+ * Form data structure for adding inventory
+ * Now uses typed Quality and Language enums for type safety
+ */
 type AddFormData = {
-  quality: string;
-  price: string;
+  quality: Quality;  // Type-safe quality from enum
+  price: string;     // String for input, converted to number on submit
   stock_quantity: number;
-  language: string;
-  useAutomatedPrice: boolean; // Whether to use the automated price from price source
+  language: Language;  // Type-safe language from enum
+  useAutomatedPrice: boolean;  // Whether to use automated price from price source
 };
 
 interface AddToInventoryModalProps {
@@ -41,26 +65,21 @@ interface AddToInventoryModalProps {
   saving: boolean;
 }
 
-// ---------- Constants ----------
-const QUALITY_OPTIONS = [
-  'Near Mint',
-  'Lightly Played',
-  'Moderately Played',
-  'Heavily Played',
-  'Damaged'
-];
+// ---------- Imports for Shared Enums ----------
+import {
+  QUALITY_OPTIONS,
+  LANGUAGE_OPTIONS,
+  DEFAULT_QUALITY,
+  DEFAULT_LANGUAGE,
+  getQualityDescription,
+  getLanguageDisplayName,
+  type Quality,
+  type Language
+} from '@/types/enums/inventory';
+import { formatPriceForStorage } from '@/lib/utils/inventoryUtils';
 
-// FOIL_OPTIONS removed - foil information comes from card.finish
-
-const LANGUAGE_OPTIONS = [
-  'English',
-  'Japanese',
-  'Spanish',
-  'French',
-  'German',
-  'Portuguese',
-  'Italian'
-];
+// Note: FOIL_OPTIONS removed - foil information comes from card.finish
+// Note: Quality and Language options now imported from centralized enum module
 
 /**
  * Get the appropriate automated price for a variation based on its finish
@@ -287,15 +306,17 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                 onChange={(e) => handleChange('quality', e.target.value)}
                 className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 required
+                title={formData.quality ? getQualityDescription(formData.quality) : 'Select card quality'}
               >
                 {QUALITY_OPTIONS.map((quality) => (
-                  <option key={quality} value={quality}>
+                  <option key={quality} value={quality} title={getQualityDescription(quality)}>
                     {quality}
                   </option>
                 ))}
               </select>
+              {/* Enhanced help text with dynamic description */}
               <p className="text-xs text-slate-500 mt-1">
-                Condition of the physical card
+                {formData.quality ? getQualityDescription(formData.quality) : 'Select the physical condition of the card'}
               </p>
             </div>
 
@@ -315,10 +336,13 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
               >
                 {LANGUAGE_OPTIONS.map((language) => (
                   <option key={language} value={language}>
-                    {language}
+                    {getLanguageDisplayName(language)}
                   </option>
                 ))}
               </select>
+              <p className="text-xs text-slate-500 mt-1">
+                Language printed on the card
+              </p>
             </div>
 
             {/* Price and Stock Quantity (Side by Side) */}

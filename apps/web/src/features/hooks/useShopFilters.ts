@@ -21,6 +21,7 @@ export function useShopFilters() {
   const filterHook = useFilters({ mode: 'storefront', autoLoad: true });
 
   // Return the same API as before for backward compatibility
+  // ENHANCED (Third Sweep): Now exposing handler methods to eliminate duplication
   return {
     // Current active filters
     filters: filterHook.filters,
@@ -28,6 +29,13 @@ export function useShopFilters() {
     // Filter manipulation
     updateFilters: filterHook.updateFilters,
     clearFilters: filterHook.clearFilters,
+
+    // Handler methods - NEW: Exposed to eliminate duplication in components
+    updateParam: filterHook.updateParam,
+    handleGameChange: filterHook.handleGameChange,
+    handleSetChange: filterHook.handleSetChange,
+    handleSearchChange: filterHook.handleSearchChange,
+    getAdditionalFilters: filterHook.getAdditionalFilters,
 
     // Filter options data (individual exports for convenience)
     games: filterHook.games,

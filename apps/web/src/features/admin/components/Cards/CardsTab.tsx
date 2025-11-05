@@ -29,9 +29,14 @@ import type { Game, Set } from '@/types/filters';
 import AddToInventoryModal from './AddToInventoryModal';
 import {
   groupCardsForBrowse,
-  groupCardsBySort
+  groupCardsBySort,
+  calculateTotalStock,
+  countUniqueCards,
+  calculateAverageVariations,
+  calculateVariationPrice
 } from '@/lib/utils';
 import type { SortOption, SortOrder } from '@/lib/utils';
+import { DEFAULT_QUALITY, DEFAULT_LANGUAGE } from '@/types/enums/inventory';
 import { CardSearchBar } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
@@ -95,10 +100,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const [addModalCard, setAddModalCard] = useState<BrowseBaseCard | null>(null);
   const [selectedVariation, setSelectedVariation] = useState<BrowseVariation | undefined>();
   const [addFormData, setAddFormData] = useState<AddFormData>({
-    quality: 'Near Mint',
+    quality: DEFAULT_QUALITY,
     price: '',
     stock_quantity: 1,
-    language: 'English',
+    language: DEFAULT_LANGUAGE,
     useAutomatedPrice: false,
   });
   const [saving, setSaving] = useState(false);
@@ -251,17 +256,13 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     return cards.filter(c => Boolean(c?.has_inventory) && (c?.total_stock ?? 0) > 0);
   }, [cards, isInventoryMode]);
 
-  // Calculate totals
-  const totalStock = useMemo(
-    () => displayCards.reduce((sum, c) => sum + (c.total_stock || 0), 0),
-    [displayCards]
-  );
-  
-  const uniqueCards = useMemo(() => {
-    // Count unique card_number + set_name combinations
-    const unique = new Set(displayCards.map(c => `${c.set_name}-${c.card_number}`));
-    return unique.size;
-  }, [displayCards]);
+  /**
+   * Calculate display statistics using centralized utilities.
+   * These memoized values are used for the header stats display.
+   */
+  const totalStock = useMemo(() => calculateTotalStock(displayCards), [displayCards]);
+  const uniqueCards = useMemo(() => countUniqueCards(displayCards), [displayCards]);
+  const averageVariations = useMemo(() => calculateAverageVariations(displayCards), [displayCards]);
 
   // Use the centralized grouping utility
   const baseGroupedCards: BrowseBaseCard[] = useMemo(() => {
@@ -376,24 +377,13 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     }))
   }), []);
 
-  // Helper function to get automated price for a variation
+  /**
+   * Get the automated price for a variation based on finish type.
+   * Uses centralized price calculation logic for consistency.
+   */
   const getAutomatedPrice = useCallback((variation?: BrowseVariation): number | null => {
     if (!variation) return null;
-
-    const finish = variation.finish?.toLowerCase() || 'nonfoil';
-
-    // Check for nonfoil first (before checking for 'foil' substring)
-    if (finish.includes('non') || finish === 'nonfoil') {
-      return variation.base_price ?? null;
-    }
-
-    // For foil/etched finishes, use foil_price
-    if (finish.includes('foil') || finish.includes('etched')) {
-      return variation.foil_price ?? null;
-    }
-
-    // Default to base_price for unknown finishes
-    return variation.base_price ?? null;
+    return calculateVariationPrice(variation);
   }, []);
 
   const openAddModal = useCallback((card: BrowseBaseCard) => {
@@ -417,10 +407,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     const hasAutomatedPrice = automatedPrice !== null && Boolean(selectedVar?.price_source); // ✅ boolean
 
     setAddFormData({
-      quality: 'Near Mint',
+      quality: DEFAULT_QUALITY,
       price: hasAutomatedPrice ? String(automatedPrice) : '',
       stock_quantity: 1,
-      language: 'English',
+      language: DEFAULT_LANGUAGE,
       useAutomatedPrice: hasAutomatedPrice, // ✅ boolean
     });
 
@@ -433,10 +423,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setAddModalCard(null);
     setSelectedVariation(undefined);
     setAddFormData({
-      quality: 'Near Mint',
+      quality: DEFAULT_QUALITY,
       price: '',
       stock_quantity: 1,
-      language: 'English',
+      language: DEFAULT_LANGUAGE,
       useAutomatedPrice: false,
     });
   }, []);
@@ -502,9 +492,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
             {' • '}
             <span className="font-semibold text-slate-900">{displayCards.length}</span>
             <span> total variations</span>
-            {displayCards.length > uniqueCards && (
+            {displayCards.length > uniqueCards && averageVariations > 1 && (
               <span className="text-xs text-slate-500 ml-1">
-                (~{Math.round(displayCards.length / uniqueCards * 10) / 10} variations per card)
+                (~{averageVariations} variations per card)
               </span>
             )}
             {!isInventoryMode && totalCardCount > uniqueCards && (

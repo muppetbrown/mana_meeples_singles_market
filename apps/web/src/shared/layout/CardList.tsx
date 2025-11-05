@@ -1,13 +1,40 @@
 // apps/web/src/shared/layout/CardList.tsx
 /**
- * Card List Component - REFACTORED TO USE CARDROW
- * Displays cards in list/table view using CardRow component for each row
+ * Card List Component - Table/List View Card Display
  *
- * ARCHITECTURE:
- * - Uses CardRow.tsx for consistent row rendering
- * - Converts BrowseBaseCard to CardIdentity for CardRow
- * - Generates variation badges using CardRow's badge system
- * - Passes action buttons via CardRow's rightNode prop
+ * A responsive list/table view component for displaying cards with variation badges,
+ * pricing information, and action buttons. Provides both desktop table and mobile
+ * card layouts.
+ *
+ * @module CardList
+ *
+ * ## Features
+ * - Responsive table view (desktop) and card view (mobile)
+ * - Smart variation badges showing only differing fields
+ * - Price range display with currency conversion
+ * - Image modal for full-size preview
+ * - Mode-aware filtering and actions
+ *
+ * ## Architecture
+ * - **Uses CardRow**: Delegates row rendering to CardRow component
+ * - **Responsive Design**: Table for large screens, cards for mobile
+ * - **Smart Badges**: Analyzes variations to show only relevant differences
+ * - **Stock Filtering**: Automatically filters by stock based on mode
+ *
+ * ## Display Modes
+ * - `storefront`: Shows only in-stock items, "Add to Cart" action
+ * - `inventory`: Shows inventory items, "Manage" action
+ * - `all`: Shows all variations, "Add to Inventory" action
+ *
+ * @example
+ * ```tsx
+ * <CardList
+ *   cards={browseBaseCards}
+ *   mode="storefront"
+ *   currency={usdCurrency}
+ *   onAction={(card, variation) => handleAction(card, variation)}
+ * />
+ * ```
  */
 import React from 'react';
 import CardRow, { type CardIdentity, type VariationBadge } from '@/shared/card/CardRow';
@@ -31,10 +58,20 @@ import {
 // TYPES
 // ============================================================================
 
+/**
+ * Props for the CardList component
+ */
 export interface CardListProps {
+  /** Array of grouped cards to display */
   cards: BrowseBaseCard[];
+  /** Display mode affecting filtering and action behavior */
   mode: 'storefront' | 'inventory' | 'all';
+  /** Currency for price formatting (defaults to USD) */
   currency?: Currency;
+  /** Callback when user interacts with a card's action button
+   * @param card - The card that was actioned
+   * @param variation - The specific variation if only one exists, undefined for multiple
+   */
   onAction: (card: BrowseBaseCard, variation?: BrowseVariation) => void;
 }
 

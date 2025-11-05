@@ -1,9 +1,38 @@
-// File: apps/web/src/lib/utils/groupCards.ts
-// Purpose: Catalog-only grouping of "cards" (each DB row is a variation) into base cards for browsing.
-// Notes:
-// - This intentionally avoids inventory-specific fields (quality, language).
-// - Finish/foil and treatment are first-class in the variation identity and ordering.
-// - Groups are keyed by (set_id, card_number) to align with DB uniqueness.
+/**
+ * Card Grouping Utilities
+ *
+ * Transforms flat card data (where each row is a treatment/finish variation) into
+ * hierarchical BrowseBaseCard structures for unified display across admin and shop pages.
+ *
+ * @module groupCards
+ *
+ * ## Purpose
+ * The database stores each card variation (treatment/finish combo) as a separate row.
+ * This utility groups these rows by (set_id, card_number) and organizes them into
+ * a base card with a variations array for consistent UI display.
+ *
+ * ## Architecture
+ * - **Grouping Key**: (set_id, card_number) - matches DB unique constraints
+ * - **Variation Identity**: treatment + finish + border_color
+ * - **Price Logic**: Automatically selects base_price or foil_price based on finish
+ * - **Sorting**: Variations sorted by finish → treatment → border_color
+ *
+ * ## Key Features
+ * - Preserves all variation metadata (treatment, finish, border, frame effects)
+ * - Calculates aggregate stats (total_stock, variation_count, lowest_price)
+ * - Selects preferred base card (STANDARD/REGULAR + NONFOIL when available)
+ * - Consistent ordering for stable UI rendering
+ *
+ * @example
+ * ```ts
+ * const cards = [
+ *   { set_id: 1, card_number: '123', treatment: 'STANDARD', finish: 'nonfoil', ... },
+ *   { set_id: 1, card_number: '123', treatment: 'BORDERLESS', finish: 'foil', ... }
+ * ];
+ * const grouped = groupCardsForBrowse(cards);
+ * // Returns: [BrowseBaseCard with 2 variations]
+ * ```
+ */
 import type {
   Card,
   CardVariation,
@@ -38,8 +67,34 @@ const isPreferredBase = (c: Card) =>
   (c.finish || '').toUpperCase().includes('NON');
 
 /**
- * Group catalog rows into browseable base cards.
- * Each input row is itself a variation; we synthesize `variations` from grouped rows.
+ * Group catalog card rows into browseable base cards with variations.
+ *
+ * Takes an array of Card objects (where each represents a unique variation) and
+ * groups them by (set_id, card_number) into BrowseBaseCard objects. Each base card
+ * contains an array of its variations with proper price assignment and sorting.
+ *
+ * ## Grouping Logic
+ * 1. Group cards by (set_id, card_number) key
+ * 2. For each group, create variation objects with appropriate prices
+ * 3. Sort variations: nonfoil → foil → etched, then by treatment
+ * 4. Calculate aggregates: total_stock, variation_count, lowest_price
+ * 5. Select preferred base card (STANDARD/NONFOIL preferred)
+ *
+ * ## Price Assignment
+ * Each variation gets its price based on finish type:
+ * - Nonfoil: uses base_price
+ * - Foil/Etched: uses foil_price
+ * - Unknown: defaults to base_price
+ *
+ * @param cards - Array of card rows from database (each row is a variation)
+ * @returns Array of grouped BrowseBaseCards ready for display
+ *
+ * @example
+ * ```ts
+ * const dbCards = await fetchCards(); // Each row is a variation
+ * const browseable = groupCardsForBrowse(dbCards);
+ * // Can now display with CardGrid or CardList
+ * ```
  */
 export function groupCardsForBrowse(cards: Card[]): BrowseBaseCard[] {
   if (!Array.isArray(cards) || cards.length === 0) return [];
