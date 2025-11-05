@@ -497,26 +497,24 @@ const CardItem: React.FC<CardItemProps> = ({
   return (
     <div className="card-mm flex flex-col h-full bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image Section */}
-      <div className="relative flex-shrink-0 overflow-hidden bg-slate-50" style={{ aspectRatio: '5/7' }}>
-      <button
-      onClick={() => setShowImageModal(true)}
-      className="block w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-hidden"
-      aria-label={`View larger image of ${card.name}`}
-      >
-      <OptimizedImage
-      src={imageUrl}
-      alt={card.name}
-      width={250}
-      height={350}
-      className={`w-full h-full hover:scale-105 transition-transform ${
-      isCardFoil
-      ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
-      : ''
-      }`}
-      placeholder="blur"
-      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-      />
-      </button>
+      <div className="relative flex-shrink-0 bg-slate-50 aspect-[5/7] overflow-hidden">
+        <button
+          onClick={() => setShowImageModal(true)}
+          className="block w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+          aria-label={`View larger image of ${card.name}`}
+          type="button"
+        >
+          <img
+            src={imageUrl}
+            alt={card.name}
+            className={`w-full h-full object-cover hover:scale-105 transition-transform ${
+              isCardFoil
+                ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
+                : ''
+            }`}
+            loading="lazy"
+          />
+        </button>
       </div>
 
       {/* Content Section */}
