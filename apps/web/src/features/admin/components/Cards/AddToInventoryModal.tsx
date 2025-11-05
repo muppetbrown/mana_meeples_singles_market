@@ -203,7 +203,7 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                 finish: selectedVariation.finish ?? null,
                 border_color: selectedVariation.border_color ?? null,
                 in_stock: selectedVariation.in_stock,
-              } : undefined}
+              } : null}
               onVariationChange={(variation) => {
                 const fullVariation = card.variations.find(v => v.id === variation.id);
                 if (fullVariation) onVariationChange(fullVariation);
