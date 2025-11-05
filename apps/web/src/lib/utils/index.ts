@@ -7,3 +7,21 @@ export { sanitizeText, sanitizeHTML, sanitizeEmail, sanitizePhone, sanitizeAddre
 export { useVirtualScroll } from './virtualScroll';
 export { sortCards, groupCardsBySort, getSortOptions, getSortOptionLabel } from './sortCards';
 export type { SortOption, SortOrder, CardGroup } from './sortCards';
+
+// Card transformation utilities
+export {
+  calculateCardPrice,
+  calculateVariationPrice,
+  transformStorefrontCard,
+  transformStorefrontCards,
+  isValidDisplayCard,
+  hasPricingInfo,
+  hasStock,
+  filterValidCards,
+  filterCardsWithPricing,
+  filterCardsWithStock,
+  calculateTotalStock,
+  countUniqueCards,
+  calculateAverageVariations
+} from './cardTransformations';
+export type { CardTransformOptions } from './cardTransformations';

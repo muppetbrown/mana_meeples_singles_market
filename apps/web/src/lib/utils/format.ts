@@ -1,7 +1,29 @@
 /**
  * Currency and Price Formatting Utilities
- * Centralized formatters with consistent behavior
- * REFACTORED: Consolidated from 4 functions to 2 main functions
+ *
+ * Centralized, type-safe formatters for consistent price and currency display
+ * across the application. Supports multiple currencies with automatic conversion
+ * and both simple and Intl.NumberFormat-based formatting.
+ *
+ * @module format
+ *
+ * ## Key Functions
+ * - `formatPrice()` - Main formatter for dollar amounts with currency conversion
+ * - `formatPriceDisplay()` - Smart price range display for cards with variations
+ * - `formatCurrency()` - Legacy support for cent-based prices
+ * - `formatCurrencySimple()` - Fast formatting without Intl API
+ *
+ * ## Usage Patterns
+ * ```ts
+ * // Single price with currency conversion
+ * formatPrice(10.50, { code: 'NZD', rate: 1.5 }) // "NZ$15.75"
+ *
+ * // Price range for cards with multiple variations
+ * formatPriceDisplay(variations, currency, 'storefront') // "$5.99 - $12.99"
+ *
+ * // Simple format (no Intl, faster)
+ * formatCurrencySimple(10.50, currency) // "$10.50"
+ * ```
  */
 
 import type { Currency } from '@/types';
@@ -108,10 +130,36 @@ export function formatOrderTotal(dollars: number, currencySymbol: string = '$'):
 // ============================================================================
 
 /**
- * Calculate and format price display for cards with variations
- * Shows single price if all variations have the same price
- * Shows price range (min-max) if variations have different prices
- * Only considers variations with stock (in_stock > 0)
+ * Calculate and format smart price display for cards with variations.
+ *
+ * Analyzes all variations to determine the appropriate price display:
+ * - Single price if all variations cost the same
+ * - Price range (min-max) if variations have different prices
+ * - Null if no valid prices are available
+ *
+ * ## Stock Filtering
+ * - `storefront`/`inventory` modes: Only considers in-stock variations
+ * - `all` mode: Considers all variations regardless of stock
+ *
+ * @param variations - Array of card variations with price and stock info
+ * @param currency - Currency object for conversion and formatting
+ * @param mode - Display mode affecting stock filtering
+ * @returns Formatted price string or null if no prices available
+ *
+ * @example
+ * ```ts
+ * // Single price (all variations same price)
+ * formatPriceDisplay([
+ *   { price: 5.99, in_stock: 3 },
+ *   { price: 5.99, in_stock: 1 }
+ * ], usdCurrency, 'storefront') // "$5.99"
+ *
+ * // Price range (different prices)
+ * formatPriceDisplay([
+ *   { price: 5.99, in_stock: 3 },
+ *   { price: 12.99, in_stock: 1 }
+ * ], usdCurrency, 'storefront') // "$5.99 - $12.99"
+ * ```
  */
 export function formatPriceDisplay(
   variations: Array<{ price?: number | null; in_stock?: number }>,

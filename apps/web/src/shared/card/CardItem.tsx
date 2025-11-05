@@ -1,12 +1,39 @@
 // apps/web/src/shared/card/CardItem.tsx
 /**
- * Card Item Component - IMPLEMENTATION OF NEW ARCHITECTURE
- * Displays individual card with 3-dropdown system for grid view
+ * Card Item Component - Grid View Card Display
  *
- * ARCHITECTURE:
- * - Grid view: Large cards with 3 dropdowns (Variation, Quality, Language)
- * - Adapts display based on mode: storefront/inventory/all
- * - Follows AI development principles for clarity and maintainability
+ * A comprehensive card display component for grid layouts featuring a 3-dropdown
+ * selection system for variations, quality, and language options.
+ *
+ * @module CardItem
+ *
+ * ## Features
+ * - Responsive image display with modal zoom
+ * - Three-tier selection system (Variation → Quality → Language)
+ * - Mode-aware display (storefront/inventory/all)
+ * - Real-time stock and price information
+ * - Accessibility-compliant with ARIA labels and keyboard navigation
+ *
+ * ## Architecture
+ * - **Grid View Only**: Designed for card grid layouts
+ * - **BrowseBaseCard Format**: Works with grouped card variations
+ * - **Progressive Disclosure**: Dropdowns appear based on availability
+ * - **Optimized Images**: Uses OptimizedImage component with lazy loading
+ *
+ * ## Display Modes
+ * - `storefront`: Customer-facing shop display with "Add to Cart" action
+ * - `inventory`: Admin inventory management with "Manage" action
+ * - `all`: Admin card database with "Add to Inventory" action
+ *
+ * @example
+ * ```tsx
+ * <CardItem
+ *   card={browseBaseCard}
+ *   mode="storefront"
+ *   currency={usdCurrency}
+ *   onAction={handleAddToCart}
+ * />
+ * ```
  */
 import React, { useState, useMemo, useEffect } from 'react';
 import OptimizedImage from '@/shared/media/OptimizedImage';
@@ -32,18 +59,34 @@ import {
 // TYPES
 // ============================================================================
 
+/**
+ * Props for the CardItem component
+ */
 export interface CardItemProps {
+  /** Card data including all variations and metadata */
   card: BrowseBaseCard;
+  /** Display mode determining behavior and action button text */
   mode: 'storefront' | 'inventory' | 'all';
+  /** Currency for price display (defaults to USD if not provided) */
   currency?: Currency;
+  /** Callback when user triggers the action button (Add to Cart/Manage/Add to Inventory) */
   onAction: (params: ActionParams) => void;
 }
 
+/**
+ * Parameters passed to the onAction callback
+ * Contains all information needed to process the user's selection
+ */
 export interface ActionParams {
+  /** The base card that was actioned */
   card: BrowseBaseCard;
+  /** Selected variation ID (treatment/finish combination) */
   variationId: number;
+  /** Selected inventory ID (quality/language specific), if applicable */
   inventoryId: number | undefined;
+  /** Selected quality grade, if applicable */
   quality: string | undefined;
+  /** Selected language, if applicable */
   language: string | undefined;
 }
 
