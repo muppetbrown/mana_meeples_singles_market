@@ -473,7 +473,7 @@ const CardItem: React.FC<CardItemProps> = ({
 
   const isCardFoil = selectedVariation ? selectedVariation.finish === 'foil' : false;
   const hasSpecial = selectedVariation
-    ? hasSpecialTreatment({ treatment: selectedVariation.treatment } as Pick<BrowseBaseCard, 'treatment'>)
+    ? hasSpecialTreatment({ treatment: selectedVariation.treatment })
     : false;
 
   return (

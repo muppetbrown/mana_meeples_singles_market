@@ -395,8 +395,10 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
                 {/* Automated price checkbox - Below the price input */}
                 {selectedVariation && (selectedVariation.base_price !== null || selectedVariation.foil_price !== null) && selectedVariation.price_source && (
                   <div className="mt-2">
-                    <label className="flex items-center gap-2 text-sm">
+                    <label htmlFor="useAutomatedPrice" className="flex items-center gap-2 text-sm">
                       <input
+                        id="useAutomatedPrice"
+                        name="useAutomatedPrice"
                         type="checkbox"
                         checked={formData.useAutomatedPrice}
                         onChange={(e) => handleChange('useAutomatedPrice', e.target.checked)}

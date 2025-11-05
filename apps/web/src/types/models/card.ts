@@ -242,7 +242,7 @@ export function isFoilCard(card: Card): boolean {
 /**
  * Check if card has special treatment
  */
-export function hasSpecialTreatment(card: Card): boolean {
+export function hasSpecialTreatment(card: Pick<Card, 'treatment'>): boolean {
   if (!card.treatment) return false;
   const upper = card.treatment.toUpperCase();
   return upper !== 'STANDARD' && upper !== '';
