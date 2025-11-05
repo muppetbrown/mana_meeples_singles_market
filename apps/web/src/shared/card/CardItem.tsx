@@ -36,6 +36,7 @@
  * ```
  */
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import OptimizedImage from '@/shared/media/OptimizedImage';
 import { X } from 'lucide-react';
 import VariationBadge from '@/shared/ui/VariationBadge';
@@ -495,77 +496,79 @@ const CardItem: React.FC<CardItemProps> = ({
     : false;
 
   return (
-    <div className="card-mm flex flex-col h-full bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
-      {/* Image Section */}
-      <div className="relative flex-shrink-0 bg-slate-50 aspect-[5/7] overflow-hidden">
-        <button
-          onClick={() => setShowImageModal(true)}
-          className="block w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-500"
-          aria-label={`View larger image of ${card.name}`}
-          type="button"
-        >
-          <img
-            src={imageUrl}
-            alt={card.name}
-            className={`w-full h-full object-cover hover:scale-105 transition-transform ${
-              isCardFoil
-                ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
-                : ''
-            }`}
-            loading="lazy"
-          />
-        </button>
-      </div>
+    <>
+      <div className="card-mm flex flex-col h-full bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+        {/* Image Section */}
+        <div className="relative flex-shrink-0 bg-slate-50 aspect-[5/7] overflow-hidden">
+          <button
+            onClick={() => setShowImageModal(true)}
+            className="block w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label={`View larger image of ${card.name}`}
+            type="button"
+          >
+            <img
+              src={imageUrl}
+              alt={card.name}
+              className={`w-full h-full object-cover hover:scale-105 transition-transform ${
+                isCardFoil
+                  ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
+                  : ''
+              }`}
+              loading="lazy"
+            />
+          </button>
+        </div>
 
-      {/* Content Section */}
-      <div className="flex flex-col flex-grow p-4">
-        {/* Content that can grow/shrink */}
-        <div className="flex flex-col flex-grow space-y-4">
-          {/* Card Info */}
-          <div className="flex-shrink-0">
-            <h3 className="font-semibold text-lg text-slate-900 line-clamp-2 mb-1">
-              {card.name}
-            </h3>
-            <p className="text-sm text-slate-600">
-              {card.set_name}
-            </p>
-            {card.card_number && (
-              <p className="text-sm text-slate-500">
-                #{card.card_number}
+        {/* Content Section */}
+        <div className="flex flex-col flex-grow p-4">
+          {/* Content that can grow/shrink */}
+          <div className="flex flex-col flex-grow space-y-4">
+            {/* Card Info */}
+            <div className="flex-shrink-0">
+              <h3 className="font-semibold text-lg text-slate-900 line-clamp-2 mb-1">
+                {card.name}
+              </h3>
+              <p className="text-sm text-slate-600">
+                {card.set_name}
               </p>
-            )}
+              {card.card_number && (
+                <p className="text-sm text-slate-500">
+                  #{card.card_number}
+                </p>
+              )}
+            </div>
+
+            {/* Three Dropdowns */}
+            <div className="space-y-3 flex-shrink-0">
+              {renderVariationDropdown()}
+              {renderQualityDropdown()}
+              {renderLanguageDropdown()}
+            </div>
+
+            {/* Stock and Price */}
+            <div className="flex-shrink-0 py-3 border-t border-slate-200">
+              {inventoryLoading ? (
+                <div className="flex items-center gap-2 text-sm text-slate-500">
+                  <div className="w-2 h-2 bg-slate-300 rounded-full animate-pulse" />
+                  <span>Loading...</span>
+                </div>
+              ) : (
+                renderStockAndPrice()
+              )}
+            </div>
           </div>
 
-          {/* Three Dropdowns */}
-          <div className="space-y-3 flex-shrink-0">
-            {renderVariationDropdown()}
-            {renderQualityDropdown()}
-            {renderLanguageDropdown()}
+          {/* Action Button - Always at bottom */}
+          <div className="flex-shrink-0 pt-4">
+            {renderActionButton()}
           </div>
-
-          {/* Stock and Price */}
-          <div className="flex-shrink-0 py-3 border-t border-slate-200">
-            {inventoryLoading ? (
-              <div className="flex items-center gap-2 text-sm text-slate-500">
-                <div className="w-2 h-2 bg-slate-300 rounded-full animate-pulse" />
-                <span>Loading...</span>
-              </div>
-            ) : (
-              renderStockAndPrice()
-            )}
-          </div>
-        </div>
-
-        {/* Action Button - Always at bottom */}
-        <div className="flex-shrink-0 pt-4">
-          {renderActionButton()}
         </div>
       </div>
 
-      {/* Image Modal */}
-      {showImageModal && (
+      {/* Image Modal - Rendered via Portal */}
+      {showImageModal && createPortal(
         <div
-          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4"
           onClick={(e) => {
             // Only close if clicking the backdrop, not the image or content
             if (e.target === e.currentTarget) {
@@ -576,28 +579,32 @@ const CardItem: React.FC<CardItemProps> = ({
           aria-modal="true"
           aria-label="Image preview modal"
         >
-          <div className="relative max-w-4xl max-h-[90vh]">
+          <div className="relative max-w-5xl max-h-[90vh] flex flex-col">
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setShowImageModal(false);
               }}
-              className="absolute -top-10 right-0 text-white hover:text-gray-300 transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded"
-              aria-label="Close image modal"
+              className="absolute -top-12 right-0 text-white hover:text-gray-300 text-2xl font-bold px-4 py-2 transition-colors focus:outline-none focus:ring-2 focus:ring-white rounded"
+              aria-label="Close image"
               type="button"
             >
-              <X className="w-8 h-8" />
+              ✕
             </button>
             <img
               src={imageUrl}
               alt={card.name}
-              className="max-w-full max-h-[90vh] object-contain rounded-lg shadow-2xl"
+              className="max-w-full max-h-[85vh] object-contain rounded-lg shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             />
+            <p className="text-white text-center mt-4 text-lg font-medium">
+              {card.name}
+            </p>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
-    </div>
+    </>
   );
 };
 
