@@ -9,8 +9,6 @@ import OptimizedImage from '@/shared/media/OptimizedImage';
 
 export type InventoryOption = {
   inventoryId: number; // card_inventory.id
-  treatment: string;   // e.g., STANDARD, BORDERLESS
-  foilType: string;    // e.g., NONFOIL, FOIL, ETCHED
   quality: string;     // e.g., NM, LP, MP
   language: string;    // e.g., EN, JP
   priceCents: number;
@@ -51,7 +49,6 @@ export function AddToCartModal({
           variations: Array<{
             inventory_id: number;
             quality: string;
-            foil_type?: string;
             language: string;
             stock: number;
             price: number;
@@ -62,8 +59,6 @@ export function AddToCartModal({
       // Map variations to InventoryOption format
       const options: InventoryOption[] = (response.card.variations || []).map(v => ({
         inventoryId: v.inventory_id,
-        treatment: response.card.treatment || 'STANDARD',
-        foilType: v.foil_type || 'NONFOIL',
         quality: v.quality,
         language: v.language,
         priceCents: Math.round((v.price || 0) * 100), // Convert to cents
@@ -79,18 +74,12 @@ export function AddToCartModal({
     staleTime: 60_000,
   });
 
-  const [selectedFoilType, setSelectedFoilType] = React.useState<string>('');
   const [selectedQuality, setSelectedQuality] = React.useState<string>('');
   const [selectedLanguage, setSelectedLanguage] = React.useState<string>('');
   const [qty, setQty] = React.useState(1);
   const liveRef = React.useRef<HTMLDivElement>(null);
 
   // Get unique values for dropdowns
-  const foilTypes = React.useMemo(() => {
-    if (!data?.options) return [];
-    return Array.from(new Set(data.options.map(o => o.foilType))).sort();
-  }, [data?.options]);
-
   const qualities = React.useMemo(() => {
     if (!data?.options) return [];
     return Array.from(new Set(data.options.map(o => o.quality))).sort();
@@ -104,7 +93,6 @@ export function AddToCartModal({
   // Reset state when modal opens
   React.useEffect(() => {
     if (!isOpen) return;
-    setSelectedFoilType('');
     setSelectedQuality('');
     setSelectedLanguage('');
     setQty(1);
@@ -120,7 +108,6 @@ export function AddToCartModal({
       .sort((a, b) => a.priceCents - b.priceCents)[0];
 
     if (cheapest) {
-      setSelectedFoilType(cheapest.foilType);
       setSelectedQuality(cheapest.quality);
       setSelectedLanguage(cheapest.language);
     }
@@ -128,39 +115,28 @@ export function AddToCartModal({
 
   // Find the selected inventory option based on current selections
   const selected = React.useMemo(() => {
-    if (!data?.options || !selectedFoilType || !selectedQuality || !selectedLanguage) {
+    if (!data?.options || !selectedQuality || !selectedLanguage) {
       return null;
     }
     return data.options.find(
-      o => o.foilType === selectedFoilType &&
-           o.quality === selectedQuality &&
-           o.language === selectedLanguage
+      o => o.quality === selectedQuality && o.language === selectedLanguage
     ) || null;
-  }, [data?.options, selectedFoilType, selectedQuality, selectedLanguage]);
+  }, [data?.options, selectedQuality, selectedLanguage]);
 
   // Get available options based on current selections
-  const availableFoilTypes = React.useMemo(() => {
-    if (!data?.options) return [];
-    return Array.from(new Set(data.options.map(o => o.foilType))).sort();
-  }, [data?.options]);
-
   const availableQualities = React.useMemo(() => {
-    if (!data?.options || !selectedFoilType) return qualities;
-    return Array.from(new Set(
-      data.options
-        .filter(o => o.foilType === selectedFoilType)
-        .map(o => o.quality)
-    )).sort();
-  }, [data?.options, selectedFoilType, qualities]);
+    if (!data?.options) return qualities;
+    return Array.from(new Set(data.options.map(o => o.quality))).sort();
+  }, [data?.options, qualities]);
 
   const availableLanguages = React.useMemo(() => {
-    if (!data?.options || !selectedFoilType || !selectedQuality) return languages;
+    if (!data?.options || !selectedQuality) return languages;
     return Array.from(new Set(
       data.options
-        .filter(o => o.foilType === selectedFoilType && o.quality === selectedQuality)
+        .filter(o => o.quality === selectedQuality)
         .map(o => o.language)
     )).sort();
-  }, [data?.options, selectedFoilType, selectedQuality, languages]);
+  }, [data?.options, selectedQuality, languages]);
 
   // Helper function to format labels
   const formatLabel = (value: string): string => {
@@ -286,29 +262,6 @@ export function AddToCartModal({
               )}
 
               <div className="space-y-4">
-                {/* Foil Type Selection - only show if multiple options */}
-                {availableFoilTypes.length > 1 && (
-                  <div>
-                    <label htmlFor="foilType" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
-                      Finish <span className="text-red-500">*</span>
-                    </label>
-                    <select
-                      id="foilType"
-                      value={selectedFoilType}
-                      onChange={(e) => setSelectedFoilType(e.target.value)}
-                      className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:border-transparent"
-                      required
-                    >
-                      <option value="">Select finish...</option>
-                      {availableFoilTypes.map((type) => (
-                        <option key={type} value={type}>
-                          {formatLabel(type)}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-
                 {/* Quality Selection */}
                 <div>
                   <label htmlFor="quality" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
@@ -318,8 +271,7 @@ export function AddToCartModal({
                     id="quality"
                     value={selectedQuality}
                     onChange={(e) => setSelectedQuality(e.target.value)}
-                    disabled={!selectedFoilType && availableFoilTypes.length > 1}
-                    className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:border-transparent"
                     required
                   >
                     <option value="">Select quality...</option>

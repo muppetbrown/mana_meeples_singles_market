@@ -12,7 +12,6 @@ export interface InventoryItem {
   card_number?: string;
   rarity?: string;
   quality: string;
-  foil_type?: string;
   language?: string;
   price: string | number;
   stock_quantity: number;
@@ -191,9 +190,8 @@ export const validateInventoryCSV = (data: Record<string, unknown>[]): Validatio
   const warnings: string[] = [];
 
   const requiredFields = ['name', 'set_name', 'quality', 'price', 'stock_quantity'];
-  const optionalFields = ['card_number', 'rarity', 'foil_type', 'language', 'game_name'];
+  const optionalFields = ['card_number', 'rarity', 'language', 'game_name'];
   const validQualities = ['NM', 'LP', 'MP', 'HP', 'DMG'];
-  const validFoilTypes = ['Regular', 'Foil', 'Etched', 'Showcase'];
 
   if (!Array.isArray(data) || data.length === 0) {
     errors.push('No valid data found in CSV');
@@ -263,12 +261,6 @@ export const validateInventoryCSV = (data: Record<string, unknown>[]): Validatio
       errors.push(`Row ${rowNumber}: Invalid quality '${qualityValue}'. Must be one of: ${validQualities.join(', ')}`);
     }
 
-    // Validate foil type
-    const foilTypeValue = row?.foil_type;
-    if (foilTypeValue && !validFoilTypes.includes(String(foilTypeValue))) {
-      warnings.push(`Row ${rowNumber}: Unusual foil type '${foilTypeValue}'. Expected: ${validFoilTypes.join(', ')}`);
-    }
-
     // Check for suspicious duplicates
     const duplicates = data.filter((otherRow, otherIndex) =>
       otherIndex !== index &&
@@ -276,7 +268,7 @@ export const validateInventoryCSV = (data: Record<string, unknown>[]): Validatio
       otherRow.set_name === row.set_name &&
       otherRow.card_number === row.card_number &&
       otherRow.quality === row.quality &&
-      otherRow.foil_type === row.foil_type
+      otherRow.language === row.language
     );
 
     if (duplicates.length > 0) {
@@ -306,7 +298,6 @@ export const formatInventoryForExport = (inventoryData: InventoryItem[]) => {
     card_number: item.card_number || '',
     rarity: item.rarity || '',
     quality: item.quality,
-    foil_type: item.foil_type || 'Regular',
     language: item.language || 'English',
     price: parseFloat(String(item.price)).toFixed(2),
     stock_quantity: item.stock_quantity,
@@ -327,7 +318,6 @@ export const generateInventoryTemplate = () => {
       card_number: '161',
       rarity: 'Common',
       quality: 'NM',
-      foil_type: 'Regular',
       language: 'English',
       price: '45.00',
       stock_quantity: '1',

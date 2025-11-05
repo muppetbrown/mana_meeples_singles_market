@@ -232,14 +232,13 @@ router.get("/cards/:id", async (req: Request, res: Response) => {
 
     const card = cardRes.rows[0];
 
-    // Get inventory variations with proper field aliases including foil_type
+    // Get inventory variations with proper field aliases
     // IMPORTANT: Alias 'id' as 'inventory_id' and 'stock_quantity' as 'stock'
     // to match the CardVariation interface used throughout the app
     const invRes = await client.query(
       `SELECT
         id AS inventory_id,
         quality,
-        foil_type,
         language,
         stock_quantity AS stock,
         price

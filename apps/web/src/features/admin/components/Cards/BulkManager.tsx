@@ -130,7 +130,6 @@ const BulkInventoryManager: React.FC<BulkInventoryManagerProps> = ({ onInventory
         card_number: String(r.card_number ?? ''),
         rarity: String(r.rarity ?? ''),
         quality: String(r.quality ?? 'NM'),
-        foil_type: String(r.foil_type ?? 'Regular'),
         language: String(r.language ?? 'English'),
         price: Number(r.price ?? 0),
         stock_quantity: Number(r.stock_quantity ?? 0),
@@ -320,13 +319,10 @@ const BulkInventoryManager: React.FC<BulkInventoryManagerProps> = ({ onInventory
             <strong>Required columns:</strong> name, set_name, quality, price, stock_quantity
           </p>
           <p>
-            <strong>Optional columns:</strong> card_number, rarity, foil_type, language, game_name
+            <strong>Optional columns:</strong> card_number, rarity, language, game_name
           </p>
           <p>
             <strong>Quality values:</strong> NM, LP, MP, HP, DMG
-          </p>
-          <p>
-            <strong>Foil types:</strong> Regular, Foil, Etched, Showcase
           </p>
         </div>
       </div>
