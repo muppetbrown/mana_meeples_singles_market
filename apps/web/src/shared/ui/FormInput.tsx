@@ -3,7 +3,7 @@
  * Reusable input field with consistent styling and accessibility
  */
 
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 
 export interface FormInputProps {
   /** Unique ID for the input element */
