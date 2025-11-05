@@ -303,6 +303,7 @@ const ShopPage: React.FC = () => {
                           cards={group.cards}
                           mode="storefront"
                           viewMode={viewMode}
+                          columnCount={3}
                           currency={currency}
                           onAddToCart={({ card, inventoryId, quantity }) => {
                             setAddToCartModal({ open: true, cardId: card.id });

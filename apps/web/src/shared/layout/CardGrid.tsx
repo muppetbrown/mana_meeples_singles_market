@@ -169,13 +169,13 @@ export const CardGrid: React.FC<CardGridProps> = ({
           onManage?.(card);
           break;
         case 'storefront':
-          if (params.inventoryId) {
-            onAddToCart?.({
-              card,
-              inventoryId: params.inventoryId,
-              quantity: 1
-            });
-          }
+          // Always call onAddToCart to open modal for quality/language selection
+          // Pass variationId for preselection in modal
+          onAddToCart?.({
+            card,
+            inventoryId: params.variationId || card.variations[0]?.id,
+            quantity: 1
+          });
           break;
       }
     };
