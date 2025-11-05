@@ -153,7 +153,10 @@ export function useCardFetching({
     selectedSet,
     selectedTreatment,
     selectedFinish,
+    selectedRarity,
+    selectedQuality,
     games,
+    sets,
     fetchCards
   ]);
 
