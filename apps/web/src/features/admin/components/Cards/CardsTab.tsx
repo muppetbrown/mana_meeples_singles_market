@@ -21,8 +21,9 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download, LayoutGrid, List, Package } from 'lucide-react';
-import { api, ENDPOINTS } from '@/lib/api';
+import { api, ENDPOINTS, buildCardParams, type CardQueryParams, type Game, type Set } from '@/lib/api';
 import { useToast } from '@/shared/ui/Toast';
+import { useCardFetching } from '@/features/hooks/useCardFetching';
 import AddToInventoryModal from './AddToInventoryModal';
 import {
   groupCardsForBrowse,
@@ -44,10 +45,10 @@ import type {
 // TYPES
 // ============================================================================
 
-// STANDARDIZED: Filter options using finishes instead of foilTypes
+// UNIFIED: Filter options using shared types
 interface FilterOptions {
-  games: Array<{ id: number; name: string; code?: string }>;
-  sets: Array<{ id: number; name: string; code?: string; game_id: number }>;
+  games: Game[];
+  sets: Set[];
   treatments: string[];
   finishes: string[];
   rarities: string[];
@@ -77,7 +78,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [cards, setCards] = useState<Card[]>([]);
   const [filterOptions, setFilterOptions] = useState<FilterOptions>({
     games: [],
     sets: [],
@@ -86,9 +86,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     rarities: [],
     qualities: []
   });
-  const [loading, setLoading] = useState(false);
   const [filtersLoading, setFiltersLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [totalCardCount, setTotalCardCount] = useState<number>(0);
   
@@ -117,6 +115,29 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const sortBy = (searchParams.get('sortBy') as SortOption) || 'name';
   const sortOrder = (searchParams.get('sortOrder') as SortOrder) || 'asc';
   const isInventoryMode = mode === 'inventory';
+
+  // --------------------------------------------------------------------------
+  // UNIFIED CARD FETCHING
+  // --------------------------------------------------------------------------
+
+  // UNIFIED: Use shared hook for card fetching (eliminates duplicate query building)
+  const {
+    cards,
+    loading,
+    error,
+    refetch: refetchCards
+  } = useCardFetching({
+    searchTerm,
+    selectedGame,
+    selectedSet,
+    selectedTreatment,
+    selectedFinish,
+    games: filterOptions.games,
+    sets: filterOptions.sets,
+    mode: 'admin',
+    limit: 1000, // Admin uses limit instead of pagination
+    hasInventory: isInventoryMode ? true : undefined
+  });
 
   // --------------------------------------------------------------------------
   // LOAD FILTER OPTIONS
@@ -223,44 +244,22 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, [setSearchParams]);
 
   // --------------------------------------------------------------------------
-  // DATA FETCHING
+  // CARD COUNT FETCHING
   // --------------------------------------------------------------------------
 
   const fetchCardCount = useCallback(async () => {
     try {
-      const params: Record<string, unknown> = {};
+      // UNIFIED: Use shared query builder for count endpoint
+      const queryParams: CardQueryParams = {
+        searchTerm,
+        selectedGame,
+        selectedSet,
+        selectedTreatment,
+        selectedFinish,
+        hasInventory: isInventoryMode ? true : undefined
+      };
 
-      // Apply same filters as main query
-      if (selectedGame && selectedGame !== 'all') {
-        const game = filterOptions.games.find(g => g.name === selectedGame);
-        if (game?.id) {
-          params.game_id = game.id;
-        }
-      }
-
-      if (selectedSet && selectedSet !== 'all') {
-        const set = filterOptions.sets.find(s => s.name === selectedSet);
-        if (set?.id) {
-          params.set_id = set.id;
-        }
-      }
-
-      if (searchTerm?.trim()) {
-        params.search = searchTerm.trim();
-      }
-
-      if (selectedTreatment && selectedTreatment !== 'all') {
-        params.treatment = selectedTreatment;
-      }
-
-      if (selectedFinish && selectedFinish !== 'all') {
-        params.finish = selectedFinish;
-      }
-
-      // Add inventory filter for inventory mode
-      if (isInventoryMode) {
-        params.has_inventory = 'true';
-      }
+      const params = buildCardParams(queryParams, filterOptions.games, filterOptions.sets);
 
       const data = await api.get<{ count: number }>(ENDPOINTS.CARDS.COUNT, params);
       setTotalCardCount(data?.count ?? 0);
@@ -278,22 +277,14 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     filterOptions
   ]);
 
+  // Fetch card count when filters change
   useEffect(() => {
     // Don't fetch until filters are loaded
     if (filtersLoading || !filterOptions.games.length) {
       return;
     }
 
-    const fetchData = async () => {
-      setLoading(true);
-      await Promise.all([
-        fetchCards(),
-        fetchCardCount()
-      ]);
-      setLoading(false);
-    };
-
-    fetchData();
+    fetchCardCount();
   }, [
     selectedGame,
     selectedSet,
@@ -303,61 +294,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     filtersLoading,
     filterOptions,
     fetchCardCount
-  ]);
-
-  const fetchCards = useCallback(async () => {
-    setError(null);
-
-    try {
-      const params: Record<string, unknown> = {
-        limit: 1000
-      };
-
-      // Resolve game NAME to game ID
-      if (selectedGame && selectedGame !== 'all') {
-        const game = filterOptions.games.find(g => g.name === selectedGame);
-        if (game?.id) {
-          params.game_id = game.id;
-        }
-      }
-
-      // Resolve set NAME to set ID
-      if (selectedSet && selectedSet !== 'all') {
-        const set = filterOptions.sets.find(s => s.name === selectedSet);
-        if (set?.id) {
-          params.set_id = set.id;
-        }
-      }
-
-      // Add search term
-      if (searchTerm?.trim()) {
-        params.search = searchTerm.trim();
-      }
-
-      // Add treatment filter
-      if (selectedTreatment && selectedTreatment !== 'all') {
-        params.treatment = selectedTreatment;
-      }
-
-      // Add finish filter
-      if (selectedFinish && selectedFinish !== 'all') {
-        params.finish = selectedFinish;
-      }
-
-      const data = await api.get<{ cards?: Card[] }>(ENDPOINTS.CARDS.LIST, params);
-      setCards(data?.cards ?? []);
-    } catch (err) {
-      console.error('❌ Error fetching cards:', err);
-      setCards([]);
-      setError(err instanceof Error ? err.message : 'Failed to fetch cards');
-    }
-  }, [
-    selectedGame,
-    selectedSet,
-    searchTerm,
-    selectedTreatment,
-    selectedFinish,
-    filterOptions
   ]);
 
   // --------------------------------------------------------------------------
@@ -424,11 +360,12 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   // --------------------------------------------------------------------------
   // ACTIONS
   // --------------------------------------------------------------------------
-  
+
   const handleRefresh = useCallback(() => {
-    // Force re-fetch by updating a dependency
-    setSearchParams(prev => new URLSearchParams(prev));
-  }, [setSearchParams]);
+    // UNIFIED: Use the refetch function from the hook
+    refetchCards();
+    fetchCardCount();
+  }, [refetchCards, fetchCardCount]);
 
   const handleExportCSV = useCallback(async () => {
     if (loading || cards.length === 0) {
@@ -601,17 +538,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       // cost: ..., markup_percentage: ..., low_stock_threshold: ...
     } as const;
 
-    const res = await fetch(ENDPOINTS.ADMIN.INVENTORY, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // if your adminAuthJWT uses cookies
-      body: JSON.stringify(inventoryData),
-    });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({} as any));
-      throw new Error(err?.error || `Upsert failed (${res.status})`);
-    }
+    // UNIFIED: Use api client instead of direct fetch()
+    await api.post(ENDPOINTS.ADMIN.INVENTORY, inventoryData);
 
     // success
     closeAddModal();

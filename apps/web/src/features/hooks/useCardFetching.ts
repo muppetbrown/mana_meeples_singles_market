@@ -1,28 +1,22 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { api, ENDPOINTS, buildStorefrontQuery } from '@/lib/api';
+import { api, ENDPOINTS, buildCardQuery, type CardQueryParams, type Game, type Set } from '@/lib/api';
 import { useErrorHandler } from '@/services/error/handler';
 import type { StorefrontCard, SearchFilters } from '@/types';
 
-interface Game {
-  id: number;
-  name: string;
-  code?: string;
-}
-
-interface Set {
-  id: number;
-  name: string;
-}
-
-// STANDARDIZED: Card fetching params
-interface UseCardFetchingParams {
+// UNIFIED: Card fetching params using shared types
+export interface UseCardFetchingParams {
   searchTerm: string;
   selectedGame: string;
   selectedSet: string;
   selectedTreatment: string;
   selectedFinish: string;
+  selectedRarity?: string;
+  selectedQuality?: string;
   games: Game[];
   sets: Set[];
+  mode?: 'storefront' | 'admin';  // Endpoint mode
+  hasInventory?: boolean;          // Admin filter: only cards with inventory
+  limit?: number;                  // Admin: max results
 }
 
 export function useCardFetching({
@@ -31,21 +25,26 @@ export function useCardFetching({
   selectedSet,
   selectedTreatment,
   selectedFinish,
+  selectedRarity,
+  selectedQuality,
   games,
-  sets
+  sets,
+  mode = 'storefront',
+  hasInventory,
+  limit
 }: UseCardFetchingParams) {
   const [cards, setCards] = useState<StorefrontCard[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const errorHandler = useErrorHandler();
-  
+
   // Track in-flight requests to prevent duplicates
   const requestInFlight = useRef(false);
-  
-  // 🔥 NEW: Debounce timer for search term only
+
+  // Debounce timer for search term only
   const searchDebounceTimer = useRef<NodeJS.Timeout | null>(null);
-  
-  // 🔥 NEW: Track last fetched params to prevent unnecessary refetches
+
+  // Track last fetched params to prevent unnecessary refetches
   const lastFetchedParams = useRef<string>('');
 
   const fetchCards = useCallback(async () => {
@@ -57,18 +56,20 @@ export function useCardFetching({
       setLoading(true);
       setError(null);
 
-      // Use shared query builder to reduce duplication with backend
-      const params = buildStorefrontQuery(
-        {
-          searchTerm,
-          selectedGame,
-          selectedSet,
-          selectedTreatment,
-          selectedFinish
-        },
-        games,
-        sets
-      );
+      // UNIFIED: Use shared query builder for both admin and storefront
+      const queryParams: CardQueryParams = {
+        searchTerm,
+        selectedGame,
+        selectedSet,
+        selectedTreatment,
+        selectedFinish,
+        selectedRarity,
+        selectedQuality,
+        hasInventory,
+        limit
+      };
+
+      const params = buildCardQuery(queryParams, games, sets);
 
       // Check if params actually changed
       const currentParams = params.toString();
@@ -82,9 +83,13 @@ export function useCardFetching({
       // Store current params
       lastFetchedParams.current = currentParams;
 
-      // Use the storefront endpoint
+      // Choose endpoint based on mode
+      const endpoint = mode === 'admin'
+        ? ENDPOINTS.CARDS.LIST
+        : ENDPOINTS.STOREFRONT.CARDS;
+
       const response = await api.get<{ cards: StorefrontCard[] }>(
-        `${ENDPOINTS.STOREFRONT.CARDS}?${params.toString()}`
+        `${endpoint}?${params.toString()}`
       );
 
       setCards(response.cards ?? []);
@@ -103,6 +108,11 @@ export function useCardFetching({
     searchTerm,
     selectedTreatment,
     selectedFinish,
+    selectedRarity,
+    selectedQuality,
+    hasInventory,
+    limit,
+    mode,
     games,
     sets,
     errorHandler
