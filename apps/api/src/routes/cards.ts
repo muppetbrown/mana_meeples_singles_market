@@ -148,24 +148,21 @@ router.get("/cards", async (req: Request, res: Response) => {
   // ============================================================================
   // FIXED QUERY - ENSURES ALL CARD VARIATIONS ARE RETURNED TOGETHER
   // Uses three-phase approach:
-  // 1. Get inventory aggregates per card identity (not per variation)
-  // 2. Get unique card identities with those aggregates
-  // 3. Get all variations for those identities with the shared aggregates
+  // 1. Get inventory aggregates per card_id (each variation separately)
+  // 2. Get unique card identities with filtering
+  // 3. Get all variations for those identities with per-variation aggregates
   // ============================================================================
   const sql = `
     WITH card_inventory_aggregates AS (
-      -- Phase 1: Calculate inventory aggregates per card identity (not per variation)
-      -- This ensures all variations of a card share the same inventory flags
+      -- Phase 1: Calculate inventory aggregates per card_id (per variation)
+      -- This ensures each variation shows its own stock, not shared across all variations
       SELECT
-        c.name,
-        c.card_number,
-        c.set_id,
+        cinv.card_id,
         COUNT(DISTINCT cinv.id)::int AS variation_count,
         COALESCE(SUM(cinv.stock_quantity), 0)::int AS total_stock,
         BOOL_OR(cinv.stock_quantity > 0) AS has_inventory
-      FROM cards c
-      LEFT JOIN card_inventory cinv ON cinv.card_id = c.id
-      GROUP BY c.name, c.card_number, c.set_id
+      FROM card_inventory cinv
+      GROUP BY cinv.card_id
     ),
     card_identities AS (
       -- Phase 2: Get first N unique card identities (by name + card_number + set_id)
@@ -205,7 +202,7 @@ router.get("/cards", async (req: Request, res: Response) => {
       c.game_id,
       c.set_id,
 
-      -- Stock aggregates from card identity level (shared across all variations)
+      -- Stock aggregates from card level (per variation, not shared)
       COALESCE(cia.total_stock, 0)::int AS total_stock,
       COALESCE(cia.variation_count, 0)::int AS variation_count,
       COALESCE(cia.has_inventory, false) AS has_inventory,
@@ -221,9 +218,7 @@ router.get("/cards", async (req: Request, res: Response) => {
     JOIN games g ON g.id = c.game_id
     JOIN card_sets cs ON cs.id = c.set_id
     LEFT JOIN card_pricing cp ON cp.card_id = c.id
-    LEFT JOIN card_inventory_aggregates cia ON cia.name = c.name
-      AND cia.card_number = c.card_number
-      AND cia.set_id = c.set_id
+    LEFT JOIN card_inventory_aggregates cia ON cia.card_id = c.id
     ${orderBy}  -- Apply ordering to final result
   `;
 

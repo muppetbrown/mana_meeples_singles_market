@@ -179,7 +179,7 @@ export function AddToCartModal({
             title="Add to Cart"
             titleId="addToCartTitle"
             onClose={onClose}
-            iconType="special"
+            iconType="cart"
           />
         )}
 
