@@ -151,7 +151,7 @@ router.get('/cards', async (req: Request, res: Response) => {
                 'language', COALESCE(ci.language, 'English'),
                 'price', COALESCE(
                   CASE
-                    WHEN COALESCE(cf.finish, 'nonfoil') = 'foil'
+                    WHEN COALESCE(c.finish, 'nonfoil') = 'foil'
                     THEN lp.foil_price
                     ELSE lp.base_price
                   END,
@@ -168,17 +168,12 @@ router.get('/cards', async (req: Request, res: Response) => {
           ) AS variations
         FROM card_inventory ci
         LEFT JOIN (
-          SELECT DISTINCT ON (id)
-            id, finish
-            from cards
-        ) cf on cf.id = ci.card_id
-        LEFT JOIN (
           SELECT DISTINCT ON (card_id)
                  card_id, base_price, foil_price, price_source, updated_at
           FROM card_pricing
           WHERE card_id = c.id
           ORDER BY card_id, updated_at DESC NULLS LAST, created_at DESC NULLS LAST
-        ) lp ON lp.card_id = ci.card_id
+        ) lp ON lp.card_id = c.id
         WHERE ci.card_id = c.id
       ) inv ON TRUE
       ${whereSql ? `${whereSql} AND` : 'WHERE'} inv.variation_count > 0
