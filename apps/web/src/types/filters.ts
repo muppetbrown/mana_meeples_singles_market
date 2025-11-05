@@ -95,6 +95,39 @@ export interface AdditionalFilter {
 export type AdditionalFiltersConfig = Record<string, AdditionalFilter>;
 
 // ============================================================================
+// API RESPONSE TYPES
+// ============================================================================
+
+/**
+ * Response from /api/cards/filters endpoint
+ * Contains all available filter options
+ */
+export interface FilterOptionsApiResponse {
+  games: Array<{
+    id: number;
+    name: string;
+    code?: string;
+    card_count?: number;
+  }>;
+  sets: Array<{
+    id: number;
+    name: string;
+    code?: string;
+    game_id?: number;
+    card_count?: number;
+  }>;
+  treatments: string[];
+  finishes: string[];
+  foilTypes?: string[]; // Legacy alias for finishes
+  rarities: string[];
+  qualities: string[];
+  priceMin?: number | null;
+  priceMax?: number | null;
+  totalCards?: number;
+  inStockCount?: number;
+}
+
+// ============================================================================
 // FILTER HOOK RETURN TYPE
 // ============================================================================
 

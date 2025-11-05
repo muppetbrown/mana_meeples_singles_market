@@ -7,3 +7,6 @@ export { default as MobileFilterModal } from './MobileFilterModal';
 export { default as FilterSidebar } from './FilterSidebar';
 export { default as CurrencySelector } from './CurrencySelector';
 export { SortDropdown } from './SortDropdown';
+export { default as BaseModal } from './BaseModal';
+export { default as FormSelect } from './FormSelect';
+export { default as FormInput } from './FormInput';

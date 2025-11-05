@@ -20,7 +20,7 @@ import type {
   FilterOptions,
   FilterHookResult,
   AdditionalFiltersConfig,
-  EMPTY_FILTER_OPTIONS
+  FilterOptionsApiResponse
 } from '@/types/filters';
 
 // Import empty filter options
@@ -125,7 +125,7 @@ export function useFilters(options: UseFiltersOptions = {}): FilterHookResult {
     setError(null);
 
     try {
-      const data = await api.get<any>(ENDPOINTS.CARDS.FILTERS);
+      const data = await api.get<FilterOptionsApiResponse>(ENDPOINTS.CARDS.FILTERS);
 
       // Validate response structure
       if (!data || typeof data !== 'object') {
@@ -135,22 +135,22 @@ export function useFilters(options: UseFiltersOptions = {}): FilterHookResult {
       setFilterOptions({
         games: data.games ?? [],
         sets: data.sets ?? [],
-        treatments: data.treatments?.map((t: string) => ({
+        treatments: data.treatments?.map((t) => ({
           value: t,
           label: t.replace(/_/g, ' '),
           count: 0
         })) ?? [],
-        finishes: (data.finishes ?? data.foilTypes ?? []).map((f: string) => ({
+        finishes: (data.finishes ?? data.foilTypes ?? []).map((f) => ({
           value: f,
           label: f.charAt(0).toUpperCase() + f.slice(1),
           count: 0
         })),
-        rarities: data.rarities?.map((r: string) => ({
+        rarities: data.rarities?.map((r) => ({
           value: r,
           label: r,
           count: 0
         })) ?? [],
-        qualities: data.qualities?.map((q: string) => ({
+        qualities: data.qualities?.map((q) => ({
           value: q,
           label: q,
           count: 0

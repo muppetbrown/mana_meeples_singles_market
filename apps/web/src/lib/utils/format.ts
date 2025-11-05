@@ -1,48 +1,111 @@
-// apps/web/src/lib/utils/format.ts
-// Shared price formatter to eliminate duplication across components.
-import type { Currency } from '@/types'
+/**
+ * Currency and Price Formatting Utilities
+ * Centralized formatters with consistent behavior
+ * REFACTORED: Consolidated from 4 functions to 2 main functions
+ */
 
-export function formatCurrency(cents: number, currency: Currency): string {
-const amount = (cents * (currency?.rate ?? 1)) / 100;
-try {
-return new Intl.NumberFormat(undefined, {
-style: 'currency',
-currency: currency?.code ?? 'USD',
-currencyDisplay: 'symbol',
-maximumFractionDigits: 2,
-}).format(amount);
-} catch {
-// Fallback to symbol + fixed decimals
-return `${currency?.symbol ?? '$'}${amount.toFixed(2)}`;
-}
+import type { Currency } from '@/types';
+
+// ============================================================================
+// CORE FORMATTING FUNCTION
+// ============================================================================
+
+/**
+ * Internal helper: Format amount with optional Intl.NumberFormat
+ * Handles both Intl formatting and fallback gracefully
+ */
+function formatWithIntl(
+  amount: number,
+  currency: Currency,
+  useIntl: boolean = true
+): string {
+  if (!useIntl) {
+    return `${currency?.symbol ?? '$'}${amount.toFixed(2)}`;
+  }
+
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currency?.code ?? 'USD',
+      currencyDisplay: 'symbol',
+      maximumFractionDigits: 2,
+    }).format(amount);
+  } catch {
+    // Fallback to simple format
+    return `${currency?.symbol ?? '$'}${amount.toFixed(2)}`;
+  }
 }
 
-// Helper function for formatting prices that are already in dollars (not cents)
-export function formatPrice(dollars: number, currency: Currency): string {
-const amount = dollars * (currency?.rate ?? 1);
-try {
-return new Intl.NumberFormat(undefined, {
-style: 'currency',
-currency: currency?.code ?? 'USD',
-currencyDisplay: 'symbol',
-maximumFractionDigits: 2,
-}).format(amount);
-} catch {
-// Fallback to symbol + fixed decimals
-return `${currency?.symbol ?? '$'}${amount.toFixed(2)}`;
-}
+// ============================================================================
+// PUBLIC API - TWO MAIN FUNCTIONS
+// ============================================================================
+
+/**
+ * Format price in dollars with currency conversion
+ * This is the primary formatter - handles both simple and Intl formatting
+ *
+ * @param dollars - Price in dollars (NOT cents)
+ * @param currency - Currency object with symbol, code, and exchange rate
+ * @param simple - If true, uses simple format (symbol + amount). Default: false (uses Intl)
+ *
+ * @example
+ * formatPrice(10.50, { code: 'USD', symbol: '$', rate: 1 }) // "$10.50"
+ * formatPrice(10.50, { code: 'NZD', symbol: 'NZ$', rate: 1.5 }) // "NZ$15.75"
+ * formatPrice(10.50, currency, true) // Simple format: "$10.50"
+ */
+export function formatPrice(
+  dollars: number,
+  currency: Currency,
+  simple: boolean = false
+): string {
+  const amount = dollars * (currency?.rate ?? 1);
+  return formatWithIntl(amount, currency, !simple);
 }
 
-// Helper for simple currency symbol + amount formatting (matching current pattern)
+/**
+ * Format price in cents (legacy support for APIs that return cents)
+ * Converts cents to dollars and applies currency conversion
+ *
+ * @param cents - Price in cents (will be divided by 100)
+ * @param currency - Currency object
+ * @param simple - If true, uses simple format. Default: false
+ *
+ * @example
+ * formatCurrency(1050, currency) // "$10.50"
+ */
+export function formatCurrency(
+  cents: number,
+  currency: Currency,
+  simple: boolean = false
+): string {
+  const dollars = cents / 100;
+  return formatPrice(dollars, currency, simple);
+}
+
+// ============================================================================
+// CONVENIENCE ALIASES (for backward compatibility)
+// ============================================================================
+
+/**
+ * Simple currency format (symbol + amount, no Intl)
+ * Alias for formatPrice(dollars, currency, true)
+ */
 export function formatCurrencySimple(dollars: number, currency: Currency): string {
-const amount = dollars * (currency?.rate ?? 1);
-return `${currency?.symbol ?? '$'}${amount.toFixed(2)}`;
+  return formatPrice(dollars, currency, true);
 }
 
-// Helper for order totals and other admin displays (no currency conversion)
+/**
+ * Format order total (no currency conversion, for admin displays)
+ * @param dollars - Price in dollars
+ * @param currencySymbol - Currency symbol (default: '$')
+ */
 export function formatOrderTotal(dollars: number, currencySymbol: string = '$'): string {
-return `${currencySymbol}${parseFloat(dollars.toString()).toFixed(2)}`;
+  return `${currencySymbol}${parseFloat(dollars.toString()).toFixed(2)}`;
 }
+
+// ============================================================================
+// CARD-SPECIFIC FORMATTERS
+// ============================================================================
 
 /**
  * Calculate and format price display for cards with variations
