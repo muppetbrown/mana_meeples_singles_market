@@ -34,7 +34,7 @@ export const ShopCart: React.FC<ShopCartProps> = ({
     addNotification
   } = useCart();
 
-  const { selectedVariations, selectVariation } = useVariationSelection(cards);
+  const { selections, selectVariation } = useVariationSelection(cards);
 
   // Derived state
   const cartTotal = useMemo(() =>
@@ -124,7 +124,7 @@ export const useShopCartUtils = (cards: StorefrontCard[]) => {
     addToCart
   } = useCart();
 
-  const { selectedVariations, selectVariation } = useVariationSelection(cards);
+  const { selections, selectVariation } = useVariationSelection(cards);
 
   const cartTotal = useMemo(() =>
     cart.items.reduce((sum, item) => sum + (item.price * item.quantity), 0),
@@ -164,7 +164,7 @@ export const useShopCartUtils = (cards: StorefrontCard[]) => {
     cartCount,
     handleVariationChange,
     handleAddToCart,
-    selectedVariations,
+    selectedVariations: selections,
     addToCart
   };
 };

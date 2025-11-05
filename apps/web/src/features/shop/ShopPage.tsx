@@ -128,11 +128,11 @@ const ShopPage: React.FC = () => {
   const availableTreatments = useMemo(() => {
     if (cards.length === 0) return undefined; // Use all on initial load
     const uniqueTreatments = new Set(
-      cards.map(card => card.treatment).filter(Boolean)
+      cards.map(card => card.treatment).filter((t): t is string => Boolean(t))
     );
     return Array.from(uniqueTreatments).map(treatment => ({
       value: treatment,
-      label: treatment?.replace(/_/g, ' ') || 'Standard',
+      label: treatment.replace(/_/g, ' ') || 'Standard',
       count: 0
     }));
   }, [cards]);
@@ -140,11 +140,11 @@ const ShopPage: React.FC = () => {
   const availableFinishes = useMemo(() => {
     if (cards.length === 0) return undefined; // Use all on initial load
     const uniqueFinishes = new Set(
-      cards.map(card => card.finish).filter(Boolean)
+      cards.map(card => card.finish).filter((f): f is string => Boolean(f))
     );
     return Array.from(uniqueFinishes).map(finish => ({
       value: finish,
-      label: finish ? finish.charAt(0).toUpperCase() + finish.slice(1) : 'Nonfoil',
+      label: finish.charAt(0).toUpperCase() + finish.slice(1),
       count: 0
     }));
   }, [cards]);

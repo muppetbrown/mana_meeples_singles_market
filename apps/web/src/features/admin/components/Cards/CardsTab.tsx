@@ -754,7 +754,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           onClose={closeAddModal}
           saving={saving}
           mode={modalMode}
-          inventoryId={managingInventoryId}
+          {...(managingInventoryId !== undefined ? { inventoryId: managingInventoryId } : {})}
         />
       )}
     </div>

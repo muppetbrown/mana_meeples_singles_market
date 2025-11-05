@@ -173,11 +173,11 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
         <CardVariationHeader
           card={{
             name: card.name,
-            image_url: card.image_url,
-            game_name: card.game_name,
-            set_name: card.set_name,
-            treatment: selectedVariation?.treatment,
-            finish: selectedVariation?.finish,
+            ...(card.image_url !== undefined && { image_url: card.image_url }),
+            ...(card.game_name !== undefined && { game_name: card.game_name }),
+            ...(card.set_name !== undefined && { set_name: card.set_name }),
+            ...(selectedVariation?.treatment !== undefined && { treatment: selectedVariation.treatment }),
+            ...(selectedVariation?.finish !== undefined && { finish: selectedVariation.finish }),
           }}
           title={modalTitle}
           titleId="modal-title"
@@ -192,16 +192,16 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
             <VariationField
               variations={card.variations.map(v => ({
                 id: v.id,
-                treatment: v.treatment,
-                finish: v.finish,
-                border_color: v.border_color,
+                treatment: v.treatment ?? null,
+                finish: v.finish ?? null,
+                border_color: v.border_color ?? null,
                 in_stock: v.in_stock,
               }))}
               selectedVariation={selectedVariation ? {
                 id: selectedVariation.id,
-                treatment: selectedVariation.treatment,
-                finish: selectedVariation.finish,
-                border_color: selectedVariation.border_color,
+                treatment: selectedVariation.treatment ?? null,
+                finish: selectedVariation.finish ?? null,
+                border_color: selectedVariation.border_color ?? null,
                 in_stock: selectedVariation.in_stock,
               } : undefined}
               onVariationChange={(variation) => {
@@ -216,10 +216,10 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
           {selectedVariation && (
             <VariationDetailsBox
               variation={{
-                treatment: selectedVariation.treatment,
-                finish: selectedVariation.finish,
-                border_color: selectedVariation.border_color,
-                frame_effect: selectedVariation.frame_effect,
+                treatment: selectedVariation.treatment ?? null,
+                finish: selectedVariation.finish ?? null,
+                border_color: selectedVariation.border_color ?? null,
+                frame_effect: selectedVariation.frame_effect ?? null,
               }}
               title="Selected Variation:"
             />
@@ -248,14 +248,14 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
             {/* Quality and Language Selectors */}
             <div className="mb-4">
               <QualityLanguageSelectors
-                qualities={QUALITY_OPTIONS}
+                qualities={[...QUALITY_OPTIONS]}
                 selectedQuality={formData.quality}
                 onQualityChange={(quality) => handleChange('quality', quality)}
                 qualityHelpText={formData.quality ? getQualityDescription(formData.quality) : 'Select the physical condition of the card'}
-                languages={LANGUAGE_OPTIONS}
+                languages={[...LANGUAGE_OPTIONS]}
                 selectedLanguage={formData.language}
                 onLanguageChange={(language) => handleChange('language', language)}
-                formatLanguage={getLanguageDisplayName}
+                formatLanguage={(language) => getLanguageDisplayName(language as Language)}
               />
             </div>
 
