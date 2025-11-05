@@ -380,7 +380,7 @@ const ShopPage: React.FC = () => {
             if (!card) return;
 
             try {
-              // Fetch the inventory details from storefront endpoint
+              // UNIFIED: Fetch the inventory details using api client
               const response = await api.get<{
                 card: {
                   variations: Array<{

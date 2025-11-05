@@ -1,43 +1,91 @@
 /**
- * Storefront API Query Builder
+ * Unified Card Query Builder
  *
- * Shared utilities for building storefront API queries
- * Reduces duplication between frontend query building and backend expectations
+ * CONSOLIDATED SOLUTION - Single source of truth for building card API queries
+ * Used by BOTH admin and storefront to eliminate duplication
+ *
+ * Replaces:
+ * - Duplicate query building in CardsTab.tsx (lines 312-345)
+ * - Original buildStorefrontQuery function
+ * - Inline param building throughout the codebase
  */
 
-interface Game {
+export interface Game {
   id: number;
   name: string;
+  code?: string;
 }
 
-interface Set {
+export interface Set {
   id: number;
   name: string;
+  code?: string;
+  game_id?: number;
 }
 
-export interface StorefrontQueryParams {
+/**
+ * Unified parameters for card queries
+ * Works for both admin (/api/cards/cards) and storefront (/api/storefront/cards)
+ */
+export interface CardQueryParams {
+  // Filters
   searchTerm?: string;
-  selectedGame?: string;
-  selectedSet?: string;
+  selectedGame?: string;      // Game name (will be converted to game_id)
+  selectedSet?: string;        // Set name (will be converted to set_id)
   selectedTreatment?: string;
   selectedFinish?: string;
   selectedRarity?: string;
   selectedQuality?: string;
+  hasInventory?: boolean;      // Admin-only: filter to cards with inventory
+
+  // Pagination
   page?: number;
   perPage?: number;
-  sortBy?: string;
+  limit?: number;              // Admin-only: max results without pagination
+
+  // Sorting
+  sortBy?: 'name' | 'number' | 'rarity' | 'created_at' | 'price' | 'set';
   sortOrder?: 'asc' | 'desc';
 }
 
 /**
- * Build URLSearchParams for storefront API calls
- * Handles name-to-ID conversion for games and sets
- *
- * This centralizes the query param building logic that was duplicated
- * across multiple components.
+ * Backend API parameters (after name-to-ID conversion)
+ * Type-safe representation of what the API actually expects
  */
-export function buildStorefrontQuery(
-  params: StorefrontQueryParams,
+export interface CardAPIParams {
+  search?: string;
+  game_id?: number;
+  set_id?: number;
+  treatment?: string;
+  finish?: string;
+  rarity?: string;
+  quality?: string;
+  has_inventory?: string;      // Backend expects 'true'/'false' string
+
+  page?: number;
+  per_page?: number;
+  limit?: number;
+
+  sort?: 'name' | 'number' | 'rarity' | 'created_at';
+  order?: 'asc' | 'desc';
+}
+
+/**
+ * Unified query builder for card fetching
+ *
+ * Handles:
+ * - Name-to-ID conversion for games and sets
+ * - Filter normalization
+ * - Pagination parameters
+ * - Sorting parameters
+ *
+ * @param params - Query parameters with user-friendly names
+ * @param games - Available games for name-to-ID lookup
+ * @param sets - Available sets for name-to-ID lookup
+ * @returns URLSearchParams ready for API call
+ */
+export function buildCardQuery(
+  params: CardQueryParams,
   games: Game[],
   sets: Set[]
 ): URLSearchParams {
@@ -51,7 +99,7 @@ export function buildStorefrontQuery(
   // Game filter - convert name to ID
   if (params.selectedGame && params.selectedGame !== 'all') {
     const game = games.find(g => g.name === params.selectedGame);
-    if (game) {
+    if (game?.id) {
       queryParams.set('game_id', game.id.toString());
     }
   }
@@ -59,7 +107,7 @@ export function buildStorefrontQuery(
   // Set filter - convert name to ID
   if (params.selectedSet && params.selectedSet !== 'all') {
     const set = sets.find(s => s.name === params.selectedSet);
-    if (set) {
+    if (set?.id) {
       queryParams.set('set_id', set.id.toString());
     }
   }
@@ -79,22 +127,36 @@ export function buildStorefrontQuery(
     queryParams.set('rarity', params.selectedRarity);
   }
 
-  // Quality filter
+  // Quality filter (inventory-level)
   if (params.selectedQuality && params.selectedQuality !== 'all') {
     queryParams.set('quality', params.selectedQuality);
   }
 
-  // Pagination
-  if (params.page) {
-    queryParams.set('page', params.page.toString());
-  }
-  if (params.perPage) {
-    queryParams.set('per_page', params.perPage.toString());
+  // Inventory filter (admin-only)
+  if (params.hasInventory !== undefined) {
+    queryParams.set('has_inventory', params.hasInventory ? 'true' : 'false');
   }
 
-  // Sorting
+  // Pagination
+  if (params.page !== undefined) {
+    queryParams.set('page', params.page.toString());
+  }
+  if (params.perPage !== undefined) {
+    queryParams.set('per_page', params.perPage.toString());
+  }
+  if (params.limit !== undefined) {
+    queryParams.set('limit', params.limit.toString());
+  }
+
+  // Sorting - normalize different sort options
   if (params.sortBy) {
-    queryParams.set('sort', params.sortBy);
+    let sortValue = params.sortBy;
+    // Map frontend sort values to backend values
+    if (sortValue === 'number') sortValue = 'number';
+    else if (sortValue === 'set') sortValue = 'name'; // Sort by name when sorting by set
+    else if (sortValue === 'price') sortValue = 'name'; // Price sorting handled client-side
+
+    queryParams.set('sort', sortValue);
   }
   if (params.sortOrder) {
     queryParams.set('order', params.sortOrder);
@@ -104,19 +166,25 @@ export function buildStorefrontQuery(
 }
 
 /**
- * Type-safe wrapper for the backend's expected query parameters
- * This serves as documentation of the API contract
+ * Helper to convert params object to Record<string, unknown> for api.get()
+ * Some components prefer passing params as object instead of URLSearchParams
  */
-export type StorefrontAPIParams = {
-  search?: string;
-  game_id?: number;
-  set_id?: number;
-  treatment?: string;
-  finish?: string;
-  rarity?: string;
-  quality?: string;
-  page?: number;
-  per_page?: number;
-  sort?: 'name' | 'number' | 'rarity' | 'created_at';
-  order?: 'asc' | 'desc';
-};
+export function buildCardParams(
+  params: CardQueryParams,
+  games: Game[],
+  sets: Set[]
+): Record<string, unknown> {
+  const searchParams = buildCardQuery(params, games, sets);
+  const result: Record<string, unknown> = {};
+
+  searchParams.forEach((value, key) => {
+    result[key] = value;
+  });
+
+  return result;
+}
+
+// Backwards compatibility aliases
+export const buildStorefrontQuery = buildCardQuery;
+export type StorefrontQueryParams = CardQueryParams;
+export type StorefrontAPIParams = CardAPIParams;
