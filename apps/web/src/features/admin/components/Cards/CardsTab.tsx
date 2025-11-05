@@ -36,6 +36,7 @@ import {
   calculateVariationPrice
 } from '@/lib/utils';
 import type { SortOption, SortOrder } from '@/lib/utils';
+import { DEFAULT_QUALITY, DEFAULT_LANGUAGE } from '@/types/enums/inventory';
 import { CardSearchBar } from '@/shared/search';
 import { CardSkeleton } from '@/shared/card';
 import { CardList, CardGrid } from '@/shared/layout';
@@ -99,10 +100,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const [addModalCard, setAddModalCard] = useState<BrowseBaseCard | null>(null);
   const [selectedVariation, setSelectedVariation] = useState<BrowseVariation | undefined>();
   const [addFormData, setAddFormData] = useState<AddFormData>({
-    quality: 'Near Mint',
+    quality: DEFAULT_QUALITY,
     price: '',
     stock_quantity: 1,
-    language: 'English',
+    language: DEFAULT_LANGUAGE,
     useAutomatedPrice: false,
   });
   const [saving, setSaving] = useState(false);
@@ -406,10 +407,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     const hasAutomatedPrice = automatedPrice !== null && Boolean(selectedVar?.price_source); // ✅ boolean
 
     setAddFormData({
-      quality: 'Near Mint',
+      quality: DEFAULT_QUALITY,
       price: hasAutomatedPrice ? String(automatedPrice) : '',
       stock_quantity: 1,
-      language: 'English',
+      language: DEFAULT_LANGUAGE,
       useAutomatedPrice: hasAutomatedPrice, // ✅ boolean
     });
 
@@ -422,10 +423,10 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setAddModalCard(null);
     setSelectedVariation(undefined);
     setAddFormData({
-      quality: 'Near Mint',
+      quality: DEFAULT_QUALITY,
       price: '',
       stock_quantity: 1,
-      language: 'English',
+      language: DEFAULT_LANGUAGE,
       useAutomatedPrice: false,
     });
   }, []);

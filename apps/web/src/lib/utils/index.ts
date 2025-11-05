@@ -25,3 +25,24 @@ export {
   calculateAverageVariations
 } from './cardTransformations';
 export type { CardTransformOptions } from './cardTransformations';
+
+// Inventory utilities
+export {
+  formatPriceForStorage,
+  convertDollarsToCents,
+  convertCentsToDollars,
+  isValidPrice,
+  createInventoryKey,
+  parseInventoryKey,
+  validateInventoryOption,
+  hasStockAvailable,
+  isAvailable,
+  findCheapestOption,
+  findOptionByQualityLanguage,
+  getAvailableQualities,
+  getAvailableLanguagesForQuality,
+  calculateTotalInventoryStock,
+  calculatePriceRange,
+  countAvailableCombinations
+} from './inventoryUtils';
+export type { InventoryOption, ValidationResult } from './inventoryUtils';
