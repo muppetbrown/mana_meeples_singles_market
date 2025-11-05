@@ -103,7 +103,11 @@ const ShopPage: React.FC = () => {
       // We'll create pseudo-variations based on the unique finish values
       treatment: 'STANDARD',
       finish: 'nonfoil',
-      sku: String(card.id)
+      sku: String(card.id),
+      // Preserve pricing fields for price display
+      base_price: card.base_price,
+      foil_price: card.foil_price,
+      price_source: card.price_source
     }));
 
     // Use the shared grouping utility
