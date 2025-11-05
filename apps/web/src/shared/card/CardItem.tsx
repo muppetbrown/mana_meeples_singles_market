@@ -237,7 +237,9 @@ const CardItem: React.FC<CardItemProps> = ({
   };
 
   const renderQualityDropdown = () => {
-    if (mode === 'all' || availableQualities.length === 0) return null;
+    // Quality/language selection is handled in modal for storefront
+    // Only show quality dropdown in admin 'inventory' mode
+    if (mode !== 'inventory' || availableQualities.length === 0) return null;
 
     if (availableQualities.length === 1) {
       // Show as static text
@@ -279,7 +281,9 @@ const CardItem: React.FC<CardItemProps> = ({
   };
 
   const renderLanguageDropdown = () => {
-    if (mode === 'all' || availableLanguages.length === 0) return null;
+    // Quality/language selection is handled in modal for storefront
+    // Only show language dropdown in admin 'inventory' mode
+    if (mode !== 'inventory' || availableLanguages.length === 0) return null;
 
     if (availableLanguages.length === 1) {
       // Show as static text
@@ -334,27 +338,34 @@ const CardItem: React.FC<CardItemProps> = ({
       );
     }
 
-    if (!selectedInventory) {
+    // For storefront/inventory modes, show selected variation info
+    if (!selectedVariation) {
       return (
         <div className="flex items-center gap-2 text-sm">
           <span className="w-2 h-2 rounded-full bg-gray-400" />
-          <span className="text-slate-500">Select options above</span>
+          <span className="text-slate-500">No variation available</span>
         </div>
       );
     }
+
+    // Show stock and price from variation
+    const hasStock = selectedVariation.in_stock > 0;
+    const price = selectedVariation.price || card.lowest_price;
 
     return (
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-green-500" />
+            <span className={`w-2 h-2 rounded-full ${hasStock ? 'bg-green-500' : 'bg-gray-400'}`} />
             <span className="text-sm text-slate-700">
-              Stock: {selectedInventory.stock_quantity}
+              {hasStock ? `Stock: ${selectedVariation.in_stock}` : 'Out of stock'}
             </span>
           </div>
-          <span className="text-lg font-bold text-slate-900">
-            {formatCurrencySimple(selectedInventory.price, currency)}
-          </span>
+          {price && (
+            <span className="text-lg font-bold text-slate-900">
+              {formatCurrencySimple(price, currency)}
+            </span>
+          )}
         </div>
       </div>
     );
