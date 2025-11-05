@@ -4,8 +4,9 @@ import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils/';
 import { api, ENDPOINTS } from '@/lib/api';
 import type { Currency } from '@/types';
-import { X, ShoppingCart, Package } from 'lucide-react';
+import { X, ShoppingCart, Package, Sparkles } from 'lucide-react';
 import OptimizedImage from '@/shared/media/OptimizedImage';
+import { formatTreatment, formatFinish } from '@/types/models/card';
 
 export type InventoryOption = {
   inventoryId: number; // card_inventory.id
@@ -25,6 +26,8 @@ type CardData = {
   treatment?: string;
   finish?: string;
   rarity?: string;
+  border_color?: string;
+  frame_effect?: string;
 };
 
 export function AddToCartModal({
@@ -158,6 +161,12 @@ export function AddToCartModal({
 
   const card = data?.card;
 
+  // Determine if card is special/premium based on treatment or finish
+  const isSpecialCard = card?.treatment && card.treatment !== 'STANDARD' && card.treatment !== 'standard';
+  const isFoilCard = card?.finish &&
+    card.finish.toLowerCase() !== 'nonfoil' &&
+    (card.finish.toLowerCase().includes('foil') || card.finish.toLowerCase().includes('etched'));
+
   return (
     <div
       role="dialog"
@@ -190,8 +199,12 @@ export function AddToCartModal({
                   priority={true}
                 />
                 {/* Icon overlay */}
-                <div className="absolute top-1 right-1 p-1.5 rounded-md bg-gradient-to-br from-mm-gold to-mm-teal">
-                  <ShoppingCart className="w-4 h-4 text-white" />
+                <div className={`absolute top-1 right-1 p-1.5 rounded-md ${isSpecialCard || isFoilCard ? 'bg-gradient-to-br from-amber-100 to-yellow-100' : 'bg-gradient-to-br from-mm-gold to-mm-teal'}`}>
+                  {isSpecialCard || isFoilCard ? (
+                    <Sparkles className="w-4 h-4 text-amber-600" />
+                  ) : (
+                    <ShoppingCart className="w-4 h-4 text-white" />
+                  )}
                 </div>
               </div>
             </div>
@@ -248,14 +261,34 @@ export function AddToCartModal({
 
           {!isLoading && !isError && (
             <form onSubmit={handleConfirm} className="space-y-6">
-              {/* Card variation details */}
-              {card?.treatment && card.treatment !== 'STANDARD' && (
-                <div className="p-3 bg-gradient-to-r from-mm-gold/10 to-mm-teal/10 border border-mm-gold/30 rounded-lg">
-                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2">Card Variation:</p>
-                  <div className="space-y-1 text-sm text-zinc-800 dark:text-zinc-200">
-                    <div><span className="font-medium">Treatment:</span> {formatLabel(card.treatment)}</div>
-                    {card.finish && (
-                      <div><span className="font-medium">Finish:</span> {formatLabel(card.finish)}</div>
+              {/* Variation Selector - Locked/disabled since this is a single card */}
+              {card && (
+                <div>
+                  <label htmlFor="variation" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    Variation <span className="text-red-500">*</span>
+                  </label>
+                  <div className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 cursor-not-allowed">
+                    {formatTreatment(card.treatment)} {formatFinish(card.finish)}
+                    {card.border_color && card.border_color !== 'black' && ` - ${card.border_color} border`}
+                  </div>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                    This card has only one variation
+                  </p>
+                </div>
+              )}
+
+              {/* Show variation details */}
+              {card && (
+                <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                  <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">Card Variation Details:</p>
+                  <div className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
+                    <div><span className="font-medium">Treatment:</span> {formatTreatment(card.treatment)}</div>
+                    <div><span className="font-medium">Finish:</span> {formatFinish(card.finish)}</div>
+                    {card.border_color && (
+                      <div><span className="font-medium">Border:</span> {card.border_color}</div>
+                    )}
+                    {card.frame_effect && (
+                      <div><span className="font-medium">Frame:</span> {card.frame_effect}</div>
                     )}
                   </div>
                 </div>
