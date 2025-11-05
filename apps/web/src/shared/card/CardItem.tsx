@@ -477,12 +477,12 @@ const CardItem: React.FC<CardItemProps> = ({
     : false;
 
   return (
-    <div className="card-mm flex flex-col h-full min-h-[420px] bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div className="card-mm flex flex-col h-full bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image Section */}
-      <div className="relative flex-shrink-0 overflow-hidden bg-slate-50">
+      <div className="relative flex-shrink-0 overflow-hidden bg-slate-50" style={{ aspectRatio: '5/7' }}>
         <button
           onClick={() => setShowImageModal(true)}
-          className="block w-full focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg overflow-hidden"
+          className="block w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-500 overflow-hidden"
           aria-label={`View larger image of ${card.name}`}
         >
           <OptimizedImage
@@ -490,7 +490,7 @@ const CardItem: React.FC<CardItemProps> = ({
             alt={card.name}
             width={250}
             height={350}
-            className={`w-full h-48 sm:h-56 lg:h-64 object-contain hover:scale-105 transition-transform ${
+            className={`w-full h-full object-cover hover:scale-105 transition-transform ${
               isCardFoil
                 ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
                 : ''

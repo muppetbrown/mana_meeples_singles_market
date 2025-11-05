@@ -182,8 +182,11 @@ const ShopPage: React.FC = () => {
     }
   }, [cart, showCart]);
 
-  // Loading state
-  if (filtersLoading || cardsLoading) {
+  // Initial loading state - only show full-page loading on first mount
+  // After that, show content with loading indicators
+  const isInitialLoad = (filtersLoading || cardsLoading) && browseCards.length === 0;
+
+  if (isInitialLoad) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-mm-cream to-mm-tealLight">
         <a
@@ -290,49 +293,68 @@ const ShopPage: React.FC = () => {
               />
 
               {/* UNIFIED: Card Display using shared CardGrid/CardList (same pattern as admin) */}
-              {sortedAndGroupedCards.length > 0 ? (
-                viewMode === 'grid' ? (
-                  /* Grid View with Section Headers */
-                  <div>
-                    {sortedAndGroupedCards.map((group, groupIndex) => (
-                      <div key={groupIndex} className="mb-8">
-                        <SectionHeader title={group.header} count={group.cards.length} isGrid={true} />
-                        <CardGrid
-                          cards={group.cards}
-                          mode="storefront"
-                          viewMode={viewMode}
-                          columnCount={3}
-                          currency={currency}
-                          onAddToCart={({ card, inventoryId, quantity }) => {
-                            setAddToCartModal({ open: true, cardId: card.id });
-                          }}
-                        />
-                      </div>
+              <div className="relative">
+                {/* Loading overlay for filter changes */}
+                {cardsLoading && browseCards.length > 0 && (
+                  <div className="absolute inset-0 bg-white/60 backdrop-blur-sm z-10 flex items-center justify-center rounded-lg">
+                    <div className="flex flex-col items-center gap-3">
+                      <div className="w-12 h-12 border-4 border-mm-gold border-t-transparent rounded-full animate-spin"></div>
+                      <p className="text-sm text-mm-forest font-medium">Updating cards...</p>
+                    </div>
+                  </div>
+                )}
+
+                {sortedAndGroupedCards.length > 0 ? (
+                  viewMode === 'grid' ? (
+                    /* Grid View with Section Headers */
+                    <div>
+                      {sortedAndGroupedCards.map((group, groupIndex) => (
+                        <div key={groupIndex} className="mb-8">
+                          <SectionHeader title={group.header} count={group.cards.length} isGrid={true} />
+                          <CardGrid
+                            cards={group.cards}
+                            mode="storefront"
+                            viewMode={viewMode}
+                            columnCount={3}
+                            currency={currency}
+                            onAddToCart={({ card, inventoryId, quantity }) => {
+                              setAddToCartModal({ open: true, cardId: card.id });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    /* List View with Section Headers */
+                    <div>
+                      {sortedAndGroupedCards.map((group, groupIndex) => (
+                        <div key={groupIndex} className="mb-8">
+                          <SectionHeader title={group.header} count={group.cards.length} isGrid={false} />
+                          <CardList
+                            cards={group.cards}
+                            mode="storefront"
+                            currency={currency}
+                            onAction={(card, variation) => {
+                              setAddToCartModal({ open: true, cardId: card.id });
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )
+                ) : cardsLoading ? (
+                  /* Show skeleton while loading initial results */
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 lg:gap-6">
+                    {Array.from({ length: 6 }).map((_, i) => (
+                      <CardSkeleton key={i} />
                     ))}
                   </div>
                 ) : (
-                  /* List View with Section Headers */
-                  <div>
-                    {sortedAndGroupedCards.map((group, groupIndex) => (
-                      <div key={groupIndex} className="mb-8">
-                        <SectionHeader title={group.header} count={group.cards.length} isGrid={false} />
-                        <CardList
-                          cards={group.cards}
-                          mode="storefront"
-                          currency={currency}
-                          onAction={(card, variation) => {
-                            setAddToCartModal({ open: true, cardId: card.id });
-                          }}
-                        />
-                      </div>
-                    ))}
+                  <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+                    <p className="text-mm-forest text-lg">No cards found matching your search</p>
                   </div>
-                )
-              ) : (
-                <div className="text-center py-12 bg-white rounded-xl shadow-sm">
-                  <p className="text-mm-forest text-lg">No cards found matching your search</p>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         </main>

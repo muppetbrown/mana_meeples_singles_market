@@ -46,7 +46,8 @@ export function useCardFetching({
   const searchDebounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   // Track last fetched params to prevent unnecessary refetches
-  const lastFetchedParams = useRef<string>('');
+  // Use null to distinguish "never fetched" from "fetched with no params"
+  const lastFetchedParams = useRef<string | null>(null);
 
   const fetchCards = useCallback(async () => {
     // Prevent duplicate requests
@@ -74,7 +75,7 @@ export function useCardFetching({
 
       // Check if params actually changed
       const currentParams = params.toString();
-      if (currentParams === lastFetchedParams.current) {
+      if (lastFetchedParams.current !== null && currentParams === lastFetchedParams.current) {
         // Same params, skip fetch
         setLoading(false);
         requestInFlight.current = false;
