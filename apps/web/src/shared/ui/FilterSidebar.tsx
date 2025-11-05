@@ -4,28 +4,7 @@ import {
 } from '@/shared/search';
 import { API_BASE } from '@/lib/api';
 import { FILTER_CONFIG } from '@/lib/constants';
-
-interface Game {
-  id: number;
-  name: string;
-  code?: string;
-}
-
-interface Set {
-  id: number;
-  name: string;
-}
-
-interface AdditionalFilter {
-  value: string;
-  onChange: (value: string) => void;
-  label: string;
-  options: Array<{
-    value: string;
-    label: string;
-    count: number;
-  }>;
-}
+import type { Game, Set, AdditionalFiltersConfig } from '@/types/filters';
 
 interface FilterSidebarProps {
   searchTerm: string;
@@ -36,7 +15,7 @@ interface FilterSidebarProps {
   onSetChange: (set: string) => void;
   games: Game[];
   sets: Set[];
-  additionalFilters: Record<string, AdditionalFilter>;
+  additionalFilters: AdditionalFiltersConfig;
 }
 
 export const FilterSidebar: React.FC<FilterSidebarProps> = ({
