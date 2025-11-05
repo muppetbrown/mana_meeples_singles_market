@@ -54,22 +54,41 @@ export function groupCardsForBrowse(cards: Card[]): BrowseBaseCard[] {
   const result: BrowseBaseCard[] = [];
   for (const group of groups.values()) {
     const variations: BrowseVariation[] = group
-      .map((c) => ({
-        id: c.id,
-        sku: c.sku,
-        scryfall_id: c.scryfall_id ?? null,
-        treatment: c.treatment ?? '',
-        finish: c.finish ?? '',
-        border_color: c.border_color ?? null,
-        frame_effect: c.frame_effect ?? null,
-        promo_type: c.promo_type ?? null,
-        image: c.image_url?? null,
-        in_stock: Number(c.total_stock ?? 0),
-        price: null, // Individual variation price (not used in browse view)
-        base_price: c.base_price ?? null,
-        foil_price: c.foil_price ?? null,
-        price_source: c.price_source ?? null,
-      }))
+      .map((c) => {
+        // Determine the appropriate price based on finish type
+        const finish = (c.finish ?? '').toLowerCase();
+        let price: number | null = null;
+
+        // Check for nonfoil first (before checking for 'foil' substring)
+        if (finish.includes('non') || finish === 'nonfoil' || finish === '') {
+          price = c.base_price ?? null;
+        }
+        // For foil/etched finishes, use foil_price
+        else if (finish.includes('foil') || finish.includes('etched')) {
+          price = c.foil_price ?? null;
+        }
+        // Default to base_price for unknown finishes
+        else {
+          price = c.base_price ?? null;
+        }
+
+        return {
+          id: c.id,
+          sku: c.sku,
+          scryfall_id: c.scryfall_id ?? null,
+          treatment: c.treatment ?? '',
+          finish: c.finish ?? '',
+          border_color: c.border_color ?? null,
+          frame_effect: c.frame_effect ?? null,
+          promo_type: c.promo_type ?? null,
+          image: c.image_url?? null,
+          in_stock: Number(c.total_stock ?? 0),
+          price, // Set to appropriate price based on finish
+          base_price: c.base_price ?? null,
+          foil_price: c.foil_price ?? null,
+          price_source: c.price_source ?? null,
+        };
+      })
       .sort((a, b) => {
         const fr = finishRank(a.finish) - finishRank(b.finish);
         if (fr !== 0) return fr;
