@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { api, ENDPOINTS, buildCardQuery, type CardQueryParams, type Game, type Set } from '@/lib/api';
 import { useErrorHandler } from '@/services/error/handler';
+import { FILTER_CONFIG } from '@/lib/constants';
 import type { StorefrontCard, SearchFilters } from '@/types';
 
 // UNIFIED: Card fetching params using shared types
@@ -133,7 +134,7 @@ export function useCardFetching({
       // Debounce search term changes
       searchDebounceTimer.current = setTimeout(() => {
         fetchCards();
-      }, 400); // 400ms debounce for search
+      }, FILTER_CONFIG.DEBOUNCE_DELAY); // Use consistent debounce delay
     } else {
       // Immediate fetch for filter changes or empty search
       // This allows initial load to work even if games aren't loaded yet

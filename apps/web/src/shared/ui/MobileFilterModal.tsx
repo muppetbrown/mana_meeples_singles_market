@@ -5,28 +5,7 @@ import {
 } from '@/shared/search';
 import { API_BASE } from '@/lib/api';
 import { FILTER_CONFIG } from '@/lib/constants';
-
-interface Game {
-  id: number;
-  name: string;
-  code?: string;
-}
-
-interface Set {
-  id: number;
-  name: string;
-}
-
-interface AdditionalFilter {
-  value: string;
-  onChange: (value: string) => void;
-  label: string;
-  options: Array<{
-    value: string;
-    label: string;
-    count: number;
-  }>;
-}
+import type { Game, Set, AdditionalFiltersConfig } from '@/types/filters';
 
 interface Filters {
   sortBy: string;
@@ -44,7 +23,7 @@ interface MobileFilterModalProps {
   onSetChange: (set: string) => void;
   games: Game[];
   sets: Set[];
-  additionalFilters: Record<string, AdditionalFilter>;
+  additionalFilters: AdditionalFiltersConfig;
   filters: Filters;
   handleFilterChange: (key: string, value: string) => void;
 }

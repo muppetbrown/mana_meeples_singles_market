@@ -21,9 +21,11 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { RefreshCw, Download, LayoutGrid, List, Package } from 'lucide-react';
-import { api, ENDPOINTS, buildCardParams, type CardQueryParams, type Game, type Set } from '@/lib/api';
+import { api, ENDPOINTS, buildCardParams, type CardQueryParams } from '@/lib/api';
 import { useToast } from '@/shared/ui/Toast';
 import { useCardFetching } from '@/features/hooks/useCardFetching';
+import { useFilters } from '@/features/hooks/useFilters';
+import type { Game, Set } from '@/types/filters';
 import AddToInventoryModal from './AddToInventoryModal';
 import {
   groupCardsForBrowse,
@@ -44,16 +46,6 @@ import type {
 // ============================================================================
 // TYPES
 // ============================================================================
-
-// UNIFIED: Filter options using shared types
-interface FilterOptions {
-  games: Game[];
-  sets: Set[];
-  treatments: string[];
-  finishes: string[];
-  rarities: string[];
-  qualities: string[];
-}
 
 type AddFormData = {
   quality: string;
@@ -78,15 +70,23 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
 
   const { toast } = useToast();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filterOptions, setFilterOptions] = useState<FilterOptions>({
-    games: [],
-    sets: [],
-    treatments: [],
-    finishes: [],
-    rarities: [],
-    qualities: []
-  });
-  const [filtersLoading, setFiltersLoading] = useState(true);
+
+  // UNIFIED: Use the unified filter hook for admin mode
+  const {
+    filterOptions,
+    games,
+    sets,
+    treatments,
+    finishes,
+    isLoading: filtersLoading,
+    updateParam,
+    handleGameChange: filterHandleGameChange,
+    handleSetChange: filterHandleSetChange,
+    handleSearchChange: filterHandleSearchChange,
+    clearFilters: filterClearFilters,
+    getAdditionalFilters
+  } = useFilters({ mode: 'admin', autoLoad: true });
+
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
   const [totalCardCount, setTotalCardCount] = useState<number>(0);
   
@@ -132,41 +132,12 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     selectedSet,
     selectedTreatment,
     selectedFinish,
-    games: filterOptions.games,
-    sets: filterOptions.sets,
+    games,
+    sets,
     mode: 'admin',
     limit: 1000, // Admin uses limit instead of pagination
     hasInventory: isInventoryMode ? true : undefined
   });
-
-  // --------------------------------------------------------------------------
-  // LOAD FILTER OPTIONS
-  // --------------------------------------------------------------------------
-  
-  useEffect(() => {
-    const loadFilters = async () => {
-      setFiltersLoading(true);
-      try {
-        const data = await api.get<FilterOptions>(ENDPOINTS.CARDS.FILTERS);
-        
-        setFilterOptions({
-          games: data.games || [],
-          sets: data.sets || [],
-          treatments: data.treatments || [],
-          finishes: data.finishes || [], 
-          rarities: data.rarities || [],
-          qualities: data.qualities || []
-        });
-      } catch (err) {
-        console.error('❌ Error loading filters:', err);
-        // Don't show error to user, just use empty filters
-      } finally {
-        setFiltersLoading(false);
-      }
-    };
-
-    loadFilters();
-  }, []);
 
   // Auto-populate price when variation changes
   useEffect(() => {
@@ -187,42 +158,16 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, [selectedVariation, showAddModal]);
 
   // --------------------------------------------------------------------------
-  // URL STATE HANDLERS
+  // URL STATE HANDLERS (using unified hook + local handlers for sort)
   // --------------------------------------------------------------------------
-  
-  const updateParam = useCallback((key: string, value: string) => {
-    setSearchParams(prev => {
-      const newParams = new URLSearchParams(prev);
-      if (value && value !== 'all') {
-        newParams.set(key, value);
-      } else {
-        newParams.delete(key);
-      }
-      return newParams;
-    });
-  }, [setSearchParams]);
 
-  const handleSearchChange = useCallback((value: string) => {
-    updateParam('search', value);
-  }, [updateParam]);
+  // Use filter hook handlers directly
+  const handleSearchChange = filterHandleSearchChange;
+  const handleGameChange = filterHandleGameChange;
+  const handleSetChange = filterHandleSetChange;
+  const handleClearFilters = filterClearFilters;
 
-  const handleGameChange = useCallback((game: string) => {
-    setSearchParams(prev => {
-      const newParams = new URLSearchParams(prev);
-      if (game && game !== 'all') {
-        newParams.set('game', game);
-      } else {
-        newParams.delete('game');
-      }
-      newParams.delete('set'); // Clear set when game changes
-      return newParams;
-    });
-  }, [setSearchParams]);
-
-  const handleSetChange = useCallback((set: string) => {
-    updateParam('set', set);
-  }, [updateParam]);
-
+  // Local handlers for treatment, finish, and sorting (not in unified hook)
   const handleTreatmentChange = useCallback((treatment: string) => {
     updateParam('treatment', treatment);
   }, [updateParam]);
@@ -238,10 +183,6 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const handleSortOrderChange = useCallback((newSortOrder: SortOrder) => {
     updateParam('sortOrder', newSortOrder);
   }, [updateParam]);
-
-  const handleClearFilters = useCallback(() => {
-    setSearchParams(new URLSearchParams());
-  }, [setSearchParams]);
 
   // --------------------------------------------------------------------------
   // CARD COUNT FETCHING
@@ -259,7 +200,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         hasInventory: isInventoryMode ? true : undefined
       };
 
-      const params = buildCardParams(queryParams, filterOptions.games, filterOptions.sets);
+      const params = buildCardParams(queryParams, games, sets);
 
       const data = await api.get<{ count: number }>(ENDPOINTS.CARDS.COUNT, params);
       setTotalCardCount(data?.count ?? 0);
@@ -280,7 +221,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   // Fetch card count when filters change
   useEffect(() => {
     // Don't fetch until filters are loaded
-    if (filtersLoading || !filterOptions.games.length) {
+    if (filtersLoading || !games.length) {
       return;
     }
 
@@ -292,7 +233,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     selectedTreatment,
     selectedFinish,
     filtersLoading,
-    filterOptions,
+    games,
     fetchCardCount
   ]);
 
@@ -333,29 +274,17 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, [baseGroupedCards, sortBy, sortOrder]);
 
   // --------------------------------------------------------------------------
-  // ADDITIONAL FILTERS (for SearchBar component)
+  // ADDITIONAL FILTERS (using unified hook)
   // --------------------------------------------------------------------------
-  
-  const additionalFilters = useMemo(() => ({
-    treatment: {
-      value: selectedTreatment,
-      onChange: handleTreatmentChange,
-      label: 'Treatment',
-      options: filterOptions.treatments.map(treatment => ({
-        value: treatment,
-        label: treatment.replace(/_/g, ' ')
-      }))
-    },
-    finish: {
-      value: selectedFinish,
-      onChange: handleFinishChange,
-      label: 'Finish',
-      options: filterOptions.finishes?.map(finish => ({
-        value: finish,
-        label: finish.charAt(0).toUpperCase() + finish.slice(1)
-      })) || []
-    }
-  }), [selectedTreatment, handleTreatmentChange, selectedFinish, handleFinishChange, filterOptions.treatments, filterOptions.finishes]);
+
+  const additionalFilters = useMemo(() => {
+    return getAdditionalFilters({
+      selectedTreatment,
+      selectedFinish,
+      onTreatmentChange: handleTreatmentChange,
+      onFinishChange: handleFinishChange
+    });
+  }, [selectedTreatment, selectedFinish, handleTreatmentChange, handleFinishChange, getAdditionalFilters]);
 
   // --------------------------------------------------------------------------
   // ACTIONS
@@ -653,8 +582,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         searchTerm={searchTerm}
         selectedGame={selectedGame}
         selectedSet={selectedSet}
-        games={filterOptions.games}
-        sets={filterOptions.sets}
+        games={games}
+        sets={sets}
         onSearchChange={handleSearchChange}
         onGameChange={handleGameChange}
         onSetChange={handleSetChange}

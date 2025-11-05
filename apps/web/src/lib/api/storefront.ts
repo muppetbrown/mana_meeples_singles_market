@@ -10,18 +10,10 @@
  * - Inline param building throughout the codebase
  */
 
-export interface Game {
-  id: number;
-  name: string;
-  code?: string;
-}
+import type { Game, Set } from '@/types/filters';
 
-export interface Set {
-  id: number;
-  name: string;
-  code?: string;
-  game_id?: number;
-}
+// Re-export for backward compatibility
+export type { Game, Set };
 
 /**
  * Unified parameters for card queries
