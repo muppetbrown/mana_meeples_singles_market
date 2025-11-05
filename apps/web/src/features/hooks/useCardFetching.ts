@@ -11,13 +11,13 @@ export interface UseCardFetchingParams {
   selectedSet: string;
   selectedTreatment: string;
   selectedFinish: string;
-  selectedRarity?: string;
-  selectedQuality?: string;
+  selectedRarity?: string | undefined;
+  selectedQuality?: string | undefined;
   games: Game[];
   sets: Set[];
-  mode?: 'storefront' | 'admin';  // Endpoint mode
-  hasInventory?: boolean;          // Admin filter: only cards with inventory
-  limit?: number;                  // Admin: max results
+  mode?: 'storefront' | 'admin' | undefined;  // Endpoint mode
+  hasInventory?: boolean | undefined;          // Admin filter: only cards with inventory
+  limit?: number | undefined;                  // Admin: max results
 }
 
 export function useCardFetching({

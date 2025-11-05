@@ -1,0 +1,316 @@
+[{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx",
+	"owner": "typescript",
+	"code": "2379",
+	"severity": 8,
+	"message": "Argument of type '{ searchTerm: string; selectedGame: string; selectedSet: string; selectedTreatment: string; selectedFinish: string; games: Game[]; sets: Set[]; mode: \"admin\"; limit: number; hasInventory: true | undefined; }' is not assignable to parameter of type 'UseCardFetchingParams' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n  Types of property 'hasInventory' are incompatible.\n    Type 'boolean | undefined' is not assignable to type 'boolean'.\n      Type 'undefined' is not assignable to type 'boolean'.",
+	"source": "ts",
+	"startLineNumber": 129,
+	"startColumn": 23,
+	"endLineNumber": 140,
+	"endColumn": 4,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx",
+	"owner": "typescript",
+	"code": "2375",
+	"severity": 8,
+	"message": "Type '{ searchTerm: string; selectedGame: string; selectedSet: string; selectedTreatment: string; selectedFinish: string; hasInventory: true | undefined; }' is not assignable to type 'CardQueryParams' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n  Types of property 'hasInventory' are incompatible.\n    Type 'boolean | undefined' is not assignable to type 'boolean'.\n      Type 'undefined' is not assignable to type 'boolean'.",
+	"source": "ts",
+	"startLineNumber": 194,
+	"startColumn": 13,
+	"endLineNumber": 194,
+	"endColumn": 24,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx",
+	"owner": "typescript",
+	"code": "2552",
+	"severity": 8,
+	"message": "Cannot find name 'setLoading'. Did you mean 'loading'?",
+	"source": "ts",
+	"startLineNumber": 306,
+	"startColumn": 7,
+	"endLineNumber": 306,
+	"endColumn": 17,
+	"relatedInformation": [
+		{
+			"startLineNumber": 126,
+			"startColumn": 5,
+			"endLineNumber": 126,
+			"endColumn": 12,
+			"message": "'loading' is declared here.",
+			"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx",
+	"owner": "typescript",
+	"code": "2552",
+	"severity": 8,
+	"message": "Cannot find name 'setLoading'. Did you mean 'loading'?",
+	"source": "ts",
+	"startLineNumber": 316,
+	"startColumn": 9,
+	"endLineNumber": 316,
+	"endColumn": 19,
+	"relatedInformation": [
+		{
+			"startLineNumber": 126,
+			"startColumn": 5,
+			"endLineNumber": 126,
+			"endColumn": 12,
+			"message": "'loading' is declared here.",
+			"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx"
+		}
+	],
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx",
+	"owner": "typescript",
+	"code": "2552",
+	"severity": 8,
+	"message": "Cannot find name 'setLoading'. Did you mean 'loading'?",
+	"source": "ts",
+	"startLineNumber": 351,
+	"startColumn": 7,
+	"endLineNumber": 351,
+	"endColumn": 17,
+	"relatedInformation": [
+		{
+			"startLineNumber": 126,
+			"startColumn": 5,
+			"endLineNumber": 126,
+			"endColumn": 12,
+			"message": "'loading' is declared here.",
+			"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/Cards/CardsTab.tsx"
+		}
+	],
+	"origin": "extHost1"
+}]
+
+[{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/admin/components/PriceManagementHeaderButtons.tsx",
+	"owner": "typescript",
+	"code": "2345",
+	"severity": 8,
+	"message": "Argument of type '{ success: true; result: PriceUpdateResult; failureDetails: { card_id: number; error: string; }[] | undefined; }' is not assignable to parameter of type 'SetStateAction<OperationResult | null>'.\n  Type '{ success: true; result: PriceUpdateResult; failureDetails: { card_id: number; error: string; }[] | undefined; }' is not assignable to type 'OperationResult' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n    Types of property 'failureDetails' are incompatible.\n      Type '{ card_id: number; error: string; }[] | undefined' is not assignable to type '{ card_id: number; error: string; }[]'.\n        Type 'undefined' is not assignable to type '{ card_id: number; error: string; }[]'.",
+	"source": "ts",
+	"startLineNumber": 220,
+	"startColumn": 28,
+	"endLineNumber": 224,
+	"endColumn": 10,
+	"origin": "extHost1"
+}]
+
+[{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/hooks/useCardFetching.ts",
+	"owner": "typescript",
+	"code": "2375",
+	"severity": 8,
+	"message": "Type '{ searchTerm: string; selectedGame: string; selectedSet: string; selectedTreatment: string; selectedFinish: string; selectedRarity: string | undefined; selectedQuality: string | undefined; hasInventory: boolean | undefined; limit: number | undefined; }' is not assignable to type 'CardQueryParams' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n  Types of property 'selectedRarity' are incompatible.\n    Type 'string | undefined' is not assignable to type 'string'.\n      Type 'undefined' is not assignable to type 'string'.",
+	"source": "ts",
+	"startLineNumber": 61,
+	"startColumn": 13,
+	"endLineNumber": 61,
+	"endColumn": 24,
+	"origin": "extHost1"
+}]
+
+[{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/hooks/useFilters.ts",
+	"owner": "typescript",
+	"code": "2375",
+	"severity": 8,
+	"message": "Type '{ game: string | undefined; set: string | undefined; treatment: string | undefined; finish: string | undefined; rarity: string[]; quality: string[]; minPrice: number | undefined; maxPrice: number | undefined; inStockOnly: boolean; search: string | undefined; }' is not assignable to type 'SearchFilters' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n  Types of property 'game' are incompatible.\n    Type 'string | undefined' is not assignable to type 'string'.\n      Type 'undefined' is not assignable to type 'string'.",
+	"source": "ts",
+	"startLineNumber": 50,
+	"startColumn": 3,
+	"endLineNumber": 50,
+	"endColumn": 9,
+	"origin": "extHost1"
+}]
+
+[{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/ShopFilters.tsx",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ searchTerm: string; onSearchChange: (value: string) => void; selectedGame: string; selectedSet: string; selectedRarity: string; selectedQuality: string; filters: { quality: string; rarity: string; ... 7 more ...; set: string; }; ... 11 more ...; error: string | null; }' is not assignable to type 'FilterSidebarProps'.\n  Types of property 'additionalFilters' are incompatible.\n    Type '{ treatment: { value: string; onChange: (value: string) => void; label: string; options: { value: string; label: string; count: number | undefined; }[]; }; finish: { value: string; onChange: (value: string) => void; label: string; options: { ...; }[]; }; }' is not assignable to type 'AdditionalFiltersConfig'.\n      Property 'treatment' is incompatible with index signature.\n        Type '{ value: string; onChange: (value: string) => void; label: string; options: { value: string; label: string; count: number | undefined; }[]; }' is not assignable to type 'AdditionalFilter'.\n          Types of property 'options' are incompatible.\n            Type '{ value: string; label: string; count: number | undefined; }[]' is not assignable to type 'FilterOption[]'.\n              Type '{ value: string; label: string; count: number | undefined; }' is not assignable to type 'FilterOption' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n                Types of property 'count' are incompatible.\n                  Type 'number | undefined' is not assignable to type 'number'.\n                    Type 'undefined' is not assignable to type 'number'.",
+	"source": "ts",
+	"startLineNumber": 215,
+	"startColumn": 10,
+	"endLineNumber": 215,
+	"endColumn": 23,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/features/shop/components/ShopFilters.tsx",
+	"owner": "typescript",
+	"code": "2322",
+	"severity": 8,
+	"message": "Type '{ treatment: { value: string; onChange: (value: string) => void; label: string; options: { value: string; label: string; count: number | undefined; }[]; }; finish: { value: string; onChange: (value: string) => void; label: string; options: { ...; }[]; }; }' is not assignable to type 'AdditionalFiltersConfig'.\n  Property 'treatment' is incompatible with index signature.\n    Type '{ value: string; onChange: (value: string) => void; label: string; options: { value: string; label: string; count: number | undefined; }[]; }' is not assignable to type 'AdditionalFilter'.\n      Types of property 'options' are incompatible.\n        Type '{ value: string; label: string; count: number | undefined; }[]' is not assignable to type 'FilterOption[]'.\n          Type '{ value: string; label: string; count: number | undefined; }' is not assignable to type 'FilterOption' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n            Types of property 'count' are incompatible.\n              Type 'number | undefined' is not assignable to type 'number'.\n                Type 'undefined' is not assignable to type 'number'.",
+	"source": "ts",
+	"startLineNumber": 238,
+	"startColumn": 9,
+	"endLineNumber": 238,
+	"endColumn": 26,
+	"relatedInformation": [
+		{
+			"startLineNumber": 26,
+			"startColumn": 3,
+			"endLineNumber": 26,
+			"endColumn": 20,
+			"message": "The expected type comes from property 'additionalFilters' which is declared here on type 'IntrinsicAttributes & MobileFilterModalProps'",
+			"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/ui/MobileFilterModal.tsx"
+		}
+	],
+	"origin": "extHost1"
+}]
+
+[{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2379",
+	"severity": 8,
+	"message": "Argument of type '{ game: undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n  Types of property 'game' are incompatible.\n    Type 'undefined' is not assignable to type 'string'.",
+	"source": "ts",
+	"startLineNumber": 25,
+	"startColumn": 37,
+	"endLineNumber": 25,
+	"endColumn": 56,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2379",
+	"severity": 8,
+	"message": "Argument of type '{ set: undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n  Types of property 'set' are incompatible.\n    Type 'undefined' is not assignable to type 'string'.",
+	"source": "ts",
+	"startLineNumber": 35,
+	"startColumn": 37,
+	"endLineNumber": 35,
+	"endColumn": 55,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2379",
+	"severity": 8,
+	"message": "Argument of type '{ rarity: string[] | undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n  Types of property 'rarity' are incompatible.\n    Type 'string[] | undefined' is not assignable to type 'string[]'.\n      Type 'undefined' is not assignable to type 'string[]'.",
+	"source": "ts",
+	"startLineNumber": 46,
+	"startColumn": 39,
+	"endLineNumber": 48,
+	"endColumn": 10,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2379",
+	"severity": 8,
+	"message": "Argument of type '{ quality: string[] | undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n  Types of property 'quality' are incompatible.\n    Type 'string[] | undefined' is not assignable to type 'string[]'.\n      Type 'undefined' is not assignable to type 'string[]'.",
+	"source": "ts",
+	"startLineNumber": 60,
+	"startColumn": 39,
+	"endLineNumber": 62,
+	"endColumn": 10,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'foilType' does not exist on type 'SearchFilters'.",
+	"source": "ts",
+	"startLineNumber": 68,
+	"startColumn": 15,
+	"endLineNumber": 68,
+	"endColumn": 23,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'foilType' does not exist on type 'SearchFilters'.",
+	"source": "ts",
+	"startLineNumber": 68,
+	"startColumn": 35,
+	"endLineNumber": 68,
+	"endColumn": 43,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'foilType' does not exist on type 'SearchFilters'.",
+	"source": "ts",
+	"startLineNumber": 69,
+	"startColumn": 13,
+	"endLineNumber": 69,
+	"endColumn": 21,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "7006",
+	"severity": 8,
+	"message": "Parameter 'foilType' implicitly has an 'any' type.",
+	"source": "ts",
+	"startLineNumber": 69,
+	"startColumn": 30,
+	"endLineNumber": 69,
+	"endColumn": 38,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2353",
+	"severity": 8,
+	"message": "Object literal may only specify known properties, and 'foilType' does not exist in type 'Partial<SearchFilters>'.",
+	"source": "ts",
+	"startLineNumber": 75,
+	"startColumn": 11,
+	"endLineNumber": 75,
+	"endColumn": 19,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2339",
+	"severity": 8,
+	"message": "Property 'foilType' does not exist on type 'SearchFilters'.",
+	"source": "ts",
+	"startLineNumber": 75,
+	"startColumn": 29,
+	"endLineNumber": 75,
+	"endColumn": 37,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "7006",
+	"severity": 8,
+	"message": "Parameter 'f' implicitly has an 'any' type.",
+	"source": "ts",
+	"startLineNumber": 75,
+	"startColumn": 46,
+	"endLineNumber": 75,
+	"endColumn": 47,
+	"origin": "extHost1"
+},{
+	"resource": "/c:/Git_Repos/mana_meeples_singles_market/apps/web/src/shared/search/ActiveFilters.tsx",
+	"owner": "typescript",
+	"code": "2379",
+	"severity": 8,
+	"message": "Argument of type '{ minPrice: undefined; maxPrice: undefined; }' is not assignable to parameter of type 'Partial<SearchFilters>' with 'exactOptionalPropertyTypes: true'. Consider adding 'undefined' to the types of the target's properties.\n  Types of property 'minPrice' are incompatible.\n    Type 'undefined' is not assignable to type 'number'.",
+	"source": "ts",
+	"startLineNumber": 96,
+	"startColumn": 37,
+	"endLineNumber": 96,
+	"endColumn": 81,
+	"origin": "extHost1"
+}]
+

@@ -26,7 +26,7 @@ export interface Set {
 export interface FilterOption {
   value: string;
   label: string;
-  count?: number;
+  count?: number | undefined;
 }
 
 // ============================================================================
@@ -64,16 +64,16 @@ export const EMPTY_FILTER_OPTIONS: FilterOptions = {
  * Represents the current filter state
  */
 export interface SearchFilters {
-  game?: string;
-  set?: string;
-  treatment?: string;
-  finish?: string;
-  rarity?: string[];
-  quality?: string[];
-  minPrice?: number;
-  maxPrice?: number;
-  inStockOnly?: boolean;
-  search?: string;
+  game?: string | undefined;
+  set?: string | undefined;
+  treatment?: string | undefined;
+  finish?: string | undefined;
+  rarity?: string[] | undefined;
+  quality?: string[] | undefined;
+  minPrice?: number | undefined;
+  maxPrice?: number | undefined;
+  inStockOnly?: boolean | undefined;
+  search?: string | undefined;
 }
 
 // ============================================================================

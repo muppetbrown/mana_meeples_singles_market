@@ -21,23 +21,23 @@ export type { Game, Set };
  */
 export interface CardQueryParams {
   // Filters
-  searchTerm?: string;
-  selectedGame?: string;      // Game name (will be converted to game_id)
-  selectedSet?: string;        // Set name (will be converted to set_id)
-  selectedTreatment?: string;
-  selectedFinish?: string;
-  selectedRarity?: string;
-  selectedQuality?: string;
-  hasInventory?: boolean;      // Admin-only: filter to cards with inventory
+  searchTerm?: string | undefined;
+  selectedGame?: string | undefined;      // Game name (will be converted to game_id)
+  selectedSet?: string | undefined;        // Set name (will be converted to set_id)
+  selectedTreatment?: string | undefined;
+  selectedFinish?: string | undefined;
+  selectedRarity?: string | undefined;
+  selectedQuality?: string | undefined;
+  hasInventory?: boolean | undefined;      // Admin-only: filter to cards with inventory
 
   // Pagination
-  page?: number;
-  perPage?: number;
-  limit?: number;              // Admin-only: max results without pagination
+  page?: number | undefined;
+  perPage?: number | undefined;
+  limit?: number | undefined;              // Admin-only: max results without pagination
 
   // Sorting
-  sortBy?: 'name' | 'number' | 'rarity' | 'created_at' | 'price' | 'set';
-  sortOrder?: 'asc' | 'desc';
+  sortBy?: 'name' | 'number' | 'rarity' | 'created_at' | 'price' | 'set' | undefined;
+  sortOrder?: 'asc' | 'desc' | undefined;
 }
 
 /**
