@@ -12,7 +12,6 @@ interface ActiveFilter {
 
 interface ResultsHeaderProps {
   searchTerm: string;
-  cardCount?: number; // deprecated, use resultsCount
   resultsCount: number;
   viewMode: ViewMode;
   setViewMode: (mode: ViewMode) => void;
@@ -27,7 +26,6 @@ interface ResultsHeaderProps {
 
 export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
   searchTerm,
-  cardCount,
   resultsCount,
   viewMode,
   setViewMode,
@@ -39,7 +37,7 @@ export const ResultsHeader: React.FC<ResultsHeaderProps> = ({
   onSortByChange,
   onSortOrderChange
 }) => {
-  const count = resultsCount ?? cardCount ?? 0;
+  const count = resultsCount ?? 0;
   return (
     <>
       {/* Results Count, Sort, and View Toggle */}

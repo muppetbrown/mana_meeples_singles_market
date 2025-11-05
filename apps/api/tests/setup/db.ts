@@ -136,8 +136,7 @@ export async function seedInventory(cardId: number, quantity: number = 10) {
       );
       insertedIds.push(res.rows[0]?.id);
     }
-    
-    // Return the first ID for backward compatibility
+
     return insertedIds[0];
   } finally {
     await client.end();

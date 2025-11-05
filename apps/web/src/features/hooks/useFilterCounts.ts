@@ -27,11 +27,9 @@ const RETRY_DELAY = ERROR_CONFIG.DEFAULT_RETRY_DELAY;
 /**
  * Hook to retrieve the total card count for the current filters, with caching, debouncing, and retry.
  *
- * NOTE: This replaces the old `/filters/counts` (per-option) endpoint.
- * It now reads `/cards/count` (single total). The old helpers `getCount` and
- * `getOptionsWithCounts` are retained as safe no-ops to avoid breakage while you migrate UIs.
+ * Fetches from `/cards/count` endpoint and returns the total count.
  */
-export const useFilterCounts = (_deprecatedAPIBase: unknown, currentFilters: Filters = {}) => {
+export const useFilterCounts = (currentFilters: Filters = {}) => {
   const [count, setCount] = useState<number>(globalCache.data?.total ?? 0);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -143,34 +141,15 @@ export const useFilterCounts = (_deprecatedAPIBase: unknown, currentFilters: Fil
     };
   }, [currentFilters, fetchCount, isCacheValid]);
 
-  // ─── Back-compat no-ops (will be removed when UI migrates) ─────────────
   const formatCount = (n: number | undefined | null) =>
     !n ? '' : n < 1000 ? `(${n})` : n < 1_000_000 ? `(${(n / 1000).toFixed(1)}k)` : `(${(n / 1_000_000).toFixed(1)}M)`;
 
-  const getCount = (_category: unknown, _value: unknown) => {
-    // Old API returned per-option counts; we now only track total.
-    // Keep signature but return empty string to avoid breaking UI conditionals.
-    return '';
-  };
-
-  const getOptionsWithCounts = (_category: unknown, options: Array<{ value: string }>) => {
-    // Return options unchanged, with zero/blank counts.
-    return options.map((o) => ({ ...o, count: 0, displayCount: '' }));
-  };
-
   return {
-    // new shape
     total: count,
-
-    // legacy name retained so consumers don’t explode; contains { total }
     filterCounts: { total: count },
-
     isLoading,
     error,
     formatCount,
-    // legacy helpers (no-ops)
-    getCount,
-    getOptionsWithCounts,
     refreshCounts: () => {
       globalCache.data = null;
       globalCache.timestamp = null;

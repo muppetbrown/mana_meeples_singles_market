@@ -140,7 +140,7 @@ export function useFilters(options: UseFiltersOptions = {}): FilterHookResult {
           label: t.replace(/_/g, ' '),
           count: 0
         })) ?? [],
-        finishes: (data.finishes ?? data.foilTypes ?? []).map((f) => ({
+        finishes: (data.finishes ?? []).map((f) => ({
           value: f,
           label: f.charAt(0).toUpperCase() + f.slice(1),
           count: 0
@@ -342,7 +342,7 @@ export function useFilters(options: UseFiltersOptions = {}): FilterHookResult {
 
     // Loading state
     isLoading,
-    loading: isLoading, // Alias for backward compatibility
+    loading: isLoading,
     error
   };
 }

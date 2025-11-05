@@ -118,7 +118,6 @@ export interface FilterOptionsApiResponse {
   }>;
   treatments: string[];
   finishes: string[];
-  foilTypes?: string[]; // Legacy alias for finishes
   rarities: string[];
   qualities: string[];
   priceMin?: number | null;
