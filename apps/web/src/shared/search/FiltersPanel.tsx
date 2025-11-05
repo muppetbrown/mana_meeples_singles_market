@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from '@/lib/api';
 
 type FilterOption = {
-  type: 'treatment' | 'quality' | 'foilType' | 'language';
+  type: 'treatment' | 'quality' | 'finish' | 'language';
   value: string;
   label: string;
 };
@@ -12,7 +12,7 @@ type FiltersResponse = {
   treatments: string[];
   languages: string[];
   qualities: string[];
-  foilTypes: string[];
+  finishes: string[];
   priceMin: number | null;
   priceMax: number | null;
   inStockCount: number;
@@ -49,8 +49,8 @@ export default function FiltersPanel() {
             value: q,
             label: q
           })) ?? []),
-          ...(response.foilTypes?.map(f => ({
-            type: 'foilType' as const,
+          ...(response.finishes?.map(f => ({
+            type: 'finish' as const,
             value: f,
             label: f
           })) ?? []),
@@ -100,7 +100,7 @@ export default function FiltersPanel() {
   const filtersByType = {
     treatments: filterOptions.filter(f => f.type === 'treatment'),
     qualities: filterOptions.filter(f => f.type === 'quality'),
-    foilTypes: filterOptions.filter(f => f.type === 'foilType'),
+    finishes: filterOptions.filter(f => f.type === 'finish'),
     languages: filterOptions.filter(f => f.type === 'language'),
   };
 
@@ -197,14 +197,14 @@ export default function FiltersPanel() {
           </div>
         )}
 
-        {/* Foil Types */}
-        {filtersByType.foilTypes.length > 0 && (
+        {/* Finishes */}
+        {filtersByType.finishes.length > 0 && (
           <div>
             <h3 className="text-xs font-semibold text-slate-700 uppercase tracking-wide mb-2">
-              Foil Types ({filtersByType.foilTypes.length})
+              Finishes ({filtersByType.finishes.length})
             </h3>
             <ul className="space-y-1">
-              {filtersByType.foilTypes.map((filter) => (
+              {filtersByType.finishes.map((filter) => (
                 <li key={filter.value} className="text-sm text-slate-600">
                   <span className="inline-block w-2 h-2 rounded-full bg-amber-400 mr-2" aria-hidden="true" />
                   {filter.label}

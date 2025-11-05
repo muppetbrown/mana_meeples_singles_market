@@ -69,11 +69,8 @@ export interface CardVariation {
   
   // Convenience fields
   variation_key: string;     // e.g., "Near Mint-Regular-English"
-  
-  // DEPRECATED: These fields are now on Card interface
-  // Kept for backward compatibility during transition
-  finish?: string;           // Use Card.finish instead
-  treatment?: string;        // Use Card.treatment instead
+  finish?: string;           // Card finish (nonfoil, foil, etched, etc.)
+  treatment?: string;        // Card treatment (STANDARD, BORDERLESS, etc.)
 }
 
 // ============================================================================
