@@ -201,7 +201,7 @@ const CardItem: React.FC<CardItemProps> = ({
       // Show as static badge
       return (
         <div className="variation-badge">
-          <span className="text-sm font-medium text-slate-700 bg-slate-100 px-3 py-2 rounded-md">
+          <span className="text-sm font-medium text-slate-700 bg-slate-100 px-3 py-2 rounded-md truncate block" title={formatVariationOption(availableVariations[0])}>
             {formatVariationOption(availableVariations[0])}
           </span>
         </div>
@@ -223,10 +223,11 @@ const CardItem: React.FC<CardItemProps> = ({
             setSelectedQuality(undefined);
             setSelectedLanguage(undefined);
           }}
-          className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-3 py-2 border border-slate-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent truncate"
+          title={selectedVariation ? formatVariationOption(selectedVariation) : ''}
         >
           {availableVariations.map(v => (
-            <option key={v.id} value={v.id}>
+            <option key={v.id} value={v.id} title={formatVariationOption(v)}>
               {formatVariationOption(v)}
             </option>
           ))}
@@ -374,7 +375,13 @@ const CardItem: React.FC<CardItemProps> = ({
                       mode === 'inventory' ? 'Manage' :
                       'Add to Cart';
 
-    const isDisabled = mode !== 'all' && !selectedInventory;
+    // Button should be enabled when:
+    // - 'all' mode: always (opens modal to add inventory)
+    // - 'inventory' mode: when variation is selected (opens manage modal)
+    // - 'storefront' mode: when variation has stock (opens modal to select quality/language)
+    const hasVariation = !!selectedVariation;
+    const hasStock = mode === 'all' || (selectedVariation && selectedVariation.in_stock > 0);
+    const isDisabled = !hasVariation || !hasStock;
 
     return (
       <button
@@ -413,7 +420,7 @@ const CardItem: React.FC<CardItemProps> = ({
   const hasSpecial = selectedVariation ? hasSpecialTreatment({ treatment: selectedVariation.treatment } as any) : false;
 
   return (
-    <div className="card-mm flex flex-col h-full bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+    <div className="card-mm flex flex-col h-full min-h-[420px] bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
       {/* Image Section */}
       <div className="relative flex-shrink-0 overflow-hidden">
         <button
@@ -434,70 +441,50 @@ const CardItem: React.FC<CardItemProps> = ({
             placeholder="blur"
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
         />
-
-        {/* Variation badges overlay */}
-        {selectedVariation && (
-          <div className="absolute top-2 left-2 flex flex-col gap-1">
-            {isCardFoil && (
-              <VariationBadge
-                finish={formatFinish(selectedVariation.finish)}
-              />
-            )}
-            {hasSpecial && (
-              <VariationBadge
-                finish=""
-                treatment={formatTreatment(selectedVariation.treatment)}
-              />
-            )}
-            {selectedVariation.promo_type && (
-              <VariationBadge
-                finish=""
-                promoType={selectedVariation.promo_type}
-              />
-            )}
-          </div>
-        )}
         </button>
       </div>
 
       {/* Content Section */}
-      <div className="flex flex-col flex-grow p-4 space-y-4">
-        {/* Card Info */}
-        <div className="flex-shrink-0">
-          <h3 className="font-semibold text-lg text-slate-900 line-clamp-2 mb-1">
-            {card.name}
-          </h3>
-          <p className="text-sm text-slate-600">
-            {card.set_name}
-          </p>
-          {card.card_number && (
-            <p className="text-sm text-slate-500">
-              #{card.card_number}
+      <div className="flex flex-col flex-grow p-4">
+        {/* Content that can grow/shrink */}
+        <div className="flex flex-col flex-grow space-y-4">
+          {/* Card Info */}
+          <div className="flex-shrink-0">
+            <h3 className="font-semibold text-lg text-slate-900 line-clamp-2 mb-1">
+              {card.name}
+            </h3>
+            <p className="text-sm text-slate-600">
+              {card.set_name}
             </p>
-          )}
+            {card.card_number && (
+              <p className="text-sm text-slate-500">
+                #{card.card_number}
+              </p>
+            )}
+          </div>
+
+          {/* Three Dropdowns */}
+          <div className="space-y-3 flex-shrink-0">
+            {renderVariationDropdown()}
+            {renderQualityDropdown()}
+            {renderLanguageDropdown()}
+          </div>
+
+          {/* Stock and Price */}
+          <div className="flex-shrink-0 py-3 border-t border-slate-200">
+            {inventoryLoading ? (
+              <div className="flex items-center gap-2 text-sm text-slate-500">
+                <div className="w-2 h-2 bg-slate-300 rounded-full animate-pulse" />
+                <span>Loading...</span>
+              </div>
+            ) : (
+              renderStockAndPrice()
+            )}
+          </div>
         </div>
 
-        {/* Three Dropdowns */}
-        <div className="space-y-3 flex-shrink-0">
-          {renderVariationDropdown()}
-          {renderQualityDropdown()}
-          {renderLanguageDropdown()}
-        </div>
-
-        {/* Stock and Price */}
-        <div className="flex-shrink-0 py-3 border-t border-slate-200">
-          {inventoryLoading ? (
-            <div className="flex items-center gap-2 text-sm text-slate-500">
-              <div className="w-2 h-2 bg-slate-300 rounded-full animate-pulse" />
-              <span>Loading...</span>
-            </div>
-          ) : (
-            renderStockAndPrice()
-          )}
-        </div>
-
-        {/* Action Button */}
-        <div className="flex-shrink-0 mt-auto">
+        {/* Action Button - Always at bottom */}
+        <div className="flex-shrink-0 pt-4">
           {renderActionButton()}
         </div>
       </div>
