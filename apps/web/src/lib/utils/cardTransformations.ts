@@ -112,6 +112,12 @@ export function transformStorefrontCard(
 ): Card {
   const { calculatePrice = true, defaults = {} } = options;
 
+  // Calculate total_stock from variations if not provided
+  let totalStock = storefrontCard.total_stock ?? 0;
+  if (totalStock === 0 && storefrontCard.variations && storefrontCard.variations.length > 0) {
+    totalStock = storefrontCard.variations.reduce((sum, v) => sum + (v.stock || 0), 0);
+  }
+
   const card: Card = {
     ...storefrontCard,
     // Ensure required fields have values
@@ -130,8 +136,8 @@ export function transformStorefrontCard(
 
     // Ensure numeric fields have fallback values
     rarity: storefrontCard.rarity ?? 'Unknown',
-    total_stock: storefrontCard.total_stock ?? 0,
-    variation_count: storefrontCard.variation_count ?? 0,
+    total_stock: totalStock,
+    variation_count: storefrontCard.variation_count ?? storefrontCard.variations?.length ?? 0,
 
     // Preserve pricing fields (explicitly handle undefined for exactOptionalPropertyTypes)
     base_price: storefrontCard.base_price ?? null,
