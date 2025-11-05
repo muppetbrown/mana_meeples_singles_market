@@ -92,15 +92,23 @@ export const ShopFilters: React.FC<ShopFiltersProps> = ({
     set: selectedSet
   }), [searchParams, selectedQuality, selectedRarity, selectedTreatment, selectedFinish, selectedSet]);
 
-  // REFACTORED: Use hook's getAdditionalFilters method
+  // Create additionalFilters using our merged filterOptions (with inventory-based options)
   const additionalFilters = useMemo(() => {
-    return getAdditionalFilters({
-      selectedTreatment,
-      selectedFinish,
-      onTreatmentChange: (value: string) => updateParam('treatment', value),
-      onFinishChange: (value: string) => updateParam('finish', value)
-    });
-  }, [selectedTreatment, selectedFinish, getAdditionalFilters, updateParam]);
+    return {
+      treatment: {
+        value: selectedTreatment,
+        onChange: (value: string) => updateParam('treatment', value),
+        label: 'Treatment',
+        options: filterOptions.treatments
+      },
+      finish: {
+        value: selectedFinish,
+        onChange: (value: string) => updateParam('finish', value),
+        label: 'Finish',
+        options: filterOptions.finishes
+      }
+    };
+  }, [selectedTreatment, selectedFinish, filterOptions.treatments, filterOptions.finishes, updateParam]);
 
   // Active filters for display
   const activeFilters = useMemo(() => {
