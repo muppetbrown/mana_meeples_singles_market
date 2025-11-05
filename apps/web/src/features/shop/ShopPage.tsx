@@ -16,33 +16,12 @@ import {
   useShopCartUtils,
   AddToCartModal
 } from '@/features/shop/components';
-import { CardDisplayArea } from '@/features/hooks/useCardDisplayArea';
-import { ErrorBoundary } from '@/shared/layout';
+import { ErrorBoundary, CardGrid, CardList } from '@/shared/layout';
 import { CardSkeleton } from '@/shared/card';
+import { SectionHeader } from '@/shared/ui';
 import { api, ENDPOINTS } from '@/lib/api';
-import type { Currency } from '@/types';
-
-// Local type definitions (simplified)
-interface CardForDisplay {
-  id: number;
-  name: string;
-  image_url: string;
-  set_name: string;
-  card_number: string;
-  game_name: string;
-  rarity?: string;
-  total_stock: number;
-  variation_count: number;
-  variations: Array<{
-    variation_key: string;
-    quality: string;
-    finish: string;
-    language?: string;
-    price: number;
-    stock: number;
-    inventory_id: number;
-  }>;
-}
+import { groupCardsForBrowse, groupCardsBySort } from '@/lib/utils';
+import type { Currency, BrowseBaseCard } from '@/types';
 
 const ShopPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -104,29 +83,32 @@ const ShopPage: React.FC = () => {
     addToCart
   } = useShopCartUtils(cards);
 
-  // Transform StorefrontCard to CardForDisplay
-  const displayCards: CardForDisplay[] = useMemo(() =>
-    cards.map(card => ({
+  // UNIFIED: Transform StorefrontCard to BrowseBaseCard (same format as admin)
+  const browseCards: BrowseBaseCard[] = useMemo(() => {
+    // Convert StorefrontCard format to the unified Card format for grouping
+    const cardsForGrouping = cards.map(card => ({
+      ...card,
       id: card.id,
       name: card.name,
-      image_url: card.image_url || '',
+      set_id: card.set_id || 0,
       set_name: card.set_name,
       card_number: card.card_number,
       game_name: card.game_name,
+      image_url: card.image_url || '',
       rarity: card.rarity ?? 'Unknown',
       total_stock: card.total_stock ?? 0,
       variation_count: card.variation_count ?? 0,
-      variations: card.variations.map(v => ({
-        variation_key: v.variation_key,
-        quality: v.quality,
-        finish: v.finish || 'nonfoil',
-        language: v.language,
-        price: v.price ?? 0,
-        stock: v.stock ?? 0,
-        inventory_id: v.inventory_id,
-      }))
-    })), [cards]
-  );
+      // StorefrontCard doesn't have individual variations with treatment/finish
+      // Instead it has variations with quality/finish/language for inventory
+      // We'll create pseudo-variations based on the unique finish values
+      treatment: 'STANDARD',
+      finish: 'nonfoil',
+      sku: String(card.id)
+    }));
+
+    // Use the shared grouping utility
+    return groupCardsForBrowse(cardsForGrouping);
+  }, [cards]);
 
   // Sorting state
   const sortBy = (searchParams.get('sortBy') as 'name' | 'price' | 'set' | 'rarity') || 'name';
@@ -147,6 +129,11 @@ const ShopPage: React.FC = () => {
       return newParams;
     });
   }, [setSearchParams]);
+
+  // UNIFIED: Apply sorting and grouping with section headers (same as admin)
+  const sortedAndGroupedCards = useMemo(() => {
+    return groupCardsBySort(browseCards, sortBy, sortOrder);
+  }, [browseCards, sortBy, sortOrder]);
 
   // Derived state for filters
   // STANDARDIZED: Using treatment and finish
@@ -304,16 +291,49 @@ const ShopPage: React.FC = () => {
                 onSortOrderChange={handleSortOrderChange}
               />
 
-              <CardDisplayArea
-                cards={cards}
-                viewMode={viewMode}
-                currency={currency}
-                selectedVariations={selectedVariations}
-                filters={filters}
-                onVariationChange={handleVariationChange}
-                setAddToCartModal={setAddToCartModal}
-                loading={cardsLoading}
-              />
+              {/* UNIFIED: Card Display using shared CardGrid/CardList (same pattern as admin) */}
+              {sortedAndGroupedCards.length > 0 ? (
+                viewMode === 'grid' ? (
+                  /* Grid View with Section Headers */
+                  <div>
+                    {sortedAndGroupedCards.map((group, groupIndex) => (
+                      <div key={groupIndex} className="mb-8">
+                        <SectionHeader title={group.header} count={group.cards.length} isGrid={true} />
+                        <CardGrid
+                          cards={group.cards}
+                          mode="storefront"
+                          viewMode={viewMode}
+                          currency={currency}
+                          onAddToCart={({ card, inventoryId, quantity }) => {
+                            setAddToCartModal({ open: true, cardId: card.id });
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* List View with Section Headers */
+                  <div>
+                    {sortedAndGroupedCards.map((group, groupIndex) => (
+                      <div key={groupIndex} className="mb-8">
+                        <SectionHeader title={group.header} count={group.cards.length} isGrid={false} />
+                        <CardList
+                          cards={group.cards}
+                          mode="storefront"
+                          currency={currency}
+                          onAction={(card, variation) => {
+                            setAddToCartModal({ open: true, cardId: card.id });
+                          }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : (
+                <div className="text-center py-12 bg-white rounded-xl shadow-sm">
+                  <p className="text-mm-forest text-lg">No cards found matching your search</p>
+                </div>
+              )}
             </div>
           </div>
         </main>
@@ -346,7 +366,7 @@ const ShopPage: React.FC = () => {
 
         {/* ARIA Live Regions */}
         <div aria-live="polite" aria-atomic="true" className="sr-only">
-          {cards.length > 0 && `Showing ${cards.length} cards`}
+          {browseCards.length > 0 && `Showing ${browseCards.length} cards`}
         </div>
         <div aria-live="assertive" aria-atomic="true" className="sr-only">
           {(filtersLoading || cardsLoading) && "Loading cards..."}
@@ -359,11 +379,11 @@ const ShopPage: React.FC = () => {
           aria-live="polite"
           aria-atomic="true"
           className="sr-only"
-          key={`search-${searchTerm}-${cards.length}`}
+          key={`search-${searchTerm}-${browseCards.length}`}
         >
           {searchTerm && !cardsLoading && (
-            cards.length > 0
-              ? `Found ${cards.length} cards matching "${searchTerm}"`
+            browseCards.length > 0
+              ? `Found ${browseCards.length} cards matching "${searchTerm}"`
               : `No cards found matching "${searchTerm}"`
           )}
         </div>

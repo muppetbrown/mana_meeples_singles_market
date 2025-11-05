@@ -9,4 +9,3 @@ export * from '../hooks/useShopFilters';
 export * from '../hooks/useShopKeyboardShortcuts';
 export * from '../hooks/useShopViewMode';
 export * from '../hooks/useVariationSelection';
-export { CardDisplayArea } from '../hooks/useCardDisplayArea';
