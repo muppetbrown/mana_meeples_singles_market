@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils/';
 import { api, ENDPOINTS } from '@/lib/api';
 import type { Currency } from '@/types';
+import { X, ShoppingCart, Package } from 'lucide-react';
+import OptimizedImage from '@/shared/media/OptimizedImage';
 
 export type InventoryOption = {
   inventoryId: number; // card_inventory.id
@@ -13,6 +15,18 @@ export type InventoryOption = {
   language: string;    // e.g., EN, JP
   priceCents: number;
   inStock: number;     // available quantity
+};
+
+type CardData = {
+  id: number;
+  name: string;
+  image_url?: string;
+  game_name?: string;
+  set_name?: string;
+  card_number?: string;
+  treatment?: string;
+  finish?: string;
+  rarity?: string;
 };
 
 export function AddToCartModal({
@@ -33,11 +47,11 @@ export function AddToCartModal({
     queryFn: async () => {
       // Fetch from storefront endpoint which returns card with variations
       const response = await api.get<{
-        card: {
-          id: number;
+        card: CardData & {
           variations: Array<{
             inventory_id: number;
             quality: string;
+            foil_type?: string;
             language: string;
             stock: number;
             price: number;
@@ -48,115 +62,360 @@ export function AddToCartModal({
       // Map variations to InventoryOption format
       const options: InventoryOption[] = (response.card.variations || []).map(v => ({
         inventoryId: v.inventory_id,
-        treatment: 'STANDARD', // TODO: Add treatment field to backend response if needed
-        foilType: 'NONFOIL',
+        treatment: response.card.treatment || 'STANDARD',
+        foilType: v.foil_type || 'NONFOIL',
         quality: v.quality,
         language: v.language,
         priceCents: Math.round((v.price || 0) * 100), // Convert to cents
         inStock: v.stock || 0,
       }));
 
-      return { options };
+      return {
+        options,
+        card: response.card
+      };
     },
     enabled: isOpen,
     staleTime: 60_000,
   });
 
-  const [selectedId, setSelectedId] = React.useState<number | null>(null);
+  const [selectedFoilType, setSelectedFoilType] = React.useState<string>('');
+  const [selectedQuality, setSelectedQuality] = React.useState<string>('');
+  const [selectedLanguage, setSelectedLanguage] = React.useState<string>('');
   const [qty, setQty] = React.useState(1);
   const liveRef = React.useRef<HTMLDivElement>(null);
 
+  // Get unique values for dropdowns
+  const foilTypes = React.useMemo(() => {
+    if (!data?.options) return [];
+    return Array.from(new Set(data.options.map(o => o.foilType))).sort();
+  }, [data?.options]);
+
+  const qualities = React.useMemo(() => {
+    if (!data?.options) return [];
+    return Array.from(new Set(data.options.map(o => o.quality))).sort();
+  }, [data?.options]);
+
+  const languages = React.useMemo(() => {
+    if (!data?.options) return [];
+    return Array.from(new Set(data.options.map(o => o.language))).sort();
+  }, [data?.options]);
+
+  // Reset state when modal opens
   React.useEffect(() => {
     if (!isOpen) return;
-    // Reset state when opening
-    setSelectedId(null);
+    setSelectedFoilType('');
+    setSelectedQuality('');
+    setSelectedLanguage('');
     setQty(1);
   }, [isOpen]);
 
+  // Auto-select first available options when data loads
   React.useEffect(() => {
-    if (!isOpen || !data?.options) return;
-    // Auto select the cheapest in-stock option for convenience
+    if (!isOpen || !data?.options || data.options.length === 0) return;
+
+    // Find cheapest in-stock option
     const cheapest = [...data.options]
       .filter(o => o.inStock > 0)
       .sort((a, b) => a.priceCents - b.priceCents)[0];
-    if (cheapest) setSelectedId(cheapest.inventoryId);
+
+    if (cheapest) {
+      setSelectedFoilType(cheapest.foilType);
+      setSelectedQuality(cheapest.quality);
+      setSelectedLanguage(cheapest.language);
+    }
   }, [isOpen, data?.options]);
 
-  const selected = data?.options.find(o => o.inventoryId === selectedId) || null;
+  // Find the selected inventory option based on current selections
+  const selected = React.useMemo(() => {
+    if (!data?.options || !selectedFoilType || !selectedQuality || !selectedLanguage) {
+      return null;
+    }
+    return data.options.find(
+      o => o.foilType === selectedFoilType &&
+           o.quality === selectedQuality &&
+           o.language === selectedLanguage
+    ) || null;
+  }, [data?.options, selectedFoilType, selectedQuality, selectedLanguage]);
 
-  function handleConfirm() {
+  // Get available options based on current selections
+  const availableFoilTypes = React.useMemo(() => {
+    if (!data?.options) return [];
+    return Array.from(new Set(data.options.map(o => o.foilType))).sort();
+  }, [data?.options]);
+
+  const availableQualities = React.useMemo(() => {
+    if (!data?.options || !selectedFoilType) return qualities;
+    return Array.from(new Set(
+      data.options
+        .filter(o => o.foilType === selectedFoilType)
+        .map(o => o.quality)
+    )).sort();
+  }, [data?.options, selectedFoilType, qualities]);
+
+  const availableLanguages = React.useMemo(() => {
+    if (!data?.options || !selectedFoilType || !selectedQuality) return languages;
+    return Array.from(new Set(
+      data.options
+        .filter(o => o.foilType === selectedFoilType && o.quality === selectedQuality)
+        .map(o => o.language)
+    )).sort();
+  }, [data?.options, selectedFoilType, selectedQuality, languages]);
+
+  // Helper function to format labels
+  const formatLabel = (value: string): string => {
+    if (!value) return 'Standard';
+    return value
+      .split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
+  const handleConfirm = (e?: React.FormEvent) => {
+    e?.preventDefault();
     if (!selected) return;
     onAdd({ inventoryId: selected.inventoryId, quantity: qty });
     onClose();
-  }
+  };
 
   if (!isOpen) return null;
 
+  const card = data?.card;
+
   return (
-    <div role="dialog" aria-modal="true" aria-labelledby="addToCartTitle" className="fixed inset-0 z-60">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" onClick={onClose} aria-hidden="true" />
-      <div className="absolute inset-x-0 bottom-0 sm:inset-y-0 sm:my-auto sm:mx-auto sm:max-w-lg w-full bg-white dark:bg-zinc-900 rounded-t-2xl sm:rounded-2xl p-6 shadow-2xl animate-slide-in-up">
-        <h2 id="addToCartTitle" className="text-xl font-bold bg-gradient-to-r from-mm-gold to-mm-tealBright bg-clip-text text-transparent mb-1">
-          Select variation & quantity
-        </h2>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="addToCartTitle"
+      className="fixed inset-0 z-60 flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" aria-hidden="true" />
+
+      <div
+        className="relative bg-white dark:bg-zinc-900 rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div aria-live="polite" aria-atomic="true" className="sr-only" ref={liveRef} />
 
-        {isLoading && <p role="status">Loading inventory…</p>}
-        {isError && <p role="alert">Could not load inventory. Please try again.</p>}
-
-        {!isLoading && !isError && (
-          <form
-            onSubmit={(e) => { e.preventDefault(); handleConfirm(); }}
-            className="mt-3 space-y-3"
-          >
-            <label className="block text-sm font-medium">
-              <span className="block mb-1">Variation</span>
-              <select
-                className="w-full rounded-lg border px-3 py-2"
-                value={selectedId ?? ''}
-                onChange={(e) => setSelectedId(Number(e.target.value))}
-              >
-                {data?.options.map((o) => (
-                  <option key={o.inventoryId} value={o.inventoryId} disabled={o.inStock === 0}>
-                    {`${o.treatment} · ${o.foilType} · ${o.quality} · ${o.language} — ${formatCurrency(o.priceCents, currency)} ${o.inStock === 0 ? '(out of stock)' : ''}`}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="block text-sm font-medium">
-              <span className="block mb-1">Quantity</span>
-              <input
-                type="number"
-                min={1}
-                max={selected ? selected.inStock : 1}
-                value={qty}
-                onChange={(e) => setQty(Math.max(1, Math.min(selected?.inStock ?? 1, Number(e.target.value) || 1)))}
-                className="w-28 rounded-lg border px-3 py-2"
-              />
-              {selected && (
-                <p className="mt-1 text-xs text-zinc-600">{selected.inStock} available</p>
-              )}
-            </label>
-
-            <div className="flex justify-end gap-3 pt-4">
-              <button
-                type="button"
-                onClick={onClose}
-                className="rounded-xl border-2 border-mm-warmAccent hover:border-mm-teal hover:bg-mm-tealLight px-6 py-2.5 font-medium transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={!selected || selected.inStock === 0}
-                className="rounded-xl bg-gradient-to-r from-mm-gold to-mm-teal text-white px-6 py-2.5 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                Add to Cart {selected ? `(${formatCurrency(selected.priceCents, currency)})` : ''}
-              </button>
+        {/* Header */}
+        <div className="flex items-start justify-between p-6 border-b border-zinc-200 dark:border-zinc-700 gap-4">
+          {/* Left: Card Image */}
+          {card && (
+            <div className="flex-shrink-0">
+              <div className="relative w-24 h-32 rounded-lg overflow-hidden border-2 border-zinc-200 dark:border-zinc-700 shadow-md">
+                <OptimizedImage
+                  src={card.image_url || '/images/card-back-placeholder.svg'}
+                  alt={card.name}
+                  width={96}
+                  height={128}
+                  className="w-full h-full object-cover"
+                  placeholder="blur"
+                  priority={true}
+                />
+                {/* Icon overlay */}
+                <div className="absolute top-1 right-1 p-1.5 rounded-md bg-gradient-to-br from-mm-gold to-mm-teal">
+                  <ShoppingCart className="w-4 h-4 text-white" />
+                </div>
+              </div>
             </div>
-          </form>
-        )}
+          )}
+
+          {/* Center: Card Info */}
+          <div className="flex-1 min-w-0">
+            <h2 id="addToCartTitle" className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+              Add to Cart
+            </h2>
+            {card && (
+              <div className="mt-2 space-y-1">
+                <p className="text-base font-semibold text-zinc-800 dark:text-zinc-200">
+                  {card.name}
+                </p>
+                {card.game_name && (
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    <span className="font-medium">Game:</span> {card.game_name}
+                  </p>
+                )}
+                {card.set_name && (
+                  <p className="text-sm text-zinc-600 dark:text-zinc-400">
+                    <span className="font-medium">Set:</span> {card.set_name}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+
+          {/* Right: Close Button */}
+          <button
+            onClick={onClose}
+            className="flex-shrink-0 p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors"
+            aria-label="Close modal"
+          >
+            <X className="w-5 h-5 text-zinc-600 dark:text-zinc-400" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="p-6">
+          {isLoading && (
+            <div className="flex items-center justify-center py-8">
+              <div className="w-8 h-8 border-4 border-mm-teal border-t-transparent rounded-full animate-spin" />
+              <p className="ml-3 text-zinc-600 dark:text-zinc-400" role="status">Loading inventory…</p>
+            </div>
+          )}
+
+          {isError && (
+            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+              <p className="text-red-800 dark:text-red-200" role="alert">Could not load inventory. Please try again.</p>
+            </div>
+          )}
+
+          {!isLoading && !isError && (
+            <form onSubmit={handleConfirm} className="space-y-6">
+              {/* Card variation details */}
+              {card?.treatment && card.treatment !== 'STANDARD' && (
+                <div className="p-3 bg-gradient-to-r from-mm-gold/10 to-mm-teal/10 border border-mm-gold/30 rounded-lg">
+                  <p className="text-sm font-medium text-zinc-900 dark:text-zinc-100 mb-2">Card Variation:</p>
+                  <div className="space-y-1 text-sm text-zinc-800 dark:text-zinc-200">
+                    <div><span className="font-medium">Treatment:</span> {formatLabel(card.treatment)}</div>
+                    {card.finish && (
+                      <div><span className="font-medium">Finish:</span> {formatLabel(card.finish)}</div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              <div className="space-y-4">
+                {/* Foil Type Selection - only show if multiple options */}
+                {availableFoilTypes.length > 1 && (
+                  <div>
+                    <label htmlFor="foilType" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                      Finish <span className="text-red-500">*</span>
+                    </label>
+                    <select
+                      id="foilType"
+                      value={selectedFoilType}
+                      onChange={(e) => setSelectedFoilType(e.target.value)}
+                      className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:border-transparent"
+                      required
+                    >
+                      <option value="">Select finish...</option>
+                      {availableFoilTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {formatLabel(type)}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
+                {/* Quality Selection */}
+                <div>
+                  <label htmlFor="quality" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    Quality <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="quality"
+                    value={selectedQuality}
+                    onChange={(e) => setSelectedQuality(e.target.value)}
+                    disabled={!selectedFoilType && availableFoilTypes.length > 1}
+                    className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    required
+                  >
+                    <option value="">Select quality...</option>
+                    {availableQualities.map((qual) => (
+                      <option key={qual} value={qual}>
+                        {qual}
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                    Condition of the physical card
+                  </p>
+                </div>
+
+                {/* Language Selection */}
+                <div>
+                  <label htmlFor="language" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    Language <span className="text-red-500">*</span>
+                  </label>
+                  <select
+                    id="language"
+                    value={selectedLanguage}
+                    onChange={(e) => setSelectedLanguage(e.target.value)}
+                    disabled={!selectedQuality}
+                    className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    required
+                  >
+                    <option value="">Select language...</option>
+                    {availableLanguages.map((lang) => (
+                      <option key={lang} value={lang}>
+                        {lang}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Price & Stock Info */}
+                {selected && (
+                  <div className="p-4 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-zinc-700 dark:text-zinc-300">Price:</span>
+                      <span className="text-lg font-bold text-mm-teal">
+                        {formatCurrency(selected.priceCents, currency)}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+                      <Package className="w-4 h-4" />
+                      <span>{selected.inStock} available in stock</span>
+                    </div>
+                  </div>
+                )}
+
+                {/* Quantity Selection */}
+                <div>
+                  <label htmlFor="quantity" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-2">
+                    <Package className="w-4 h-4 inline mr-1" />
+                    Quantity <span className="text-red-500">*</span>
+                  </label>
+                  <input
+                    id="quantity"
+                    type="number"
+                    min={1}
+                    max={selected ? selected.inStock : 1}
+                    value={qty}
+                    onChange={(e) => setQty(Math.max(1, Math.min(selected?.inStock ?? 1, Number(e.target.value) || 1)))}
+                    disabled={!selected}
+                    className="w-32 px-4 py-2 border border-zinc-300 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-200 dark:border-zinc-700">
+                <button
+                  type="button"
+                  onClick={onClose}
+                  className="px-6 py-2 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={!selected || selected.inStock === 0}
+                  className="px-6 py-2 bg-gradient-to-r from-mm-gold to-mm-teal text-white font-semibold rounded-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg flex items-center gap-2"
+                >
+                  <ShoppingCart className="w-4 h-4" />
+                  Add to Cart
+                  {selected && selected.inStock > 0 && (
+                    <span className="ml-1">({formatCurrency(selected.priceCents, currency)})</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
       </div>
     </div>
   );

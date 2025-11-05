@@ -213,27 +213,33 @@ router.get("/cards/:id", async (req: Request, res: Response) => {
   const client = await db.getClient();
   
   try {
-    // Get card details
+    // Get card details with joined game and set information
     const cardRes = await client.query(
-      `SELECT c.*
+      `SELECT
+        c.*,
+        g.name AS game_name,
+        cs.name AS set_name
        FROM cards c
+       LEFT JOIN games g ON c.game_id = g.id
+       LEFT JOIN card_sets cs ON c.set_id = cs.id
        WHERE c.id = $1`,
       [id]
     );
-    
+
     if (cardRes.rowCount === 0 || !cardRes.rows[0]) {
       return res.status(404).json({ error: "Card not found" });
     }
 
     const card = cardRes.rows[0];
 
-    // Get inventory variations with proper field aliases
+    // Get inventory variations with proper field aliases including foil_type
     // IMPORTANT: Alias 'id' as 'inventory_id' and 'stock_quantity' as 'stock'
     // to match the CardVariation interface used throughout the app
     const invRes = await client.query(
       `SELECT
         id AS inventory_id,
         quality,
+        foil_type,
         language,
         stock_quantity AS stock,
         price
