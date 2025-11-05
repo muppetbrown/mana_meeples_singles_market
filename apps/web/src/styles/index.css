@@ -84,7 +84,7 @@ h1, h2, h3, h4, h5, h6 {
 
   .section-mm-gradient {
     background: linear-gradient(135deg, #e8f4f1 0%, #f0f8f5 100%);
-    @apply rounded-mm-2xl p-8 shadow-mm-section;
+    @apply rounded-mm-2xl p-2 shadow-mm-section;
     border-left: 5px solid theme('colors.mm.tealBright');
   }
 }
