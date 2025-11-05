@@ -43,7 +43,13 @@ export interface CardGridProps {
   }) => void;
 
   onAddToInventory?: (card: BrowseBaseCard) => void;
-  onManage?: (card: BrowseBaseCard) => void;
+  onManage?: (card: BrowseBaseCard, params?: {
+    inventoryId?: number;
+    quality?: string;
+    language?: string;
+    price?: number;
+    stock_quantity?: number;
+  }) => void;
 }
 
 // ============================================================================
@@ -166,7 +172,14 @@ export const CardGrid: React.FC<CardGridProps> = ({
           onAddToInventory?.(card);
           break;
         case 'inventory':
-          onManage?.(card);
+          // Pass inventory params for managing existing inventory
+          onManage?.(card, {
+            inventoryId: params.inventoryId,
+            quality: params.quality,
+            language: params.language,
+            price: params.price,
+            stock_quantity: params.stock_quantity,
+          });
           break;
         case 'storefront':
           // Always call onAddToCart to open modal for quality/language selection

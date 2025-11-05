@@ -447,7 +447,9 @@ const CardItem: React.FC<CardItemProps> = ({
         variationId: selectedVariation?.id || card.variations[0]?.id || card.id,
         inventoryId: selectedInventory?.id,
         quality: selectedQuality,
-        language: selectedLanguage
+        language: selectedLanguage,
+        price: selectedInventory?.price,
+        stock_quantity: selectedInventory?.stock_quantity,
       });
     };
 
