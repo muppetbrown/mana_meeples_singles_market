@@ -10,9 +10,17 @@ import { ToastProvider } from '@/shared/ui/Toast';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 60_000, // 1 minute
-      retry: 1,
-      refetchOnWindowFocus: false,
+      staleTime: 5 * 60 * 1000, // 5 minutes - increase from 1 min for better caching
+      cacheTime: 10 * 60 * 1000, // 10 minutes - keep unused data longer
+      retry: 2, // Retry failed requests twice before giving up
+      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+      refetchOnWindowFocus: false, // Prevent refetch on tab focus (better UX)
+      refetchOnReconnect: true, // Do refetch when connection is restored
+      refetchOnMount: false, // Don't refetch if data is fresh
+    },
+    mutations: {
+      retry: 1, // Retry mutations once on failure
+      retryDelay: 1000, // 1 second delay between mutation retries
     },
   },
 });

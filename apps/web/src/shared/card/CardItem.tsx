@@ -428,18 +428,10 @@ const CardItem: React.FC<CardItemProps> = ({
 
   const imageUrl = card.image_url || '/images/card-back-placeholder.svg';
 
-  // DEBUG: Log image URL to help troubleshoot Issue #4
-  useEffect(() => {
-    console.log('CardItem - card data:', {
-      id: card.id,
-      name: card.name,
-      image_url: card.image_url,
-      hasImage: !!card.image_url,
-      imageUrl: imageUrl
-    });
-  }, [card.id, card.name, card.image_url, imageUrl]);
   const isCardFoil = selectedVariation ? selectedVariation.finish === 'foil' : false;
-  const hasSpecial = selectedVariation ? hasSpecialTreatment({ treatment: selectedVariation.treatment } as any) : false;
+  const hasSpecial = selectedVariation
+    ? hasSpecialTreatment({ treatment: selectedVariation.treatment } as Pick<BrowseBaseCard, 'treatment'>)
+    : false;
 
   return (
     <div className="card-mm flex flex-col h-full min-h-[420px] bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
