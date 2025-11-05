@@ -11,7 +11,7 @@
  */
 import React from 'react';
 import CardRow, { type CardIdentity, type VariationBadge } from '@/shared/card/CardRow';
-import { formatCurrencySimple } from '@/lib/utils';
+import { formatCurrencySimple, formatPriceDisplay } from '@/lib/utils';
 import type {
   BrowseBaseCard,
   BrowseVariation,
@@ -193,12 +193,15 @@ const CardList: React.FC<CardListProps> = ({
 
     return (
       <div className="flex items-center gap-3">
-        {/* Price info */}
-        {mode !== 'all' && card.lowest_price && (
-          <span className="text-sm text-slate-600">
-            From {formatCurrencySimple(card.lowest_price, currency)}
-          </span>
-        )}
+        {/* Price info - Show for inventory and all modes */}
+        {(mode === 'inventory' || mode === 'all') && (() => {
+          const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
+          return priceDisplay ? (
+            <span className="text-sm text-slate-600">
+              {priceDisplay}
+            </span>
+          ) : null;
+        })()}
 
         {/* Action button */}
         <button
@@ -376,11 +379,15 @@ const CardList: React.FC<CardListProps> = ({
 
                   {/* Action Button */}
                   <div className="flex items-center justify-between gap-2">
-                    {mode !== 'all' && card.lowest_price && (
-                      <span className="text-sm font-medium text-slate-700">
-                        From {formatCurrencySimple(card.lowest_price, currency)}
-                      </span>
-                    )}
+                    {/* Price info - Show for inventory and all modes */}
+                    {(mode === 'inventory' || mode === 'all') && (() => {
+                      const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
+                      return priceDisplay ? (
+                        <span className="text-sm font-medium text-slate-700">
+                          {priceDisplay}
+                        </span>
+                      ) : null;
+                    })()}
                     <button
                       onClick={() => {
                         if (visibleVariations.length === 1) {

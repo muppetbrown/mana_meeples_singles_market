@@ -13,7 +13,7 @@ import OptimizedImage from '@/shared/media/OptimizedImage';
 import { X } from 'lucide-react';
 import VariationBadge from '@/shared/ui/VariationBadge';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
-import { formatCurrencySimple } from '@/lib/utils';
+import { formatCurrencySimple, formatPriceDisplay } from '@/lib/utils';
 import { api, ENDPOINTS } from '@/lib/api';
 import type {
   BrowseBaseCard,
@@ -322,18 +322,26 @@ const CardItem: React.FC<CardItemProps> = ({
 
   const renderStockAndPrice = () => {
     if (mode === 'all') {
-      // Show total stock across all variations
+      // Show total stock across all variations and price
+      const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
       return (
-        <div className="flex items-center gap-2 text-sm">
-          <span className={`w-2 h-2 rounded-full ${
-            card.total_stock > 0 ? 'bg-green-500' : 'bg-gray-400'
-          }`} />
-          <span className="text-slate-700">
-            {card.total_stock > 0
-              ? `${card.total_stock} total stock (${card.variation_count} variations)`
-              : 'No inventory'
-            }
-          </span>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2 text-sm">
+            <span className={`w-2 h-2 rounded-full ${
+              card.total_stock > 0 ? 'bg-green-500' : 'bg-gray-400'
+            }`} />
+            <span className="text-slate-700">
+              {card.total_stock > 0
+                ? `${card.total_stock} total stock (${card.variation_count} variations)`
+                : 'No inventory'
+              }
+            </span>
+          </div>
+          {priceDisplay && (
+            <div className="text-lg font-bold text-slate-900">
+              {priceDisplay}
+            </div>
+          )}
         </div>
       );
     }
@@ -348,9 +356,13 @@ const CardItem: React.FC<CardItemProps> = ({
       );
     }
 
-    // Show stock and price from variation
+    // Show stock for selected variation and overall price range for inventory mode
     const hasStock = selectedVariation.in_stock > 0;
-    const price = selectedVariation.price || card.lowest_price;
+
+    // For inventory mode, show overall price range; for storefront, show selected variation price
+    const priceDisplay = mode === 'inventory'
+      ? formatPriceDisplay(card.variations, currency, mode)
+      : (selectedVariation.price ? formatCurrencySimple(selectedVariation.price, currency) : null);
 
     return (
       <div className="space-y-2">
@@ -361,9 +373,9 @@ const CardItem: React.FC<CardItemProps> = ({
               {hasStock ? `Stock: ${selectedVariation.in_stock}` : 'Out of stock'}
             </span>
           </div>
-          {price && (
+          {priceDisplay && (
             <span className="text-lg font-bold text-slate-900">
-              {formatCurrencySimple(price, currency)}
+              {priceDisplay}
             </span>
           )}
         </div>

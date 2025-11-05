@@ -43,3 +43,40 @@ return `${currency?.symbol ?? '$'}${amount.toFixed(2)}`;
 export function formatOrderTotal(dollars: number, currencySymbol: string = '$'): string {
 return `${currencySymbol}${parseFloat(dollars.toString()).toFixed(2)}`;
 }
+
+/**
+ * Calculate and format price display for cards with variations
+ * Shows single price if all variations have the same price
+ * Shows price range (min-max) if variations have different prices
+ * Only considers variations with stock (in_stock > 0)
+ */
+export function formatPriceDisplay(
+  variations: Array<{ price?: number | null; in_stock?: number }>,
+  currency: Currency,
+  mode: 'storefront' | 'inventory' | 'all' = 'storefront'
+): string | null {
+  // Filter to variations with stock (except in 'all' mode where we show all)
+  const relevantVariations = mode === 'all'
+    ? variations
+    : variations.filter(v => v.in_stock && v.in_stock > 0);
+
+  // Get prices from variations
+  const prices = relevantVariations
+    .map(v => v.price)
+    .filter((price): price is number => price != null && price > 0);
+
+  if (prices.length === 0) {
+    return null;
+  }
+
+  const minPrice = Math.min(...prices);
+  const maxPrice = Math.max(...prices);
+
+  // If all prices are the same, show single price
+  if (minPrice === maxPrice) {
+    return formatCurrencySimple(minPrice, currency);
+  }
+
+  // Show price range
+  return `${formatCurrencySimple(minPrice, currency)} - ${formatCurrencySimple(maxPrice, currency)}`;
+}
