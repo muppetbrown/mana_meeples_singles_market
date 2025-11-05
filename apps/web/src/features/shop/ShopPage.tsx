@@ -85,30 +85,53 @@ const ShopPage: React.FC = () => {
 
   // UNIFIED: Transform StorefrontCard to BrowseBaseCard (same format as admin)
   const browseCards: BrowseBaseCard[] = useMemo(() => {
+    // StorefrontCard already represents a unique card variation with treatment/finish
+    // Each card's "variations" array contains quality/language inventory options
+    // We need to convert this to BrowseBaseCard format where variations are treatment/finish combos
+
     // Convert StorefrontCard format to the unified Card format for grouping
-    const cardsForGrouping = cards.map(card => ({
-      ...card,
-      id: card.id,
-      name: card.name,
-      set_id: card.set_id || 0,
-      set_name: card.set_name,
-      card_number: card.card_number,
-      game_name: card.game_name,
-      image_url: card.image_url || '',
-      rarity: card.rarity ?? 'Unknown',
-      total_stock: card.total_stock ?? 0,
-      variation_count: card.variation_count ?? 0,
-      // StorefrontCard doesn't have individual variations with treatment/finish
-      // Instead it has variations with quality/finish/language for inventory
-      // We'll create pseudo-variations based on the unique finish values
-      treatment: 'STANDARD',
-      finish: 'nonfoil',
-      sku: String(card.id),
-      // Preserve pricing fields for price display
-      base_price: card.base_price,
-      foil_price: card.foil_price,
-      price_source: card.price_source
-    }));
+    const cardsForGrouping = cards.map(card => {
+      // Determine price based on the card's finish
+      const finish = (card.finish ?? '').toLowerCase();
+      let price: number | null = null;
+
+      // Check for nonfoil first
+      if (finish.includes('non') || finish === 'nonfoil' || finish === '') {
+        price = card.base_price ?? null;
+      }
+      // For foil/etched finishes, use foil_price
+      else if (finish.includes('foil') || finish.includes('etched')) {
+        price = card.foil_price ?? null;
+      }
+      // Default to base_price for unknown finishes
+      else {
+        price = card.base_price ?? null;
+      }
+
+      return {
+        ...card,
+        id: card.id,
+        name: card.name,
+        set_id: card.set_id || 0,
+        set_name: card.set_name,
+        card_number: card.card_number,
+        game_name: card.game_name,
+        image_url: card.image_url || '',
+        rarity: card.rarity ?? 'Unknown',
+        total_stock: card.total_stock ?? 0,
+        variation_count: card.variation_count ?? 0,
+        // Use the actual treatment and finish from the card
+        treatment: card.treatment || 'STANDARD',
+        finish: card.finish || 'nonfoil',
+        sku: card.sku || String(card.id),
+        // Preserve pricing fields for price display
+        base_price: card.base_price,
+        foil_price: card.foil_price,
+        price_source: card.price_source,
+        // Add the computed price for this specific variation
+        price
+      };
+    });
 
     // Use the shared grouping utility
     return groupCardsForBrowse(cardsForGrouping);
