@@ -66,6 +66,8 @@ interface AddToInventoryModalProps {
   onSave: () => void;
   onClose: () => void;
   saving: boolean;
+  mode?: 'add' | 'manage';              // Mode: add new inventory or manage existing
+  inventoryId?: number;                 // ID of inventory item when in manage mode
 }
 
 // ---------- Imports for Shared Enums ----------
@@ -116,7 +118,12 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
   onSave,
   onClose,
   saving,
+  mode = 'add',
+  inventoryId,
 }) => {
+  // Determine modal text based on mode
+  const modalTitle = mode === 'manage' ? 'Manage Inventory' : 'Add to Inventory';
+  const buttonText = mode === 'manage' ? 'Update Inventory' : 'Add to Inventory';
   // Prevent modal close when clicking inside
   const handleModalClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -172,7 +179,7 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
             treatment: selectedVariation?.treatment,
             finish: selectedVariation?.finish,
           }}
-          title="Add to Inventory"
+          title={modalTitle}
           titleId="modal-title"
           onClose={onClose}
           iconType="inventory"
@@ -373,12 +380,12 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
               {saving ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Adding...
+                  {mode === 'manage' ? 'Updating...' : 'Adding...'}
                 </>
               ) : (
                 <>
                   <Package className="w-4 h-4" />
-                  Add to Inventory
+                  {buttonText}
                 </>
               )}
             </button>

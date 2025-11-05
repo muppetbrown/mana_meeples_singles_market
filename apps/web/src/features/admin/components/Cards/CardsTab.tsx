@@ -107,6 +107,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     useAutomatedPrice: false,
   });
   const [saving, setSaving] = useState(false);
+  const [modalMode, setModalMode] = useState<'add' | 'manage'>('add');
+  const [managingInventoryId, setManagingInventoryId] = useState<number | undefined>();
 
   // --------------------------------------------------------------------------
   // URL PARAMS
@@ -387,6 +389,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   }, []);
 
   const openAddModal = useCallback((card: BrowseBaseCard) => {
+    setModalMode('add');
+    setManagingInventoryId(undefined);
     setAddModalCard(card);
 
     // Auto-select a variation (prefer non-foil, otherwise first)
@@ -417,11 +421,45 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setShowAddModal(true);
   }, [getAutomatedPrice]);
 
+  const openManageModal = useCallback((card: BrowseBaseCard, params: {
+    inventoryId: number;
+    quality: string;
+    language: string;
+    price: number;
+    stock_quantity: number;
+  }) => {
+    setModalMode('manage');
+    setManagingInventoryId(params.inventoryId);
+    setAddModalCard(card);
+
+    // Find the variation that matches this inventory
+    let selectedVar: BrowseVariation | undefined;
+    if (card.variations && card.variations.length > 0) {
+      selectedVar = card.variations[0]; // For now, just use first variation since card only has one in inventory mode
+      setSelectedVariation(selectedVar);
+    } else {
+      setSelectedVariation(undefined);
+    }
+
+    // Pre-populate form with existing inventory data
+    setAddFormData({
+      quality: params.quality as Quality,
+      price: String(params.price),
+      stock_quantity: params.stock_quantity,
+      language: params.language as Language,
+      useAutomatedPrice: false, // Don't auto-use automated price for existing inventory
+    });
+
+    setShowAddModal(true);
+  }, []);
+
 
   const closeAddModal = useCallback(() => {
     setShowAddModal(false);
     setAddModalCard(null);
     setSelectedVariation(undefined);
+    setModalMode('add');
+    setManagingInventoryId(undefined);
     setAddFormData({
       quality: DEFAULT_QUALITY,
       price: '',
@@ -472,7 +510,57 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   } finally {
     setSaving(false);
   }
-}, [addModalCard, selectedVariation, addFormData, closeAddModal, handleRefresh]);
+}, [addModalCard, selectedVariation, addFormData, closeAddModal, handleRefresh, toast]);
+
+  const handleUpdateInventory = useCallback(async () => {
+    if (!addModalCard || !managingInventoryId) return;
+
+    // Validation: Must have a selected variation
+    if (!selectedVariation) {
+      alert('Please select a card variation');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const inventoryData = {
+        quality: addFormData.quality,
+        language: addFormData.language || 'English',
+        price: Number.isFinite(parseFloat(addFormData.price))
+          ? parseFloat(addFormData.price)
+          : 0,
+        stock_quantity: Number(addFormData.stock_quantity) || 0,
+
+        // Optional but useful:
+        auto_price_enabled: !!addFormData.useAutomatedPrice,
+        price_source: selectedVariation?.price_source ?? undefined,
+      } as const;
+
+      // UNIFIED: Use api client with PUT to update inventory
+      await api.put(`${ENDPOINTS.ADMIN.INVENTORY}/${managingInventoryId}`, inventoryData);
+
+      // success
+      closeAddModal();
+      handleRefresh();
+
+      // Show success toast notification
+      toast.success(`Successfully updated ${addModalCard.name} inventory! (Qty: ${addFormData.stock_quantity}, Price: $${addFormData.price})`, 4000);
+    } catch (err) {
+      console.error('Failed to update inventory:', err);
+      alert(err instanceof Error ? err.message : 'Failed to update inventory. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  }, [addModalCard, managingInventoryId, selectedVariation, addFormData, closeAddModal, handleRefresh, toast]);
+
+  // Combined save handler that routes to add or update based on mode
+  const handleSaveInventory = useCallback(async () => {
+    if (modalMode === 'manage') {
+      await handleUpdateInventory();
+    } else {
+      await handleAddToInventory();
+    }
+  }, [modalMode, handleUpdateInventory, handleAddToInventory]);
 
   // --------------------------------------------------------------------------
   // RENDER
@@ -623,7 +711,20 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                       mode={mode}
                       viewMode={viewMode}
                       onAddToInventory={(card) => openAddModal(card)}
-                      onManage={(card) => openAddModal(card)}
+                      onManage={(card, params) => {
+                        if (params?.inventoryId) {
+                          openManageModal(card, {
+                            inventoryId: params.inventoryId,
+                            quality: params.quality || 'Near Mint',
+                            language: params.language || 'English',
+                            price: params.price || 0,
+                            stock_quantity: params.stock_quantity || 0,
+                          });
+                        } else {
+                          // Fallback to add mode if no inventory params
+                          openAddModal(card);
+                        }
+                      }}
                     />
                   </div>
                 ))}
@@ -649,9 +750,11 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
           onVariationChange={(v) => setSelectedVariation(v)}       // keep signature simple
           formData={addFormData}
           onFormChange={setAddFormData}
-          onSave={handleAddToInventory}
+          onSave={handleSaveInventory}
           onClose={closeAddModal}
           saving={saving}
+          mode={modalMode}
+          inventoryId={managingInventoryId}
         />
       )}
     </div>
