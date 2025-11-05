@@ -147,11 +147,28 @@ router.get("/cards", async (req: Request, res: Response) => {
 
   // ============================================================================
   // FIXED QUERY - ENSURES ALL CARD VARIATIONS ARE RETURNED TOGETHER
-  // Uses two-phase approach: get unique card identities first, then all their variations
+  // Uses three-phase approach:
+  // 1. Get inventory aggregates per card identity (not per variation)
+  // 2. Get unique card identities with those aggregates
+  // 3. Get all variations for those identities with the shared aggregates
   // ============================================================================
   const sql = `
-    WITH card_identities AS (
-      -- Phase 1: Get first N unique card identities (by name + card_number + set_id)
+    WITH card_inventory_aggregates AS (
+      -- Phase 1: Calculate inventory aggregates per card identity (not per variation)
+      -- This ensures all variations of a card share the same inventory flags
+      SELECT
+        c.name,
+        c.card_number,
+        c.set_id,
+        COUNT(DISTINCT cinv.id)::int AS variation_count,
+        COALESCE(SUM(cinv.stock_quantity), 0)::int AS total_stock,
+        BOOL_OR(cinv.stock_quantity > 0) AS has_inventory
+      FROM cards c
+      LEFT JOIN card_inventory cinv ON cinv.card_id = c.id
+      GROUP BY c.name, c.card_number, c.set_id
+    ),
+    card_identities AS (
+      -- Phase 2: Get first N unique card identities (by name + card_number + set_id)
       SELECT
         c.name,
         c.card_number,
@@ -167,7 +184,7 @@ router.get("/cards", async (req: Request, res: Response) => {
       ${orderBy.replace('c.name', 'MIN(c.name)').replace('c.card_number', 'MIN(c.card_number)').replace('c.rarity', 'MIN(c.rarity)').replace('c.created_at', 'MIN(c.created_at)')}
       ${limitSql}  -- ✅ Limit applies to unique card identities only
     )
-    -- Phase 2: Get ALL variations for those card identities
+    -- Phase 3: Get ALL variations for those card identities with shared inventory aggregates
     SELECT
       c.id,
       c.name,
@@ -188,10 +205,10 @@ router.get("/cards", async (req: Request, res: Response) => {
       c.game_id,
       c.set_id,
 
-      -- Stock aggregates from card_inventory (but NO variations array)
-      COALESCE(inv.total_stock, 0)::int AS total_stock,
-      COALESCE(inv.variation_count, 0)::int AS variation_count,
-      COALESCE(inv.has_inventory, false) AS has_inventory,
+      -- Stock aggregates from card identity level (shared across all variations)
+      COALESCE(cia.total_stock, 0)::int AS total_stock,
+      COALESCE(cia.variation_count, 0)::int AS variation_count,
+      COALESCE(cia.has_inventory, false) AS has_inventory,
 
       -- Pricing information
       cp.base_price,
@@ -204,14 +221,9 @@ router.get("/cards", async (req: Request, res: Response) => {
     JOIN games g ON g.id = c.game_id
     JOIN card_sets cs ON cs.id = c.set_id
     LEFT JOIN card_pricing cp ON cp.card_id = c.id
-    LEFT JOIN LATERAL (
-      SELECT
-        COUNT(cinv.id)::int AS variation_count,
-        COALESCE(SUM(cinv.stock_quantity), 0)::int AS total_stock,
-        BOOL_OR(cinv.stock_quantity > 0) AS has_inventory
-      FROM card_inventory cinv
-      WHERE cinv.card_id = c.id
-    ) inv ON TRUE
+    LEFT JOIN card_inventory_aggregates cia ON cia.name = c.name
+      AND cia.card_number = c.card_number
+      AND cia.set_id = c.set_id
     ${orderBy}  -- Apply ordering to final result
   `;
 
