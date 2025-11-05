@@ -4,10 +4,8 @@ import {
   verifyJWT,
   createJWT,
   shouldRefreshToken,
-  validateCredentials,
   getAuthCookieConfig,
   getCSRFCookieConfig,
-  addSecurityDelay,
 } from "../lib/authUtils.js";
 import { env } from "../lib/env.js";
 
@@ -90,50 +88,6 @@ export const adminAuthJWT = async (
 };
 
 /**
- * Legacy basic authentication (backwards compatibility)
- */
-export const adminAuthBasic = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> => {
-  try {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Basic ")) {
-      res.status(401).json({
-        error: "Authentication required",
-        hint: "Use Basic Auth with username:password",
-      });
-      return;
-    }
-
-    const base64Credentials = authHeader.split(" ")[1];
-    if (typeof base64Credentials !== 'string' || !base64Credentials.length) {
-      res.status(401).json({
-        error: "Invalid authorization header format",
-        hint: "Use Basic Auth with username:password"
-      });
-      return;
-    }
-    const credentials = Buffer.from(base64Credentials, "base64").toString("utf-8");
-    const [username, password] = credentials.split(":");
-
-    const isValid = await validateCredentials(username, password);
-    if (!isValid) {
-      await addSecurityDelay();
-      res.status(401).json({ error: "Invalid credentials" });
-      return;
-    }
-
-    req.user = { username, role: "admin" };
-    next();
-  } catch (error: unknown) {
-    console.error("Basic auth error:", error instanceof Error ? error.message : String(error));
-    res.status(500).json({ error: "Authentication failed" });
-  }
-};
-
-/**
  * Generate CSRF token and set cookies
  */
 export const generateCSRFToken = (
@@ -202,7 +156,6 @@ export const adminAuthWithCSRF = (
 
 export default {
   adminAuthJWT,
-  adminAuthBasic,
   generateCSRFToken,
   validateCSRFToken,
   adminAuthWithCSRF,

@@ -16,13 +16,3 @@ export { CartItemDisplay } from './Cart/CartItem';
 export { CartModal } from './Cart/CartModal';
 export { MiniCart } from './Cart/MiniCart';
 export { default as Checkout } from './Cart/Checkout';
-
-// Deprecated default exports - will be removed in future version
-/** @deprecated Use named export { ShopHeader } instead */
-export { default as ShopHeaderDefault } from './ShopHeader';
-/** @deprecated Use named export { ResultsHeader } instead */
-export { default as ResultsHeaderDefault } from './ResultsHeader';
-/** @deprecated Use named export { RecentlyViewedCards } instead */
-export { default as RecentlyViewedCardsDefault } from './RecentlyViewedCards';
-/** @deprecated Use named export { Checkout } instead */
-export { default as CheckoutDefault } from './Cart/Checkout';

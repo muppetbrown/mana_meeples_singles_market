@@ -175,8 +175,3 @@ export function buildCardParams(
 
   return result;
 }
-
-// Backwards compatibility aliases
-export const buildStorefrontQuery = buildCardQuery;
-export type StorefrontQueryParams = CardQueryParams;
-export type StorefrontAPIParams = CardAPIParams;

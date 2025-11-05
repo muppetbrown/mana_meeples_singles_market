@@ -1,10 +1,8 @@
 /**
- * Shop Filters Hook (UNIFIED)
+ * Shop Filters Hook
  *
- * This hook is now a thin wrapper around the unified useFilters hook.
- * It maintains backward compatibility while using the consolidated filter logic.
- *
- * Migration note: This hook now uses useFilters internally, eliminating code duplication.
+ * Convenience wrapper around the unified useFilters hook for storefront use.
+ * Provides filter management with handler methods for shop components.
  */
 
 import { useFilters } from './useFilters';
@@ -12,16 +10,11 @@ import type { SearchFilters } from '@/types/filters';
 
 /**
  * Shop-specific filter management hook
- *
- * This is a backward-compatible wrapper around the unified useFilters hook.
- * All shop components can continue using this hook without changes.
+ * Uses the unified useFilters hook in storefront mode with auto-loading enabled.
  */
 export function useShopFilters() {
-  // Use the unified filter hook in storefront mode
   const filterHook = useFilters({ mode: 'storefront', autoLoad: true });
 
-  // Return the same API as before for backward compatibility
-  // ENHANCED (Third Sweep): Now exposing handler methods to eliminate duplication
   return {
     // Current active filters
     filters: filterHook.filters,
@@ -30,30 +23,26 @@ export function useShopFilters() {
     updateFilters: filterHook.updateFilters,
     clearFilters: filterHook.clearFilters,
 
-    // Handler methods - NEW: Exposed to eliminate duplication in components
+    // Handler methods
     updateParam: filterHook.updateParam,
     handleGameChange: filterHook.handleGameChange,
     handleSetChange: filterHook.handleSetChange,
     handleSearchChange: filterHook.handleSearchChange,
     getAdditionalFilters: filterHook.getAdditionalFilters,
 
-    // Filter options data (individual exports for convenience)
+    // Filter options data
     games: filterHook.games,
     sets: filterHook.sets,
     treatments: filterHook.treatments,
     finishes: filterHook.finishes,
     rarities: filterHook.rarities,
     qualities: filterHook.qualities,
-
-    // Full filter options object
     filterOptions: filterHook.filterOptions,
-
-    // Legacy method for backward compatibility
     getFilterOptions: () => filterHook.filterOptions,
 
     // Loading state
     isLoading: filterHook.isLoading,
-    loading: filterHook.loading,
+    loading: filterHook.isLoading,
     error: filterHook.error
   };
 }

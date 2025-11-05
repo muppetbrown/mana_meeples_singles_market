@@ -44,7 +44,6 @@ export function useVariationSelection(cards: StorefrontCard[]) {
 
   return {
     selections,
-    selectedVariations: selections, // Alias for backward compatibility
     selectVariation,
     getSelected,
     clearStaleSelections

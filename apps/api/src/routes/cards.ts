@@ -434,7 +434,6 @@ router.get('/filters', async (req: Request, res: Response) => {
       finishes: filterRow?.finishes ?? [],
       languages: filterRow?.languages ?? [],
       qualities: filterRow?.qualities ?? [],
-      foilTypes: filterRow?.finishes ?? [], // Alias for backwards compatibility
 
       // Price range
       priceMin: filterRow?.priceMin ?? null,
