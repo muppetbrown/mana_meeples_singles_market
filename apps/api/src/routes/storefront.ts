@@ -119,74 +119,72 @@ router.get('/cards', async (req: Request, res: Response) => {
   const orderByOut = sortToSql('c', sort, order);
   const offset = (page - 1) * per_page;
 
-  // FIXED: Join card_sets in subquery for search functionality
+  // FIXED: Apply inventory filter before pagination to show only cards with stock
   const sql = `
-    SELECT
-      c.id,
-      c.name,
-      c.card_number,
-      cs.name AS set_name,
-      c.rarity,
-      c.image_url,
-      c.treatment,
-      c.finish,
-      g.name AS game_name,
-      COALESCE(inv.total_stock, 0)::int AS total_stock,
-      COALESCE(inv.variation_count, 0)::int AS variation_count,
-      COALESCE(inv.variations, '[]'::jsonb) AS variations
+    SELECT *
     FROM (
-      SELECT c.*
-      FROM cards c
-      JOIN card_sets cs ON cs.id = c.set_id
-      ${whereSql}
-      ${orderByOut}
-      LIMIT $${params.push(per_page)} OFFSET $${params.push(offset)}
-    ) c
-    JOIN games g ON g.id = c.game_id
-    JOIN card_sets cs ON cs.id = c.set_id
-    LEFT JOIN LATERAL (
       SELECT
-        COUNT(ci.id)::int AS variation_count,
-        COALESCE(SUM(ci.stock_quantity), 0)::int AS total_stock,
-        COALESCE(
-          JSONB_AGG(
-            JSONB_BUILD_OBJECT(
-              'inventory_id', ci.id,
-              'quality', ci.quality,
-              'language', COALESCE(ci.language, 'English'),
-              'price', COALESCE(
-                CASE 
-                  WHEN COALESCE(cf.finish, 'nonfoil') = 'foil'
-                  THEN lp.foil_price 
-                  ELSE lp.base_price 
-                END,
-                ci.price
-              ),
-              'stock', ci.stock_quantity,
-              'variation_key',
-                CONCAT(ci.quality,'-',COALESCE(ci.language,'English')),
-              'price_source', COALESCE(lp.price_source, ci.price_source),
-              'price_updated_at', lp.updated_at
-            )
-          ) FILTER (WHERE ci.id IS NOT NULL),
-          '[]'::jsonb
-        ) AS variations
-      FROM card_inventory ci
-      LEFT JOIN (
-        SELECT DISTINCT ON (id)
-          id, finish
-          from cards
-      ) cf on cf.id = ci.card_id
-      LEFT JOIN (
-        SELECT DISTINCT ON (card_id)
-               card_id, base_price, foil_price, price_source, updated_at
-        FROM card_pricing
-        WHERE card_id = c.id
-        ORDER BY card_id, updated_at DESC NULLS LAST, created_at DESC NULLS LAST
-      ) lp ON lp.card_id = ci.card_id
-      WHERE ci.card_id = c.id
-    ) inv ON TRUE
-    WHERE inv.variation_count > 0;
+        c.id,
+        c.name,
+        c.card_number,
+        cs.name AS set_name,
+        c.rarity,
+        c.image_url,
+        c.treatment,
+        c.finish,
+        g.name AS game_name,
+        COALESCE(inv.total_stock, 0)::int AS total_stock,
+        COALESCE(inv.variation_count, 0)::int AS variation_count,
+        COALESCE(inv.variations, '[]'::jsonb) AS variations
+      FROM cards c
+      JOIN games g ON g.id = c.game_id
+      JOIN card_sets cs ON cs.id = c.set_id
+      LEFT JOIN LATERAL (
+        SELECT
+          COUNT(ci.id)::int AS variation_count,
+          COALESCE(SUM(ci.stock_quantity), 0)::int AS total_stock,
+          COALESCE(
+            JSONB_AGG(
+              JSONB_BUILD_OBJECT(
+                'inventory_id', ci.id,
+                'quality', ci.quality,
+                'language', COALESCE(ci.language, 'English'),
+                'price', COALESCE(
+                  CASE
+                    WHEN COALESCE(cf.finish, 'nonfoil') = 'foil'
+                    THEN lp.foil_price
+                    ELSE lp.base_price
+                  END,
+                  ci.price
+                ),
+                'stock', ci.stock_quantity,
+                'variation_key',
+                  CONCAT(ci.quality,'-',COALESCE(ci.language,'English')),
+                'price_source', COALESCE(lp.price_source, ci.price_source),
+                'price_updated_at', lp.updated_at
+              )
+            ) FILTER (WHERE ci.id IS NOT NULL),
+            '[]'::jsonb
+          ) AS variations
+        FROM card_inventory ci
+        LEFT JOIN (
+          SELECT DISTINCT ON (id)
+            id, finish
+            from cards
+        ) cf on cf.id = ci.card_id
+        LEFT JOIN (
+          SELECT DISTINCT ON (card_id)
+                 card_id, base_price, foil_price, price_source, updated_at
+          FROM card_pricing
+          WHERE card_id = c.id
+          ORDER BY card_id, updated_at DESC NULLS LAST, created_at DESC NULLS LAST
+        ) lp ON lp.card_id = ci.card_id
+        WHERE ci.card_id = c.id
+      ) inv ON TRUE
+      ${whereSql ? `${whereSql} AND` : 'WHERE'} inv.variation_count > 0
+      ${orderByOut}
+    ) cards_with_inventory
+    LIMIT $${params.push(per_page)} OFFSET $${params.push(offset)};
   `;
 
   try {
