@@ -273,7 +273,7 @@ const Checkout = ({
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 flex items-center justify-center p-4 animate-fade-in">
         <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Mail className="w-8 h-8 text-green-600" />
@@ -298,22 +298,23 @@ const Checkout = ({
   if (!isOpen) return null;
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      {/* Header */}
-      <div className="bg-white shadow-sm border-b">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
-          <button
-            onClick={onBack || onClose}
-            className="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
-          >
-            <ArrowLeft className="w-5 h-5" />
-            Back to Cart
-          </button>
-          <h1 className="text-2xl font-bold text-slate-900 mt-2">Checkout</h1>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 overflow-y-auto animate-fade-in">
+      <div className="min-h-screen bg-slate-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm border-b">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
+            <button
+              onClick={onBack || onClose}
+              className="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              Back to Cart
+            </button>
+            <h1 className="text-2xl font-bold text-slate-900 mt-2">Checkout</h1>
+          </div>
         </div>
-      </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Customer Details Form */}
           <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
@@ -670,6 +671,7 @@ const Checkout = ({
           </div>
         </div>
       </div>
+    </div>
     </div>
   );
 };
