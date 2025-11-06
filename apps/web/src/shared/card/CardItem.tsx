@@ -439,7 +439,7 @@ const CardItem: React.FC<CardItemProps> = ({
 
   const renderStockAndPrice = () => {
     if (mode === 'all') {
-      // Show total stock across all variations and price
+      // Show total stock across all variations and price range
       const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
       return (
         <div className="space-y-2">
@@ -473,12 +473,13 @@ const CardItem: React.FC<CardItemProps> = ({
       );
     }
 
-    // Show stock for selected variation and overall price range
+    // Show stock for selected variation and its specific price
     const hasStock = selectedVariation.in_stock > 0;
 
-    // For inventory/storefront modes, show overall price range if multiple variations
-    // For single variation, show the specific price
-    const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
+    // Show price for the selected variation only
+    const priceDisplay = selectedVariation.price
+      ? formatCurrencySimple(selectedVariation.price, currency)
+      : null;
 
     return (
       <div className="space-y-2">
