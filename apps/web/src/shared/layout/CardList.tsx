@@ -260,14 +260,26 @@ const CardList: React.FC<CardListProps> = ({
       }
     };
 
+    // Get lowest price from visible variations
+    const getLowestPrice = () => {
+      const prices = visibleVariations
+        .map(v => v.price)
+        .filter((price): price is number => price != null && price > 0);
+
+      if (prices.length === 0) return null;
+
+      const minPrice = Math.min(...prices);
+      return formatCurrencySimple(minPrice, currency);
+    };
+
     return (
       <div className="flex items-center gap-3">
-        {/* Price info - Show for all modes */}
+        {/* Price info - Show lowest price or "from" price for multiple variations */}
         {(() => {
-          const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
+          const priceDisplay = getLowestPrice();
           return priceDisplay ? (
             <span className="text-sm text-slate-600">
-              {priceDisplay}
+              {hasMultipleVariations ? `From ${priceDisplay}` : priceDisplay}
             </span>
           ) : null;
         })()}
@@ -448,12 +460,21 @@ const CardList: React.FC<CardListProps> = ({
 
                   {/* Action Button */}
                   <div className="flex items-center justify-between gap-2">
-                    {/* Price info - Show for all modes */}
+                    {/* Price info - Show lowest price */}
                     {(() => {
-                      const priceDisplay = formatPriceDisplay(card.variations, currency, mode);
+                      const prices = visibleVariations
+                        .map(v => v.price)
+                        .filter((price): price is number => price != null && price > 0);
+
+                      if (prices.length === 0) return null;
+
+                      const minPrice = Math.min(...prices);
+                      const priceDisplay = formatCurrencySimple(minPrice, currency);
+                      const hasMultiple = visibleVariations.length > 1;
+
                       return priceDisplay ? (
                         <span className="text-sm font-medium text-slate-700">
-                          {priceDisplay}
+                          {hasMultiple ? `From ${priceDisplay}` : priceDisplay}
                         </span>
                       ) : null;
                     })()}
