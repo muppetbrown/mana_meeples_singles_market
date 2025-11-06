@@ -47,7 +47,10 @@ export default function VariationBadgesTab() {
         ? `${ENDPOINTS.ADMIN.VARIATION_OVERRIDES}/combinations?game_id=${gameFilter}`
         : `${ENDPOINTS.ADMIN.VARIATION_OVERRIDES}/combinations`;
 
+      console.log('🔄 Loading combinations from:', url);
       const data = await api.get<VariationCombination[]>(url);
+      console.log('✅ Received combinations:', data?.length || 0);
+      console.log('📊 Sample data:', data?.slice(0, 3));
       setCombinations(data || []);
     } catch (error) {
       console.error('Failed to load variation combinations:', error);
@@ -284,6 +287,12 @@ export default function VariationBadgesTab() {
                   Border
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                  Frame
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
+                  Promo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
                   Count
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-slate-600 uppercase tracking-wider">
@@ -300,7 +309,7 @@ export default function VariationBadgesTab() {
             <tbody className="bg-white divide-y divide-slate-200">
               {filteredCombinations.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-6 py-12 text-center text-slate-500">
+                  <td colSpan={9} className="px-6 py-12 text-center text-slate-500">
                     <AlertCircle className="w-12 h-12 mx-auto mb-3 text-slate-400" />
                     <div className="text-lg font-medium">No variations found</div>
                     <div className="text-sm">Try adjusting your search or filters</div>
@@ -321,6 +330,12 @@ export default function VariationBadgesTab() {
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-900">
                         {combo.border_color || <span className="text-slate-400">—</span>}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-900">
+                        {combo.frame_effect || <span className="text-slate-400">—</span>}
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-900">
+                        {combo.promo_type || <span className="text-slate-400">—</span>}
                       </td>
                       <td className="px-6 py-4 text-sm text-slate-600">
                         {combo.count} cards
