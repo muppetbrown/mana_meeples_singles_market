@@ -65,15 +65,11 @@ interface ImportProgress {
 function calculateTreatment(card: MTGCard): string {
   const borderColor = card.border_color || 'black';
   const frameEffects = card.frame_effects || [];
-  const promoTypes = card.promo_types || [];
 
   // Filter frame effects
   const relevantFrameEffects = frameEffects.filter((e: string) =>
     !IGNORE_FRAME_EFFECTS.includes(e)
   );
-
-  // Find special foil type
-  const specialFoilType = promoTypes.find((p: string) => SPECIAL_FOILS.includes(p));
 
   // Helper function
   const has = (effect: string) => relevantFrameEffects.includes(effect);
@@ -83,44 +79,26 @@ function calculateTreatment(card: MTGCard): string {
 
   // 1. Yellow border (winner cards)
   if (borderColor === 'yellow') {
-    return specialFoilType ?
-      `WINNER_${specialFoilType.toUpperCase()}` :
-      'WINNER';
+    return 'WINNER';
   }
 
-  // 2. Special foil + white border
-  if (specialFoilType && borderColor === 'white') {
+  // 2. White border
+  if (borderColor === 'white') {
     const base = getBaseTreatment(relevantFrameEffects, isBorderless);
-    return base ?
-      `${base}_${specialFoilType.toUpperCase()}` :
-      `WHITE_BORDER_${specialFoilType.toUpperCase()}`;
+    return base || 'WHITE_BORDER';
   }
 
-  // 3. Special foil + borderless
-  if (specialFoilType && isBorderless) {
+  // 3. Borderless
+  if (isBorderless) {
     const base = getBaseTreatment(relevantFrameEffects, isBorderless);
-    return base ?
-      `${base}_${specialFoilType.toUpperCase()}` :
-      `BORDERLESS_${specialFoilType.toUpperCase()}`;
+    return base || 'BORDERLESS';
   }
 
-  // 4. Special foil + standard
-  if (specialFoilType) {
-    const base = getBaseTreatment(relevantFrameEffects, isBorderless);
-    return base ?
-      `${base}_${specialFoilType.toUpperCase()}` :
-      `STANDARD_${specialFoilType.toUpperCase()}`;
-  }
-
-  // 5. No special foil - just frame effects
+  // 4. Frame effects
   const base = getBaseTreatment(relevantFrameEffects, isBorderless);
   if (base) return base;
 
-  // 6. Border-only treatments
-  if (borderColor === 'white') return 'WHITE_BORDER';
-  if (borderColor === 'borderless') return 'BORDERLESS';
-
-  // 7. Standard
+  // 5. Standard
   return 'STANDARD';
 }
 
