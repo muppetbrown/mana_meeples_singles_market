@@ -52,25 +52,25 @@ export function QualityLanguageSelectors({
     <div className="space-y-4">
       {/* Quality Selection */}
       <div>
-        <label htmlFor="quality" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 text-slate-700 mb-2">
+        <label htmlFor="quality" className="block text-sm font-medium text-slate-700 mb-2">
           {qualityLabel} {required && <span className="text-red-500">*</span>}
         </label>
         <select
           id="quality"
           value={selectedQuality}
           onChange={(e) => onQualityChange(e.target.value)}
-          className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 border-slate-300 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:ring-blue-500 focus:border-transparent"
+          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
           required={required}
         >
-          <option value="">Select quality...</option>
+          <option value="" className="text-slate-500">Select quality...</option>
           {qualities.map((quality) => (
-            <option key={quality} value={quality}>
+            <option key={quality} value={quality} className="text-slate-900">
               {formatQuality(quality)}
             </option>
           ))}
         </select>
         {qualityHelpText && (
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             {qualityHelpText}
           </p>
         )}
@@ -78,7 +78,7 @@ export function QualityLanguageSelectors({
 
       {/* Language Selection */}
       <div>
-        <label htmlFor="language" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 text-slate-700 mb-2">
+        <label htmlFor="language" className="block text-sm font-medium text-slate-700 mb-2">
           {languageLabel} {required && <span className="text-red-500">*</span>}
         </label>
         <select
@@ -86,18 +86,18 @@ export function QualityLanguageSelectors({
           value={selectedLanguage}
           onChange={(e) => onLanguageChange(e.target.value)}
           disabled={languageDisabled}
-          className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 border-slate-300 rounded-lg bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 focus:ring-2 focus:ring-mm-teal focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-white text-slate-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-slate-50"
           required={required}
         >
-          <option value="">Select language...</option>
+          <option value="" className="text-slate-500">Select language...</option>
           {languages.map((language) => (
-            <option key={language} value={language}>
+            <option key={language} value={language} className="text-slate-900">
               {formatLanguage(language)}
             </option>
           ))}
         </select>
         {languageHelpText && (
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             {languageHelpText}
           </p>
         )}

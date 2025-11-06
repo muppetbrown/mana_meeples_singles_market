@@ -64,10 +64,10 @@ export function CardVariationHeader({
   };
 
   return (
-    <div className="flex items-start justify-between p-6 border-b border-zinc-200 dark:border-zinc-700 border-slate-200 gap-4">
+    <div className="flex items-start justify-between p-6 border-b border-slate-200 gap-4">
       {/* Left: Card Image */}
       <div className="flex-shrink-0">
-        <div className="relative w-24 h-32 rounded-lg overflow-hidden border-2 border-zinc-200 dark:border-zinc-700 border-slate-200 shadow-md">
+        <div className="relative w-24 h-32 rounded-lg overflow-hidden border-2 border-slate-200 shadow-md">
           <OptimizedImage
             src={card.image_url || '/images/card-back-placeholder.svg'}
             alt={card.name}
@@ -86,20 +86,20 @@ export function CardVariationHeader({
 
       {/* Center: Card Info */}
       <div className="flex-1 min-w-0">
-        <h2 id={titleId} className="text-xl font-bold text-zinc-900 dark:text-zinc-100 text-slate-900">
+        <h2 id={titleId} className="text-xl font-bold text-slate-900">
           {title}
         </h2>
         <div className="mt-2 space-y-1">
-          <p className="text-base font-semibold text-zinc-800 dark:text-zinc-200 text-slate-800">
+          <p className="text-base font-semibold text-slate-800">
             {card.name}
           </p>
           {card.game_name && (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 text-slate-600">
+            <p className="text-sm text-slate-600">
               <span className="font-medium">Game:</span> {card.game_name}
             </p>
           )}
           {card.set_name && (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 text-slate-600">
+            <p className="text-sm text-slate-600">
               <span className="font-medium">Set:</span> {card.set_name}
             </p>
           )}
@@ -109,10 +109,10 @@ export function CardVariationHeader({
       {/* Right: Close Button */}
       <button
         onClick={onClose}
-        className="flex-shrink-0 p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:bg-slate-100 rounded-lg transition-colors"
+        className="flex-shrink-0 p-2 hover:bg-slate-100 rounded-lg transition-colors"
         aria-label="Close modal"
       >
-        <X className="w-5 h-5 text-zinc-600 dark:text-zinc-400 text-slate-600" />
+        <X className="w-5 h-5 text-slate-600" />
       </button>
     </div>
   );

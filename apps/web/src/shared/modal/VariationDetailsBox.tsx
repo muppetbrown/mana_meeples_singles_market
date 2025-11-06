@@ -27,23 +27,23 @@ export function VariationDetailsBox({
   title = 'Card Variation Details:',
 }: VariationDetailsBoxProps) {
   return (
-    <div className="p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-      <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">{title}</p>
-      <div className="space-y-1 text-sm text-blue-800 dark:text-blue-200">
+    <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+      <p className="text-sm font-semibold text-blue-900 mb-2">{title}</p>
+      <div className="space-y-1.5 text-sm text-slate-700">
         <div>
-          <span className="font-medium">Treatment:</span> {formatTreatment(variation.treatment)}
+          <span className="font-medium text-slate-900">Treatment:</span> {formatTreatment(variation.treatment)}
         </div>
         <div>
-          <span className="font-medium">Finish:</span> {formatFinish(variation.finish)}
+          <span className="font-medium text-slate-900">Finish:</span> {formatFinish(variation.finish)}
         </div>
         {variation.border_color && (
           <div>
-            <span className="font-medium">Border:</span> {variation.border_color}
+            <span className="font-medium text-slate-900">Border:</span> {variation.border_color}
           </div>
         )}
         {variation.frame_effect && (
           <div>
-            <span className="font-medium">Frame:</span> {variation.frame_effect}
+            <span className="font-medium text-slate-900">Frame:</span> {variation.frame_effect}
           </div>
         )}
       </div>

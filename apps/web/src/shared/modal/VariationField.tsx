@@ -67,14 +67,14 @@ export function VariationField({
   if (locked) {
     return (
       <div>
-        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 text-slate-700 mb-2">
+        <label className="block text-sm font-medium text-slate-700 mb-2">
           {label} {required && <span className="text-red-500">*</span>}
         </label>
-        <div className="w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 border-slate-300 rounded-lg bg-zinc-100 dark:bg-zinc-800 bg-slate-100 text-zinc-900 dark:text-zinc-100 text-slate-900 cursor-not-allowed">
+        <div className="w-full px-4 py-2.5 border border-slate-300 rounded-lg bg-slate-100 text-slate-900 cursor-not-allowed">
           {selectedVariation ? formatVariationLabel(selectedVariation) : 'No variation selected'}
         </div>
         {finalHelpText && (
-          <p className="text-xs text-zinc-500 dark:text-zinc-400 text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 mt-1">
             {finalHelpText}
           </p>
         )}
@@ -87,7 +87,7 @@ export function VariationField({
 
   return (
     <div>
-      <label htmlFor="variation" className="block text-sm font-medium text-zinc-700 dark:text-zinc-300 text-slate-700 mb-2">
+      <label htmlFor="variation" className="block text-sm font-medium text-slate-700 mb-2">
         {label} {required && <span className="text-red-500">*</span>}
       </label>
       <select
@@ -100,20 +100,20 @@ export function VariationField({
           }
         }}
         disabled={isDisabled}
-        className={`w-full px-4 py-2 border border-zinc-300 dark:border-zinc-600 border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-          isDisabled ? 'bg-zinc-100 dark:bg-zinc-800 bg-slate-100 cursor-not-allowed' : 'bg-white dark:bg-zinc-900'
+        className={`w-full px-4 py-2.5 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
+          isDisabled ? 'bg-slate-100 text-slate-700 cursor-not-allowed' : 'bg-white text-slate-900'
         }`}
         required={required}
       >
-        {!selectedVariation && <option value="">Select variation...</option>}
+        {!selectedVariation && <option value="" className="text-slate-500">Select variation...</option>}
         {variations.map((variation) => (
-          <option key={variation.id} value={variation.id}>
+          <option key={variation.id} value={variation.id} className="text-slate-900">
             {formatVariationLabel(variation)}
           </option>
         ))}
       </select>
       {finalHelpText && (
-        <p className="text-xs text-zinc-500 dark:text-zinc-400 text-slate-500 mt-1">
+        <p className="text-xs text-slate-500 mt-1">
           {finalHelpText}
         </p>
       )}
