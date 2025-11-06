@@ -120,10 +120,16 @@ const ShopPage: React.FC = () => {
   }, [cards, games]);
 
   const availableSets = useMemo(() => {
-    if (cards.length === 0) return sets; // Show all on initial load
-    const uniqueSetNames = new Set(cards.map(card => card.set_name));
-    return sets.filter(set => uniqueSetNames.has(set.name));
-  }, [cards, sets]);
+    // Filter sets based on selected game, not on currently displayed cards
+    if (selectedGame === 'all') return sets; // Show all sets if no game selected
+
+    // Find the selected game's ID
+    const selectedGameObj = games.find(game => game.name === selectedGame);
+    if (!selectedGameObj) return sets;
+
+    // Show only sets that belong to the selected game
+    return sets.filter(set => set.game_id === selectedGameObj.id);
+  }, [selectedGame, sets, games]);
 
   const availableTreatments = useMemo(() => {
     if (cards.length === 0) return undefined; // Use all on initial load
