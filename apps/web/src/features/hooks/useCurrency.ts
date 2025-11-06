@@ -20,11 +20,17 @@ interface UseCurrencyReturn {
  */
 export function useCurrency(initialCurrencyCode: string = CURRENCY_CONFIG.DEFAULT_CURRENCY): UseCurrencyReturn {
   const [currencies, setCurrencies] = useState<CurrencyWithRate[]>([]);
+
+  // Find the initial currency's rate from config
+  const initialCurrencyConfig = CURRENCY_CONFIG.SUPPORTED_CURRENCIES.find(
+    c => c.code === CURRENCY_CONFIG.DEFAULT_CURRENCY
+  );
+
   const [currentCurrency, setCurrentCurrency] = useState<Currency>({
     symbol: CURRENCY_CONFIG.DEFAULT_SYMBOL,
-    rate: 1.0,
+    rate: initialCurrencyConfig?.rate ?? 1.64, // Use config rate or fallback to NZD rate
     code: CURRENCY_CONFIG.DEFAULT_CURRENCY,
-    label: 'New Zealand Dollar',
+    label: initialCurrencyConfig?.name ?? 'New Zealand Dollar',
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

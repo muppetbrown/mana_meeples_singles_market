@@ -28,7 +28,7 @@ const Dashboard = () => {
     code: 'NZD',
     symbol: 'NZ$',
     label: 'New Zealand Dollar (NZD)',
-    rate: 1.0
+    rate: 1.64 // NZD rate from USD base (prices stored in USD)
   });
   const [showImportModal, setShowImportModal] = useState(false);
 

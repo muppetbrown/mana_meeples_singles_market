@@ -91,17 +91,20 @@ export const IMAGE_CONFIG = {
 };
 
 // Currency Configuration
+// NOTE: Prices in database are stored in USD (from Scryfall/TCGPlayer)
+// USD is the base currency (rate 1.0), all others convert FROM USD
 export const CURRENCY_CONFIG = {
-  DEFAULT_CURRENCY: 'NZD',
+  BASE_CURRENCY: 'USD', // Database storage currency
+  DEFAULT_CURRENCY: 'NZD', // Default display currency for customers
   DEFAULT_SYMBOL: 'NZ$',
   DECIMAL_PLACES: 2,
   UPDATE_INTERVAL: 60 * 60 * 1000, // 1 hour for exchange rates
   SUPPORTED_CURRENCIES: [
-    { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar', rate: 1.0 },
-    { code: 'USD', symbol: '$', name: 'US Dollar', rate: 0.61 },
-    { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', rate: 0.92 },
-    { code: 'EUR', symbol: '€', name: 'Euro', rate: 0.55 },
-    { code: 'GBP', symbol: '£', name: 'British Pound', rate: 0.48 },
+    { code: 'USD', symbol: '$', name: 'US Dollar', rate: 1.0 }, // Base currency
+    { code: 'NZD', symbol: 'NZ$', name: 'New Zealand Dollar', rate: 1.64 }, // ~1.64 NZD per 1 USD
+    { code: 'AUD', symbol: 'A$', name: 'Australian Dollar', rate: 1.51 }, // ~1.51 AUD per 1 USD
+    { code: 'EUR', symbol: '€', name: 'Euro', rate: 0.92 }, // ~0.92 EUR per 1 USD
+    { code: 'GBP', symbol: '£', name: 'British Pound', rate: 0.79 }, // ~0.79 GBP per 1 USD
   ],
 };
 
