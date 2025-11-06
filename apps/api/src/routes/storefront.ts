@@ -75,32 +75,39 @@ router.get('/cards', async (req: Request, res: Response) => {
   const { page, per_page, sort, order, search, game_id, set_id, treatment, finish, rarity } = parsed.data;
 
   const where: string[] = [];
+  const cteWhere: string[] = ['ci.stock_quantity > 0']; // CTE filters for inventory check
   const params: unknown[] = [];
 
   // Build WHERE conditions - STANDARDIZED
   if (typeof game_id === 'number') {
     params.push(game_id);
     where.push(`c.game_id = $${params.length}`);
+    cteWhere.push(`c.game_id = $${params.length}`);
   }
 
   if (typeof set_id === 'number') {
     params.push(set_id);
     where.push(`c.set_id = $${params.length}`);
+    cteWhere.push(`c.set_id = $${params.length}`);
   }
 
   if (treatment) {
     params.push(treatment.toUpperCase()); // Normalize to uppercase
     where.push(`c.treatment = $${params.length}`);
+    cteWhere.push(`c.treatment = $${params.length}`);
   }
 
   if (finish) {
     params.push(finish); // Card finish from cards table
     where.push(`c.finish = $${params.length}`);
+    // CRITICAL: Also apply finish filter in CTE to only find identities with inventory for this finish
+    cteWhere.push(`c.finish = $${params.length}`);
   }
 
   if (rarity) {
     params.push(rarity);
     where.push(`c.rarity = $${params.length}`);
+    cteWhere.push(`c.rarity = $${params.length}`);
   }
 
   // ENHANCED SEARCH: name, card_number, set name, and treatment
@@ -113,25 +120,31 @@ router.get('/cards', async (req: Request, res: Response) => {
       cs.name ILIKE ${searchParam} OR
       c.treatment ILIKE ${searchParam}
     )`);
+    cteWhere.push(`(
+      c.name ILIKE ${searchParam} OR
+      c.card_number ILIKE ${searchParam} OR
+      c.treatment ILIKE ${searchParam}
+    )`);
   }
 
   const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+  const cteWhereSql = `WHERE ${cteWhere.join(' AND ')}`;
   const orderByOut = sortToSql('c', sort, order);
   const offset = (page - 1) * per_page;
 
-  // FIXED: Show all variations of cards that have inventory on ANY variation
-  // This ensures that if a card has regular and foil versions, and only regular has inventory,
-  // both versions will be returned so the frontend can properly group them
+  // Show variations of cards that have inventory matching the filters
+  // When a finish filter is applied, only show card identities that have inventory for that finish
+  // This ensures that if a card has only regular in stock, it won't show when filtering for foil
   const sql = `
     WITH card_identities_with_inventory AS (
-      -- Find card identities (name, card_number, set_id) that have ANY inventory
+      -- Find card identities (name, card_number, set_id) that have inventory matching filters
       SELECT DISTINCT
         c.name,
         c.card_number,
         c.set_id
       FROM cards c
       JOIN card_inventory ci ON ci.card_id = c.id
-      WHERE ci.stock_quantity > 0
+      ${cteWhereSql}
     )
     SELECT *
     FROM (
