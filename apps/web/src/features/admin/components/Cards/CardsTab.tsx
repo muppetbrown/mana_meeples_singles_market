@@ -427,42 +427,106 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setShowAddModal(true);
   }, [getAutomatedPrice]);
 
-  const openManageModal = useCallback((card: BrowseBaseCard, params: {
-    inventoryId: number;
-    quality: string;
-    language: string;
-    price: number;
-    stock_quantity: number;
+  const openManageModal = useCallback(async (card: BrowseBaseCard, params?: {
+    inventoryId?: number;
+    quality?: string;
+    language?: string;
+    price?: number;
+    stock_quantity?: number;
   }) => {
     setModalMode('manage');
-    setManagingInventoryId(params.inventoryId);
-    setAddModalCard(card);
 
-    // Store original values for comparison in success message
-    setOriginalInventoryValues({
-      stock_quantity: params.stock_quantity,
-      price: params.price,
-    });
+    // If params are provided, use them directly (from grid view)
+    if (params?.inventoryId && params?.quality && params?.language &&
+        params?.price !== undefined && params?.stock_quantity !== undefined) {
+      setManagingInventoryId(params.inventoryId);
+      setAddModalCard(card);
 
-    // Find the variation that matches this inventory
-    let selectedVar: BrowseVariation | undefined;
-    if (card.variations && card.variations.length > 0) {
-      selectedVar = card.variations[0]; // For now, just use first variation since card only has one in inventory mode
-      setSelectedVariation(selectedVar);
-    } else {
-      setSelectedVariation(undefined);
+      // Store original values for comparison in success message
+      setOriginalInventoryValues({
+        stock_quantity: params.stock_quantity,
+        price: params.price,
+      });
+
+      // Find the variation that matches this inventory
+      let selectedVar: BrowseVariation | undefined;
+      if (card.variations && card.variations.length > 0) {
+        selectedVar = card.variations[0]; // For now, just use first variation since card only has one in inventory mode
+        setSelectedVariation(selectedVar);
+      } else {
+        setSelectedVariation(undefined);
+      }
+
+      // Pre-populate form with existing inventory data
+      setAddFormData({
+        quality: params.quality as Quality,
+        price: String(params.price),
+        stock_quantity: params.stock_quantity,
+        language: params.language as Language,
+        useAutomatedPrice: false, // Don't auto-use automated price for existing inventory
+      });
+
+      setShowAddModal(true);
+      return;
     }
 
-    // Pre-populate form with existing inventory data
-    setAddFormData({
-      quality: params.quality as Quality,
-      price: String(params.price),
-      stock_quantity: params.stock_quantity,
-      language: params.language as Language,
-      useAutomatedPrice: false, // Don't auto-use automated price for existing inventory
-    });
+    // If no params provided (from list view), fetch inventory data
+    try {
+      // Get the card variation ID (should only be one in inventory mode)
+      const cardId = card.variations?.[0]?.id || card.id;
 
-    setShowAddModal(true);
+      // Fetch inventory items for this card
+      const response = await api.get<{ inventory: Array<{
+        id: number;
+        card_id: number;
+        quality: string;
+        language: string;
+        stock_quantity: number;
+        price: number;
+      }> }>(ENDPOINTS.ADMIN.INVENTORY, { card_id: cardId });
+
+      const inventoryItems = response.inventory || [];
+
+      if (inventoryItems.length === 0) {
+        alert('No inventory found for this card');
+        return;
+      }
+
+      // Use the first inventory item (or could show selection UI)
+      const firstItem = inventoryItems[0];
+
+      setManagingInventoryId(firstItem.id);
+      setAddModalCard(card);
+
+      // Store original values for comparison in success message
+      setOriginalInventoryValues({
+        stock_quantity: firstItem.stock_quantity,
+        price: firstItem.price,
+      });
+
+      // Find the variation that matches this inventory
+      let selectedVar: BrowseVariation | undefined;
+      if (card.variations && card.variations.length > 0) {
+        selectedVar = card.variations[0];
+        setSelectedVariation(selectedVar);
+      } else {
+        setSelectedVariation(undefined);
+      }
+
+      // Pre-populate form with existing inventory data
+      setAddFormData({
+        quality: firstItem.quality as Quality,
+        price: String(firstItem.price),
+        stock_quantity: firstItem.stock_quantity,
+        language: firstItem.language as Language,
+        useAutomatedPrice: false,
+      });
+
+      setShowAddModal(true);
+    } catch (error) {
+      console.error('Failed to fetch inventory:', error);
+      alert('Failed to fetch inventory data. Please try again.');
+    }
   }, []);
 
 
@@ -550,8 +614,8 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
         price_source: selectedVariation?.price_source ?? undefined,
       } as const;
 
-      // UNIFIED: Use api client with PUT to update inventory
-      await api.put(`${ENDPOINTS.ADMIN.INVENTORY}/${managingInventoryId}`, inventoryData);
+      // UNIFIED: Use api client with PATCH to update inventory
+      await api.patch(`${ENDPOINTS.ADMIN.INVENTORY}/${managingInventoryId}`, inventoryData);
 
       // success
       closeAddModal();
