@@ -106,6 +106,12 @@ export const ENDPOINTS = {
     UPDATE: `${BASE_URL}/settings`,
     GAMES: `${BASE_URL}/settings/games`,
   },
+
+  // -------------------- Currency --------------------
+  CURRENCY: {
+    RATES: `${BASE_URL}/currency/rates`,
+    REFRESH: `${BASE_URL}/currency/refresh`,
+  },
 } as const;
 
 export type EndpointKey = keyof typeof ENDPOINTS;

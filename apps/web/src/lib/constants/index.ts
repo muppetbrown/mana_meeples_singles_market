@@ -138,7 +138,7 @@ export const ERROR_CONFIG = {
 export const FEATURES = {
   VIRTUAL_SCROLLING: true,
   PROGRESSIVE_LOADING: true,
-  AUTO_CURRENCY_UPDATE: false, // Disabled by default for privacy
+  AUTO_CURRENCY_UPDATE: true, // Enabled - uses exchangerate-api.com for live rates
   KEYBOARD_SHORTCUTS: true,
   ADVANCED_FILTERS: true,
   BULK_OPERATIONS: true,

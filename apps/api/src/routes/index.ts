@@ -11,6 +11,7 @@ import storefrontRouter from './storefront.js';
 import pricingRouter from './pricing.js';
 import importRouter from './import.js';
 import variationOverridesRouter from './variationDisplayOverrides.js';
+import currencyRouter from './currency.js';
 
 const router = express.Router();
 
@@ -18,6 +19,7 @@ const router = express.Router();
 router.use("/auth", authRoutes);
 router.use("/cards", cardsRoutes); // exposes /cards/cards, /cards/count, /cards/filters
 router.use("/storefront", storefrontRouter);
+router.use("/currency", currencyRouter); // exposes /currency/rates, /currency/refresh
 router.use("/", ordersRoutes);
 router.use("/", inventoryRoutes); // exposes /admin/inventory
 router.use("/", additionalRoutes);
