@@ -133,14 +133,25 @@ export function useFilters(options: UseFiltersOptions = {}): FilterHookResult {
         throw new Error('Invalid filter options response');
       }
 
+      // Deduplicate treatments by label - if multiple treatments have the same display text,
+      // group them together and use comma-separated values
+      const treatmentMap = new Map<string, string[]>();
+      data.treatments?.forEach((t) => {
+        const existing = treatmentMap.get(t.label) || [];
+        existing.push(t.value);
+        treatmentMap.set(t.label, existing);
+      });
+
+      const uniqueTreatments = Array.from(treatmentMap.entries()).map(([label, values]) => ({
+        value: values.join(','), // Multiple treatments with same label: "BORDERLESS,BORDERLESS_INVERTED"
+        label: label,
+        count: 0
+      }));
+
       setFilterOptions({
         games: data.games ?? [],
         sets: data.sets ?? [],
-        treatments: data.treatments?.map((t) => ({
-          value: t.value,
-          label: t.label, // Use label from API (includes overrides)
-          count: 0
-        })) ?? [],
+        treatments: uniqueTreatments,
         finishes: (data.finishes ?? []).map((f) => ({
           value: f,
           label: formatFinish(f),
