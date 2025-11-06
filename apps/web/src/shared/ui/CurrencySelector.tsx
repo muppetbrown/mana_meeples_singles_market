@@ -1,7 +1,9 @@
 // apps/web/src/components/CurrencySelector.tsx
 import { useState, useRef, useEffect } from 'react';
-import { ChevronDown, Info, InfoIcon } from 'lucide-react';
+import { ChevronDown, Info, InfoIcon, RefreshCw } from 'lucide-react';
 import type { Currency } from '@/types';
+import { useCurrency } from '@/features/hooks/useCurrency';
+import { FEATURES } from '@/lib/constants';
 
 interface CurrencySelectorCurrency extends Currency {
   flag?: string;
@@ -14,6 +16,15 @@ interface CurrencySelectorProps {
   className?: string;
 }
 
+// Currency flags mapping
+const CURRENCY_FLAGS: Record<string, string> = {
+  NZD: '🇳🇿',
+  USD: '🇺🇸',
+  AUD: '🇦🇺',
+  EUR: '🇪🇺',
+  GBP: '🇬🇧',
+};
+
 const CurrencySelector = ({
   currency,
   onCurrencyChange,
@@ -22,24 +33,17 @@ const CurrencySelector = ({
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
-  const currencies: CurrencySelectorCurrency[] = [
-    {
-      code: 'NZD',
-      symbol: 'NZ$',
-      label: 'New Zealand Dollar (NZD)',
-      rate: 1.0,
-      flag: '🇳🇿',
-      lastUpdated: '2024-01-01' // Static date to indicate these are approximate
-    },
-    {
-      code: 'USD',
-      symbol: '$',
-      label: 'US Dollar (USD)',
-      rate: 0.625,
-      flag: '🇺🇸',
-      lastUpdated: '2024-01-01' // Static date to indicate these are approximate
-    }
-  ];
+  // Use the currency hook to get live exchange rates
+  const { currencies: liveCurrencies, isLoading, lastUpdated } = useCurrency(currency.code);
+
+  // Convert live currencies to selector format with flags
+  const currencies: CurrencySelectorCurrency[] = liveCurrencies.map(curr => ({
+    code: curr.code,
+    symbol: curr.symbol,
+    label: `${curr.name} (${curr.code})`,
+    rate: curr.rate,
+    flag: CURRENCY_FLAGS[curr.code] || '💱',
+  }));
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -150,12 +154,26 @@ const CurrencySelector = ({
             </button>
           ))}
 
-          {/* Disclaimer for approximate rates */}
+          {/* Disclaimer and status */}
           <div className="border-t border-mm-warmAccent mt-1 pt-2 px-4 pb-2">
-            <p className="text-xs text-mm-teal flex items-center gap-1">
-              <Info className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
-              <span>Exchange rates are approximate (Jan 2024)</span>
-            </p>
+            {isLoading ? (
+              <p className="text-xs text-mm-teal flex items-center gap-1">
+                <RefreshCw className="w-3 h-3 flex-shrink-0 animate-spin" aria-hidden="true" />
+                <span>Updating rates...</span>
+              </p>
+            ) : FEATURES.AUTO_CURRENCY_UPDATE && lastUpdated ? (
+              <p className="text-xs text-mm-teal flex items-center gap-1">
+                <Info className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                <span>
+                  Live rates updated {new Date(lastUpdated).toLocaleDateString()}
+                </span>
+              </p>
+            ) : (
+              <p className="text-xs text-mm-teal flex items-center gap-1">
+                <Info className="w-3 h-3 flex-shrink-0" aria-hidden="true" />
+                <span>Exchange rates are approximate</span>
+              </p>
+            )}
           </div>
         </div>
       )}
