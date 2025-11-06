@@ -8,7 +8,7 @@
 
 import type { BrowseBaseCard } from '@/types';
 
-export type SortOption = 'name' | 'price' | 'set' | 'rarity';
+export type SortOption = 'name' | 'price' | 'set' | 'rarity' | 'cardNumber';
 export type SortOrder = 'asc' | 'desc';
 
 export interface CardGroup {
@@ -37,6 +37,24 @@ function getPriceRangeHeader(price: number | null): string {
 function getAlphabeticHeader(name: string): string {
   const firstChar = name.charAt(0).toUpperCase();
   return /[A-Z]/.test(firstChar) ? firstChar : '#';
+}
+
+/**
+ * Get the card number range header
+ */
+function getCardNumberRangeHeader(cardNumber: string): string {
+  // Extract numeric value from card number (handles formats like "123", "123a", "P123", etc.)
+  const match = cardNumber.match(/\d+/);
+  if (!match) return 'Other';
+
+  const num = parseInt(match[0], 10);
+  if (isNaN(num)) return 'Other';
+
+  // Group by ranges of 50
+  const rangeStart = Math.floor((num - 1) / 50) * 50 + 1;
+  const rangeEnd = rangeStart + 49;
+
+  return `${rangeStart}-${rangeEnd}`;
 }
 
 /**
@@ -102,6 +120,17 @@ export function sortCards(
         }
         break;
 
+      case 'cardNumber':
+        // Extract numeric values for proper numerical sorting
+        const numA = parseInt(a.card_number.match(/\d+/)?.[0] ?? '0', 10);
+        const numB = parseInt(b.card_number.match(/\d+/)?.[0] ?? '0', 10);
+        comparison = numA - numB;
+        // If numeric values are the same, compare full string (handles "123a" vs "123b")
+        if (comparison === 0) {
+          comparison = a.card_number.localeCompare(b.card_number, undefined, { numeric: true });
+        }
+        break;
+
       default:
         comparison = 0;
     }
@@ -144,6 +173,10 @@ export function groupCardsBySort(
         header = (card.rarity || 'Unknown').charAt(0).toUpperCase() + (card.rarity || 'Unknown').slice(1).toLowerCase();
         break;
 
+      case 'cardNumber':
+        header = getCardNumberRangeHeader(card.card_number);
+        break;
+
       default:
         header = 'All Cards';
     }
@@ -168,7 +201,8 @@ export function getSortOptionLabel(sortBy: SortOption): string {
     name: 'Name',
     price: 'Price',
     set: 'Set',
-    rarity: 'Rarity'
+    rarity: 'Rarity',
+    cardNumber: 'Card Number'
   };
   return labels[sortBy];
 }
@@ -181,6 +215,7 @@ export function getSortOptions(): Array<{ value: SortOption; label: string }> {
     { value: 'name', label: 'Name' },
     { value: 'price', label: 'Price' },
     { value: 'set', label: 'Set' },
-    { value: 'rarity', label: 'Rarity' }
+    { value: 'rarity', label: 'Rarity' },
+    { value: 'cardNumber', label: 'Card Number' }
   ];
 }
