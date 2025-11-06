@@ -15,6 +15,7 @@ import { useState, useCallback, useMemo, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { api, ENDPOINTS } from '@/lib/api';
 import { useErrorHandler } from '@/services/error/handler';
+import { formatTreatment, formatFinish } from '@/types/models/card';
 import type {
   SearchFilters,
   FilterOptions,
@@ -137,12 +138,12 @@ export function useFilters(options: UseFiltersOptions = {}): FilterHookResult {
         sets: data.sets ?? [],
         treatments: data.treatments?.map((t) => ({
           value: t,
-          label: t.replace(/_/g, ' '),
+          label: formatTreatment(t),
           count: 0
         })) ?? [],
         finishes: (data.finishes ?? []).map((f) => ({
           value: f,
-          label: f.charAt(0).toUpperCase() + f.slice(1),
+          label: formatFinish(f),
           count: 0
         })),
         rarities: data.rarities?.map((r) => ({
