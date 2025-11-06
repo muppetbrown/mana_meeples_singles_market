@@ -422,3 +422,99 @@ export async function getTreatmentOverrides(gameId?: number | null): Promise<Map
     client.release();
   }
 }
+
+/**
+ * Find orphaned overrides - overrides for variations that no longer exist in cards table
+ */
+export async function findOrphanedOverrides(gameId?: number): Promise<VariationDisplayOverride[]> {
+  const client = await db.getClient();
+
+  try {
+    const query = gameId
+      ? `
+        SELECT o.*
+        FROM variation_display_overrides o
+        WHERE (o.game_id IS NULL OR o.game_id = $1)
+          AND NOT EXISTS (
+            SELECT 1
+            FROM cards c
+            WHERE (o.game_id IS NULL OR c.game_id = o.game_id)
+              AND (o.treatment IS NULL OR UPPER(TRIM(c.treatment)) = o.treatment)
+              AND (o.finish IS NULL OR LOWER(TRIM(c.finish)) = o.finish)
+              AND (o.border_color IS NULL OR LOWER(TRIM(c.border_color)) = o.border_color)
+              AND (o.frame_effect IS NULL OR LOWER(TRIM(c.frame_effect)) = o.frame_effect)
+              AND (o.promo_type IS NULL OR UPPER(TRIM(c.promo_type)) = o.promo_type)
+          )
+        ORDER BY o.created_at DESC
+      `
+      : `
+        SELECT o.*
+        FROM variation_display_overrides o
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM cards c
+          WHERE (o.game_id IS NULL OR c.game_id = o.game_id)
+            AND (o.treatment IS NULL OR UPPER(TRIM(c.treatment)) = o.treatment)
+            AND (o.finish IS NULL OR LOWER(TRIM(c.finish)) = o.finish)
+            AND (o.border_color IS NULL OR LOWER(TRIM(c.border_color)) = o.border_color)
+            AND (o.frame_effect IS NULL OR LOWER(TRIM(c.frame_effect)) = o.frame_effect)
+            AND (o.promo_type IS NULL OR UPPER(TRIM(c.promo_type)) = o.promo_type)
+        )
+        ORDER BY o.created_at DESC
+      `;
+
+    const result = await client.query<VariationDisplayOverride>(
+      query,
+      gameId ? [gameId] : []
+    );
+
+    return result.rows;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Delete orphaned overrides - overrides for variations that no longer exist in cards table
+ * Returns the number of overrides deleted
+ */
+export async function deleteOrphanedOverrides(gameId?: number): Promise<number> {
+  const client = await db.getClient();
+
+  try {
+    const query = gameId
+      ? `
+        DELETE FROM variation_display_overrides o
+        WHERE (o.game_id IS NULL OR o.game_id = $1)
+          AND NOT EXISTS (
+            SELECT 1
+            FROM cards c
+            WHERE (o.game_id IS NULL OR c.game_id = o.game_id)
+              AND (o.treatment IS NULL OR UPPER(TRIM(c.treatment)) = o.treatment)
+              AND (o.finish IS NULL OR LOWER(TRIM(c.finish)) = o.finish)
+              AND (o.border_color IS NULL OR LOWER(TRIM(c.border_color)) = o.border_color)
+              AND (o.frame_effect IS NULL OR LOWER(TRIM(c.frame_effect)) = o.frame_effect)
+              AND (o.promo_type IS NULL OR UPPER(TRIM(c.promo_type)) = o.promo_type)
+          )
+      `
+      : `
+        DELETE FROM variation_display_overrides o
+        WHERE NOT EXISTS (
+          SELECT 1
+          FROM cards c
+          WHERE (o.game_id IS NULL OR c.game_id = o.game_id)
+            AND (o.treatment IS NULL OR UPPER(TRIM(c.treatment)) = o.treatment)
+            AND (o.finish IS NULL OR LOWER(TRIM(c.finish)) = o.finish)
+            AND (o.border_color IS NULL OR LOWER(TRIM(c.border_color)) = o.border_color)
+            AND (o.frame_effect IS NULL OR LOWER(TRIM(c.frame_effect)) = o.frame_effect)
+            AND (o.promo_type IS NULL OR UPPER(TRIM(c.promo_type)) = o.promo_type)
+        )
+      `;
+
+    const result = await client.query(query, gameId ? [gameId] : []);
+
+    return result.rowCount || 0;
+  } finally {
+    client.release();
+  }
+}
