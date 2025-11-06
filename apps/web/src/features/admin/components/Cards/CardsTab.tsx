@@ -44,7 +44,8 @@ import { EmptyState, SectionHeader, SortDropdown } from '@/shared/ui';
 import type {
   Card,
   BrowseBaseCard,
-  BrowseVariation
+  BrowseVariation,
+  Currency
 } from '@/types';
 
 // ============================================================================
@@ -59,15 +60,19 @@ type AddFormData = {
   useAutomatedPrice: boolean; // Whether to use the automated price from price source
 };
 
-interface UnifiedCardsTabProps { 
-  mode?: 'all' | 'inventory'; 
+interface UnifiedCardsTabProps {
+  mode?: 'all' | 'inventory';
+  currency?: Currency;
 }
 
 // ============================================================================
 // COMPONENT
 // ============================================================================
 
-const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
+const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({
+  mode = 'all',
+  currency = { code: 'NZD', symbol: 'NZ$', rate: 1.64, label: 'New Zealand Dollar' }
+}) => {
   // --------------------------------------------------------------------------
   // HOOKS
   // --------------------------------------------------------------------------
@@ -794,7 +799,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                     <CardList
                       cards={group.cards}
                       mode={mode}
-                      currency={{ code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
+                      currency={currency}
                       onAction={(card, variation) => {
                         // In inventory mode, open manage modal to edit existing inventory
                         // In all cards mode, open add modal to add new inventory
@@ -818,6 +823,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                       cards={group.cards}
                       mode={mode}
                       viewMode={viewMode}
+                      currency={currency}
                       onAddToInventory={(card) => openAddModal(card)}
                       onManage={(card, params) => {
                         if (params?.inventoryId) {
