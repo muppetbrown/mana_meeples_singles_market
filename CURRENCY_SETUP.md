@@ -64,11 +64,15 @@ This application now uses **live exchange rates** from [exchangerate-api.com](ht
 
 ## Supported Currencies
 
-- **NZD** (New Zealand Dollar) - Base currency
-- **USD** (US Dollar)
+- **USD** (US Dollar) - Base currency (prices stored in database)
+- **NZD** (New Zealand Dollar) - Default display currency
 - **AUD** (Australian Dollar)
 - **EUR** (Euro)
 - **GBP** (British Pound)
+
+### Important Note on Currency Architecture
+
+**Prices are stored in USD** in the database (imported from Scryfall/TCGPlayer APIs). All currency conversions happen at display time, converting FROM USD to the selected currency. NZD is the default display currency for customers, but USD remains the base/storage currency.
 
 ## Feature Flag
 

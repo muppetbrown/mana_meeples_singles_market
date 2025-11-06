@@ -26,12 +26,12 @@ interface CachedRates {
 
 let cachedRates: CachedRates | null = null;
 const CACHE_DURATION = 60 * 60 * 1000; // 1 hour in milliseconds
-const BASE_CURRENCY = 'NZD'; // Base currency for the shop
-const SUPPORTED_CURRENCIES = ['NZD', 'USD', 'AUD', 'EUR', 'GBP'];
+const BASE_CURRENCY = 'USD'; // Base currency (prices stored in USD from Scryfall/TCGPlayer)
+const SUPPORTED_CURRENCIES = ['USD', 'NZD', 'AUD', 'EUR', 'GBP'];
 
 /**
  * Fetches exchange rates from exchangerate-api.com
- * Uses NZD as the base currency
+ * Uses USD as the base currency (matches database storage)
  */
 async function fetchExchangeRates(): Promise<{ [key: string]: number }> {
   const apiKey = process.env.EXCHANGE_RATE_API_KEY;
@@ -79,15 +79,16 @@ async function fetchExchangeRates(): Promise<{ [key: string]: number }> {
 
 /**
  * Fallback static rates if API fails or is not configured
- * These are approximate rates from January 2024
+ * Base currency is USD (rate 1.0), all others convert FROM USD
+ * These are approximate rates from January 2025
  */
 function getFallbackRates(): { [key: string]: number } {
   return {
-    NZD: 1.0,
-    USD: 0.61,
-    AUD: 0.92,
-    EUR: 0.55,
-    GBP: 0.48,
+    USD: 1.0,    // Base currency
+    NZD: 1.64,   // 1 USD = 1.64 NZD
+    AUD: 1.51,   // 1 USD = 1.51 AUD
+    EUR: 0.92,   // 1 USD = 0.92 EUR
+    GBP: 0.79,   // 1 USD = 0.79 GBP
   };
 }
 

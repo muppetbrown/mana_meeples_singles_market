@@ -16,7 +16,7 @@ export function useShopViewMode(): UseShopViewModeReturn {
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [currency, setCurrency] = useState<Currency>({
     symbol: 'NZ$',
-    rate: 1.0,
+    rate: 1.64, // NZD rate from USD base (prices stored in USD)
     code: 'NZD',
     label: 'New Zealand Dollar'
   });

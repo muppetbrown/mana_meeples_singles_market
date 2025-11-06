@@ -28,7 +28,7 @@ const Dashboard = () => {
     code: 'NZD',
     symbol: 'NZ$',
     label: 'New Zealand Dollar (NZD)',
-    rate: 1.0
+    rate: 1.64 // NZD rate from USD base (prices stored in USD)
   });
   const [showImportModal, setShowImportModal] = useState(false);
 
@@ -220,7 +220,7 @@ const Dashboard = () => {
         {activeTab === 'inventory' && <UnifiedCardsTab mode="inventory" />}
         {activeTab === 'all-cards' && <UnifiedCardsTab mode="all" />}
         {activeTab === 'analytics' && <AnalyticsTab />}
-        {activeTab === 'orders' && <OrdersTab />}
+        {activeTab === 'orders' && <OrdersTab currency={currency} />}
         {activeTab === 'instructions' && <InstructionsTab />}
         {activeTab === 'variation-badges' && <VariationBadgesTab />}
       </main>
