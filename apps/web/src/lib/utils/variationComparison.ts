@@ -1,5 +1,6 @@
 import type { BrowseVariation } from '@/types';
 import { formatTreatment, formatFinish } from '@/types/models/card';
+import { ENDPOINTS, buildUrl } from '@/lib/api/endpoints';
 
 /**
  * Analyze which fields are common vs different across variations
@@ -132,4 +133,58 @@ export function formatVariationFullTitle(variation: BrowseVariation): string {
   if (variation.sku) parts.push(`SKU: ${variation.sku}`);
 
   return parts.join(' • ');
+}
+
+/**
+ * Fetch variation display override from the API
+ * Returns the custom display_text if an override exists, or null if not found
+ */
+export async function fetchVariationOverride(
+  gameId: number | undefined,
+  variation: BrowseVariation
+): Promise<string | null> {
+  try {
+    const params: Record<string, any> = {};
+
+    if (gameId) params.game_id = gameId;
+    if (variation.treatment) params.treatment = variation.treatment;
+    if (variation.finish) params.finish = variation.finish;
+    if (variation.border_color) params.border_color = variation.border_color;
+    if (variation.frame_effect) params.frame_effect = variation.frame_effect;
+    if (variation.promo_type) params.promo_type = variation.promo_type;
+
+    const url = buildUrl(`${ENDPOINTS.ADMIN.VARIATION_OVERRIDES}/lookup`, params);
+    const response = await fetch(url);
+
+    if (response.ok) {
+      const data = await response.json();
+      return data.display_text || null;
+    }
+
+    // 404 means no override found, which is expected
+    return null;
+  } catch (error) {
+    console.error('Error fetching variation override:', error);
+    return null;
+  }
+}
+
+/**
+ * Get the display text for a variation, checking for overrides first
+ * Falls back to auto-generated text if no override exists
+ */
+export async function getVariationDisplayText(
+  gameId: number | undefined,
+  variation: BrowseVariation,
+  analysis: VariationAnalysis
+): Promise<string> {
+  // Try to fetch override first
+  const override = await fetchVariationOverride(gameId, variation);
+
+  if (override) {
+    return override;
+  }
+
+  // Fall back to auto-generated text
+  return formatVariationDifference(variation, analysis);
 }
