@@ -273,7 +273,7 @@ const CardList: React.FC<CardListProps> = ({
   return (
     <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
       {/* Desktop/Tablet Table View - Hidden on mobile */}
-      <div className="hidden sm:block w-full overflow-x-auto">
+      <div className="hidden md:block w-full overflow-x-auto">
         <table className="w-full table-auto border-collapse">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
@@ -331,7 +331,7 @@ const CardList: React.FC<CardListProps> = ({
       </div>
 
       {/* Mobile Card View - Visible only on mobile */}
-      <div className="sm:hidden divide-y divide-slate-200">
+      <div className="md:hidden divide-y divide-slate-200">
         {cards.map(card => {
           const identity = convertToCardIdentity(card);
           const badges = generateVariationBadges(card);
