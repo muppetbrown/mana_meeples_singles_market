@@ -205,11 +205,11 @@ const Dashboard = () => {
                   ? 'bg-blue-600 text-white border-blue-600'
                   : 'text-slate-700 hover:bg-slate-100 border-transparent'
               }`}
-              aria-label="Variation Badges tab"
+              aria-label="Variation Overrides tab"
               aria-current={activeTab === 'variation-badges' ? 'page' : undefined}
             >
               <Package className="w-4 h-4" />
-              Variation Badges
+              Variation Overrides
             </button>
           </div>
         </div>
