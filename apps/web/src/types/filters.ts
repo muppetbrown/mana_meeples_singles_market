@@ -116,7 +116,7 @@ export interface FilterOptionsApiResponse {
     game_id?: number;
     card_count?: number;
   }>;
-  treatments: string[];
+  treatments: Array<{ value: string; label: string }>;
   finishes: string[];
   rarities: string[];
   qualities: string[];

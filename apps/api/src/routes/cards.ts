@@ -15,6 +15,7 @@
 import express, { type Request, type Response } from "express";
 import { z } from "zod";
 import { db } from "../lib/db.js";
+import { getTreatmentOverrides } from "../services/variationDisplayOverrides.js";
 
 const router = express.Router();
 
@@ -429,16 +430,36 @@ router.get('/filters', async (req: Request, res: Response) => {
 
   try {
     // ============================================================================
-    // Execute all three queries in parallel for performance
+    // Execute all queries in parallel for performance
     // ============================================================================
-    const [gamesResult, setsResult, filtersResult] = await Promise.all([
+    const [gamesResult, setsResult, filtersResult, treatmentOverrides] = await Promise.all([
       db.query(gamesSql),
       db.query(setsSql, setsSqlParams),
-      db.query(filtersSql, params)
+      db.query(filtersSql, params),
+      getTreatmentOverrides(parsed.data.game_id)
     ]);
 
     const filterRow = filtersResult?.[0];
-    
+
+    // ============================================================================
+    // Apply treatment overrides to format display text
+    // ============================================================================
+    const rawTreatments: string[] = filterRow?.treatments ?? [];
+    const treatments = rawTreatments.map(treatment => {
+      const displayText = treatmentOverrides.get(treatment);
+      if (displayText) {
+        return { value: treatment, label: displayText };
+      }
+      // Auto-format if no override
+      const formatted = treatment
+        .split('_')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
+      return { value: treatment, label: formatted };
+    });
+
+    const finishes: string[] = filterRow?.finishes ?? [];
+
     // ============================================================================
     // RETURN COMPLETE FILTER OPTIONS INCLUDING GAMES AND SETS
     // ============================================================================
@@ -457,10 +478,10 @@ router.get('/filters', async (req: Request, res: Response) => {
         game_id: s.game_id,
         card_count: s.card_count || 0
       })),
-      
-      // Filter facets
-      treatments: filterRow?.treatments ?? [],
-      finishes: filterRow?.finishes ?? [],
+
+      // Filter facets - treatments now includes display text from overrides
+      treatments: treatments,
+      finishes: finishes,
       languages: filterRow?.languages ?? [],
       qualities: filterRow?.qualities ?? [],
 
@@ -472,7 +493,7 @@ router.get('/filters', async (req: Request, res: Response) => {
       totalCards: filterRow?.totalCards ?? 0,
       inStockCount: filterRow?.inStockCount ?? 0,
     };
-    
+
     return res.json(response);
   } catch (err: unknown) {
     const error = err instanceof Error ? err : new Error(String(err));

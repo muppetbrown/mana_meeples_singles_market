@@ -137,8 +137,8 @@ export function useFilters(options: UseFiltersOptions = {}): FilterHookResult {
         games: data.games ?? [],
         sets: data.sets ?? [],
         treatments: data.treatments?.map((t) => ({
-          value: t,
-          label: formatTreatment(t),
+          value: t.value,
+          label: t.label, // Use label from API (includes overrides)
           count: 0
         })) ?? [],
         finishes: (data.finishes ?? []).map((f) => ({
