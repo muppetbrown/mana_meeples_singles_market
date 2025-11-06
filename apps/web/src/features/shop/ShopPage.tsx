@@ -131,30 +131,6 @@ const ShopPage: React.FC = () => {
     return sets.filter(set => set.game_id === selectedGameObj.id);
   }, [selectedGame, sets, games]);
 
-  const availableTreatments = useMemo(() => {
-    if (cards.length === 0) return undefined; // Use all on initial load
-    const uniqueTreatments = new Set(
-      cards.map(card => card.treatment).filter((t): t is string => Boolean(t))
-    );
-    return Array.from(uniqueTreatments).map(treatment => ({
-      value: treatment,
-      label: treatment.replace(/_/g, ' ') || 'Standard',
-      count: 0
-    }));
-  }, [cards]);
-
-  const availableFinishes = useMemo(() => {
-    if (cards.length === 0) return undefined; // Use all on initial load
-    const uniqueFinishes = new Set(
-      cards.map(card => card.finish).filter((f): f is string => Boolean(f))
-    );
-    return Array.from(uniqueFinishes).map(finish => ({
-      value: finish,
-      label: finish.charAt(0).toUpperCase() + finish.slice(1),
-      count: 0
-    }));
-  }, [cards]);
-
   // Sorting state
   const sortBy = (searchParams.get('sortBy') as 'name' | 'price' | 'set' | 'rarity' | 'cardNumber') || 'name';
   const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc';
@@ -328,8 +304,6 @@ const ShopPage: React.FC = () => {
                   selectedQuality={selectedQuality}
                   availableGames={availableGames}
                   availableSets={availableSets}
-                  {...(availableTreatments !== undefined && { availableTreatments })}
-                  {...(availableFinishes !== undefined && { availableFinishes })}
                 />
               </div>
             </aside>
