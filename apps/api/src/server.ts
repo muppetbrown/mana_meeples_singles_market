@@ -4,13 +4,25 @@
 
 import { createApp } from './app.js';
 import { env } from './lib/env.js';
+import * as variationDisplayService from './services/variationDisplayOverrides.js';
 
 const app = createApp();
 
 const HOST = '0.0.0.0';
 const PORT = Number(process.env.PORT) || 10000;
 
-const server = app.listen(PORT, HOST, () => {
+// Initialize database tables on startup
+const initializeDatabase = async () => {
+  try {
+    await variationDisplayService.initializeTable();
+    console.log('✅ Database tables initialized');
+  } catch (error) {
+    console.error('⚠️  Warning: Failed to initialize some database tables:', error);
+    // Don't crash the server, just log the warning
+  }
+};
+
+const server = app.listen(PORT, HOST, async () => {
   console.log(`✅ API+Web listening on http://${HOST}:${PORT}`);
   console.log(`🔐 Environment variables status:`);
   console.log(`  ADMIN_USERNAME: ${env.ADMIN_USERNAME ? '✅ SET' : '❌ MISSING'}`);
@@ -18,6 +30,9 @@ const server = app.listen(PORT, HOST, () => {
   console.log(`  JWT_SECRET: ${env.JWT_SECRET ? '✅ SET' : '❌ MISSING'}`);
   console.log(`  NODE_ENV: ${env.NODE_ENV}`);
   console.log(`  ALLOWED_ORIGINS: ${env.ALLOWED_ORIGINS || 'NOT SET'}`);
+
+  // Initialize database tables
+  await initializeDatabase();
 });
 
 // Graceful shutdown

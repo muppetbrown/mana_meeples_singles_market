@@ -10,6 +10,7 @@ import additionalRoutes from "./additional.js";
 import storefrontRouter from './storefront.js';
 import pricingRouter from './pricing.js';
 import importRouter from './import.js';
+import variationOverridesRouter from './variationDisplayOverrides.js';
 
 const router = express.Router();
 
@@ -22,6 +23,7 @@ router.use("/", inventoryRoutes); // exposes /admin/inventory
 router.use("/", additionalRoutes);
 router.use("/", pricingRouter);
 router.use("/", importRouter); // exposes /admin/import/set, /admin/import/games
+router.use("/variation-overrides", variationOverridesRouter); // exposes /variation-overrides/*
 
 /**
  * Augment Express Request to hold validated values without heavy typing.

@@ -38,12 +38,24 @@ export function VariationField({
   required = true,
 }: VariationFieldProps) {
   const formatVariationLabel = (variation: VariationOption): string => {
-    const parts = [
-      formatTreatment(variation.treatment),
-      formatFinish(variation.finish),
-    ];
+    const treatment = formatTreatment(variation.treatment);
+    const finish = formatFinish(variation.finish);
+    const hasSpecialTreatment = treatment !== 'Standard';
 
-    if (variation.border_color && variation.border_color !== 'black') {
+    const parts = [treatment];
+
+    // Only show finish if it's NOT "Regular", OR if there's no special treatment
+    // This prevents "Borderless Inverted Regular" and keeps it as "Borderless Inverted"
+    if (finish !== 'Regular' || !hasSpecialTreatment) {
+      parts.push(finish);
+    }
+
+    // Only add border_color if:
+    // 1. It exists and isn't 'black' (default)
+    // 2. Treatment doesn't already mention the border (prevents "Borderless ... borderless border")
+    if (variation.border_color &&
+        variation.border_color !== 'black' &&
+        !treatment.toLowerCase().includes(variation.border_color.toLowerCase())) {
       parts.push(`${variation.border_color} border`);
     }
 

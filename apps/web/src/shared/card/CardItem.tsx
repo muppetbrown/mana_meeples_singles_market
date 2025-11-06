@@ -245,7 +245,23 @@ const CardItem: React.FC<CardItemProps> = ({
   const formatVariationOption = (variation: BrowseVariation): string => {
     const treatment = formatTreatment(variation.treatment);
     const finish = formatFinish(variation.finish);
-    return `${treatment} ${finish}`;
+    const hasSpecialTreatment = treatment !== 'Standard';
+
+    const parts = [treatment];
+
+    // Only show finish if it's NOT "Regular", OR if there's no special treatment
+    if (finish !== 'Regular' || !hasSpecialTreatment) {
+      parts.push(finish);
+    }
+
+    // Only add border if not already in treatment name
+    if (variation.border_color &&
+        variation.border_color !== 'black' &&
+        !treatment.toLowerCase().includes(variation.border_color.toLowerCase())) {
+      parts.push(`${variation.border_color} border`);
+    }
+
+    return parts.filter(Boolean).join(' ');
   };
 
   // --------------------------------------------------------------------------

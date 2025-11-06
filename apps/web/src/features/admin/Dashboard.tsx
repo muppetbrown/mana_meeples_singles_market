@@ -9,6 +9,7 @@ import UnifiedCardsTab from './components/Cards/CardsTab';
 import OrdersTab from './components//Orders/OrdersTab';
 import AnalyticsTab from './components/Analytics/AnalyticsTab';
 import InstructionsTab from './components/InstructionsTab';
+import VariationBadgesTab from './components/VariationBadges/VariationBadgesTab';
 import PriceManagementHeaderButtons from './components/PriceManagementHeaderButtons';
 import ImportSetModal from './components/Import/ImportSetModal';
 
@@ -22,7 +23,7 @@ interface Currency {
 const Dashboard = () => {
   const [authChecking, setAuthChecking] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [activeTab, setActiveTab] = useState<'inventory' | 'all-cards' | 'analytics' | 'orders' | 'instructions'>('inventory');
+  const [activeTab, setActiveTab] = useState<'inventory' | 'all-cards' | 'analytics' | 'orders' | 'instructions' | 'variation-badges'>('inventory');
   const [currency, setCurrency] = useState<Currency>({
     code: 'NZD',
     symbol: 'NZ$',
@@ -196,6 +197,20 @@ const Dashboard = () => {
               <BookOpen className="w-4 h-4" />
               Instructions
             </button>
+
+            <button
+              onClick={() => setActiveTab('variation-badges')}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors whitespace-nowrap border ${
+                activeTab === 'variation-badges'
+                  ? 'bg-blue-600 text-white border-blue-600'
+                  : 'text-slate-700 hover:bg-slate-100 border-transparent'
+              }`}
+              aria-label="Variation Badges tab"
+              aria-current={activeTab === 'variation-badges' ? 'page' : undefined}
+            >
+              <Package className="w-4 h-4" />
+              Variation Badges
+            </button>
           </div>
         </div>
       </header>
@@ -207,6 +222,7 @@ const Dashboard = () => {
         {activeTab === 'analytics' && <AnalyticsTab />}
         {activeTab === 'orders' && <OrdersTab />}
         {activeTab === 'instructions' && <InstructionsTab />}
+        {activeTab === 'variation-badges' && <VariationBadgesTab />}
       </main>
 
       {/* Import Set Modal */}
