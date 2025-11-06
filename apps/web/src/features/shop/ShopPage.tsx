@@ -78,7 +78,11 @@ const ShopPage: React.FC = () => {
   const [showCheckout, setShowCheckout] = useState(false);
   const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
   const [showMobileFilters, setShowMobileFilters] = useState(false);
-  const [addToCartModal, setAddToCartModal] = useState<{ open: boolean; cardId: number }>({ open: false, cardId: 0 });
+  const [addToCartModal, setAddToCartModal] = useState<{
+    open: boolean;
+    card: BrowseBaseCard | null;
+    selectedVariationId: number | null;
+  }>({ open: false, card: null, selectedVariationId: null });
 
   // Use extracted cart utilities
   const {
@@ -350,8 +354,12 @@ const ShopPage: React.FC = () => {
                             columnCount={3}
                             currency={currency}
                             onAddToCart={({ card, inventoryId, quantity }) => {
-                              // Use base card ID for the modal to fetch correct card data
-                              setAddToCartModal({ open: true, cardId: card.id });
+                              // Pass the full card object and the selected variation ID
+                              setAddToCartModal({
+                                open: true,
+                                card,
+                                selectedVariationId: inventoryId
+                              });
                             }}
                           />
                         </div>
@@ -368,8 +376,12 @@ const ShopPage: React.FC = () => {
                             mode="storefront"
                             currency={currency}
                             onAction={(card, variation) => {
-                              // Use base card ID for the modal to fetch correct card data
-                              setAddToCartModal({ open: true, cardId: card.id });
+                              // Pass the full card object and the selected variation ID
+                              setAddToCartModal({
+                                open: true,
+                                card,
+                                selectedVariationId: variation?.id || card.variations[0]?.id || null
+                              });
                             }}
                           />
                         </div>
@@ -444,63 +456,72 @@ const ShopPage: React.FC = () => {
         </div>
 
         {/* Add to Cart Modal */}
-        <AddToCartModal
-          cardId={addToCartModal.cardId}
-          isOpen={addToCartModal.open}
-          onClose={() => setAddToCartModal({ open: false, cardId: 0 })}
-          currency={currency}
-          onAdd={async (payload: { inventoryId: number; quantity: number }) => {
-            // Find the card data
-            const card = cards.find(c => c.id === addToCartModal.cardId);
-            if (!card) return;
+        {addToCartModal.card && (
+          <AddToCartModal
+            card={addToCartModal.card}
+            selectedVariationId={addToCartModal.selectedVariationId}
+            isOpen={addToCartModal.open}
+            onClose={() => setAddToCartModal({ open: false, card: null, selectedVariationId: null })}
+            currency={currency}
+            onAdd={async (payload: { cardId: number; inventoryId: number; quantity: number }) => {
+              const card = addToCartModal.card;
+              if (!card) return;
 
-            try {
-              // UNIFIED: Fetch the inventory details using api client
-              const response = await api.get<{
-                card: {
-                  variations: Array<{
-                    inventory_id: number;
-                    quality: string;
-                    language: string;
-                    stock: number;
-                    price: number;
-                  }>;
-                };
-              }>(ENDPOINTS.STOREFRONT.CARD_BY_ID(addToCartModal.cardId));
-
-              const selectedVariation = response.card.variations?.find(
-                (v: any) => v.inventory_id === payload.inventoryId
-              );
-
+              // Find the selected variation to get its details
+              const selectedVariation = card.variations.find(v => v.id === payload.cardId);
               if (!selectedVariation) {
-                console.error('Could not find inventory details');
+                console.error('Could not find selected variation');
                 return;
               }
 
-              // Construct the CartItem with complete information
-              addToCart({
-                card_id: card.id,
-                inventory_id: payload.inventoryId,
-                card_name: card.name,
-                variation_key: `${selectedVariation.quality}-${selectedVariation.language}`,
-                quality: selectedVariation.quality,
-                finish: card.finish?.toLowerCase() || 'nonfoil', // Use card's finish field instead
-                language: selectedVariation.language,
-                price: selectedVariation.price, // Price is already in dollars
-                stock: selectedVariation.stock,
-                image_url: card.image_url || '',
-                set_name: card.set_name,
-                card_number: card.card_number,
-                game_name: card.game_name,
-                rarity: card.rarity || 'Unknown'
-              }, payload.quantity);
+              try {
+                // Fetch the inventory details for the selected card variation
+                const response = await api.get<{
+                  card: {
+                    variations: Array<{
+                      inventory_id: number;
+                      quality: string;
+                      language: string;
+                      stock: number;
+                      price: number;
+                    }>;
+                  };
+                }>(ENDPOINTS.STOREFRONT.CARD_BY_ID(payload.cardId));
 
-              setAddToCartModal({ open: false, cardId: 0 });
-            } catch (error) {
-              console.error('Error adding to cart:', error);
-            }
-          }}
-        />
+                const inventoryOption = response.card.variations?.find(
+                  (v: any) => v.inventory_id === payload.inventoryId
+                );
+
+                if (!inventoryOption) {
+                  console.error('Could not find inventory details');
+                  return;
+                }
+
+                // Construct the CartItem with complete information
+                addToCart({
+                  card_id: payload.cardId,
+                  inventory_id: payload.inventoryId,
+                  card_name: card.name,
+                  variation_key: `${inventoryOption.quality}-${inventoryOption.language}`,
+                  quality: inventoryOption.quality,
+                  finish: selectedVariation.finish?.toLowerCase() || 'nonfoil',
+                  language: inventoryOption.language,
+                  price: inventoryOption.price,
+                  stock: inventoryOption.stock,
+                  image_url: selectedVariation.image || card.image_url || '',
+                  set_name: card.set_name,
+                  card_number: card.card_number,
+                  game_name: card.game_name,
+                  rarity: card.rarity || 'Unknown'
+                }, payload.quantity);
+
+                setAddToCartModal({ open: false, card: null, selectedVariationId: null });
+              } catch (error) {
+                console.error('Error adding to cart:', error);
+              }
+            }}
+          />
+        )}
       </div>
     </ErrorBoundary>
   );
