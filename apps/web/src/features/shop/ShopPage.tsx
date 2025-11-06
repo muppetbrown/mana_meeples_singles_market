@@ -376,8 +376,8 @@ const ShopPage: React.FC = () => {
                             columnCount={3}
                             currency={currency}
                             onAddToCart={({ card, inventoryId, quantity }) => {
-                              // Use inventoryId (which is the selected variation's card ID) instead of base card ID
-                              setAddToCartModal({ open: true, cardId: inventoryId || card.id });
+                              // Use base card ID for the modal to fetch correct card data
+                              setAddToCartModal({ open: true, cardId: card.id });
                             }}
                           />
                         </div>
@@ -394,8 +394,8 @@ const ShopPage: React.FC = () => {
                             mode="storefront"
                             currency={currency}
                             onAction={(card, variation) => {
-                              // Use variation ID if available, otherwise use base card ID
-                              setAddToCartModal({ open: true, cardId: variation?.id || card.id });
+                              // Use base card ID for the modal to fetch correct card data
+                              setAddToCartModal({ open: true, cardId: card.id });
                             }}
                           />
                         </div>
