@@ -796,10 +796,13 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
                       mode={mode}
                       currency={{ code: 'USD', symbol: '$', rate: 1, label: 'US Dollar' }}
                       onAction={(card, variation) => {
-                        // Open add/edit inventory modal for both modes
-                        // In inventory mode, this allows editing existing inventory
-                        // In all cards mode, this allows adding new inventory
-                        openAddModal(card);
+                        // In inventory mode, open manage modal to edit existing inventory
+                        // In all cards mode, open add modal to add new inventory
+                        if (mode === 'inventory') {
+                          openManageModal(card);
+                        } else {
+                          openAddModal(card);
+                        }
                       }}
                     />
                   </div>
