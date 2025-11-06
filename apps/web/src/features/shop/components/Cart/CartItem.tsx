@@ -2,6 +2,7 @@ import React from 'react';
 import { Minus, Plus, Trash2, Package } from 'lucide-react';
 import type { CartItem, Currency } from '@/types';
 import { formatPrice } from '@/lib/utils/format';
+import { formatFinish } from '@/types';
 
 interface CartItemDisplayProps {
   item: CartItem;
@@ -20,8 +21,12 @@ export const CartItemDisplay: React.FC<CartItemDisplayProps> = ({
 
   // Create variation display text
   const variations = [];
-  if (item.finish && item.finish === 'foil') {
-    variations.push('Foil');
+  // Check for any foil type (including special foils like surgefoil)
+  if (item.finish) {
+    const lower = item.finish.toLowerCase();
+    if (lower.includes('foil') && !lower.includes('non')) {
+      variations.push(formatFinish(item.finish));
+    }
   }
   if (item.quality && item.quality !== 'Near Mint') {
     variations.push(item.quality);

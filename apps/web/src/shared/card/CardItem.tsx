@@ -503,12 +503,16 @@ const CardItem: React.FC<CardItemProps> = ({
   // --------------------------------------------------------------------------
 
   // Use the base card's image_url, or fall back to the first variation's image
-  const imageUrl = card.image_url || 
-                   (selectedVariation?.image) || 
-                   (card.variations?.[0]?.image) || 
+  const imageUrl = card.image_url ||
+                   (selectedVariation?.image) ||
+                   (card.variations?.[0]?.image) ||
                    '/images/card-back-placeholder.svg';
 
-  const isCardFoil = selectedVariation ? selectedVariation.finish === 'foil' : false;
+  // Check if the selected variation is any foil type (including special foils like surgefoil)
+  const isCardFoil = selectedVariation ?
+    (selectedVariation.finish &&
+     selectedVariation.finish.toLowerCase().includes('foil') &&
+     !selectedVariation.finish.toLowerCase().includes('non')) : false;
   const hasSpecial = selectedVariation
     ? hasSpecialTreatment({ treatment: selectedVariation.treatment })
     : false;

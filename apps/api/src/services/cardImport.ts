@@ -41,6 +41,11 @@ interface MTGCard {
   promo_types?: string[];
   finishes?: string[];
   released_at?: string;
+  prices?: {
+    usd?: string | null;
+    usd_foil?: string | null;
+    usd_etched?: string | null;
+  };
   [key: string]: unknown;
 }
 
@@ -315,7 +320,38 @@ export async function importMTGSet(
         ) || [];
 
         // Process each finish as a separate card entry
-        for (const finish of finishes) {
+        for (const rawFinish of finishes) {
+          // Determine the actual finish to use in the database
+          // If this is a foil card and has a special foil type (like surgefoil), use that as the finish
+          let finish = rawFinish;
+          if (rawFinish === 'foil' && specialFoil) {
+            finish = specialFoil;
+          }
+
+          // Check if we have a price for this finish type
+          const prices = card.prices;
+          let hasPrice = false;
+
+          if (prices) {
+            if (finish === 'nonfoil' && prices.usd) {
+              hasPrice = true;
+            } else if (finish === 'etched' && prices.usd_etched) {
+              hasPrice = true;
+            } else if (finish !== 'nonfoil' && finish !== 'etched') {
+              // For foil and special foils (surgefoil, etc.), check foil price
+              if (prices.usd_foil) {
+                hasPrice = true;
+              }
+            }
+          }
+
+          // Skip this variation if no price exists
+          if (!hasPrice) {
+            console.log(`  ⏭️  Skipped: ${card.name} (${finish}) - No price available`);
+            skipped++;
+            continue;
+          }
+
           const sku = generateSKU(card, treatment, finish);
 
           // Check if card already exists

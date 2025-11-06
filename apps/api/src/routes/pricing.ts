@@ -57,17 +57,25 @@ async function upsertCardPricing(
   priceSource: string = 'scryfall'
 ): Promise<{ wasCreated: boolean; wasUpdated: boolean }> {
   try {
+    // Helper to check if a finish is foil-type (including special foils like surgefoil)
+    const isFoilFinish = (f: string): boolean => {
+      const lower = f.toLowerCase();
+      return (lower.includes('foil') || lower.includes('etched')) && !lower.includes('non');
+    };
+
     // Determine which price to use based on finish
-    const basePrice = finish === 'foil' ? null : usd;
-    const foilPrice = finish === 'foil' ? usdFoil : null;
-    
+    // Special foils (surgefoil, etc.) and standard foil use foil_price
+    // Nonfoil uses base_price
+    const basePrice = isFoilFinish(finish) ? null : usd;
+    const foilPrice = isFoilFinish(finish) ? usdFoil : null;
+
     if (basePrice === null && foilPrice === null) {
       return { wasCreated: false, wasUpdated: false }; // No price available
     }
 
     // Check if card_pricing record exists
     const existing = await db.query(
-      `SELECT id, base_price, foil_price, price_source FROM card_pricing 
+      `SELECT id, base_price, foil_price, price_source FROM card_pricing
        WHERE card_id = $1`,
       [cardId]
     );
@@ -83,24 +91,24 @@ async function upsertCardPricing(
     } else {
       // UPDATE existing record
       const current = existing[0];
-      
+
       // Update the appropriate price column based on finish
-      if (finish === 'foil' && foilPrice !== null) {
+      if (isFoilFinish(finish) && foilPrice !== null) {
         await db.query(
-          `UPDATE card_pricing 
+          `UPDATE card_pricing
            SET foil_price = $1, price_source = $2, updated_at = NOW()
            WHERE card_id = $3`,
           [foilPrice, priceSource, cardId]
         );
       } else if (basePrice !== null) {
         await db.query(
-          `UPDATE card_pricing 
+          `UPDATE card_pricing
            SET base_price = $1, price_source = $2, updated_at = NOW()
            WHERE card_id = $3`,
           [basePrice, priceSource, cardId]
         );
       }
-      
+
       return { wasCreated: false, wasUpdated: true };
     }
   } catch (error) {
@@ -294,8 +302,15 @@ router.post('/admin/pricing/refresh-inventory', adminAuthJWT, async (req: Reques
     try {
       const { card_id, finish, usd, usd_foil } = priceData;
 
+      // Helper to check if a finish is foil-type (including special foils like surgefoil)
+      const isFoilFinish = (f: string): boolean => {
+        const lower = f.toLowerCase();
+        return (lower.includes('foil') || lower.includes('etched')) && !lower.includes('non');
+      };
+
       // Determine the price to use for inventory
-      const inventoryPrice = finish === 'foil' ? usd_foil : usd;
+      // Special foils (surgefoil, etc.) and standard foil use foil price
+      const inventoryPrice = isFoilFinish(finish) ? usd_foil : usd;
 
       // Validate that we have a price for this finish
       if (inventoryPrice === null) {
@@ -391,9 +406,16 @@ router.post('/admin/pricing/refresh-card', adminAuthJWT, async (req: Request, re
   for (const priceData of prices) {
     try {
       const { card_id, finish, usd, usd_foil } = priceData;
-      
+
+      // Helper to check if a finish is foil-type (including special foils like surgefoil)
+      const isFoilFinish = (f: string): boolean => {
+        const lower = f.toLowerCase();
+        return (lower.includes('foil') || lower.includes('etched')) && !lower.includes('non');
+      };
+
       // Determine the price to use for inventory
-      const inventoryPrice = finish === 'foil' ? usd_foil : usd;
+      // Special foils (surgefoil, etc.) and standard foil use foil price
+      const inventoryPrice = isFoilFinish(finish) ? usd_foil : usd;
 
       // Update card_pricing table
       const pricingResult = await upsertCardPricing(

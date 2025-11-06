@@ -1,6 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { formatCurrencySimple } from '@/lib/utils';
+import { formatFinish } from '@/types';
 import type { Cart, Currency } from '@/types';
 
 interface MiniCartProps {
@@ -70,8 +71,8 @@ export const MiniCart: React.FC<MiniCartProps> = ({
                   {item.set_name} #{item.card_number}
                 </div>
                 <div>{item.quality} × {item.quantity}</div>
-                {item.finish && item.finish === 'foil' && (
-                  <div className="text-yellow-600">✨ Foil</div>
+                {item.finish && item.finish.toLowerCase().includes('foil') && !item.finish.toLowerCase().includes('non') && (
+                  <div className="text-yellow-600">✨ {formatFinish(item.finish)}</div>
                 )}
               </div>
             </div>
