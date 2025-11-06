@@ -3,7 +3,7 @@ import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { formatCurrency } from '@/lib/utils/';
 import { api, ENDPOINTS } from '@/lib/api';
-import type { Currency } from '@/types';
+import type { Currency, BrowseBaseCard, BrowseVariation } from '@/types';
 import { ShoppingCart, Package } from 'lucide-react';
 import {
   CardVariationHeader,
@@ -35,22 +35,41 @@ type CardData = {
 };
 
 export function AddToCartModal({
-  cardId,
+  card,
+  selectedVariationId,
   isOpen,
   onClose,
   currency,
   onAdd,
 }: {
-  cardId: number;
+  card: BrowseBaseCard;
+  selectedVariationId: number | null;
   isOpen: boolean;
   onClose: () => void;
   currency: Currency;
-  onAdd: (payload: { inventoryId: number; quantity: number }) => void;
+  onAdd: (payload: { cardId: number; inventoryId: number; quantity: number }) => void;
 }) {
+  // State for selected variation (within the modal)
+  const [selectedVariation, setSelectedVariation] = React.useState<BrowseVariation | null>(null);
+
+  // Initialize selected variation when modal opens
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    // Find the variation that was selected in the grid
+    const initialVariation = card.variations.find(v => v.id === selectedVariationId) ||
+                            card.variations.find(v => v.in_stock > 0) ||
+                            card.variations[0];
+    setSelectedVariation(initialVariation || null);
+  }, [isOpen, selectedVariationId, card.variations]);
+
+  // Fetch inventory options for the selected variation
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['inventory-options', cardId],
+    queryKey: ['inventory-options', selectedVariation?.id],
     queryFn: async () => {
-      // Fetch from storefront endpoint which returns card with variations
+      if (!selectedVariation) return { options: [] };
+
+      // Fetch from storefront endpoint which returns card with inventory variations
       const response = await api.get<{
         card: CardData & {
           variations: Array<{
@@ -61,7 +80,7 @@ export function AddToCartModal({
             price: number;
           }>;
         };
-      }>(ENDPOINTS.STOREFRONT.CARD_BY_ID(cardId));
+      }>(ENDPOINTS.STOREFRONT.CARD_BY_ID(selectedVariation.id));
 
       // Map variations to InventoryOption format
       const options: InventoryOption[] = (response.card.variations || []).map(v => ({
@@ -72,12 +91,9 @@ export function AddToCartModal({
         inStock: v.stock || 0,
       }));
 
-      return {
-        options,
-        card: response.card
-      };
+      return { options };
     },
-    enabled: isOpen,
+    enabled: isOpen && !!selectedVariation,
     staleTime: 60_000,
   });
 
@@ -97,13 +113,13 @@ export function AddToCartModal({
     return Array.from(new Set(data.options.map(o => o.language))).sort();
   }, [data?.options]);
 
-  // Reset state when modal opens
+  // Reset state when modal opens or variation changes
   React.useEffect(() => {
     if (!isOpen) return;
     setSelectedQuality('');
     setSelectedLanguage('');
     setQty(1);
-  }, [isOpen]);
+  }, [isOpen, selectedVariation?.id]);
 
   // Auto-select first available options when data loads
   React.useEffect(() => {
@@ -147,14 +163,16 @@ export function AddToCartModal({
 
   const handleConfirm = (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!selected) return;
-    onAdd({ inventoryId: selected.inventoryId, quantity: qty });
+    if (!selected || !selectedVariation) return;
+    onAdd({
+      cardId: selectedVariation.id,
+      inventoryId: selected.inventoryId,
+      quantity: qty
+    });
     onClose();
   };
 
   if (!isOpen) return null;
-
-  const card = data?.card;
 
   return (
     <div
@@ -173,15 +191,21 @@ export function AddToCartModal({
         <div aria-live="polite" aria-atomic="true" className="sr-only" ref={liveRef} />
 
         {/* Header */}
-        {card && (
-          <CardVariationHeader
-            card={card}
-            title="Add to Cart"
-            titleId="addToCartTitle"
-            onClose={onClose}
-            iconType="cart"
-          />
-        )}
+        <CardVariationHeader
+          card={{
+            name: card.name,
+            image_url: selectedVariation?.image || card.image_url,
+            game_name: card.game_name,
+            set_name: card.set_name,
+            card_number: card.card_number,
+            treatment: selectedVariation?.treatment,
+            finish: selectedVariation?.finish,
+          }}
+          title="Add to Cart"
+          titleId="addToCartTitle"
+          onClose={onClose}
+          iconType="cart"
+        />
 
         {/* Body */}
         <div className="p-6">
@@ -200,33 +224,57 @@ export function AddToCartModal({
 
           {!isLoading && !isError && (
             <form onSubmit={handleConfirm} className="space-y-6">
-              {/* Variation Field - Locked since this is a single card */}
-              {card && (
+              {/* Variation Field - Allow selection if multiple variations */}
+              {card.variations.length > 1 ? (
                 <VariationField
-                  variations={[{
-                    id: card.id,
-                    treatment: card.treatment ?? null,
-                    finish: card.finish ?? null,
-                    border_color: card.border_color ?? null,
-                  }]}
-                  selectedVariation={{
-                    id: card.id,
-                    treatment: card.treatment ?? null,
-                    finish: card.finish ?? null,
-                    border_color: card.border_color ?? null,
+                  variations={card.variations.map(v => ({
+                    id: v.id,
+                    treatment: v.treatment ?? null,
+                    finish: v.finish ?? null,
+                    border_color: v.border_color ?? null,
+                    in_stock: v.in_stock,
+                  }))}
+                  selectedVariation={selectedVariation ? {
+                    id: selectedVariation.id,
+                    treatment: selectedVariation.treatment ?? null,
+                    finish: selectedVariation.finish ?? null,
+                    border_color: selectedVariation.border_color ?? null,
+                    in_stock: selectedVariation.in_stock,
+                  } : null}
+                  onVariationChange={(variation) => {
+                    const fullVariation = card.variations.find(v => v.id === variation.id);
+                    if (fullVariation) setSelectedVariation(fullVariation);
                   }}
+                  locked={false}
+                />
+              ) : (
+                <VariationField
+                  variations={card.variations.map(v => ({
+                    id: v.id,
+                    treatment: v.treatment ?? null,
+                    finish: v.finish ?? null,
+                    border_color: v.border_color ?? null,
+                    in_stock: v.in_stock,
+                  }))}
+                  selectedVariation={selectedVariation ? {
+                    id: selectedVariation.id,
+                    treatment: selectedVariation.treatment ?? null,
+                    finish: selectedVariation.finish ?? null,
+                    border_color: selectedVariation.border_color ?? null,
+                    in_stock: selectedVariation.in_stock,
+                  } : null}
                   locked={true}
                 />
               )}
 
               {/* Variation Details Box */}
-              {card && (
+              {selectedVariation && (
                 <VariationDetailsBox
                   variation={{
-                    treatment: card.treatment ?? null,
-                    finish: card.finish ?? null,
-                    border_color: card.border_color ?? null,
-                    frame_effect: card.frame_effect ?? null,
+                    treatment: selectedVariation.treatment ?? null,
+                    finish: selectedVariation.finish ?? null,
+                    border_color: selectedVariation.border_color ?? null,
+                    frame_effect: selectedVariation.frame_effect ?? null,
                   }}
                 />
               )}

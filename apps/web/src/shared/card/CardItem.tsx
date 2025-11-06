@@ -38,7 +38,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import OptimizedImage from '@/shared/media/OptimizedImage';
-import { X } from 'lucide-react';
+import { X, Sparkles } from 'lucide-react';
 import VariationBadge from '@/shared/ui/VariationBadge';
 import { ACCESSIBILITY_CONFIG } from '@/lib/constants';
 import { formatCurrencySimple, formatPriceDisplay } from '@/lib/utils';
@@ -563,9 +563,20 @@ const CardItem: React.FC<CardItemProps> = ({
 
   return (
     <>
-      <div className="card-mm flex flex-col h-full bg-white border border-slate-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+      <div className={`card-mm flex flex-col h-full bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all ${
+        isCardFoil
+          ? 'border-yellow-400 border-2 shadow-yellow-200/50'
+          : 'border-slate-200'
+      }`}>
         {/* Image Section */}
         <div className="relative flex-shrink-0 bg-slate-50 aspect-[5/7] overflow-hidden">
+          {/* Foil Badge Overlay */}
+          {isCardFoil && (
+            <div className="absolute top-2 right-2 z-10 bg-gradient-to-r from-yellow-400 to-yellow-500 text-white px-2 py-1 rounded-full shadow-lg flex items-center gap-1 text-xs font-bold">
+              <Sparkles className="w-3 h-3" />
+              FOIL
+            </div>
+          )}
           <button
             onClick={() => setShowImageModal(true)}
             className="block w-full h-full focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -577,7 +588,7 @@ const CardItem: React.FC<CardItemProps> = ({
               alt={card.name}
               className={`w-full h-full object-cover hover:scale-105 transition-transform ${
                 isCardFoil
-                  ? 'ring-2 ring-yellow-400 ring-offset-2 shadow-yellow-200/50 shadow-lg'
+                  ? 'ring-2 ring-yellow-400 ring-inset'
                   : ''
               }`}
               loading="lazy"
