@@ -1,19 +1,20 @@
 {
-  "generatedAt": "2025-11-04T20:34:12.664Z",
+  "generatedAt": "2025-11-06T07:49:12.948Z",
   "schema": "public",
-  "tableCount": 11,
+  "tableCount": 12,
   "tableCounts": {
     "audit_log": -1,
-    "card_inventory": 0,
-    "card_pricing": 1199,
+    "card_inventory": 64,
+    "card_pricing": 1801,
     "card_sets": 5,
-    "cards": 1243,
+    "cards": 1801,
     "game_variations_metadata": -1,
     "games": 2,
     "order_items": -1,
     "orders": -1,
     "price_history": -1,
-    "set_variations_metadata": -1
+    "set_variations_metadata": -1,
+    "variation_display_overrides": -1
   },
-  "totalRows": 2443
+  "totalRows": 3666
 }

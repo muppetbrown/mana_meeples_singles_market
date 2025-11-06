@@ -10,6 +10,7 @@ mana_meeples_singles_market
 │ │ │ └── print-coverage-summary.mjs
 │ │ ├── src/
 │ │ │ ├── lib/
+│ │ │ │ ├── apiHelpers.ts
 │ │ │ │ ├── authUtils.ts
 │ │ │ │ ├── db.ts
 │ │ │ │ ├── env.ts
@@ -29,11 +30,14 @@ mana_meeples_singles_market
 │ │ │ │ ├── inventory.ts
 │ │ │ │ ├── orders.ts
 │ │ │ │ ├── pricing.ts
-│ │ │ │ └── storefront.ts
+│ │ │ │ ├── storefront.ts
+│ │ │ │ └── variationDisplayOverrides.ts
 │ │ │ ├── services/
 │ │ │ │ ├── cardImport.ts
 │ │ │ │ ├── emailService.ts
-│ │ │ │ └── variationAnalysis.ts
+│ │ │ │ ├── importJobTracker.ts
+│ │ │ │ ├── variationAnalysis.ts
+│ │ │ │ └── variationDisplayOverrides.ts
 │ │ │ ├── types/
 │ │ │ │ └── express.d.ts
 │ │ │ ├── utils/
@@ -519,6 +523,8 @@ mana_meeples_singles_market
 │  │ │ │ │ │ └── ImportSetModal.tsx
 │  │ │ │ │ ├── Orders/
 │  │ │ │ │ │ └── OrdersTab.tsx
+│  │ │ │ │ ├── VariationBadges/
+│  │ │ │ │ │ └── VariationBadgesTab.tsx
 │  │ │ │ │ ├── InstructionsTab.tsx
 │  │ │ │ │ └── PriceManagementHeaderButtons.tsx
 │  │ │ │ ├── utils/
@@ -527,10 +533,10 @@ mana_meeples_singles_market
 │  │ │ │ └── Login.tsx
 │  │ │ ├── hooks/
 │  │ │ │ ├── index.ts
-│  │ │ │ ├── useCardDisplayArea.tsx
 │  │ │ │ ├── useCardFetching.ts
 │  │ │ │ ├── useCart.ts
 │  │ │ │ ├── useFilterCounts.ts
+│  │ │ │ ├── useFilters.ts
 │  │ │ │ ├── useRecentlyViewed.tsx
 │  │ │ │ ├── useShopFilters.ts
 │  │ │ │ ├── useShopKeyboardShortcuts.ts
@@ -557,20 +563,25 @@ mana_meeples_singles_market
 │  │ │ │ ├── client.ts
 │  │ │ │ ├── endpoints.ts
 │  │ │ │ ├── index.ts
-│  │ │ │ └── README.md
+│  │ │ │ ├── README.md
+│  │ │ │ └── storefront.ts
 │  │ │ ├── constants/
 │  │ │ │ ├── index.ts
 │  │ │ │ └── validation.ts
-│  │ │ └── utils/
-│  │ │  ├── csv.ts
-│  │ │  ├── errorLogger.ts
-│  │ │  ├── format.ts
-│  │ │  ├── groupCards.ts
-│  │ │  ├── index.ts
-│  │ │  ├── sanitization.ts
-│  │ │  ├── sortCards.ts
-│  │ │  ├── variationComparison.ts
-│  │ │  └── virtualScroll.ts
+│  │ │ ├── utils/
+│  │ │ │ ├── cardTransformations.ts
+│  │ │ │ ├── csv.ts
+│  │ │ │ ├── errorLogger.ts
+│  │ │ │ ├── format.ts
+│  │ │ │ ├── groupCards.ts
+│  │ │ │ ├── index.ts
+│  │ │ │ ├── inventoryUtils.ts
+│  │ │ │ ├── performance.ts
+│  │ │ │ ├── sanitization.ts
+│  │ │ │ ├── sortCards.ts
+│  │ │ │ ├── variationComparison.ts
+│  │ │ │ └── virtualScroll.ts
+│  │ │ └── config.ts
 │  │ ├── services/
 │  │ │ ├── error/
 │  │ │ │ ├── handler.ts
@@ -592,6 +603,12 @@ mana_meeples_singles_market
 │  │ │ ├── media/
 │  │ │ │ ├── index.ts
 │  │ │ │ └── OptimizedImage.tsx
+│  │ │ ├── modal/
+│  │ │ │ ├── CardVariationHeader.tsx
+│  │ │ │ ├── index.ts
+│  │ │ │ ├── QualityLanguageSelectors.tsx
+│  │ │ │ ├── VariationDetailsBox.tsx
+│  │ │ │ └── VariationField.tsx
 │  │ │ ├── search/
 │  │ │ │ ├── ActiveFilters.tsx
 │  │ │ │ ├── FiltersPanel.tsx
@@ -599,9 +616,12 @@ mana_meeples_singles_market
 │  │ │ │ ├── MobileFilterButton.tsx
 │  │ │ │ └── SearchBar.tsx
 │  │ │ └── ui/
+│  │ │  ├── BaseModal.tsx
 │  │ │  ├── CurrencySelector.tsx
 │  │ │  ├── EmptyState.tsx
 │  │ │  ├── FilterSidebar.tsx
+│  │ │  ├── FormInput.tsx
+│  │ │  ├── FormSelect.tsx
 │  │ │  ├── index.ts
 │  │ │  ├── MobileFilterModal.tsx
 │  │ │  ├── SectionHeader.tsx
@@ -614,6 +634,8 @@ mana_meeples_singles_market
 │  │ │ ├── api/
 │  │ │ │ ├── requests.ts
 │  │ │ │ └── responses.ts
+│  │ │ ├── enums/
+│  │ │ │ └── inventory.ts
 │  │ │ ├── models/
 │  │ │ │ ├── card.ts
 │  │ │ │ ├── inventory.ts
@@ -621,6 +643,7 @@ mana_meeples_singles_market
 │  │ │ ├── ui/
 │  │ │ │ ├── cart.ts
 │  │ │ │ └── common.ts
+│  │ │ ├── filters.ts
 │  │ │ └── index.ts
 │  │ ├── App.tsx
 │  │ ├── main.tsx
@@ -637,8 +660,13 @@ mana_meeples_singles_market
 │  └── vite.config.ts
 ├── build_logs/
 │ ├── problems-eslint.log
-│ └── problems-ts.log
+│ ├── problems-ts.log
+│ └── problems.txt
 ├── database/
+│ ├── migrations/
+│ │ ├── 002_update_special_foil_finishes.sql
+│ │ ├── 003_cleanup_cards_without_prices.sql
+│ │ └── UPDATE_EXISTING_CARDS.md
 │ ├── DATABASE_SCHEMA.md
 │ └── database-stats.json
 ├── docs/
@@ -649,7 +677,8 @@ mana_meeples_singles_market
 │ ├── Complete File Documentation for apps.docx
 │ ├── openapi.yaml
 │ ├── pokemon_set_codes.txt
-│ └── problems_to_fix.txt
+│ ├── problems_to_fix.txt
+│ └── VARIATION_BADGE_IMPROVEMENTS.md
 ├── scripts/
 │ ├── imports/
 │ │ ├── analyze-variations.ts
@@ -658,9 +687,8 @@ mana_meeples_singles_market
 │ │ ├── import-pokemon-set.ts
 │ │ └── list-pokemon-sets.ts
 │ ├── migrations/
-│ │ ├── add-inventory-unique-constraint.sql
-│ │ ├── apply-inventory-constraint.ts
-│ │ └── FIX-INVENTORY-CONSTRAINT.md
+│ │ ├── 001_create_variation_display_overrides.sql
+│ │ └── update-special-foil-finishes.ts
 │ ├── analyze-repo.mjs
 │ ├── analyze-unused-code.js
 │ ├── copy-dist-to-api.js
@@ -671,6 +699,7 @@ mana_meeples_singles_market
 │ ├── line-lengths.ts
 │ ├── refresh-mviews.sh
 │ ├── route-analysis-report.json
+│ ├── run-migration.ts
 │ ├── scan-routes.js
 │ ├── smoke.mjs
 │ ├── test-db-connected.ts
@@ -685,6 +714,7 @@ mana_meeples_singles_market
 ├── api.effective.tsconfig.json
 ├── conversation-starter-template.txt
 ├── deps.svg
+├── ENV_GUIDE.md
 ├── eslint.config.cjs
 ├── FIX-INVENTORY-README.md
 ├── FIX-INVENTORY.sql
@@ -693,6 +723,7 @@ mana_meeples_singles_market
 ├── pnpm-workspace.yaml
 ├── prettier.config.cjs
 ├── render.yaml
+├── SECONDARY_IMPROVEMENTS.md
 ├── tsconfig.base.json
 └── tsconfig.json
 ```

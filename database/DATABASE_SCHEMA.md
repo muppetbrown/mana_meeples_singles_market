@@ -1,10 +1,10 @@
 # Database Schema — `public`
 
-**Generated:** 5/11/2025, 9:34:12 am
+**Generated:** 6/11/2025, 8:49:12 pm
 
-**Tables:** 11
+**Tables:** 12
 
-**Total Rows:** 2,443
+**Total Rows:** 3,666
 
 ---
 
@@ -47,7 +47,7 @@ CREATE UNIQUE INDEX audit_log_pkey ON public.audit_log USING btree (id)
 
 ## 📋 card_inventory
 
-**Row Count:** 0
+**Row Count:** 64
 
 ### Columns
 
@@ -165,11 +165,98 @@ CREATE INDEX idx_inventory_stock_price ON public.card_inventory USING btree (sto
 CREATE INDEX idx_inventory_updated ON public.card_inventory USING btree (updated_at DESC)
 ```
 
+### Sample Rows
+
+```json
+[
+  {
+    "id": 3832,
+    "card_id": 1079,
+    "quality": "Near Mint",
+    "stock_quantity": 1,
+    "price": "3.51",
+    "price_source": "scryfall",
+    "last_price_update": "2025-11-05T07:52:58.779Z",
+    "created_at": "2025-11-05T07:52:58.779Z",
+    "updated_at": "2025-11-05T07:57:35.642Z",
+    "language": "English",
+    "cost": null,
+    "markup_percentage": "0.00",
+    "auto_price_enabled": true,
+    "low_stock_threshold": 3
+  },
+  {
+    "id": 3819,
+    "card_id": 1081,
+    "quality": "Near Mint",
+    "stock_quantity": 1,
+    "price": "0.76",
+    "price_source": "scryfall",
+    "last_price_update": "2025-11-05T07:49:07.158Z",
+    "created_at": "2025-11-05T07:49:07.158Z",
+    "updated_at": "2025-11-05T07:57:36.087Z",
+    "language": "English",
+    "cost": null,
+    "markup_percentage": "0.00",
+    "auto_price_enabled": true,
+    "low_stock_threshold": 3
+  },
+  {
+    "id": 3835,
+    "card_id": 1090,
+    "quality": "Near Mint",
+    "stock_quantity": 1,
+    "price": "0.37",
+    "price_source": "scryfall",
+    "last_price_update": "2025-11-05T07:53:19.885Z",
+    "created_at": "2025-11-05T07:53:19.885Z",
+    "updated_at": "2025-11-05T07:57:36.534Z",
+    "language": "English",
+    "cost": null,
+    "markup_percentage": "0.00",
+    "auto_price_enabled": true,
+    "low_stock_threshold": 3
+  },
+  {
+    "id": 3813,
+    "card_id": 1099,
+    "quality": "Near Mint",
+    "stock_quantity": 1,
+    "price": "0.39",
+    "price_source": "scryfall",
+    "last_price_update": "2025-11-05T07:48:20.149Z",
+    "created_at": "2025-11-05T07:48:20.149Z",
+    "updated_at": "2025-11-05T07:57:36.972Z",
+    "language": "English",
+    "cost": null,
+    "markup_percentage": "0.00",
+    "auto_price_enabled": true,
+    "low_stock_threshold": 3
+  },
+  {
+    "id": 3848,
+    "card_id": 1104,
+    "quality": "Near Mint",
+    "stock_quantity": 1,
+    "price": "0.38",
+    "price_source": "scryfall",
+    "last_price_update": "2025-11-05T07:55:09.127Z",
+    "created_at": "2025-11-05T07:55:09.127Z",
+    "updated_at": "2025-11-05T07:57:37.408Z",
+    "language": "English",
+    "cost": null,
+    "markup_percentage": "0.00",
+    "auto_price_enabled": true,
+    "low_stock_threshold": 3
+  }
+]
+```
+
 ---
 
 ## 📋 card_pricing
 
-**Row Count:** 1,199
+**Row Count:** 1,801
 
 ### Columns
 
@@ -332,16 +419,6 @@ CREATE INDEX idx_card_sets_name_trgm ON public.card_sets USING gin (name gin_trg
 ```json
 [
   {
-    "id": 11,
-    "game_id": 1,
-    "name": "Final Fantasy",
-    "code": "FIN",
-    "release_date": "2025-06-12T12:00:00.000Z",
-    "active": true,
-    "created_at": "2025-10-13T19:01:32.046Z",
-    "updated_at": "2025-10-13T19:01:32.046Z"
-  },
-  {
     "id": 12,
     "game_id": 1,
     "name": "Final Fantasy: Through the Ages",
@@ -350,6 +427,26 @@ CREATE INDEX idx_card_sets_name_trgm ON public.card_sets USING gin (name gin_trg
     "active": true,
     "created_at": "2025-10-31T11:34:27.552Z",
     "updated_at": "2025-10-31T11:34:27.552Z"
+  },
+  {
+    "id": 11,
+    "game_id": 1,
+    "name": "Final Fantasy",
+    "code": "FIN",
+    "release_date": "2025-06-12T12:00:00.000Z",
+    "active": true,
+    "created_at": "2025-10-13T19:01:32.046Z",
+    "updated_at": "2025-11-05T16:04:16.730Z"
+  },
+  {
+    "id": 13,
+    "game_id": 1,
+    "name": "Final Fantasy Commander",
+    "code": "FIC",
+    "release_date": "2025-12-04T11:00:00.000Z",
+    "active": true,
+    "created_at": "2025-11-05T14:11:28.804Z",
+    "updated_at": "2025-11-05T16:10:05.788Z"
   }
 ]
 ```
@@ -358,7 +455,7 @@ CREATE INDEX idx_card_sets_name_trgm ON public.card_sets USING gin (name gin_trg
 
 ## 📋 cards
 
-**Row Count:** 1,243
+**Row Count:** 1,801
 
 ### Columns
 
@@ -521,119 +618,119 @@ CREATE INDEX idx_cards_treatment ON public.cards USING btree (treatment)
 ```json
 [
   {
-    "id": 1042,
+    "id": 1204,
     "game_id": 1,
     "set_id": 11,
-    "name": "Absolute Virtue",
-    "card_number": "212",
-    "rarity": "mythic",
-    "card_type": "Legendary Creature — Avatar Warrior",
-    "description": "This spell can't be countered.\nFlying\nYou have protection from each of your opponents. (You can't be dealt damage, enchanted, or targeted by anything controlled by your opponents.)",
-    "image_url": "https://cards.scryfall.io/large/front/a/a/aa192912-c9ee-403f-8a46-a338c9edb4b9.jpg?1748706551",
-    "scryfall_id": "aa192912-c9ee-403f-8a46-a338c9edb4b9",
-    "tcgplayer_id": null,
-    "pokemontcg_id": null,
-    "created_at": "2025-10-13T19:01:32.357Z",
-    "updated_at": "2025-10-13T19:01:32.357Z",
-    "search_tsv": "'212':37 'absolut':1 'anyth':32 'avatar':5 'control':33 'counter':12 'creatur':4 'damag':27 'dealt':26 'enchant':28 'fli':13 'legendari':3 'oppon':21,36 'protect':16 'spell':8 'target':30 'virtu':2 'warrior':6",
-    "border_color": "black",
-    "finish": "nonfoil",
-    "frame_effect": null,
-    "promo_type": null,
-    "treatment": "STANDARD",
-    "sku": "FIN-212-STANDARD-NONFOIL"
-  },
-  {
-    "id": 1043,
-    "game_id": 1,
-    "set_id": 11,
-    "name": "Absolute Virtue",
-    "card_number": "212",
-    "rarity": "mythic",
-    "card_type": "Legendary Creature — Avatar Warrior",
-    "description": "This spell can't be countered.\nFlying\nYou have protection from each of your opponents. (You can't be dealt damage, enchanted, or targeted by anything controlled by your opponents.)",
-    "image_url": "https://cards.scryfall.io/large/front/a/a/aa192912-c9ee-403f-8a46-a338c9edb4b9.jpg?1748706551",
-    "scryfall_id": "aa192912-c9ee-403f-8a46-a338c9edb4b9",
-    "tcgplayer_id": null,
-    "pokemontcg_id": null,
-    "created_at": "2025-10-13T19:01:32.653Z",
-    "updated_at": "2025-10-13T19:01:32.653Z",
-    "search_tsv": "'212':37 'absolut':1 'anyth':32 'avatar':5 'control':33 'counter':12 'creatur':4 'damag':27 'dealt':26 'enchant':28 'fli':13 'legendari':3 'oppon':21,36 'protect':16 'spell':8 'target':30 'virtu':2 'warrior':6",
-    "border_color": "black",
-    "finish": "foil",
-    "frame_effect": null,
-    "promo_type": null,
-    "treatment": "STANDARD",
-    "sku": "FIN-212-STANDARD-FOIL"
-  },
-  {
-    "id": 1044,
-    "game_id": 1,
-    "set_id": 11,
-    "name": "Absolute Virtue",
-    "card_number": "476",
-    "rarity": "mythic",
-    "card_type": "Legendary Creature — Avatar Warrior",
-    "description": "This spell can't be countered.\nFlying\nYou have protection from each of your opponents. (You can't be dealt damage, enchanted, or targeted by anything controlled by your opponents.)",
-    "image_url": "https://cards.scryfall.io/large/front/5/0/50716867-4370-4c2f-aae5-9d791a5d5a2e.jpg?1748707531",
-    "scryfall_id": "50716867-4370-4c2f-aae5-9d791a5d5a2e",
-    "tcgplayer_id": null,
-    "pokemontcg_id": null,
-    "created_at": "2025-10-13T19:01:32.942Z",
-    "updated_at": "2025-10-13T19:01:32.942Z",
-    "search_tsv": "'476':37 'absolut':1 'anyth':32 'avatar':5 'control':33 'counter':12 'creatur':4 'damag':27 'dealt':26 'enchant':28 'fli':13 'legendari':3 'oppon':21,36 'protect':16 'spell':8 'target':30 'virtu':2 'warrior':6",
-    "border_color": "black",
-    "finish": "nonfoil",
-    "frame_effect": "extendedart",
-    "promo_type": null,
-    "treatment": "EXTENDED",
-    "sku": "FIN-476-EXTENDED-NONFOIL"
-  },
-  {
-    "id": 1045,
-    "game_id": 1,
-    "set_id": 11,
-    "name": "Absolute Virtue",
-    "card_number": "476",
-    "rarity": "mythic",
-    "card_type": "Legendary Creature — Avatar Warrior",
-    "description": "This spell can't be countered.\nFlying\nYou have protection from each of your opponents. (You can't be dealt damage, enchanted, or targeted by anything controlled by your opponents.)",
-    "image_url": "https://cards.scryfall.io/large/front/5/0/50716867-4370-4c2f-aae5-9d791a5d5a2e.jpg?1748707531",
-    "scryfall_id": "50716867-4370-4c2f-aae5-9d791a5d5a2e",
-    "tcgplayer_id": null,
-    "pokemontcg_id": null,
-    "created_at": "2025-10-13T19:01:33.230Z",
-    "updated_at": "2025-10-13T19:01:33.230Z",
-    "search_tsv": "'476':37 'absolut':1 'anyth':32 'avatar':5 'control':33 'counter':12 'creatur':4 'damag':27 'dealt':26 'enchant':28 'fli':13 'legendari':3 'oppon':21,36 'protect':16 'spell':8 'target':30 'virtu':2 'warrior':6",
-    "border_color": "black",
-    "finish": "foil",
-    "frame_effect": "extendedart",
-    "promo_type": null,
-    "treatment": "EXTENDED",
-    "sku": "FIN-476-EXTENDED-FOIL"
-  },
-  {
-    "id": 1046,
-    "game_id": 1,
-    "set_id": 11,
-    "name": "Adelbert Steiner",
-    "card_number": "3",
+    "name": "Cid, Timeless Artificer",
+    "card_number": "418",
     "rarity": "uncommon",
-    "card_type": "Legendary Creature — Human Knight",
-    "description": "Lifelink\nAdelbert Steiner gets +1/+1 for each Equipment you control.",
-    "image_url": "https://cards.scryfall.io/large/front/1/a/1a67a991-1e52-4676-a2e3-2bc7aa943ab3.jpg?1748705765",
-    "scryfall_id": "1a67a991-1e52-4676-a2e3-2bc7aa943ab3",
+    "card_type": "Legendary Creature — Human Artificer",
+    "description": "Artifact creatures and Heroes you control get +1/+1 for each Artificer you control and each Artificer card in your graveyard.\nA deck can have any number of cards named Cid, Timeless Artificer.\nCycling {W}{U} ({W}{U}, Discard this card: Draw a card.)",
+    "image_url": "https://cards.scryfall.io/large/front/0/1/0148fa7c-b6d6-458c-8cdd-a6c4e6dd4e59.jpg?1748707417",
+    "scryfall_id": "0148fa7c-b6d6-458c-8cdd-a6c4e6dd4e59",
     "tcgplayer_id": null,
     "pokemontcg_id": null,
-    "created_at": "2025-10-13T19:01:33.521Z",
-    "updated_at": "2025-10-13T19:01:33.521Z",
-    "search_tsv": "'+1':11,12 '3':18 'adelbert':1,8 'control':17 'creatur':4 'equip':15 'get':10 'human':5 'knight':6 'legendari':3 'lifelink':7 'steiner':2,9",
+    "created_at": "2025-10-13T19:02:20.433Z",
+    "updated_at": "2025-11-05T16:05:04.440Z",
+    "search_tsv": "'+1':15,16 '418':52 'artifact':8 'artific':3,7,19,24,40 'card':25,36,48,51 'cid':1,38 'control':13,21 'creatur':5,9 'cycl':41 'deck':30 'discard':46 'draw':49 'get':14 'graveyard':28 'hero':11 'human':6 'legendari':4 'name':37 'number':34 'timeless':2,39 'u':43,45 'w':42,44",
     "border_color": "black",
-    "finish": "nonfoil",
+    "finish": "foil",
     "frame_effect": null,
     "promo_type": null,
     "treatment": "STANDARD",
-    "sku": "FIN-3-STANDARD-NONFOIL"
+    "sku": "FIN-418-STANDARD-FOIL"
+  },
+  {
+    "id": 3306,
+    "game_id": 1,
+    "set_id": 11,
+    "name": "The Wandering Minstrel",
+    "card_number": "548",
+    "rarity": "rare",
+    "card_type": "Legendary Creature — Human Bard",
+    "description": "Lands you control enter untapped.\nThe Minstrel's Ballad — At the beginning of combat on your turn, if you control five or more Towns, create a 2/2 Elemental creature token that's all colors.\n{3}{W}{U}{B}{R}{G}: Other creatures you control get +X/+X until end of turn, where X is the number of Towns you control.",
+    "image_url": "https://cards.scryfall.io/large/front/f/e/fe9cd860-1b4e-48ec-be30-e0ec4ca75e26.jpg?1748707595",
+    "scryfall_id": "fe9cd860-1b4e-48ec-be30-e0ec4ca75e26",
+    "tcgplayer_id": null,
+    "pokemontcg_id": null,
+    "created_at": "2025-11-05T15:53:52.762Z",
+    "updated_at": "2025-11-05T16:08:49.456Z",
+    "search_tsv": "'2/2':34 '3':42 '548':68 'b':45 'ballad':16 'bard':7 'begin':19 'color':41 'combat':21 'control':10,27,51,67 'creat':32 'creatur':5,36,49 'element':35 'end':56 'enter':11 'five':28 'g':47 'get':52 'human':6 'land':8 'legendari':4 'minstrel':3,14 'number':63 'r':46 'token':37 'town':31,65 'turn':24,58 'u':44 'untap':12 'w':43 'wander':2 'x':53,54,60",
+    "border_color": "borderless",
+    "finish": "surgefoil",
+    "frame_effect": "inverted",
+    "promo_type": "surgefoil",
+    "treatment": "BORDERLESS_INVERTED_SURGEFOIL",
+    "sku": "FIN-548-BORDERLESS_INVERTED_SURGEFOIL-SURGEFOIL"
+  },
+  {
+    "id": 2286,
+    "game_id": 1,
+    "set_id": 13,
+    "name": "Aerith, Last Ancient",
+    "card_number": "76",
+    "rarity": "rare",
+    "card_type": "Legendary Creature — Human Cleric Druid",
+    "description": "Lifelink\nRaise — At the beginning of your end step, if you gained life this turn, return target creature card from your graveyard to your hand. If you gained 7 or more life this turn, return that card to the battlefield instead.",
+    "image_url": "https://cards.scryfall.io/large/front/d/0/d041a51c-9a28-4b32-9da3-0f06807959f1.jpg?1748704472",
+    "scryfall_id": "d041a51c-9a28-4b32-9da3-0f06807959f1",
+    "tcgplayer_id": null,
+    "pokemontcg_id": null,
+    "created_at": "2025-11-05T14:11:29.586Z",
+    "updated_at": "2025-11-05T16:10:06.090Z",
+    "search_tsv": "'7':37 '76':50 'aerith':1 'ancient':3 'battlefield':48 'begin':13 'card':27,45 'cleric':7 'creatur':5,26 'druid':8 'end':16 'gain':20,36 'graveyard':30 'hand':33 'human':6 'instead':49 'last':2 'legendari':4 'life':21,40 'lifelink':9 'rais':10 'return':24,43 'step':17 'target':25 'turn':23,42",
+    "border_color": "black",
+    "finish": "nonfoil",
+    "frame_effect": null,
+    "promo_type": "surgefoil",
+    "treatment": "STANDARD_SURGEFOIL",
+    "sku": "FIC-76-STANDARD_SURGEFOIL-NONFOIL"
+  },
+  {
+    "id": 2288,
+    "game_id": 1,
+    "set_id": 13,
+    "name": "Aerith, Last Ancient",
+    "card_number": "163",
+    "rarity": "rare",
+    "card_type": "Legendary Creature — Human Cleric Druid",
+    "description": "Lifelink\nRaise — At the beginning of your end step, if you gained life this turn, return target creature card from your graveyard to your hand. If you gained 7 or more life this turn, return that card to the battlefield instead.",
+    "image_url": "https://cards.scryfall.io/large/front/8/2/82518d3f-9557-416b-9b4d-dfe3ffa57f88.jpg?1748704790",
+    "scryfall_id": "82518d3f-9557-416b-9b4d-dfe3ffa57f88",
+    "tcgplayer_id": null,
+    "pokemontcg_id": null,
+    "created_at": "2025-11-05T14:11:30.170Z",
+    "updated_at": "2025-11-05T16:10:06.404Z",
+    "search_tsv": "'163':50 '7':37 'aerith':1 'ancient':3 'battlefield':48 'begin':13 'card':27,45 'cleric':7 'creatur':5,26 'druid':8 'end':16 'gain':20,36 'graveyard':30 'hand':33 'human':6 'instead':49 'last':2 'legendari':4 'life':21,40 'lifelink':9 'rais':10 'return':24,43 'step':17 'target':25 'turn':23,42",
+    "border_color": "black",
+    "finish": "nonfoil",
+    "frame_effect": "extendedart",
+    "promo_type": null,
+    "treatment": "EXTENDED",
+    "sku": "FIC-163-EXTENDED-NONFOIL"
+  },
+  {
+    "id": 2289,
+    "game_id": 1,
+    "set_id": 13,
+    "name": "Aerith, Last Ancient",
+    "card_number": "163",
+    "rarity": "rare",
+    "card_type": "Legendary Creature — Human Cleric Druid",
+    "description": "Lifelink\nRaise — At the beginning of your end step, if you gained life this turn, return target creature card from your graveyard to your hand. If you gained 7 or more life this turn, return that card to the battlefield instead.",
+    "image_url": "https://cards.scryfall.io/large/front/8/2/82518d3f-9557-416b-9b4d-dfe3ffa57f88.jpg?1748704790",
+    "scryfall_id": "82518d3f-9557-416b-9b4d-dfe3ffa57f88",
+    "tcgplayer_id": null,
+    "pokemontcg_id": null,
+    "created_at": "2025-11-05T14:11:30.500Z",
+    "updated_at": "2025-11-05T16:10:06.696Z",
+    "search_tsv": "'163':50 '7':37 'aerith':1 'ancient':3 'battlefield':48 'begin':13 'card':27,45 'cleric':7 'creatur':5,26 'druid':8 'end':16 'gain':20,36 'graveyard':30 'hand':33 'human':6 'instead':49 'last':2 'legendari':4 'life':21,40 'lifelink':9 'rais':10 'return':24,43 'step':17 'target':25 'turn':23,42",
+    "border_color": "black",
+    "finish": "foil",
+    "frame_effect": "extendedart",
+    "promo_type": null,
+    "treatment": "EXTENDED",
+    "sku": "FIC-163-EXTENDED-FOIL"
   }
 ]
 ```
@@ -711,34 +808,36 @@ CREATE INDEX idx_game_variations_treatments ON public.game_variations_metadata U
     "id": 1,
     "game_id": 1,
     "visual_treatments": [
-      "extendedart",
-      "inverted"
+      "inverted",
+      "extendedart"
     ],
-    "special_foils": [],
+    "special_foils": [
+      "surgefoil",
+      "neonink"
+    ],
     "border_colors": [
       "black",
       "borderless"
     ],
     "frame_effects": [
-      "extendedart",
-      "inverted"
+      "inverted",
+      "extendedart"
     ],
     "treatment_codes": [
       "STANDARD",
-      "EXTENDED",
-      "STANDARD_SURGEFOIL",
-      "BORDERLESS_INVERTED",
       "BORDERLESS_INVERTED_SURGEFOIL",
-      "BORDERLESS_INVERTED_CHOCOBOTRACKFOIL",
-      "BORDERLESS",
-      "BORDERLESS_NEONINK"
+      "STANDARD_SURGEFOIL",
+      "EXTENDED",
+      "BORDERLESS_INVERTED",
+      "BORDERLESS_NEONINK",
+      "BORDERLESS"
     ],
-    "total_sets": 2,
-    "total_cards": 1243,
-    "total_variations": 1243,
-    "last_analyzed": "2025-10-31T11:35:12.083Z",
+    "total_sets": 3,
+    "total_cards": 1866,
+    "total_variations": 1866,
+    "last_analyzed": "2025-11-05T16:12:58.990Z",
     "created_at": "2025-10-13T19:13:13.244Z",
-    "updated_at": "2025-10-31T11:35:12.083Z"
+    "updated_at": "2025-11-05T16:12:58.990Z"
   }
 ]
 ```
@@ -1103,43 +1202,6 @@ CREATE UNIQUE INDEX set_variations_metadata_set_id_game_id_key ON public.set_var
 ```json
 [
   {
-    "id": 2564,
-    "set_id": 11,
-    "game_id": 1,
-    "visual_treatments": [
-      "extendedart",
-      "inverted"
-    ],
-    "special_foils": [
-      "surgefoil",
-      "chocobotrackfoil",
-      "neonink"
-    ],
-    "border_colors": [
-      "black",
-      "borderless"
-    ],
-    "frame_effects": [
-      "extendedart",
-      "inverted"
-    ],
-    "treatment_codes": [
-      "STANDARD",
-      "EXTENDED",
-      "STANDARD_SURGEFOIL",
-      "BORDERLESS_INVERTED",
-      "BORDERLESS_INVERTED_SURGEFOIL",
-      "BORDERLESS_INVERTED_CHOCOBOTRACKFOIL",
-      "BORDERLESS",
-      "BORDERLESS_NEONINK"
-    ],
-    "total_cards": 1114,
-    "total_variations": 1114,
-    "last_analyzed": "2025-10-13T19:13:12.383Z",
-    "created_at": "2025-10-13T19:01:32.357Z",
-    "updated_at": "2025-10-13T19:13:12.383Z"
-  },
-  {
     "id": 3679,
     "set_id": 12,
     "game_id": 1,
@@ -1161,6 +1223,224 @@ CREATE UNIQUE INDEX set_variations_metadata_set_id_game_id_key ON public.set_var
     "last_analyzed": "2025-10-31T11:35:11.271Z",
     "created_at": "2025-10-31T11:34:27.863Z",
     "updated_at": "2025-10-31T11:35:11.271Z"
+  },
+  {
+    "id": 2564,
+    "set_id": 11,
+    "game_id": 1,
+    "visual_treatments": [
+      "inverted",
+      "extendedart"
+    ],
+    "special_foils": [
+      "surgefoil",
+      "neonink"
+    ],
+    "border_colors": [
+      "borderless",
+      "black"
+    ],
+    "frame_effects": [
+      "inverted",
+      "extendedart"
+    ],
+    "treatment_codes": [
+      "BORDERLESS_INVERTED_SURGEFOIL",
+      "STANDARD",
+      "EXTENDED",
+      "BORDERLESS_NEONINK",
+      "STANDARD_SURGEFOIL",
+      "BORDERLESS_INVERTED",
+      "BORDERLESS"
+    ],
+    "total_cards": 1147,
+    "total_variations": 1147,
+    "last_analyzed": "2025-11-05T16:09:44.396Z",
+    "created_at": "2025-10-13T19:01:32.357Z",
+    "updated_at": "2025-11-05T16:09:44.396Z"
+  },
+  {
+    "id": 3809,
+    "set_id": 13,
+    "game_id": 1,
+    "visual_treatments": [
+      "extendedart",
+      "inverted"
+    ],
+    "special_foils": [
+      "surgefoil"
+    ],
+    "border_colors": [
+      "black",
+      "borderless"
+    ],
+    "frame_effects": [
+      "extendedart",
+      "inverted"
+    ],
+    "treatment_codes": [
+      "STANDARD_SURGEFOIL",
+      "EXTENDED",
+      "BORDERLESS_INVERTED",
+      "BORDERLESS_INVERTED_SURGEFOIL",
+      "STANDARD"
+    ],
+    "total_cards": 591,
+    "total_variations": 591,
+    "last_analyzed": "2025-11-05T16:12:58.254Z",
+    "created_at": "2025-11-05T14:11:29.104Z",
+    "updated_at": "2025-11-05T16:12:58.254Z"
+  }
+]
+```
+
+---
+
+## 📋 variation_display_overrides
+
+**Row Count:** -1
+
+### Columns
+
+| Column | Type | Null | Default | Length/Precision |
+|--------|------|------|---------|------------------|
+| `id` | `integer` | `NO` | `nextval('variation_display_overrides_id_seq'::regclass)` | `32,0` |
+| `game_id` | `integer` | `YES` | `` | `32,0` |
+| `treatment` | `character varying` | `YES` | `` | `100` |
+| `finish` | `character varying` | `YES` | `` | `50` |
+| `border_color` | `character varying` | `YES` | `` | `50` |
+| `frame_effect` | `character varying` | `YES` | `` | `100` |
+| `promo_type` | `character varying` | `YES` | `` | `100` |
+| `display_text` | `character varying` | `NO` | `` | `200` |
+| `notes` | `text` | `YES` | `` | `` |
+| `active` | `boolean` | `YES` | `true` | `` |
+| `created_at` | `timestamp without time zone` | `YES` | `CURRENT_TIMESTAMP` | `` |
+| `updated_at` | `timestamp without time zone` | `YES` | `CURRENT_TIMESTAMP` | `` |
+
+### Constraints
+
+- **FOREIGN KEY** `variation_display_overrides_game_id_fkey`
+```sql
+FOREIGN KEY (game_id) REFERENCES games(id) ON DELETE CASCADE
+```
+- **PRIMARY KEY** `variation_display_overrides_pkey`
+```sql
+PRIMARY KEY (id)
+```
+- **UNIQUE** `variation_display_overrides_game_id_treatment_finish_border_key`
+```sql
+UNIQUE NULLS NOT DISTINCT (game_id, treatment, finish, border_color, frame_effect, promo_type)
+```
+
+### Foreign Keys
+
+- `game_id` → `games.id` (on update no action, on delete cascade)
+
+### Indexes
+
+- **PRIMARY** **UNIQUE** `variation_display_overrides_pkey`
+```sql
+CREATE UNIQUE INDEX variation_display_overrides_pkey ON public.variation_display_overrides USING btree (id)
+```
+
+-  `idx_variation_overrides_active`
+```sql
+CREATE INDEX idx_variation_overrides_active ON public.variation_display_overrides USING btree (active)
+```
+
+-  `idx_variation_overrides_game`
+```sql
+CREATE INDEX idx_variation_overrides_game ON public.variation_display_overrides USING btree (game_id)
+```
+
+-  `idx_variation_overrides_lookup`
+```sql
+CREATE INDEX idx_variation_overrides_lookup ON public.variation_display_overrides USING btree (game_id, treatment, finish) WHERE (active = true)
+```
+
+-  `idx_variation_overrides_treatment`
+```sql
+CREATE INDEX idx_variation_overrides_treatment ON public.variation_display_overrides USING btree (treatment)
+```
+
+- **UNIQUE** `variation_display_overrides_game_id_treatment_finish_border_key`
+```sql
+CREATE UNIQUE INDEX variation_display_overrides_game_id_treatment_finish_border_key ON public.variation_display_overrides USING btree (game_id, treatment, finish, border_color, frame_effect, promo_type) NULLS NOT DISTINCT
+```
+
+### Sample Rows
+
+```json
+[
+  {
+    "id": 1,
+    "game_id": null,
+    "treatment": "STANDARD",
+    "finish": "nonfoil",
+    "border_color": "black",
+    "frame_effect": null,
+    "promo_type": null,
+    "display_text": "Standard",
+    "notes": null,
+    "active": true,
+    "created_at": "2025-11-05T15:27:54.297Z",
+    "updated_at": "2025-11-05T15:27:54.297Z"
+  },
+  {
+    "id": 3,
+    "game_id": null,
+    "treatment": "STANDARD_SURGEFOIL",
+    "finish": "nonfoil",
+    "border_color": "black",
+    "frame_effect": null,
+    "promo_type": "surgefoil",
+    "display_text": "Standard",
+    "notes": null,
+    "active": true,
+    "created_at": "2025-11-05T15:28:28.245Z",
+    "updated_at": "2025-11-05T15:28:28.245Z"
+  },
+  {
+    "id": 4,
+    "game_id": null,
+    "treatment": "BORDERLESS_INVERTED",
+    "finish": "nonfoil",
+    "border_color": "borderless",
+    "frame_effect": "inverted",
+    "promo_type": null,
+    "display_text": "Borderless",
+    "notes": null,
+    "active": true,
+    "created_at": "2025-11-05T15:28:36.108Z",
+    "updated_at": "2025-11-05T15:28:36.108Z"
+  },
+  {
+    "id": 5,
+    "game_id": null,
+    "treatment": "BORDERLESS_INVERTED",
+    "finish": "foil",
+    "border_color": "borderless",
+    "frame_effect": "inverted",
+    "promo_type": null,
+    "display_text": "Borderless Foil",
+    "notes": null,
+    "active": true,
+    "created_at": "2025-11-05T15:28:44.203Z",
+    "updated_at": "2025-11-05T15:28:44.203Z"
+  },
+  {
+    "id": 6,
+    "game_id": null,
+    "treatment": "EXTENDED",
+    "finish": "nonfoil",
+    "border_color": "black",
+    "frame_effect": "extendedart",
+    "promo_type": null,
+    "display_text": "Extended Art",
+    "notes": null,
+    "active": true,
+    "created_at": "2025-11-05T15:28:48.862Z",
+    "updated_at": "2025-11-05T15:28:48.862Z"
   }
 ]
 ```
