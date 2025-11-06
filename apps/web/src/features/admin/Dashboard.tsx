@@ -217,8 +217,8 @@ const Dashboard = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {activeTab === 'inventory' && <UnifiedCardsTab mode="inventory" />}
-        {activeTab === 'all-cards' && <UnifiedCardsTab mode="all" />}
+        {activeTab === 'inventory' && <UnifiedCardsTab mode="inventory" currency={currency} />}
+        {activeTab === 'all-cards' && <UnifiedCardsTab mode="all" currency={currency} />}
         {activeTab === 'analytics' && <AnalyticsTab />}
         {activeTab === 'orders' && <OrdersTab currency={currency} />}
         {activeTab === 'instructions' && <InstructionsTab />}
