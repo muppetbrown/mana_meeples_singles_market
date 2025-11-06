@@ -481,7 +481,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setSaving(true);
   try {
     const inventoryData = {
-      card_id: addModalCard.id,                         // ✅ card id, not variation id
+      card_id: selectedVariation.id,                    // ✅ Use selected variation's card_id, not base card
       quality: addFormData.quality,
       language: addFormData.language || 'English',
       price: Number.isFinite(parseFloat(addFormData.price))
@@ -502,8 +502,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     closeAddModal();
     handleRefresh();
 
-    // Show success toast notification
-    toast.success(`Successfully added ${addModalCard.name} to inventory! (Qty: ${addFormData.stock_quantity}, Price: $${addFormData.price})`, 4000);
+    // Show success toast notification with variation info
+    const variationLabel = selectedVariation.finish ? `${selectedVariation.finish}` : 'Standard';
+    toast.success(`Successfully added ${addModalCard.name} (${variationLabel}) to inventory! (Qty: ${addFormData.stock_quantity}, Price: $${addFormData.price})`, 4000);
   } catch (err) {
     console.error('Failed to add to inventory:', err);
     alert(err instanceof Error ? err.message : 'Failed to add to inventory. Please try again.');
@@ -543,8 +544,9 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       closeAddModal();
       handleRefresh();
 
-      // Show success toast notification
-      toast.success(`Successfully updated ${addModalCard.name} inventory! (Qty: ${addFormData.stock_quantity}, Price: $${addFormData.price})`, 4000);
+      // Show success toast notification with variation info
+      const variationLabel = selectedVariation?.finish ? `${selectedVariation.finish}` : 'Standard';
+      toast.success(`Successfully updated ${addModalCard.name} (${variationLabel}) inventory! (Qty: ${addFormData.stock_quantity}, Price: $${addFormData.price})`, 4000);
     } catch (err) {
       console.error('Failed to update inventory:', err);
       alert(err instanceof Error ? err.message : 'Failed to update inventory. Please try again.');

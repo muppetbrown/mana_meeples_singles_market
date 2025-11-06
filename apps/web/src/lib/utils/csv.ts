@@ -190,8 +190,9 @@ export const validateInventoryCSV = (data: Record<string, unknown>[]): Validatio
   const warnings: string[] = [];
 
   const requiredFields = ['name', 'set_name', 'quality', 'price', 'stock_quantity'];
-  const optionalFields = ['card_number', 'rarity', 'language', 'game_name'];
+  const optionalFields = ['card_number', 'rarity', 'language', 'game_name', 'finish', 'treatment'];
   const validQualities = ['NM', 'LP', 'MP', 'HP', 'DMG'];
+  const validFinishes = ['nonfoil', 'foil', 'etched'];
 
   if (!Array.isArray(data) || data.length === 0) {
     errors.push('No valid data found in CSV');
@@ -259,6 +260,15 @@ export const validateInventoryCSV = (data: Record<string, unknown>[]): Validatio
     const qualityValue = row?.quality;
     if (qualityValue && !validQualities.includes(String(qualityValue))) {
       errors.push(`Row ${rowNumber}: Invalid quality '${qualityValue}'. Must be one of: ${validQualities.join(', ')}`);
+    }
+
+    // Validate finish (if provided)
+    const finishValue = row?.finish;
+    if (finishValue) {
+      const finish = String(finishValue).toLowerCase();
+      if (!validFinishes.includes(finish) && finish !== '') {
+        warnings.push(`Row ${rowNumber}: Unknown finish '${finishValue}'. Valid values: ${validFinishes.join(', ')}`);
+      }
     }
 
     // Check for suspicious duplicates
