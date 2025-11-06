@@ -189,7 +189,11 @@ async function fetchCardsFromScryfall(setCode: string, onProgress?: (progress: I
       throw new Error(`Scryfall API error: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as {
+      data?: MTGCard[];
+      has_more?: boolean;
+      next_page?: string;
+    };
 
     if (!data.data || data.data.length === 0) {
       if (pageNum === 1) {
@@ -300,6 +304,11 @@ export async function importMTGSet(
         // Get finishes
         const finishes = card.finishes || ['nonfoil'];
 
+        // Debug logging for finishes
+        if (finishes.length > 1) {
+          console.log(`📦 Card "${card.name}" (${card.collector_number}) has ${finishes.length} finishes:`, finishes);
+        }
+
         const specialFoil = card.promo_types?.find((p: string) => SPECIAL_FOILS.includes(p));
         const relevantFrames = card.frame_effects?.filter((e: string) =>
           !IGNORE_FRAME_EFFECTS.includes(e)
@@ -340,6 +349,7 @@ export async function importMTGSet(
               ]
             );
             updated++;
+            console.log(`  ✏️  Updated: ${card.name} (${sku})`);
           } else {
             // Insert new
             await db.query(
@@ -368,6 +378,7 @@ export async function importMTGSet(
               ]
             );
             imported++;
+            console.log(`  ➕ Inserted: ${card.name} (${sku})`);
           }
 
           variations++;
@@ -387,7 +398,10 @@ export async function importMTGSet(
 
       } catch (error: unknown) {
         const message = error instanceof Error ? error.message : String(error);
-        console.error(`Error processing ${card.name}: ${message}`);
+        console.error(`❌ Error processing ${card.name} (#${card.collector_number}): ${message}`);
+        if (error instanceof Error && error.stack) {
+          console.error('Stack trace:', error.stack);
+        }
         skipped++;
       }
     }
@@ -403,6 +417,15 @@ export async function importMTGSet(
     await variationService.analyzeSetVariations(setId, gameId);
     await variationService.analyzeGameVariations(gameId);
     await variationService.refreshVariationFilters();
+
+    // Log final summary
+    console.log(`\n📊 Import Summary:`);
+    console.log(`   Total unique cards processed: ${allCards.length}`);
+    console.log(`   Total variations created: ${variations}`);
+    console.log(`   New cards inserted: ${imported}`);
+    console.log(`   Existing cards updated: ${updated}`);
+    console.log(`   Cards skipped (errors): ${skipped}`);
+    console.log(`   Average variations per card: ${(variations / allCards.length).toFixed(2)}`);
 
     if (onProgress) {
       onProgress({
