@@ -382,7 +382,7 @@ router.get('/filters', async (req: Request, res: Response) => {
     )
     SELECT
       -- Card-level filters (from ALL cards)
-      COALESCE(ARRAY_AGG(DISTINCT c.treatment) FILTER (WHERE c.treatment IS NOT NULL AND c.treatment NOT IN ('surgefoil', 'neonink')), ARRAY[]::text[]) AS treatments,
+      COALESCE(ARRAY_AGG(DISTINCT c.treatment) FILTER (WHERE c.treatment IS NOT NULL), ARRAY[]::text[]) AS treatments,
       COALESCE(ARRAY_AGG(DISTINCT c.finish) FILTER (WHERE c.finish IS NOT NULL), ARRAY[]::text[]) AS finishes,
 
       -- Inventory-level filters (only from cards with inventory)
