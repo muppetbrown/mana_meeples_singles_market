@@ -205,13 +205,38 @@ export function formatTreatment(treatment?: string | null): string {
 
 /**
  * Format finish label for display with smart defaults
- * Example: "nonfoil" → "Regular", "foil" → "Foil"
+ * Example: "nonfoil" → "Regular", "foil" → "Foil", "surgefoil" → "Surgefoil"
  */
 export function formatFinish(finish?: string | null): string {
   if (!finish) return 'Regular';
   const lower = finish.toLowerCase();
-  if (lower.includes('foil') && !lower.includes('non')) return 'Foil';
-  if (lower.includes('etched')) return 'Etched';
+
+  // Handle special foil types first (more specific)
+  if (lower === 'surgefoil') return 'Surgefoil';
+  if (lower === 'galaxyfoil') return 'Galaxyfoil';
+  if (lower === 'fracturefoil') return 'Fracturefoil';
+  if (lower === 'singularityfoil') return 'Singularityfoil';
+  if (lower === 'chocobotrackfoil') return 'Chocobo Track Foil';
+  if (lower === 'cosmicfoil') return 'Cosmicfoil';
+  if (lower === 'halofoil') return 'Halofoil';
+  if (lower === 'textured') return 'Textured';
+  if (lower === 'firstplacefoil') return 'First Place Foil';
+  if (lower === 'rainbowfoil') return 'Rainbowfoil';
+  if (lower === 'dragonscalefoil') return 'Dragonscale Foil';
+  if (lower === 'raisedfoil') return 'Raised Foil';
+  if (lower === 'neonink') return 'Neon Ink';
+
+  // Handle standard finishes
+  if (lower === 'etched') return 'Etched';
+  if (lower === 'foil') return 'Foil';
+  if (lower === 'nonfoil') return 'Regular';
+
+  // Generic foil detection as fallback
+  if (lower.includes('foil') && !lower.includes('non')) {
+    // Capitalize first letter for unknown foil types
+    return finish.charAt(0).toUpperCase() + finish.slice(1).toLowerCase();
+  }
+
   return 'Regular';
 }
 
@@ -220,10 +245,45 @@ export function formatFinish(finish?: string | null): string {
  */
 export function getFinishBadgeStyle(finish?: string | null): string {
   if (!finish) return 'bg-slate-200 text-slate-700';
-  const lowerFinish = finish.toLowerCase();
-  if (lowerFinish.includes('foil') || lowerFinish.includes('etched')) {
+  const lower = finish.toLowerCase();
+
+  // Special foil types get unique gradient styling
+  if (lower === 'surgefoil') {
+    return 'bg-gradient-to-r from-purple-200 to-pink-200 text-purple-900';
+  }
+  if (lower === 'galaxyfoil') {
+    return 'bg-gradient-to-r from-indigo-200 to-purple-200 text-indigo-900';
+  }
+  if (lower === 'fracturefoil') {
+    return 'bg-gradient-to-r from-cyan-200 to-blue-200 text-cyan-900';
+  }
+  if (lower === 'textured') {
+    return 'bg-gradient-to-r from-amber-200 to-orange-200 text-amber-900';
+  }
+  if (lower === 'neonink') {
+    return 'bg-gradient-to-r from-green-200 to-emerald-200 text-green-900';
+  }
+
+  // Other special foils use a premium gradient
+  const specialFoils = [
+    'singularityfoil', 'chocobotrackfoil', 'cosmicfoil', 'halofoil',
+    'firstplacefoil', 'rainbowfoil', 'dragonscalefoil', 'raisedfoil'
+  ];
+  if (specialFoils.includes(lower)) {
+    return 'bg-gradient-to-r from-rose-200 to-amber-200 text-rose-900';
+  }
+
+  // Standard foil and etched
+  if (lower === 'foil' || lower === 'etched') {
     return 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-800';
   }
+
+  // Generic foil detection
+  if (lower.includes('foil') && !lower.includes('non')) {
+    return 'bg-gradient-to-r from-yellow-100 to-amber-100 text-amber-800';
+  }
+
+  // Regular/nonfoil
   return 'bg-slate-200 text-slate-700';
 }
 

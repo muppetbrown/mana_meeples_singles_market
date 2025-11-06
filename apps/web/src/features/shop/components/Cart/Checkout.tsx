@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Mail, Phone, MapPin, CreditCard, User, AlertCircle } from 'lucide-react';
 import { sanitizeText, sanitizeEmail, sanitizePhone, sanitizeAddress, sanitizeHTML, formatCurrencySimple } from '@/lib/utils';
+import { formatFinish } from '@/types';
 import type { Cart, CartItem, Currency } from '@/types';
 
 type CheckoutForm = {
@@ -629,10 +630,10 @@ const Checkout = ({
                     <div>{item.set_name} #{item.card_number}</div>
                     {item.rarity && <div className="text-slate-500">{item.rarity}</div>}
                     <div>{item.quality}</div>
-                    {item.finish && item.finish === 'foil' && (
+                    {item.finish && item.finish.toLowerCase().includes('foil') && !item.finish.toLowerCase().includes('non') && (
                       <div className="flex items-center gap-1">
                         <span>✨</span>
-                        <span className="font-medium text-yellow-600">Foil</span>
+                        <span className="font-medium text-yellow-600">{formatFinish(item.finish)}</span>
                       </div>
                     )}
                     {item.language && item.language !== 'English' && (

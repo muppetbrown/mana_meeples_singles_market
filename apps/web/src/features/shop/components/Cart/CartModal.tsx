@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShoppingCart, X, Plus, Minus } from 'lucide-react';
 import { formatCurrencySimple } from '@/lib/utils';
+import { formatFinish } from '@/types';
 import type { Cart, Currency, CartItem } from '@/types';
 
 interface CartModalProps {
@@ -140,11 +141,11 @@ const CartItemRow: React.FC<CartItemRowProps> = ({
           <div className="font-medium">{item.game_name}</div>
           <div>{item.set_name} #{item.card_number}</div>
           <div>{item.quality}</div>
-          {item.finish && item.finish === 'foil' && (
+          {item.finish && item.finish.toLowerCase().includes('foil') && !item.finish.toLowerCase().includes('non') && (
             <div className="flex items-center gap-1">
               <span>✨</span>
               <span className="font-medium text-yellow-600">
-                Foil
+                {formatFinish(item.finish)}
               </span>
             </div>
           )}
