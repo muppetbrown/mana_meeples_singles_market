@@ -274,19 +274,19 @@ const Checkout = ({
   if (submitted) {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 flex items-center justify-center p-4 animate-fade-in">
-        <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Mail className="w-8 h-8 text-green-600" />
+        <div className="bg-white rounded-2xl shadow-xl border-2 border-mm-warmAccent p-8 max-w-md w-full text-center">
+          <div className="w-16 h-16 bg-mm-tealLight rounded-full flex items-center justify-center mx-auto mb-4 border-2 border-mm-teal">
+            <Mail className="w-8 h-8 text-mm-teal" />
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Order Submitted!</h2>
-          <p className="text-slate-600 mb-6">
+          <h2 className="text-2xl font-bold text-mm-forest mb-2">Order Submitted!</h2>
+          <p className="text-mm-teal mb-6">
             Thank you for your order! We've sent a confirmation email to{' '}
-            <span className="font-medium">{formData.email}</span> and will be in touch shortly
+            <span className="font-semibold text-mm-darkForest">{formData.email}</span> and will be in touch shortly
             to confirm your order and provide payment details.
           </p>
           <button
             onClick={onBack || onClose}
-            className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
+            className="btn-mm-primary w-full"
           >
             Continue Shopping
           </button>
@@ -299,30 +299,30 @@ const Checkout = ({
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-60 overflow-y-auto animate-fade-in">
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-gradient-to-br from-mm-cream to-mm-tealLight">
         {/* Header */}
-        <div className="bg-white shadow-sm border-b">
+        <div className="bg-white shadow-sm border-b-2 border-mm-warmAccent">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 py-4">
             <button
               onClick={onBack || onClose}
-              className="flex items-center gap-2 text-slate-600 hover:text-slate-800 transition-colors"
+              className="flex items-center gap-2 text-mm-teal hover:text-mm-darkForest transition-colors font-medium"
             >
               <ArrowLeft className="w-5 h-5" />
               Back to Cart
             </button>
-            <h1 className="text-2xl font-bold text-slate-900 mt-2">Checkout</h1>
+            <h1 className="text-2xl font-bold bg-gradient-to-r from-mm-gold to-mm-tealBright bg-clip-text text-transparent mt-2">Checkout</h1>
           </div>
         </div>
 
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8">
         <div className="grid lg:grid-cols-2 gap-8">
           {/* Customer Details Form */}
-          <div className="bg-white rounded-xl shadow-sm p-6 border border-slate-200">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">Customer Details</h2>
+          <div className="bg-white rounded-xl shadow-sm p-6 border-2 border-mm-warmAccent">
+            <h2 className="text-xl font-bold text-mm-forest mb-6">Customer Details</h2>
 
             {errors.submit && (
               <div
-                className="mb-4 p-3 rounded-lg border border-red-200 bg-red-50 text-red-800 flex items-start gap-2"
+                className="mb-4 p-3 rounded-lg border-2 border-mm-teal bg-mm-tealLight text-mm-darkForest flex items-start gap-2"
                 role="alert"
                 aria-live="assertive"
               >
@@ -334,13 +334,13 @@ const Checkout = ({
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Contact Information */}
               <div>
-                <h3 className="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                <h3 className="text-lg font-semibold text-mm-forest mb-4 flex items-center gap-2">
                   <User className="w-5 h-5" />
                   Contact Information
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label htmlFor="firstName" className="block text-sm font-medium text-slate-700 mb-1">
+                    <label htmlFor="firstName" className="block text-sm font-medium text-mm-forest mb-1">
                       First Name *
                     </label>
                     <input
@@ -348,14 +348,14 @@ const Checkout = ({
                       id="firstName"
                       value={formData.firstName}
                       onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${
+                      className={`input-mm w-full ${
 
-                        errors.firstName ? 'border-red-500' : 'border-slate-300'
+                        errors.firstName ? 'border-mm-teal' : ''
                       }`}
                       placeholder="John"
                     />
                     {errors.firstName && (
-                      <p className="text-sm text-red-600 mt-1 flex items-center gap-1">
+                      <p className="text-sm text-mm-darkForest font-semibold mt-1 flex items-center gap-1">
                         <AlertCircle className="w-4 h-4" />
                         {errors.firstName}
                       </p>
