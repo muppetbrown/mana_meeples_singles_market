@@ -105,10 +105,16 @@ The system works for any card game:
 5. Delete override to revert to auto-generated text
 
 **Creating Treatment-Level Overrides (for filter dropdowns):**
-To override how a treatment appears in filter dropdowns:
-1. Create an override with only the `treatment` field set
-2. Leave `finish`, `border_color`, `frame_effect`, and `promo_type` as NULL
-3. Example: Set `treatment="BORDERLESS_INVERTED"` with `display_text="Borderless"` to show "Borderless" in all filter dropdowns
+To override how a treatment appears in filter dropdowns, use the command-line tool:
+
+```bash
+npm run add-treatment-override BORDERLESS_INVERTED "Borderless"
+npm run add-treatment-override STANDARD_SURGEFOIL "Standard"
+```
+
+This creates an override where only the `treatment` field is set and all other fields (finish, border_color, frame_effect, promo_type) are NULL.
+
+Result: The treatment dropdown will show "Borderless" instead of "Borderless Inverted".
 
 **Creating Variation-Level Overrides (for badges):**
 To override how a specific variation appears on cards:
