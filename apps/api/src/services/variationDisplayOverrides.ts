@@ -154,27 +154,28 @@ export async function discoverVariationCombinations(gameId?: number): Promise<Va
   const client = await db.getClient();
 
   try {
+    // Normalize values to handle inconsistent casing and whitespace
     const query = gameId
       ? `SELECT
-           treatment,
-           finish,
-           border_color,
-           frame_effect,
-           promo_type,
+           UPPER(TRIM(treatment)) as treatment,
+           LOWER(TRIM(finish)) as finish,
+           LOWER(TRIM(border_color)) as border_color,
+           LOWER(TRIM(frame_effect)) as frame_effect,
+           UPPER(TRIM(promo_type)) as promo_type,
            COUNT(*) as count
          FROM cards
          WHERE game_id = $1
-         GROUP BY treatment, finish, border_color, frame_effect, promo_type
+         GROUP BY UPPER(TRIM(treatment)), LOWER(TRIM(finish)), LOWER(TRIM(border_color)), LOWER(TRIM(frame_effect)), UPPER(TRIM(promo_type))
          ORDER BY count DESC, treatment, finish`
       : `SELECT
-           treatment,
-           finish,
-           border_color,
-           frame_effect,
-           promo_type,
+           UPPER(TRIM(treatment)) as treatment,
+           LOWER(TRIM(finish)) as finish,
+           LOWER(TRIM(border_color)) as border_color,
+           LOWER(TRIM(frame_effect)) as frame_effect,
+           UPPER(TRIM(promo_type)) as promo_type,
            COUNT(*) as count
          FROM cards
-         GROUP BY treatment, finish, border_color, frame_effect, promo_type
+         GROUP BY UPPER(TRIM(treatment)), LOWER(TRIM(finish)), LOWER(TRIM(border_color)), LOWER(TRIM(frame_effect)), UPPER(TRIM(promo_type))
          ORDER BY count DESC, treatment, finish`;
 
     const result = await client.query(query, gameId ? [gameId] : []);
