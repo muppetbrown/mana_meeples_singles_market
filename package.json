@@ -26,7 +26,8 @@
     "generate:admin": "tsx scripts/generate-admin-hash.ts",
     "test:password": "tsx scripts/test-password.ts",
     "count:lines": "tsx scripts/line-lengths.ts --dir ./ --csv --ext ts,tsx",
-    "deps:graph": "tsx scripts/deps-graph.ts --dir ./ --format mermaid"
+    "deps:graph": "tsx scripts/deps-graph.ts --dir ./ --format mermaid",
+    "normalize:variations": "tsx scripts/normalize-variation-data.ts"
   },
   "devDependencies": {
     "@babel/parser": "^7.28.4",

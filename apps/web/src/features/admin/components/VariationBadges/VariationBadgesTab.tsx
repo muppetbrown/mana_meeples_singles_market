@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Loader2, Settings, Pencil, Check, X, AlertCircle } from 'lucide-react';
+import { Loader2, Settings, Pencil, Check, X, AlertCircle, RefreshCw } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
 
 interface VariationCombination {
@@ -148,6 +148,15 @@ export default function VariationBadgesTab() {
               Customize how variation badges are displayed throughout the system
             </p>
           </div>
+          <button
+            onClick={loadCombinations}
+            disabled={loading}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title="Refresh variation combinations"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+            Refresh
+          </button>
         </div>
 
         {/* Filters */}
@@ -336,6 +345,7 @@ export default function VariationBadgesTab() {
               <li>• Click the edit icon to create a custom override for any variation</li>
               <li>• Overrides apply system-wide to all matching cards</li>
               <li>• Delete an override to revert back to auto-generated text</li>
+              <li>• Click "Refresh" to reload variation combinations from the database</li>
             </ul>
           </div>
         </div>

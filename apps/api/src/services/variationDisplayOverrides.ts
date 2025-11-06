@@ -154,27 +154,28 @@ export async function discoverVariationCombinations(gameId?: number): Promise<Va
   const client = await db.getClient();
 
   try {
+    // Normalize values to handle inconsistent casing and whitespace
     const query = gameId
       ? `SELECT
-           treatment,
-           finish,
-           border_color,
-           frame_effect,
-           promo_type,
+           UPPER(TRIM(treatment)) as treatment,
+           LOWER(TRIM(finish)) as finish,
+           LOWER(TRIM(border_color)) as border_color,
+           LOWER(TRIM(frame_effect)) as frame_effect,
+           UPPER(TRIM(promo_type)) as promo_type,
            COUNT(*) as count
          FROM cards
          WHERE game_id = $1
-         GROUP BY treatment, finish, border_color, frame_effect, promo_type
+         GROUP BY UPPER(TRIM(treatment)), LOWER(TRIM(finish)), LOWER(TRIM(border_color)), LOWER(TRIM(frame_effect)), UPPER(TRIM(promo_type))
          ORDER BY count DESC, treatment, finish`
       : `SELECT
-           treatment,
-           finish,
-           border_color,
-           frame_effect,
-           promo_type,
+           UPPER(TRIM(treatment)) as treatment,
+           LOWER(TRIM(finish)) as finish,
+           LOWER(TRIM(border_color)) as border_color,
+           LOWER(TRIM(frame_effect)) as frame_effect,
+           UPPER(TRIM(promo_type)) as promo_type,
            COUNT(*) as count
          FROM cards
-         GROUP BY treatment, finish, border_color, frame_effect, promo_type
+         GROUP BY UPPER(TRIM(treatment)), LOWER(TRIM(finish)), LOWER(TRIM(border_color)), LOWER(TRIM(frame_effect)), UPPER(TRIM(promo_type))
          ORDER BY count DESC, treatment, finish`;
 
     const result = await client.query(query, gameId ? [gameId] : []);
@@ -375,6 +376,48 @@ export async function toggleOverride(id: number, active: boolean): Promise<Varia
     );
 
     return result.rows[0] || null;
+  } finally {
+    client.release();
+  }
+}
+
+/**
+ * Get treatment-level overrides for filter dropdowns
+ * Returns a map of treatment -> display_text for treatments that have overrides
+ * where only treatment is set (finish, border, etc. are NULL)
+ */
+export async function getTreatmentOverrides(gameId?: number | null): Promise<Map<string, string>> {
+  const client = await db.getClient();
+
+  try {
+    const query = `
+      SELECT treatment, display_text
+      FROM variation_display_overrides
+      WHERE active = true
+        AND treatment IS NOT NULL
+        AND finish IS NULL
+        AND border_color IS NULL
+        AND frame_effect IS NULL
+        AND promo_type IS NULL
+        AND (game_id IS NULL OR game_id = $1)
+      ORDER BY
+        (CASE WHEN game_id IS NOT NULL THEN 0 ELSE 1 END)
+    `;
+
+    const result = await client.query<{ treatment: string; display_text: string }>(
+      query,
+      [gameId || null]
+    );
+
+    const overrideMap = new Map<string, string>();
+    for (const row of result.rows) {
+      // Game-specific overrides take precedence (due to ORDER BY)
+      if (!overrideMap.has(row.treatment)) {
+        overrideMap.set(row.treatment, row.display_text);
+      }
+    }
+
+    return overrideMap;
   } finally {
     client.release();
   }

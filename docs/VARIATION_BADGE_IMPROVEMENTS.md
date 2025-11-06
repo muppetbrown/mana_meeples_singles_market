@@ -104,19 +104,32 @@ The system works for any card game:
 4. Add optional notes for why the override was created
 5. Delete override to revert to auto-generated text
 
+**Creating Treatment-Level Overrides (for filter dropdowns):**
+To override how a treatment appears in filter dropdowns:
+1. Create an override with only the `treatment` field set
+2. Leave `finish`, `border_color`, `frame_effect`, and `promo_type` as NULL
+3. Example: Set `treatment="BORDERLESS_INVERTED"` with `display_text="Borderless"` to show "Borderless" in all filter dropdowns
+
+**Creating Variation-Level Overrides (for badges):**
+To override how a specific variation appears on cards:
+1. Set both `treatment` and `finish` (and optionally other fields)
+2. Example: `treatment="BORDERLESS_INVERTED"`, `finish="foil"`, `display_text="Borderless Foil"`
+
 ### For Developers:
-The formatting functions automatically:
-1. Apply smart deduplication (hide redundant info)
-2. Hide "Regular" for special treatments
-3. Check for admin overrides (future enhancement)
+The system automatically:
+1. Applies smart deduplication (hide redundant info)
+2. Hides "Regular" for special treatments
+3. Checks for treatment-level overrides in filter dropdowns
+4. Checks for variation-level overrides in badges
 
 ## Future Enhancements
 
-1. **Override Lookup in Frontend**: Update formatting functions to check API for overrides before displaying
+1. ~~**Override Lookup in Frontend**: Update formatting functions to check API for overrides before displaying~~ ✅ **COMPLETED** - Treatment filter dropdowns now use overrides from the API
 2. **Bulk Override Operations**: Apply same pattern to multiple variations
-3. **Game-Specific Rules**: Define per-game formatting rules
+3. **Game-Specific Rules**: Define per-game formatting rules (partially implemented - overrides can be game-specific)
 4. **Preview Mode**: Show what text will look like before saving
 5. **Import/Export**: Backup and restore override configurations
+6. **Finish-Level Overrides**: Apply overrides to finish filter dropdowns (currently only treatments have this)
 
 ## Files Changed
 
