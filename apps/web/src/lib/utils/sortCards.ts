@@ -43,6 +43,9 @@ function getAlphabeticHeader(name: string): string {
  * Get the card number range header
  */
 function getCardNumberRangeHeader(cardNumber: string): string {
+  // Handle missing or empty card numbers
+  if (!cardNumber) return 'Other';
+
   // Extract numeric value from card number (handles formats like "123", "123a", "P123", etc.)
   const match = cardNumber.match(/\d+/);
   if (!match) return 'Other';
@@ -121,13 +124,17 @@ export function sortCards(
         break;
 
       case 'cardNumber':
+        // Handle missing or empty card numbers
+        const cardNumA = a.card_number || '';
+        const cardNumB = b.card_number || '';
+
         // Extract numeric values for proper numerical sorting
-        const numA = parseInt(a.card_number.match(/\d+/)?.[0] ?? '0', 10);
-        const numB = parseInt(b.card_number.match(/\d+/)?.[0] ?? '0', 10);
+        const numA = parseInt(cardNumA.match(/\d+/)?.[0] ?? '0', 10);
+        const numB = parseInt(cardNumB.match(/\d+/)?.[0] ?? '0', 10);
         comparison = numA - numB;
         // If numeric values are the same, compare full string (handles "123a" vs "123b")
         if (comparison === 0) {
-          comparison = a.card_number.localeCompare(b.card_number, undefined, { numeric: true });
+          comparison = cardNumA.localeCompare(cardNumB, undefined, { numeric: true });
         }
         break;
 

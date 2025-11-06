@@ -156,10 +156,10 @@ const ShopPage: React.FC = () => {
   }, [cards]);
 
   // Sorting state
-  const sortBy = (searchParams.get('sortBy') as 'name' | 'price' | 'set' | 'rarity') || 'name';
+  const sortBy = (searchParams.get('sortBy') as 'name' | 'price' | 'set' | 'rarity' | 'cardNumber') || 'name';
   const sortOrder = (searchParams.get('sortOrder') as 'asc' | 'desc') || 'asc';
 
-  const handleSortByChange = useCallback((newSortBy: 'name' | 'price' | 'set' | 'rarity') => {
+  const handleSortByChange = useCallback((newSortBy: 'name' | 'price' | 'set' | 'rarity' | 'cardNumber') => {
     setSearchParams(prev => {
       const newParams = new URLSearchParams(prev);
       newParams.set('sortBy', newSortBy);
