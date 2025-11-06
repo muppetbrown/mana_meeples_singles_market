@@ -66,8 +66,19 @@ function buildFilterSQL(alias: string, f: CardFilters) {
   }
 
   if (f.treatment) {
-    params.push(f.treatment.toUpperCase());
-    where.push(`${alias}.treatment = $${params.length}`);
+    // Handle comma-separated treatments (for grouped treatments with same display text)
+    const treatments = f.treatment.split(',').map(t => t.trim().toUpperCase());
+    if (treatments.length === 1) {
+      params.push(treatments[0]);
+      where.push(`${alias}.treatment = $${params.length}`);
+    } else {
+      // Multiple treatments - use IN clause
+      const placeholders = treatments.map((t) => {
+        params.push(t);
+        return `$${params.length}`;
+      }).join(', ');
+      where.push(`${alias}.treatment IN (${placeholders})`);
+    }
   }
 
   if (f.finish) {

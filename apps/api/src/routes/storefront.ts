@@ -92,9 +92,21 @@ router.get('/cards', async (req: Request, res: Response) => {
   }
 
   if (treatment) {
-    params.push(treatment.toUpperCase()); // Normalize to uppercase
-    where.push(`c.treatment = $${params.length}`);
-    cteWhere.push(`c.treatment = $${params.length}`);
+    // Handle comma-separated treatments (for grouped treatments with same display text)
+    const treatments = treatment.split(',').map(t => t.trim().toUpperCase());
+    if (treatments.length === 1) {
+      params.push(treatments[0]);
+      where.push(`c.treatment = $${params.length}`);
+      cteWhere.push(`c.treatment = $${params.length}`);
+    } else {
+      // Multiple treatments - use IN clause
+      const placeholders = treatments.map((t, i) => {
+        params.push(t);
+        return `$${params.length}`;
+      }).join(', ');
+      where.push(`c.treatment IN (${placeholders})`);
+      cteWhere.push(`c.treatment IN (${placeholders})`);
+    }
   }
 
   if (finish) {
