@@ -27,6 +27,7 @@ export const CardFiltersQuery = z.object({
   set_id: z.coerce.number().int().positive().optional(),
   set_name: z.string().trim().min(1).optional(),
   treatment: z.string().trim().optional(), // expect canonical UPPERCASE (STANDARD, BORDERLESS, etc.)
+  finish: z.string().trim().optional(), // Card finish (foil, nonfoil, etc.)
   rarity: z.string().trim().optional(),
   search: z.string().trim().optional(),
   has_inventory: z.enum(['true', 'false']).optional(),
@@ -66,6 +67,11 @@ function buildFilterSQL(alias: string, f: CardFilters) {
   if (f.treatment) {
     params.push(f.treatment.toUpperCase());
     where.push(`${alias}.treatment = $${params.length}`);
+  }
+
+  if (f.finish) {
+    params.push(f.finish);
+    where.push(`${alias}.finish = $${params.length}`);
   }
 
   if (f.rarity) {
@@ -129,10 +135,10 @@ router.get("/cards", async (req: Request, res: Response) => {
 
   const { where, joins, params } = buildFilterSQL("c", filters);
   const whereSql = where.length ? `WHERE ${where.join(" AND ")}` : '';
-  
+
   // Use limit if provided, otherwise use per_page with pagination
-  const limitSql = limit 
-    ? `LIMIT ${limit}` 
+  const limitSql = limit
+    ? `LIMIT ${limit}`
     : `LIMIT ${per_page} OFFSET ${(page - 1) * per_page}`;
 
   const sortMap: Record<string, string> = {
@@ -145,12 +151,27 @@ router.get("/cards", async (req: Request, res: Response) => {
   const safeOrder = order.toLowerCase() === "desc" ? "DESC" : "ASC";
   const orderBy = `ORDER BY ${col} ${safeOrder}`;
 
+  // Build Phase 3 filter for inventory views
+  // When has_inventory='true', only show variations that have inventory
+  // Also apply finish filter in Phase 3 to ensure we only get variations with that finish in stock
+  const phase3Where: string[] = [];
+  if (filters.has_inventory === 'true') {
+    phase3Where.push('cia.has_inventory = true');
+
+    // Re-apply finish filter in Phase 3 to only show variations with this finish that have inventory
+    if (filters.finish) {
+      params.push(filters.finish);
+      phase3Where.push(`c.finish = $${params.length}`);
+    }
+  }
+  const phase3WhereSql = phase3Where.length ? `WHERE ${phase3Where.join(" AND ")}` : '';
+
   // ============================================================================
   // FIXED QUERY - ENSURES ALL CARD VARIATIONS ARE RETURNED TOGETHER
   // Uses three-phase approach:
   // 1. Get inventory aggregates per card_id (each variation separately)
   // 2. Get unique card identities with filtering
-  // 3. Get all variations for those identities with per-variation aggregates
+  // 3. Get variations for those identities (ALL for "All Cards", inventory-only for inventory view)
   // ============================================================================
   const sql = `
     WITH card_inventory_aggregates AS (
@@ -219,6 +240,7 @@ router.get("/cards", async (req: Request, res: Response) => {
     JOIN card_sets cs ON cs.id = c.set_id
     LEFT JOIN card_pricing cp ON cp.card_id = c.id
     LEFT JOIN card_inventory_aggregates cia ON cia.card_id = c.id
+    ${phase3WhereSql}  -- Filter variations by inventory when has_inventory='true'
     ${orderBy}  -- Apply ordering to final result
   `;
 

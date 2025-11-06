@@ -44,6 +44,7 @@ export const ENDPOINTS = {
     // Import - New unified import system
     IMPORT_SET: `${BASE_URL}/admin/import/set`,
     IMPORT_GAMES: `${BASE_URL}/admin/import/games`,
+    IMPORT_PROGRESS: (jobId: string) => `${BASE_URL}/admin/import/progress/${jobId}`,
   },
 
   // -------------------- Cards (Admin endpoints) --------------------

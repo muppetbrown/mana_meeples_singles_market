@@ -110,6 +110,12 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
   const [modalMode, setModalMode] = useState<'add' | 'manage'>('add');
   const [managingInventoryId, setManagingInventoryId] = useState<number | undefined>();
 
+  // Track original values when managing inventory (for showing changes in success message)
+  const [originalInventoryValues, setOriginalInventoryValues] = useState<{
+    stock_quantity: number;
+    price: number;
+  } | null>(null);
+
   // --------------------------------------------------------------------------
   // URL PARAMS
   // --------------------------------------------------------------------------
@@ -432,6 +438,12 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setManagingInventoryId(params.inventoryId);
     setAddModalCard(card);
 
+    // Store original values for comparison in success message
+    setOriginalInventoryValues({
+      stock_quantity: params.stock_quantity,
+      price: params.price,
+    });
+
     // Find the variation that matches this inventory
     let selectedVar: BrowseVariation | undefined;
     if (card.variations && card.variations.length > 0) {
@@ -460,6 +472,7 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
     setSelectedVariation(undefined);
     setModalMode('add');
     setManagingInventoryId(undefined);
+    setOriginalInventoryValues(null);
     setAddFormData({
       quality: DEFAULT_QUALITY,
       price: '',
@@ -544,9 +557,35 @@ const UnifiedCardsTab: React.FC<UnifiedCardsTabProps> = ({ mode = 'all' }) => {
       closeAddModal();
       handleRefresh();
 
-      // Show success toast notification with variation info
+      // Show success toast notification with variation info and changes
       const variationLabel = selectedVariation?.finish ? `${selectedVariation.finish}` : 'Standard';
-      toast.success(`Successfully updated ${addModalCard.name} (${variationLabel}) inventory! (Qty: ${addFormData.stock_quantity}, Price: $${addFormData.price})`, 4000);
+      const newStock = addFormData.stock_quantity;
+      const newPrice = parseFloat(addFormData.price);
+
+      // Build message showing what changed
+      let message = `Successfully updated ${addModalCard.name} (${variationLabel}) inventory!`;
+
+      if (originalInventoryValues) {
+        const stockChanged = originalInventoryValues.stock_quantity !== newStock;
+        const priceChanged = Math.abs(originalInventoryValues.price - newPrice) > 0.001;
+
+        if (stockChanged || priceChanged) {
+          message += '\n';
+          if (stockChanged) {
+            message += `Stock: ${originalInventoryValues.stock_quantity} → ${newStock}`;
+          }
+          if (priceChanged) {
+            if (stockChanged) message += ', ';
+            message += `Price: $${originalInventoryValues.price.toFixed(2)} → $${newPrice.toFixed(2)}`;
+          }
+        } else {
+          message += ` (Stock: ${newStock}, Price: $${newPrice.toFixed(2)})`;
+        }
+      } else {
+        message += ` (Stock: ${newStock}, Price: $${newPrice.toFixed(2)})`;
+      }
+
+      toast.success(message, 4000);
     } catch (err) {
       console.error('Failed to update inventory:', err);
       alert(err instanceof Error ? err.message : 'Failed to update inventory. Please try again.');

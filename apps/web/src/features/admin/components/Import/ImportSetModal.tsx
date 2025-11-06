@@ -3,9 +3,11 @@
  *
  * Modal for importing card sets from external sources (Scryfall, etc.)
  * Future-proofed to support multiple games (MTG, Pokemon, One Piece, etc.)
+ *
+ * Features real-time progress tracking via Server-Sent Events (SSE)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, Download, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
 
@@ -14,6 +16,17 @@ interface Game {
   name: string;
   supported: boolean;
   hint?: string;
+}
+
+interface ImportProgress {
+  stage: 'fetching' | 'processing' | 'analyzing' | 'complete' | 'error';
+  message: string;
+  currentCard?: number;
+  totalCards?: number;
+  imported?: number;
+  updated?: number;
+  skipped?: number;
+  percentage?: number;
 }
 
 interface ImportSetModalProps {
@@ -33,6 +46,9 @@ const ImportSetModal: React.FC<ImportSetModalProps> = ({ isOpen, onClose, onSucc
     updated: number;
     skipped: number;
   } | null>(null);
+  const [progress, setProgress] = useState<ImportProgress | null>(null);
+
+  const eventSourceRef = useRef<EventSource | null>(null);
 
   // Load supported games when modal opens
   useEffect(() => {
@@ -57,6 +73,78 @@ const ImportSetModal: React.FC<ImportSetModalProps> = ({ isOpen, onClose, onSucc
     }
   };
 
+  // Cleanup SSE connection on unmount or modal close
+  useEffect(() => {
+    return () => {
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+    };
+  }, []);
+
+  const connectToProgressStream = (jobId: string) => {
+    // Close any existing connection
+    if (eventSourceRef.current) {
+      eventSourceRef.current.close();
+    }
+
+    // Create new SSE connection
+    const eventSource = new EventSource(ENDPOINTS.ADMIN.IMPORT_PROGRESS(jobId));
+    eventSourceRef.current = eventSource;
+
+    eventSource.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+
+        // Update progress
+        if (data.progress) {
+          setProgress(data.progress);
+        }
+
+        // Handle completion
+        if (data.status === 'completed' && data.result) {
+          setSuccess({
+            imported: data.result.imported,
+            updated: data.result.updated,
+            skipped: data.result.skipped,
+          });
+          setLoading(false);
+
+          // Call success callback after a short delay
+          setTimeout(() => {
+            if (onSuccess) {
+              onSuccess();
+            }
+          }, 2000);
+
+          // Close SSE connection
+          eventSource.close();
+        }
+
+        // Handle errors
+        if (data.status === 'failed') {
+          setError(data.error || 'Import failed');
+          setLoading(false);
+          eventSource.close();
+        }
+      } catch (err) {
+        console.error('Failed to parse SSE message:', err);
+      }
+    };
+
+    eventSource.onerror = (err) => {
+      console.error('SSE connection error:', err);
+      eventSource.close();
+
+      // Only show error if we haven't already completed/failed
+      if (loading && !success && !error) {
+        setError('Lost connection to import progress. The import may still be running.');
+        setLoading(false);
+      }
+    };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -68,50 +156,44 @@ const ImportSetModal: React.FC<ImportSetModalProps> = ({ isOpen, onClose, onSucc
     setLoading(true);
     setError(null);
     setSuccess(null);
+    setProgress(null);
 
     try {
+      // Start the import and get job ID
       const response = await api.post<{
         success: boolean;
-        setId: number;
-        stats: {
-          imported: number;
-          updated: number;
-          variations: number;
-          skipped: number;
-        };
+        jobId: string;
       }>(ENDPOINTS.ADMIN.IMPORT_SET, {
         game: selectedGame,
         setCode: setCode.trim(),
       });
 
-      if (response.success) {
-        setSuccess({
-          imported: response.stats.imported,
-          updated: response.stats.updated,
-          skipped: response.stats.skipped,
-        });
-
-        // Call success callback after a short delay to show the success message
-        setTimeout(() => {
-          if (onSuccess) {
-            onSuccess();
-          }
-        }, 2000);
+      if (response.success && response.jobId) {
+        // Connect to progress stream
+        connectToProgressStream(response.jobId);
+      } else {
+        throw new Error('Failed to start import job');
       }
     } catch (err: unknown) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to import set';
       setError(errorMessage);
-    } finally {
       setLoading(false);
     }
   };
 
   const handleClose = () => {
     if (!loading) {
+      // Close SSE connection
+      if (eventSourceRef.current) {
+        eventSourceRef.current.close();
+        eventSourceRef.current = null;
+      }
+
       setSelectedGame('');
       setSetCode('');
       setError(null);
       setSuccess(null);
+      setProgress(null);
       onClose();
     }
   };
@@ -244,13 +326,42 @@ const ImportSetModal: React.FC<ImportSetModalProps> = ({ isOpen, onClose, onSucc
           </div>
         </form>
 
-        {/* Loading Overlay */}
+        {/* Loading Overlay with Progress */}
         {loading && (
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center rounded-lg">
-            <div className="text-center">
-              <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-3" />
-              <p className="text-sm font-medium text-slate-700">Importing cards...</p>
-              <p className="text-xs text-slate-600 mt-1">This may take a few moments</p>
+          <div className="absolute inset-0 bg-white bg-opacity-95 flex items-center justify-center rounded-lg">
+            <div className="w-full max-w-sm px-8">
+              <div className="text-center mb-6">
+                <Loader2 className="w-12 h-12 text-blue-600 animate-spin mx-auto mb-3" />
+                <p className="text-sm font-medium text-slate-700">
+                  {progress?.message || 'Importing cards...'}
+                </p>
+                {progress?.currentCard && progress?.totalCards && (
+                  <p className="text-xs text-slate-600 mt-1">
+                    Processing card {progress.currentCard} of {progress.totalCards}
+                  </p>
+                )}
+              </div>
+
+              {/* Progress Bar */}
+              <div className="space-y-2">
+                <div className="w-full bg-slate-200 rounded-full h-2.5 overflow-hidden">
+                  <div
+                    className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${progress?.percentage || 0}%` }}
+                  />
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-600">
+                  <span className="capitalize">{progress?.stage || 'Starting...'}</span>
+                  <span>{progress?.percentage || 0}%</span>
+                </div>
+                {progress && (progress.imported !== undefined || progress.updated !== undefined || progress.skipped !== undefined) && (
+                  <div className="text-xs text-slate-600 text-center pt-2">
+                    {progress.imported !== undefined && `Imported: ${progress.imported}`}
+                    {progress.updated !== undefined && ` | Updated: ${progress.updated}`}
+                    {progress.skipped !== undefined && ` | Skipped: ${progress.skipped}`}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
