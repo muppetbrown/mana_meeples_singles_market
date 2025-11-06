@@ -31,7 +31,8 @@ export const SortDropdown: React.FC<SortDropdownProps> = ({
     { value: 'name', label: 'Name' },
     { value: 'price', label: 'Price' },
     { value: 'set', label: 'Set' },
-    { value: 'rarity', label: 'Rarity' }
+    { value: 'rarity', label: 'Rarity' },
+    { value: 'cardNumber', label: 'Card Number' }
   ];
 
   const toggleSortOrder = () => {
