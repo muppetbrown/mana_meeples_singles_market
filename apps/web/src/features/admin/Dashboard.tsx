@@ -220,7 +220,7 @@ const Dashboard = () => {
         {activeTab === 'inventory' && <UnifiedCardsTab mode="inventory" />}
         {activeTab === 'all-cards' && <UnifiedCardsTab mode="all" />}
         {activeTab === 'analytics' && <AnalyticsTab />}
-        {activeTab === 'orders' && <OrdersTab />}
+        {activeTab === 'orders' && <OrdersTab currency={currency} />}
         {activeTab === 'instructions' && <InstructionsTab />}
         {activeTab === 'variation-badges' && <VariationBadgesTab />}
       </main>

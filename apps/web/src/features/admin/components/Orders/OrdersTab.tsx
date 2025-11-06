@@ -18,8 +18,9 @@ import {
   Eye
 } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
-import { formatOrderTotal } from '@/lib/utils';
+import { formatPrice } from '@/lib/utils';
 import { UI_TEXT } from '@/lib/constants';
+import type { Currency } from '@/types';
 
 // -------------------- Types --------------------
 interface CustomerData {
@@ -58,9 +59,11 @@ interface Order {
   items?: OrderItem[];
 }
 
-const nzd = new Intl.NumberFormat('en-NZ', { style: 'currency', currency: 'NZD' });
+interface OrdersTabProps {
+  currency: Currency;
+}
 
-const OrdersTab = () => {
+const OrdersTab = ({ currency }: OrdersTabProps) => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -333,7 +336,7 @@ const OrdersTab = () => {
 
                     <div className="text-right">
                       <div className="font-semibold text-slate-900">
-                        {formatOrderTotal(parseFloat(order.total))}
+                        {formatPrice(parseFloat(order.total), currency)}
                       </div>
                       <div className="text-sm text-slate-500">
                         {formatDate(order.created_at)}
@@ -520,8 +523,8 @@ const OrdersTab = () => {
                             </div>
                           </td>
                           <td className="px-4 py-3 text-center">{item.quantity}</td>
-                          <td className="px-4 py-3 text-right">{formatOrderTotal(parseFloat(item.unit_price))}</td>
-                          <td className="px-4 py-3 text-right font-medium">{formatOrderTotal(parseFloat(item.total_price))}</td>
+                          <td className="px-4 py-3 text-right">{formatPrice(parseFloat(item.unit_price), currency)}</td>
+                          <td className="px-4 py-3 text-right font-medium">{formatPrice(parseFloat(item.total_price), currency)}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -530,7 +533,7 @@ const OrdersTab = () => {
                     <div className="flex justify-between items-center">
                       <span className="font-semibold text-slate-900">Order Total:</span>
                       <span className="text-xl font-bold text-slate-900">
-                        {formatOrderTotal(parseFloat(selectedOrder.total))}
+                        {formatPrice(parseFloat(selectedOrder.total), currency)}
                       </span>
                     </div>
                   </div>
