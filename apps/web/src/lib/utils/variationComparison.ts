@@ -50,6 +50,7 @@ export function analyzeVariations(variations: BrowseVariation[]): VariationAnaly
 
 /**
  * Format a variation showing only the different fields
+ * With smart deduplication and concise output
  */
 export function formatVariationDifference(
   variation: BrowseVariation,
@@ -57,26 +58,52 @@ export function formatVariationDifference(
 ): string {
   const parts: string[] = [];
 
-  // If everything is the same, show all fields
+  // If everything is the same, show all fields (with smart formatting)
   if (analysis.allSame || analysis.differentFields.size === 0) {
-    if (variation.treatment) parts.push(formatTreatment(variation.treatment));
-    if (variation.finish) parts.push(formatFinish(variation.finish));
-    if (variation.border_color && variation.border_color !== 'black') {
+    const treatment = formatTreatment(variation.treatment);
+    const finish = formatFinish(variation.finish);
+    const hasSpecialTreatment = treatment !== 'Standard';
+
+    parts.push(treatment);
+
+    // Only show finish if it's NOT "Regular", OR if there's no special treatment
+    if (finish !== 'Regular' || !hasSpecialTreatment) {
+      parts.push(finish);
+    }
+
+    // Only add border if not already in treatment name
+    if (variation.border_color &&
+        variation.border_color !== 'black' &&
+        !treatment.toLowerCase().includes(variation.border_color.toLowerCase())) {
       parts.push(`${variation.border_color} border`);
     }
+
     return parts.join(' ');
   }
 
   // Show only different fields
+  let treatment = '';
+  let finish = '';
+
   if (analysis.differentFields.has('treatment') && variation.treatment) {
-    parts.push(formatTreatment(variation.treatment));
+    treatment = formatTreatment(variation.treatment);
+    parts.push(treatment);
   }
 
   if (analysis.differentFields.has('finish') && variation.finish) {
-    parts.push(formatFinish(variation.finish));
+    finish = formatFinish(variation.finish);
+    const hasSpecialTreatment = treatment && treatment !== 'Standard';
+
+    // Only show Regular if there's no special treatment
+    if (finish !== 'Regular' || !hasSpecialTreatment) {
+      parts.push(finish);
+    }
   }
 
-  if (analysis.differentFields.has('border_color') && variation.border_color && variation.border_color !== 'black') {
+  if (analysis.differentFields.has('border_color') &&
+      variation.border_color &&
+      variation.border_color !== 'black' &&
+      !treatment.toLowerCase().includes(variation.border_color.toLowerCase())) {
     parts.push(`${variation.border_color} border`);
   }
 
