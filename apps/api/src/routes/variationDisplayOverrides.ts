@@ -173,6 +173,40 @@ router.patch('/:id/toggle', async (req, res) => {
 });
 
 /**
+ * Find orphaned overrides (overrides for variations that no longer exist)
+ * GET /api/variation-overrides/orphaned?game_id=1
+ */
+router.get('/orphaned', async (req, res) => {
+  try {
+    const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : undefined;
+    const orphaned = await overrideService.findOrphanedOverrides(gameId);
+    res.json(orphaned);
+  } catch (error) {
+    console.error('Error finding orphaned overrides:', error);
+    res.status(500).json({ error: 'Failed to find orphaned overrides' });
+  }
+});
+
+/**
+ * Delete orphaned overrides (overrides for variations that no longer exist)
+ * DELETE /api/variation-overrides/orphaned?game_id=1
+ */
+router.delete('/orphaned', async (req, res) => {
+  try {
+    const gameId = req.query.game_id ? parseInt(req.query.game_id as string) : undefined;
+    const deletedCount = await overrideService.deleteOrphanedOverrides(gameId);
+    res.json({
+      success: true,
+      message: `Deleted ${deletedCount} orphaned override${deletedCount !== 1 ? 's' : ''}`,
+      count: deletedCount
+    });
+  } catch (error) {
+    console.error('Error deleting orphaned overrides:', error);
+    res.status(500).json({ error: 'Failed to delete orphaned overrides' });
+  }
+});
+
+/**
  * Delete an override
  * DELETE /api/variation-overrides/:id
  */

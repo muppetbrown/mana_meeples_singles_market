@@ -5,7 +5,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { Loader2, Settings, Pencil, Check, X, AlertCircle, RefreshCw } from 'lucide-react';
+import { Loader2, Settings, Pencil, Check, X, AlertCircle, RefreshCw, Trash2 } from 'lucide-react';
 import { api, ENDPOINTS } from '@/lib/api';
 
 interface VariationCombination {
@@ -32,9 +32,12 @@ export default function VariationBadgesTab() {
   const [editNotes, setEditNotes] = useState('');
   const [gameFilter, setGameFilter] = useState<number | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [orphanedCount, setOrphanedCount] = useState(0);
+  const [cleaningUp, setCleaningUp] = useState(false);
 
   useEffect(() => {
     loadCombinations();
+    loadOrphanedCount();
   }, [gameFilter]);
 
   const loadCombinations = async () => {
@@ -50,6 +53,46 @@ export default function VariationBadgesTab() {
       console.error('Failed to load variation combinations:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadOrphanedCount = async () => {
+    try {
+      const url = gameFilter
+        ? `${ENDPOINTS.ADMIN.VARIATION_OVERRIDES}/orphaned?game_id=${gameFilter}`
+        : `${ENDPOINTS.ADMIN.VARIATION_OVERRIDES}/orphaned`;
+
+      const data = await api.get<any[]>(url);
+      setOrphanedCount(data?.length || 0);
+    } catch (error) {
+      console.error('Failed to load orphaned count:', error);
+      setOrphanedCount(0);
+    }
+  };
+
+  const cleanupOrphanedOverrides = async () => {
+    if (!confirm(`Are you sure you want to delete ${orphanedCount} orphaned override${orphanedCount !== 1 ? 's' : ''}? These are overrides for variations that no longer exist in the cards table.`)) {
+      return;
+    }
+
+    try {
+      setCleaningUp(true);
+      const url = gameFilter
+        ? `${ENDPOINTS.ADMIN.VARIATION_OVERRIDES}/orphaned?game_id=${gameFilter}`
+        : `${ENDPOINTS.ADMIN.VARIATION_OVERRIDES}/orphaned`;
+
+      const result = await api.delete<{ success: boolean; message: string; count: number }>(url);
+
+      alert(result.message || `Deleted ${result.count} orphaned overrides`);
+
+      // Reload data
+      await loadCombinations();
+      await loadOrphanedCount();
+    } catch (error) {
+      console.error('Failed to cleanup orphaned overrides:', error);
+      alert('Failed to cleanup orphaned overrides. Please try again.');
+    } finally {
+      setCleaningUp(false);
     }
   };
 
@@ -148,16 +191,48 @@ export default function VariationBadgesTab() {
               Customize how variation badges are displayed throughout the system
             </p>
           </div>
-          <button
-            onClick={loadCombinations}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            title="Refresh variation combinations"
-          >
-            <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-            Refresh
-          </button>
+          <div className="flex items-center gap-2">
+            {orphanedCount > 0 && (
+              <button
+                onClick={cleanupOrphanedOverrides}
+                disabled={cleaningUp}
+                className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                title="Delete orphaned overrides"
+              >
+                <Trash2 className="w-4 h-4" />
+                Clean Up ({orphanedCount})
+              </button>
+            )}
+            <button
+              onClick={() => {
+                loadCombinations();
+                loadOrphanedCount();
+              }}
+              disabled={loading}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              title="Refresh variation combinations"
+            >
+              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+              Refresh
+            </button>
+          </div>
         </div>
+
+        {/* Orphaned Overrides Warning */}
+        {orphanedCount > 0 && (
+          <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div>
+                <h3 className="text-sm font-medium text-amber-900">Orphaned Overrides Found</h3>
+                <p className="text-sm text-amber-800 mt-1">
+                  {orphanedCount} override{orphanedCount !== 1 ? 's' : ''} exist for variations that no longer appear in the cards table.
+                  These overrides won't be used and can be safely removed.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="flex gap-4 mt-4">
@@ -346,6 +421,7 @@ export default function VariationBadgesTab() {
               <li>• Overrides apply system-wide to all matching cards</li>
               <li>• Delete an override to revert back to auto-generated text</li>
               <li>• Click "Refresh" to reload variation combinations from the database</li>
+              <li>• Click "Clean Up" to remove orphaned overrides (overrides for variations that no longer exist)</li>
             </ul>
           </div>
         </div>
