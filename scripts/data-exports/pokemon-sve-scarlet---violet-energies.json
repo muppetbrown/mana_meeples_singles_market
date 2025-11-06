@@ -1,0 +1,650 @@
+[
+  {
+    "id": "sve-3",
+    "name": "Basic Water Energy",
+    "number": "3",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/3.png",
+      "large": "https://images.pokemontcg.io/sve/3_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-3",
+      "updatedAt": "2023/07/20"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-3",
+      "updatedAt": "2023/07/20"
+    },
+    "rarity": "Common",
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-1",
+    "name": "Basic Grass Energy",
+    "number": "1",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/1.png",
+      "large": "https://images.pokemontcg.io/sve/1_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-1",
+      "updatedAt": "2023/07/20"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-1",
+      "updatedAt": "2023/07/20"
+    },
+    "rarity": "Common",
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-7",
+    "name": "Basic Darkness Energy",
+    "number": "7",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/7.png",
+      "large": "https://images.pokemontcg.io/sve/7_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-7",
+      "updatedAt": "2023/07/20"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-7",
+      "updatedAt": "2023/07/20"
+    },
+    "rarity": "Common",
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-4",
+    "name": "Basic Lightning Energy",
+    "number": "4",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/4.png",
+      "large": "https://images.pokemontcg.io/sve/4_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-4",
+      "updatedAt": "2023/07/20"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-4",
+      "updatedAt": "2023/07/20"
+    },
+    "rarity": "Common",
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-8",
+    "name": "Basic Metal Energy",
+    "number": "8",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/8.png",
+      "large": "https://images.pokemontcg.io/sve/8_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-8",
+      "updatedAt": "2023/07/20"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-8",
+      "updatedAt": "2023/07/20"
+    },
+    "rarity": "Common",
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-2",
+    "name": "Basic Fire Energy",
+    "number": "2",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/2.png",
+      "large": "https://images.pokemontcg.io/sve/2_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-2",
+      "updatedAt": "2023/07/20"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-2",
+      "updatedAt": "2023/07/20"
+    },
+    "rarity": "Common",
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-5",
+    "name": "Basic Psychic Energy",
+    "number": "5",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/5.png",
+      "large": "https://images.pokemontcg.io/sve/5_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-5",
+      "updatedAt": "2023/07/20"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-5",
+      "updatedAt": "2023/07/20"
+    },
+    "rarity": "Common",
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-6",
+    "name": "Basic Fighting Energy",
+    "number": "6",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/6.png",
+      "large": "https://images.pokemontcg.io/sve/6_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-6",
+      "updatedAt": "2023/07/20"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-6",
+      "updatedAt": "2023/07/20"
+    },
+    "rarity": "Common",
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-10",
+    "name": "Basic Fire Energy",
+    "number": "10",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [
+      "Fire"
+    ],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/10.png",
+      "large": "https://images.pokemontcg.io/sve/10_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-10",
+      "updatedAt": "2024/09/19"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-10",
+      "updatedAt": "2024/09/19"
+    },
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-11",
+    "name": "Basic Water Energy",
+    "number": "11",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [
+      "Water"
+    ],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/11.png",
+      "large": "https://images.pokemontcg.io/sve/11_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-11",
+      "updatedAt": "2024/09/19"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-11",
+      "updatedAt": "2024/09/19"
+    },
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-12",
+    "name": "Basic Lightning Energy",
+    "number": "12",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [
+      "Lightning"
+    ],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/12.png",
+      "large": "https://images.pokemontcg.io/sve/12_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-12",
+      "updatedAt": "2024/09/19"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-12",
+      "updatedAt": "2024/09/19"
+    },
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-16",
+    "name": "Basic Metal Energy",
+    "number": "16",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [
+      "Metal"
+    ],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/16.png",
+      "large": "https://images.pokemontcg.io/sve/16_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-16",
+      "updatedAt": "2024/09/19"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-16",
+      "updatedAt": "2024/09/19"
+    },
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-9",
+    "name": "Basic Grass Energy",
+    "number": "9",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [
+      "Grass"
+    ],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/9.png",
+      "large": "https://images.pokemontcg.io/sve/9_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-9",
+      "updatedAt": "2024/09/19"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-9",
+      "updatedAt": "2024/09/19"
+    },
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-14",
+    "name": "Basic Fighting Energy",
+    "number": "14",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [
+      "Fighting"
+    ],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/14.png",
+      "large": "https://images.pokemontcg.io/sve/14_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-14",
+      "updatedAt": "2024/09/19"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-14",
+      "updatedAt": "2024/09/19"
+    },
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-13",
+    "name": "Basic Psychic Energy",
+    "number": "13",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [
+      "Psychic"
+    ],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/13.png",
+      "large": "https://images.pokemontcg.io/sve/13_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-13",
+      "updatedAt": "2024/09/19"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-13",
+      "updatedAt": "2024/09/19"
+    },
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  },
+  {
+    "id": "sve-15",
+    "name": "Basic Darkness Energy",
+    "number": "15",
+    "supertype": "Energy",
+    "subtypes": [
+      "Basic"
+    ],
+    "types": [
+      "Darkness"
+    ],
+    "set": {
+      "id": "sve",
+      "name": "Scarlet & Violet Energies",
+      "series": "Scarlet & Violet",
+      "releaseDate": "2023/03/31",
+      "total": 16,
+      "printedTotal": 16
+    },
+    "images": {
+      "small": "https://images.pokemontcg.io/sve/15.png",
+      "large": "https://images.pokemontcg.io/sve/15_hires.png"
+    },
+    "tcgplayer": {
+      "url": "https://prices.pokemontcg.io/tcgplayer/sve-15",
+      "updatedAt": "2024/09/19"
+    },
+    "cardmarket": {
+      "url": "https://prices.pokemontcg.io/cardmarket/sve-15",
+      "updatedAt": "2024/09/19"
+    },
+    "attacks": [],
+    "abilities": [],
+    "rules": [],
+    "nationalPokedexNumbers": [],
+    "legalities": {
+      "unlimited": "Legal",
+      "standard": "Legal",
+      "expanded": "Legal"
+    }
+  }
+]
