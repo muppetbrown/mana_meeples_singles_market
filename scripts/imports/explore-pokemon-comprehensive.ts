@@ -1,17 +1,25 @@
-import 'dotenv/config';
 import { config } from 'dotenv';
-import { resolve } from 'path';
-import { writeFileSync } from 'fs';
-import { mkdirSync } from 'fs';
+import { writeFileSync, mkdirSync } from 'fs';
+import { dirname, join } from 'path';
+import { fileURLToPath } from 'url';
 
-config({ path: resolve(__dirname, '.env') });
+// ES module fix for __dirname
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
-// Retry helper for API calls
-async function fetchWithRetry(url: string, headers: Record<string, string>, maxRetries = 3, delay = 2000) {
+// Load .env from parent directory (scripts folder)
+// This script is in scripts/imports/, .env is in scripts/
+config({ path: join(__dirname, '..', '.env') });
+
+// Retry helper for API calls with longer timeout
+async function fetchWithRetry(url: string, headers: Record<string, string>, maxRetries = 5, delay = 3000) {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 30000);
+      const timeoutId = setTimeout(() => {
+        console.log(`   ⏰ Request timeout after 90 seconds...`);
+        controller.abort();
+      }, 90000); // Increased to 90 seconds
 
       const response = await fetch(url, {
         headers,
@@ -21,11 +29,11 @@ async function fetchWithRetry(url: string, headers: Record<string, string>, maxR
       clearTimeout(timeoutId);
       
       if (!response.ok) {
-        if (response.status === 504 || response.status === 503 || response.status === 502) {
+        if (response.status === 504 || response.status === 503 || response.status === 502 || response.status === 429) {
           if (attempt < maxRetries) {
-            console.log(`   ⏳ Server error (${response.status}), waiting ${delay}ms...`);
+            console.log(`   ⏳ Server error (${response.status}), waiting ${delay}ms before retry...`);
             await new Promise(resolve => setTimeout(resolve, delay));
-            delay *= 2;
+            delay *= 2; // Exponential backoff
             continue;
           }
         }
@@ -34,18 +42,30 @@ async function fetchWithRetry(url: string, headers: Record<string, string>, maxR
       
       return await response.json();
     } catch (err: unknown) {
-      if (attempt === maxRetries) throw err;
+      if (attempt === maxRetries) {
+        console.log(`   ❌ Failed after ${maxRetries} attempts`);
+        throw err;
+      }
+      
       const message = err instanceof Error ? err.message : String(err);
-      console.log(`   ⚠️  ${message}, retrying in ${delay}ms...`);
+      
+      // Special handling for abort errors
+      if (message.includes('aborted') || message.includes('abort')) {
+        console.log(`   ⚠️  Request timed out, attempt ${attempt}/${maxRetries}`);
+      } else {
+        console.log(`   ⚠️  ${message}`);
+      }
+      
+      console.log(`   🔄 Retrying in ${delay}ms...`);
       await new Promise(resolve => setTimeout(resolve, delay));
-      delay *= 2;
+      delay *= 2; // Exponential backoff
     }
   }
 }
 
-// Rate limiter - Pokemon TCG API allows 1000 requests per day (about 1 per 90 seconds to be safe)
-// But we'll be conservative: 1 request per 1 second for pages, with backoff options
-async function rateLimitedDelay(delayMs: number = 1000) {
+// Rate limiter - Being very conservative with Pokemon TCG API
+// Using 2 seconds between page requests to avoid any issues
+async function rateLimitedDelay(delayMs: number = 2000) {
   console.log(`   ⏱️  Waiting ${delayMs}ms (rate limiting)...`);
   await new Promise(resolve => setTimeout(resolve, delayMs));
 }
@@ -54,16 +74,35 @@ async function rateLimitedDelay(delayMs: number = 1000) {
 async function getSetsBySeries(series: string, headers: Record<string, string>) {
   console.log(`\n🔍 Finding sets in series: ${series}`);
   
-  const setsUrl = `https://api.pokemontcg.io/v2/sets?q=series:"${series}"&orderBy=releaseDate`;
-  const data = await fetchWithRetry(setsUrl, headers);
+  // Fetch all sets (the API returns them all, it's not a huge dataset)
+  console.log(`   📡 Fetching all sets from API...`);
+  const allSetsUrl = 'https://api.pokemontcg.io/v2/sets?orderBy=-releaseDate';
+  const data = await fetchWithRetry(allSetsUrl, headers);
   
   if (!data.data || data.data.length === 0) {
-    console.log(`   ⚠️  No sets found for series: ${series}`);
+    console.log(`   ❌ Could not fetch sets from API`);
     return [];
   }
   
-  console.log(`   ✅ Found ${data.data.length} sets in ${series}`);
-  return data.data;
+  console.log(`   ℹ️  Retrieved ${data.data.length} total sets from API`);
+  
+  // Filter by series name (case-insensitive)
+  const filteredSets = data.data.filter((set: any) => {
+    const setSeriesLower = (set.series || '').toLowerCase();
+    const searchSeriesLower = series.toLowerCase();
+    return setSeriesLower === searchSeriesLower || setSeriesLower.includes(searchSeriesLower);
+  });
+  
+  if (filteredSets.length === 0) {
+    console.log(`   ⚠️  No sets found matching series: "${series}"`);
+    console.log(`\n   💡 Available series:`);
+    const uniqueSeries: string[] = [...new Set(data.data.map((s: any) => s.series).filter(Boolean))] as string[];
+    uniqueSeries.slice(0, 10).forEach((s: string) => console.log(`      • ${s}`));
+    return [];
+  }
+  
+  console.log(`   ✅ Found ${filteredSets.length} sets in "${series}"`);
+  return filteredSets;
 }
 
 // Extract the specific fields
@@ -137,7 +176,7 @@ function extractCardData(card: any) {
 }
 
 // Fetch all cards from a specific set
-async function fetchSetCards(setId: string, setName: string, headers: Record<string, string>, delayMs: number = 1000) {
+async function fetchSetCards(setId: string, setName: string, headers: Record<string, string>, delayMs: number = 2000) {
   console.log(`\n📦 Fetching cards from: ${setName} (${setId.toUpperCase()})`);
   
   let allCards: any[] = [];
@@ -305,7 +344,7 @@ async function exploreEra(mode: string, target?: string) {
       
       // Delay between sets to be respectful
       if (setNumber < allSets.length) {
-        await rateLimitedDelay(2000); // 2 second pause between sets
+        await rateLimitedDelay(3000); // 3 second pause between sets
       }
       
     } catch (err: unknown) {
