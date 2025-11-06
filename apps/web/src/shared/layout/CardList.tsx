@@ -47,7 +47,8 @@ import type {
 import {
   analyzeVariations,
   formatVariationDifference,
-  formatVariationFullTitle
+  formatVariationFullTitle,
+  getVariationDisplayText
 } from '@/lib/utils/variationComparison';
 import {
   formatTreatment,
@@ -89,6 +90,32 @@ const CardList: React.FC<CardListProps> = ({
   // IMAGE MODAL STATE
   // --------------------------------------------------------------------------
   const [expandedImage, setExpandedImage] = React.useState<{ url: string; name: string } | null>(null);
+
+  // --------------------------------------------------------------------------
+  // BADGE STATE - Store badges per card to handle async override lookups
+  // --------------------------------------------------------------------------
+  const [cardBadges, setCardBadges] = React.useState<Map<number, VariationBadge[]>>(new Map());
+
+  // --------------------------------------------------------------------------
+  // FETCH BADGES WITH OVERRIDES
+  // --------------------------------------------------------------------------
+  React.useEffect(() => {
+    const loadBadges = async () => {
+      const newBadges = new Map<number, VariationBadge[]>();
+
+      // Load badges for all cards in parallel
+      await Promise.all(
+        cards.map(async (card) => {
+          const badges = await generateVariationBadgesAsync(card);
+          newBadges.set(card.id, badges);
+        })
+      );
+
+      setCardBadges(newBadges);
+    };
+
+    loadBadges();
+  }, [cards, mode]); // Re-fetch when cards or mode changes
 
   // --------------------------------------------------------------------------
   // DATA CONVERSION HELPERS
@@ -167,9 +194,9 @@ const CardList: React.FC<CardListProps> = ({
 
   /**
    * Generate variation badges showing only different fields
-   * FIXED: Now analyzes which fields differ and shows only those
+   * ASYNC VERSION: Fetches overrides from the API
    */
-  const generateVariationBadges = (card: BrowseBaseCard): VariationBadge[] => {
+  const generateVariationBadgesAsync = async (card: BrowseBaseCard): Promise<VariationBadge[]> => {
     const visibleVariations = getVisibleVariations(card);
 
     if (visibleVariations.length === 0) {
@@ -179,27 +206,32 @@ const CardList: React.FC<CardListProps> = ({
     // Analyze which fields are common vs different
     const analysis = analyzeVariations(visibleVariations);
 
-    return visibleVariations.map(variation => {
-      // Use smart formatting that shows only different fields
-      let label = formatVariationDifference(variation, analysis);
+    // Fetch overrides for all variations in parallel
+    const badges = await Promise.all(
+      visibleVariations.map(async (variation) => {
+        // Use the new async function that checks for overrides
+        let label = await getVariationDisplayText(card.game_id, variation, analysis);
 
-      // Add stock count based on mode
-      if (mode !== 'all') {
-        label += ` (${variation.in_stock} in stock)`;
-      }
+        // Add stock count based on mode
+        if (mode !== 'all') {
+          label += ` (${variation.in_stock} in stock)`;
+        }
 
-      // Determine variant based on commonality and stock
-      const variant = determineVariantType(variation, visibleVariations);
+        // Determine variant based on commonality and stock
+        const variant = determineVariantType(variation, visibleVariations);
 
-      // Build hover title with FULL details (always show everything in hover)
-      const title = formatVariationFullTitle(variation);
+        // Build hover title with FULL details (always show everything in hover)
+        const title = formatVariationFullTitle(variation);
 
-      return {
-        label,
-        variant,
-        title
-      };
-    });
+        return {
+          label,
+          variant,
+          title
+        };
+      })
+    );
+
+    return badges;
   };
 
   // --------------------------------------------------------------------------
@@ -306,7 +338,7 @@ const CardList: React.FC<CardListProps> = ({
           <tbody className="divide-y divide-slate-200">
             {cards.map(card => {
               const identity = convertToCardIdentity(card);
-              const badges = generateVariationBadges(card);
+              const badges = cardBadges.get(card.id) || [];
               const rightNode = renderActionButton(card);
 
               return (
@@ -334,7 +366,7 @@ const CardList: React.FC<CardListProps> = ({
       <div className="md:hidden divide-y divide-slate-200">
         {cards.map(card => {
           const identity = convertToCardIdentity(card);
-          const badges = generateVariationBadges(card);
+          const badges = cardBadges.get(card.id) || [];
           const visibleVariations = getVisibleVariations(card);
 
           return (

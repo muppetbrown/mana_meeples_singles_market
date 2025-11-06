@@ -55,6 +55,11 @@ import {
   isFoilCard,
   hasSpecialTreatment
 } from '@/types';
+import {
+  fetchVariationOverride,
+  analyzeVariations,
+  formatVariationDifference
+} from '@/lib/utils/variationComparison';
 
 // ============================================================================
 // TYPES
@@ -123,6 +128,9 @@ const CardItem: React.FC<CardItemProps> = ({
   // State for image modal
   const [showImageModal, setShowImageModal] = useState(false);
 
+  // State for variation display labels (with overrides)
+  const [variationLabels, setVariationLabels] = useState<Map<number, string>>(new Map());
+
   // Close modal on Escape key
   useEffect(() => {
     if (!showImageModal) return;
@@ -136,6 +144,34 @@ const CardItem: React.FC<CardItemProps> = ({
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, [showImageModal]);
+
+  // --------------------------------------------------------------------------
+  // FETCH VARIATION DISPLAY LABELS WITH OVERRIDES
+  // --------------------------------------------------------------------------
+  useEffect(() => {
+    const loadVariationLabels = async () => {
+      const labels = new Map<number, string>();
+      const analysis = analyzeVariations(card.variations);
+
+      // Fetch overrides for all variations in parallel
+      await Promise.all(
+        card.variations.map(async (variation) => {
+          const override = await fetchVariationOverride(card.game_id, variation);
+          if (override) {
+            labels.set(variation.id, override);
+          } else {
+            // Fall back to auto-generated text
+            const autoLabel = formatVariationDifference(variation, analysis);
+            labels.set(variation.id, autoLabel);
+          }
+        })
+      );
+
+      setVariationLabels(labels);
+    };
+
+    loadVariationLabels();
+  }, [card.variations, card.game_id]);
 
   // --------------------------------------------------------------------------
   // FILTER VARIATIONS BASED ON MODE
@@ -243,6 +279,13 @@ const CardItem: React.FC<CardItemProps> = ({
   // --------------------------------------------------------------------------
 
   const formatVariationOption = (variation: BrowseVariation): string => {
+    // Try to get the label from state first (with overrides)
+    const label = variationLabels.get(variation.id);
+    if (label) {
+      return label;
+    }
+
+    // Fallback to old logic if labels haven't loaded yet
     const treatment = formatTreatment(variation.treatment);
     const finish = formatFinish(variation.finish);
     const hasSpecialTreatment = treatment !== 'Standard';
