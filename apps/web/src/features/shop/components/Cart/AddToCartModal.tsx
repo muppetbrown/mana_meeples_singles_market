@@ -225,9 +225,9 @@ export function AddToCartModal({
           {!isLoading && !isError && (
             <form onSubmit={handleConfirm} className="space-y-6">
               {/* Variation Field - Allow selection if multiple variations */}
-              {card.variations.length > 1 ? (
+              {card.variations.filter(v => v.in_stock > 0).length > 1 ? (
                 <VariationField
-                  variations={card.variations.map(v => ({
+                  variations={card.variations.filter(v => v.in_stock > 0).map(v => ({
                     id: v.id,
                     treatment: v.treatment ?? null,
                     finish: v.finish ?? null,
@@ -249,7 +249,7 @@ export function AddToCartModal({
                 />
               ) : (
                 <VariationField
-                  variations={card.variations.map(v => ({
+                  variations={card.variations.filter(v => v.in_stock > 0).map(v => ({
                     id: v.id,
                     treatment: v.treatment ?? null,
                     finish: v.finish ?? null,
