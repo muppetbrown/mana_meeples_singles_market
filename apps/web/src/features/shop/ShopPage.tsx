@@ -25,6 +25,7 @@ import {
   groupCardsForBrowse,
   groupCardsBySort
 } from '@/lib/utils';
+import { formatTreatment, formatFinish } from '@/types/models/card';
 import type { Currency, BrowseBaseCard } from '@/types';
 
 const ShopPage: React.FC = () => {
@@ -134,6 +135,45 @@ const ShopPage: React.FC = () => {
     // Show only sets that belong to the selected game
     return sets.filter(set => set.game_id === selectedGameObj.id);
   }, [selectedGame, sets, games]);
+
+  // Filter treatment and finish options to only show values that have inventory
+  const { filterOptions } = useShopFilters();
+
+  const availableTreatments = useMemo(() => {
+    if (cards.length === 0) return filterOptions.treatments; // Show all on initial load
+
+    // Extract unique treatments from displayed cards
+    const uniqueTreatments = new Set<string>();
+    cards.forEach(card => {
+      if (card.treatment) {
+        uniqueTreatments.add(card.treatment);
+      }
+    });
+
+    // Filter the API's treatment options to only include those present in inventory
+    return filterOptions.treatments.filter(treatment => {
+      // Handle comma-separated values (grouped treatments)
+      const values = treatment.value.split(',');
+      return values.some(val => uniqueTreatments.has(val));
+    });
+  }, [cards, filterOptions.treatments]);
+
+  const availableFinishes = useMemo(() => {
+    if (cards.length === 0) return filterOptions.finishes; // Show all on initial load
+
+    // Extract unique finishes from displayed cards
+    const uniqueFinishes = new Set<string>();
+    cards.forEach(card => {
+      if (card.finish) {
+        uniqueFinishes.add(card.finish);
+      }
+    });
+
+    // Filter the API's finish options to only include those present in inventory
+    return filterOptions.finishes.filter(finish =>
+      uniqueFinishes.has(finish.value)
+    );
+  }, [cards, filterOptions.finishes]);
 
   // Sorting state
   const sortBy = (searchParams.get('sortBy') as 'name' | 'price' | 'set' | 'rarity' | 'cardNumber') || 'name';
@@ -308,6 +348,8 @@ const ShopPage: React.FC = () => {
                   selectedQuality={selectedQuality}
                   availableGames={availableGames}
                   availableSets={availableSets}
+                  availableTreatments={availableTreatments}
+                  availableFinishes={availableFinishes}
                 />
               </div>
             </aside>
