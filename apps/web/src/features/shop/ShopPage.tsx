@@ -234,10 +234,10 @@ const ShopPage: React.FC = () => {
 
   // Show mini cart when items added
   useEffect(() => {
-    if (cart.items.length > 0 && !showCart) {
+    if (cart.itemCount > 0 && !showCart) {
       setShowMiniCart(true);
     }
-  }, [cart, showCart]);
+  }, [cart.itemCount, showCart]);
 
   // Track when cards are successfully loaded
   useEffect(() => {
@@ -529,12 +529,30 @@ const ShopPage: React.FC = () => {
                   return;
                 }
 
+                // Check if this item already exists in cart and validate stock
+                const variationKey = `${inventoryOption.quality}-${inventoryOption.language}`;
+                const existingCartItem = cart.items.find(
+                  item => item.card_id === payload.cardId && item.variation_key === variationKey
+                );
+                const currentQuantityInCart = existingCartItem?.quantity || 0;
+                const totalQuantity = currentQuantityInCart + payload.quantity;
+
+                // Validate against available stock
+                if (totalQuantity > inventoryOption.stock) {
+                  addNotification(
+                    `Cannot add ${payload.quantity} more. Only ${inventoryOption.stock - currentQuantityInCart} available (${currentQuantityInCart} already in cart)`,
+                    'warning',
+                    5000
+                  );
+                  return;
+                }
+
                 // Construct the CartItem with complete information
                 addToCart({
                   card_id: payload.cardId,
                   inventory_id: payload.inventoryId,
                   card_name: card.name,
-                  variation_key: `${inventoryOption.quality}-${inventoryOption.language}`,
+                  variation_key: variationKey,
                   quality: inventoryOption.quality,
                   finish: selectedVariation.finish?.toLowerCase() || 'nonfoil',
                   language: inventoryOption.language,
