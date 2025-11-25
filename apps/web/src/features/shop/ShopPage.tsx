@@ -13,7 +13,6 @@ import {
   ShopFilters,
   ShopCart,
   ShopState,
-  useShopCartUtils,
   AddToCartModal
 } from '@/features/shop/components';
 import { ErrorBoundary, CardGrid, CardList } from '@/shared/layout';
@@ -68,6 +67,7 @@ const ShopPage: React.FC = () => {
 
   const {
     cart,
+    addToCart,
     addNotification
   } = useCart();
 
@@ -84,16 +84,6 @@ const ShopPage: React.FC = () => {
     card: BrowseBaseCard | null;
     selectedVariationId: number | null;
   }>({ open: false, card: null, selectedVariationId: null });
-
-  // Use extracted cart utilities
-  const {
-    cartTotal,
-    cartCount,
-    handleVariationChange,
-    handleAddToCart,
-    selectedVariations,
-    addToCart
-  } = useShopCartUtils(cards);
 
   /**
    * Transform StorefrontCards to BrowseBaseCards for unified display.
