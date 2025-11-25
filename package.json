@@ -19,7 +19,7 @@
     "format": "pnpm -r run format",
     "clean": "pnpm -r run clean && rimraf node_modules .turbo",
     "ci": "pnpm typecheck && pnpm lint && pnpm test:ci && pnpm build",
-    "build:render": "pnpm --filter ./apps/web run build && pnpm --filter ./apps/api run build && node scripts/copy-dist-to-api.js && ls -la apps/api/dist/ && echo '=== Checking for server.js ===' && ls -la apps/api/dist/server.js || echo 'ERROR: server.js not found!'",
+    "build:render": "pnpm --filter ./apps/web run build && pnpm --filter ./apps/api run build && node scripts/copy-dist-to-api.js && test -f apps/api/dist/server.js || (echo 'ERROR: server.js not found after build' && exit 1)",
     "smoke": "node scripts/smoke.mjs",
     "export:schema": "tsx scripts/export-database-schema.ts",
     "debug:admin": "tsx scripts/debug-admin-login.ts",
