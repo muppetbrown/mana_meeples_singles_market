@@ -163,7 +163,7 @@ export function groupCardsForBrowse(cards: Card[]): BrowseBaseCard[] {
       total_stock,
       lowest_price:
         variations
-          .filter(v => (v.in_stock ?? 0) > 0 && typeof v.price === 'number')
+          .filter(v => typeof v.price === 'number' && v.price !== null)
           .map(v => v.price as number)
           .sort((a, b) => a - b)[0] ?? null,
     });
