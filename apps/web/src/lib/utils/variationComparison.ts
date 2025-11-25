@@ -156,6 +156,11 @@ export async function fetchVariationOverride(
     const url = buildUrl(`${ENDPOINTS.ADMIN.VARIATION_OVERRIDES}/lookup`, params);
     const response = await fetch(url);
 
+    // 404 is expected behavior - no override exists for this variation
+    if (response.status === 404) {
+      return null;
+    }
+
     if (response.ok) {
       // Check if the response is actually JSON before parsing
       const contentType = response.headers.get('content-type');
@@ -163,21 +168,21 @@ export async function fetchVariationOverride(
         const data = await response.json();
         return data.display_text || null;
       } else {
-        console.warn('Variation override endpoint returned non-JSON response:', contentType);
+        // Only log warnings for unexpected content types on successful responses
+        console.warn('[Variation Override] Expected JSON but received:', contentType);
         return null;
       }
     }
 
-    // 404 means no override found, which is expected
-    if (response.status === 404) {
-      return null;
+    // Log other error status codes (500, 502, etc.) as they indicate actual problems
+    if (response.status >= 500) {
+      console.error(`[Variation Override] Server error ${response.status} for lookup`);
     }
 
-    // Log other non-ok responses for debugging
-    console.warn(`Variation override lookup returned status ${response.status}`);
     return null;
   } catch (error) {
-    console.error('Error fetching variation override:', error);
+    // Only log actual exceptions (network errors, etc.)
+    console.error('[Variation Override] Request failed:', error);
     return null;
   }
 }
