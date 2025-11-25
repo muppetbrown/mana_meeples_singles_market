@@ -1,8 +1,8 @@
 // apps/web/src/features/shop/components/ShopCart.tsx
 import React, { useMemo, useCallback } from 'react';
 import { CartModal, MiniCart, Checkout } from '@/features/shop/components';
-import { useCart, useVariationSelection } from '@/features/hooks';
-import type { StorefrontCard, CardVariation, CartItem, Currency } from '@/types';
+import { useVariationSelection } from '@/features/hooks';
+import type { StorefrontCard, CardVariation, CartItem, Currency, Cart } from '@/types';
 
 interface ShopCartProps {
   cards: StorefrontCard[];
@@ -13,6 +13,12 @@ interface ShopCartProps {
   setShowMiniCart: (show: boolean) => void;
   showCheckout: boolean;
   setShowCheckout: (show: boolean) => void;
+  // Cart state and functions passed from parent
+  cart: Cart;
+  updateQuantity: (cardId: number, variationKey: string, quantity: number) => void;
+  removeFromCart: (cardId: number, variationKey: string) => void;
+  clearCart: () => void;
+  addNotification: (message: string, type?: 'success' | 'error' | 'warning' | 'info', timeoutMs?: number) => void;
 }
 
 export const ShopCart: React.FC<ShopCartProps> = ({
@@ -23,53 +29,24 @@ export const ShopCart: React.FC<ShopCartProps> = ({
   showMiniCart,
   setShowMiniCart,
   showCheckout,
-  setShowCheckout
+  setShowCheckout,
+  cart,
+  updateQuantity,
+  removeFromCart,
+  clearCart,
+  addNotification
 }) => {
-  const {
-    cart,
-    addToCart,
-    updateQuantity,
-    removeFromCart,
-    clearCart,
-    addNotification
-  } = useCart();
-
-  const { selections, selectVariation } = useVariationSelection(cards);
 
   // Derived state
   const cartTotal = useMemo(() =>
     cart.items.reduce((sum: number, item: CartItem) => sum + (item.price * item.quantity), 0),
-    [cart]
+    [cart.items]
   );
 
   const cartCount = useMemo(() =>
     cart.items.reduce((sum: number, item: CartItem) => sum + item.quantity, 0),
-    [cart]
+    [cart.items]
   );
-
-  // Cart handlers
-  const handleVariationChange = useCallback((cardId: number) => (e: React.ChangeEvent<HTMLSelectElement>) => {
-    selectVariation(cardId, e.target.value);
-  }, [selectVariation]);
-
-  const handleAddToCart = useCallback((card: StorefrontCard, selectedVariation: CardVariation) => () => {
-    addToCart({
-      card_id: card.id,
-      inventory_id: selectedVariation.inventory_id,
-      card_name: card.name,
-      image_url: card.image_url ?? '',
-      quality: selectedVariation.quality,
-      price: selectedVariation.price ?? 0,
-      stock: selectedVariation.stock ?? 0,
-      finish: selectedVariation.finish || 'nonfoil',
-      language: selectedVariation.language || 'English',
-      game_name: card.game_name,
-      set_name: card.set_name,
-      rarity: card.rarity || 'Unknown',
-      card_number: card.card_number,
-      variation_key: `${selectedVariation.quality}-${selectedVariation.finish || 'nonfoil'}-${selectedVariation.language}`
-    });
-  }, [addToCart]);
 
   return (
     <>

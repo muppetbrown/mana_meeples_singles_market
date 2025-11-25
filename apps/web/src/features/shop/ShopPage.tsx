@@ -68,6 +68,9 @@ const ShopPage: React.FC = () => {
   const {
     cart,
     addToCart,
+    updateQuantity,
+    removeFromCart,
+    clearCart,
     addNotification
   } = useCart();
 
@@ -447,6 +450,11 @@ const ShopPage: React.FC = () => {
           setShowMiniCart={setShowMiniCart}
           showCheckout={showCheckout}
           setShowCheckout={setShowCheckout}
+          cart={cart}
+          updateQuantity={updateQuantity}
+          removeFromCart={removeFromCart}
+          clearCart={clearCart}
+          addNotification={addNotification}
         />
 
         {/* UI State Management */}
