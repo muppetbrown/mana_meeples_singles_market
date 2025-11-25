@@ -157,11 +157,24 @@ export async function fetchVariationOverride(
     const response = await fetch(url);
 
     if (response.ok) {
-      const data = await response.json();
-      return data.display_text || null;
+      // Check if the response is actually JSON before parsing
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const data = await response.json();
+        return data.display_text || null;
+      } else {
+        console.warn('Variation override endpoint returned non-JSON response:', contentType);
+        return null;
+      }
     }
 
     // 404 means no override found, which is expected
+    if (response.status === 404) {
+      return null;
+    }
+
+    // Log other non-ok responses for debugging
+    console.warn(`Variation override lookup returned status ${response.status}`);
     return null;
   } catch (error) {
     console.error('Error fetching variation override:', error);
