@@ -188,9 +188,9 @@ const AddToInventoryModal: React.FC<AddToInventoryModalProps> = ({
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Variation Selector */}
-          {card.variations && card.variations.length > 0 && (
+          {card.variations && (mode === 'add' ? card.variations : card.variations.filter(v => v.in_stock > 0)).length > 0 && (
             <VariationField
-              variations={card.variations.map(v => ({
+              variations={(mode === 'add' ? card.variations : card.variations.filter(v => v.in_stock > 0)).map(v => ({
                 id: v.id,
                 treatment: v.treatment ?? null,
                 finish: v.finish ?? null,

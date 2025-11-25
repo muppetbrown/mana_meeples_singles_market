@@ -13,7 +13,6 @@ import {
   ShopFilters,
   ShopCart,
   ShopState,
-  useShopCartUtils,
   AddToCartModal
 } from '@/features/shop/components';
 import { ErrorBoundary, CardGrid, CardList } from '@/shared/layout';
@@ -25,6 +24,7 @@ import {
   groupCardsForBrowse,
   groupCardsBySort
 } from '@/lib/utils';
+import { formatTreatment, formatFinish } from '@/types/models/card';
 import type { Currency, BrowseBaseCard } from '@/types';
 
 const ShopPage: React.FC = () => {
@@ -67,6 +67,7 @@ const ShopPage: React.FC = () => {
 
   const {
     cart,
+    addToCart,
     addNotification
   } = useCart();
 
@@ -83,16 +84,6 @@ const ShopPage: React.FC = () => {
     card: BrowseBaseCard | null;
     selectedVariationId: number | null;
   }>({ open: false, card: null, selectedVariationId: null });
-
-  // Use extracted cart utilities
-  const {
-    cartTotal,
-    cartCount,
-    handleVariationChange,
-    handleAddToCart,
-    selectedVariations,
-    addToCart
-  } = useShopCartUtils(cards);
 
   /**
    * Transform StorefrontCards to BrowseBaseCards for unified display.
@@ -134,6 +125,45 @@ const ShopPage: React.FC = () => {
     // Show only sets that belong to the selected game
     return sets.filter(set => set.game_id === selectedGameObj.id);
   }, [selectedGame, sets, games]);
+
+  // Filter treatment and finish options to only show values that have inventory
+  const { filterOptions } = useShopFilters();
+
+  const availableTreatments = useMemo(() => {
+    if (cards.length === 0) return filterOptions.treatments; // Show all on initial load
+
+    // Extract unique treatments from displayed cards
+    const uniqueTreatments = new Set<string>();
+    cards.forEach(card => {
+      if (card.treatment) {
+        uniqueTreatments.add(card.treatment);
+      }
+    });
+
+    // Filter the API's treatment options to only include those present in inventory
+    return filterOptions.treatments.filter(treatment => {
+      // Handle comma-separated values (grouped treatments)
+      const values = treatment.value.split(',');
+      return values.some(val => uniqueTreatments.has(val));
+    });
+  }, [cards, filterOptions.treatments]);
+
+  const availableFinishes = useMemo(() => {
+    if (cards.length === 0) return filterOptions.finishes; // Show all on initial load
+
+    // Extract unique finishes from displayed cards
+    const uniqueFinishes = new Set<string>();
+    cards.forEach(card => {
+      if (card.finish) {
+        uniqueFinishes.add(card.finish);
+      }
+    });
+
+    // Filter the API's finish options to only include those present in inventory
+    return filterOptions.finishes.filter(finish =>
+      uniqueFinishes.has(finish.value)
+    );
+  }, [cards, filterOptions.finishes]);
 
   // Sorting state
   const sortBy = (searchParams.get('sortBy') as 'name' | 'price' | 'set' | 'rarity' | 'cardNumber') || 'name';
@@ -204,10 +234,10 @@ const ShopPage: React.FC = () => {
 
   // Show mini cart when items added
   useEffect(() => {
-    if (cart.items.length > 0 && !showCart) {
+    if (cart.itemCount > 0 && !showCart) {
       setShowMiniCart(true);
     }
-  }, [cart, showCart]);
+  }, [cart.itemCount, showCart]);
 
   // Track when cards are successfully loaded
   useEffect(() => {
@@ -308,6 +338,8 @@ const ShopPage: React.FC = () => {
                   selectedQuality={selectedQuality}
                   availableGames={availableGames}
                   availableSets={availableSets}
+                  availableTreatments={availableTreatments}
+                  availableFinishes={availableFinishes}
                 />
               </div>
             </aside>
@@ -497,12 +529,30 @@ const ShopPage: React.FC = () => {
                   return;
                 }
 
+                // Check if this item already exists in cart and validate stock
+                const variationKey = `${inventoryOption.quality}-${inventoryOption.language}`;
+                const existingCartItem = cart.items.find(
+                  item => item.card_id === payload.cardId && item.variation_key === variationKey
+                );
+                const currentQuantityInCart = existingCartItem?.quantity || 0;
+                const totalQuantity = currentQuantityInCart + payload.quantity;
+
+                // Validate against available stock
+                if (totalQuantity > inventoryOption.stock) {
+                  addNotification(
+                    `Cannot add ${payload.quantity} more. Only ${inventoryOption.stock - currentQuantityInCart} available (${currentQuantityInCart} already in cart)`,
+                    'warning',
+                    5000
+                  );
+                  return;
+                }
+
                 // Construct the CartItem with complete information
                 addToCart({
                   card_id: payload.cardId,
                   inventory_id: payload.inventoryId,
                   card_name: card.name,
-                  variation_key: `${inventoryOption.quality}-${inventoryOption.language}`,
+                  variation_key: variationKey,
                   quality: inventoryOption.quality,
                   finish: selectedVariation.finish?.toLowerCase() || 'nonfoil',
                   language: inventoryOption.language,

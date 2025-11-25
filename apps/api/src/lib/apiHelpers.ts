@@ -74,12 +74,12 @@ export type AsyncRequestHandler = (
 export function asyncHandler(fn: AsyncRequestHandler) {
   return (req: Request, res: Response, next: NextFunction) => {
     Promise.resolve(fn(req, res, next)).catch((err) => {
-      logger.error('Route handler error', {
+      logger.error({
         method: req.method,
         path: req.path,
         error: err instanceof Error ? err.message : String(err),
         stack: err instanceof Error ? err.stack : undefined,
-      });
+      }, 'Route handler error');
 
       // If response already sent, don't send another
       if (res.headersSent) {
@@ -182,7 +182,7 @@ export function errorResponse(
 ): Response {
   return res.status(statusCode).json({
     error: message,
-    ...(details && { details }),
+    ...(details ? { details } : {}),
   });
 }
 

@@ -154,7 +154,7 @@ function generateSKU(card: MTGCard, treatment: string, finish: string): string {
  */
 async function fetchCardsFromScryfall(setCode: string, onProgress?: (progress: ImportProgress) => void): Promise<MTGCard[]> {
   let allCards: MTGCard[] = [];
-  let nextPage = `https://api.scryfall.com/cards/search?q=set:${setCode}&unique=prints&order=name`;
+  let nextPage: string | null = `https://api.scryfall.com/cards/search?q=set:${setCode}&unique=prints&order=name`;
   let pageNum = 1;
 
   // Fetch all pages from Scryfall API
@@ -187,7 +187,7 @@ async function fetchCardsFromScryfall(setCode: string, onProgress?: (progress: I
 
     allCards = allCards.concat(data.data);
 
-    nextPage = data.has_more ? data.next_page : null;
+    nextPage = data.has_more ? (data.next_page ?? null) : null;
     pageNum++;
 
     if (nextPage) {
