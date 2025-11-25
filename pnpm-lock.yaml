@@ -159,6 +159,9 @@ importers:
       '@types/jsonwebtoken':
         specifier: ^9.0.10
         version: 9.0.10
+      '@types/node':
+        specifier: ^24.10.0
+        version: 24.10.0
       '@types/nodemailer':
         specifier: ^7.0.2
         version: 7.0.2
@@ -211,9 +214,6 @@ importers:
       '@types/dotenv':
         specifier: ^8.2.3
         version: 8.2.3
-      '@types/node':
-        specifier: ^24.10.0
-        version: 24.10.0
       pino-pretty:
         specifier: ^13.1.2
         version: 13.1.2
