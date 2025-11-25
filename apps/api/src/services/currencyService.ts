@@ -51,7 +51,7 @@ async function fetchExchangeRates(): Promise<{ [key: string]: number }> {
       throw new Error(`Exchange rate API returned status ${response.status}`);
     }
 
-    const data: ExchangeRateResponse = await response.json();
+    const data = await response.json() as ExchangeRateResponse;
 
     if (data.result !== 'success') {
       throw new Error('Exchange rate API returned unsuccessful result');
