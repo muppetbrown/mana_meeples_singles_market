@@ -563,10 +563,10 @@ const CardItem: React.FC<CardItemProps> = ({
 
   return (
     <>
-      <div className={`card-mm flex flex-col h-full bg-white border rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all ${
+      <div className={`flex flex-col h-full bg-white border rounded-lg overflow-hidden shadow-sm transition-all ${
         isCardFoil
-          ? 'border-yellow-400 border-2 shadow-yellow-200/50'
-          : 'border-slate-200'
+          ? 'border-yellow-400 border-2 shadow-yellow-200/50 hover:border-yellow-500 hover:shadow-yellow-300/50 hover:shadow-md'
+          : 'border-slate-200 border-2 hover:border-mm-tealBright hover:shadow-md'
       }`}>
         {/* Image Section */}
         <div className="relative flex-shrink-0 bg-slate-50 aspect-[5/7] overflow-hidden">

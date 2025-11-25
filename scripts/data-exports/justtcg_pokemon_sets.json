@@ -1,0 +1,1376 @@
+[
+  {
+    "id": "alternate-art-promos-pokemon",
+    "name": "Alternate Art Promos",
+    "variants_count": 280,
+    "cards_count": 56
+  },
+  {
+    "id": "aquapolis-pokemon",
+    "name": "Aquapolis",
+    "variants_count": 1650,
+    "cards_count": 186
+  },
+  {
+    "id": "arceus-pokemon",
+    "name": "Arceus",
+    "variants_count": 987,
+    "cards_count": 111
+  },
+  {
+    "id": "ash-vs-team-rocket-deck-kit-jp-exclusive-pokemon",
+    "name": "Ash vs Team Rocket Deck Kit (JP Exclusive)",
+    "variants_count": 62,
+    "cards_count": 21
+  },
+  {
+    "id": "base-set-pokemon",
+    "name": "Base Set",
+    "variants_count": 506,
+    "cards_count": 101
+  },
+  {
+    "id": "base-set-2-pokemon",
+    "name": "Base Set 2",
+    "variants_count": 650,
+    "cards_count": 130
+  },
+  {
+    "id": "base-set-shadowless-pokemon",
+    "name": "Base Set (Shadowless)",
+    "variants_count": 1008,
+    "cards_count": 102
+  },
+  {
+    "id": "battle-academy-pokemon",
+    "name": "Battle Academy",
+    "variants_count": 417,
+    "cards_count": 139
+  },
+  {
+    "id": "battle-academy-2022-pokemon",
+    "name": "Battle Academy 2022",
+    "variants_count": 422,
+    "cards_count": 139
+  },
+  {
+    "id": "battle-academy-2024-pokemon",
+    "name": "Battle Academy 2024",
+    "variants_count": 183,
+    "cards_count": 139
+  },
+  {
+    "id": "best-of-promos-pokemon",
+    "name": "Best of Promos",
+    "variants_count": 75,
+    "cards_count": 15
+  },
+  {
+    "id": "black-and-white-pokemon",
+    "name": "Black and White",
+    "variants_count": 1071,
+    "cards_count": 117
+  },
+  {
+    "id": "black-and-white-promos-pokemon",
+    "name": "Black and White Promos",
+    "variants_count": 540,
+    "cards_count": 129
+  },
+  {
+    "id": "blister-exclusives-pokemon",
+    "name": "Blister Exclusives",
+    "variants_count": 610,
+    "cards_count": 131
+  },
+  {
+    "id": "boundaries-crossed-pokemon",
+    "name": "Boundaries Crossed",
+    "variants_count": 1241,
+    "cards_count": 154
+  },
+  {
+    "id": "burger-king-promos-pokemon",
+    "name": "Burger King Promos",
+    "variants_count": 120,
+    "cards_count": 24
+  },
+  {
+    "id": "bw-trainer-kit-excadrill-zoroark-pokemon",
+    "name": "BW Trainer Kit: Excadrill & Zoroark",
+    "variants_count": 184,
+    "cards_count": 60
+  },
+  {
+    "id": "call-of-legends-pokemon",
+    "name": "Call of Legends",
+    "variants_count": 961,
+    "cards_count": 106
+  },
+  {
+    "id": "celebrations-pokemon",
+    "name": "Celebrations",
+    "variants_count": 140,
+    "cards_count": 38
+  },
+  {
+    "id": "celebrations-classic-collection-pokemon",
+    "name": "Celebrations: Classic Collection",
+    "variants_count": 124,
+    "cards_count": 25
+  },
+  {
+    "id": "champion-s-path-pokemon",
+    "name": "Champion's Path",
+    "variants_count": 565,
+    "cards_count": 93
+  },
+  {
+    "id": "countdown-calendar-promos-pokemon",
+    "name": "Countdown Calendar Promos",
+    "variants_count": 73,
+    "cards_count": 24
+  },
+  {
+    "id": "crown-zenith-pokemon",
+    "name": "Crown Zenith",
+    "variants_count": 1027,
+    "cards_count": 179
+  },
+  {
+    "id": "crown-zenith-galarian-gallery-pokemon",
+    "name": "Crown Zenith: Galarian Gallery",
+    "variants_count": 345,
+    "cards_count": 70
+  },
+  {
+    "id": "crystal-guardians-pokemon",
+    "name": "Crystal Guardians",
+    "variants_count": 942,
+    "cards_count": 101
+  },
+  {
+    "id": "dark-explorers-pokemon",
+    "name": "Dark Explorers",
+    "variants_count": 920,
+    "cards_count": 112
+  },
+  {
+    "id": "deck-exclusives-pokemon",
+    "name": "Deck Exclusives",
+    "variants_count": 2022,
+    "cards_count": 474
+  },
+  {
+    "id": "delta-species-pokemon",
+    "name": "Delta Species",
+    "variants_count": 1100,
+    "cards_count": 114
+  },
+  {
+    "id": "deoxys-pokemon",
+    "name": "Deoxys",
+    "variants_count": 1064,
+    "cards_count": 108
+  },
+  {
+    "id": "detective-pikachu-pokemon",
+    "name": "Detective Pikachu",
+    "variants_count": 97,
+    "cards_count": 25
+  },
+  {
+    "id": "diamond-and-pearl-pokemon",
+    "name": "Diamond and Pearl",
+    "variants_count": 1245,
+    "cards_count": 130
+  },
+  {
+    "id": "diamond-and-pearl-promos-pokemon",
+    "name": "Diamond and Pearl Promos",
+    "variants_count": 329,
+    "cards_count": 70
+  },
+  {
+    "id": "double-crisis-pokemon",
+    "name": "Double Crisis",
+    "variants_count": 324,
+    "cards_count": 34
+  },
+  {
+    "id": "dp-trainer-kit-manaphy-lucario-pokemon",
+    "name": "DP Trainer Kit: Manaphy & Lucario",
+    "variants_count": 110,
+    "cards_count": 23
+  },
+  {
+    "id": "dragon-pokemon",
+    "name": "Dragon",
+    "variants_count": 936,
+    "cards_count": 100
+  },
+  {
+    "id": "dragon-frontiers-pokemon",
+    "name": "Dragon Frontiers",
+    "variants_count": 944,
+    "cards_count": 101
+  },
+  {
+    "id": "dragon-majesty-pokemon",
+    "name": "Dragon Majesty",
+    "variants_count": 559,
+    "cards_count": 82
+  },
+  {
+    "id": "dragons-exalted-pokemon",
+    "name": "Dragons Exalted",
+    "variants_count": 1064,
+    "cards_count": 129
+  },
+  {
+    "id": "dragon-vault-pokemon",
+    "name": "Dragon Vault",
+    "variants_count": 106,
+    "cards_count": 22
+  },
+  {
+    "id": "emerald-pokemon",
+    "name": "Emerald",
+    "variants_count": 989,
+    "cards_count": 107
+  },
+  {
+    "id": "emerging-powers-pokemon",
+    "name": "Emerging Powers",
+    "variants_count": 911,
+    "cards_count": 99
+  },
+  {
+    "id": "ex-battle-stadium-pokemon",
+    "name": "EX Battle Stadium",
+    "variants_count": 232,
+    "cards_count": 49
+  },
+  {
+    "id": "expedition-pokemon",
+    "name": "Expedition",
+    "variants_count": 1615,
+    "cards_count": 165
+  },
+  {
+    "id": "ex-trainer-kit-1-latias-latios-pokemon",
+    "name": "EX Trainer Kit 1: Latias & Latios",
+    "variants_count": 100,
+    "cards_count": 20
+  },
+  {
+    "id": "ex-trainer-kit-2-plusle-minun-pokemon",
+    "name": "EX Trainer Kit 2: Plusle & Minun",
+    "variants_count": 120,
+    "cards_count": 24
+  },
+  {
+    "id": "firered-leafgreen-pokemon",
+    "name": "FireRed & LeafGreen",
+    "variants_count": 1152,
+    "cards_count": 116
+  },
+  {
+    "id": "first-partner-pack-pokemon",
+    "name": "First Partner Pack",
+    "variants_count": 79,
+    "cards_count": 24
+  },
+  {
+    "id": "fossil-pokemon",
+    "name": "Fossil",
+    "variants_count": 620,
+    "cards_count": 62
+  },
+  {
+    "id": "generations-pokemon",
+    "name": "Generations",
+    "variants_count": 721,
+    "cards_count": 101
+  },
+  {
+    "id": "generations-radiant-collection-pokemon",
+    "name": "Generations: Radiant Collection",
+    "variants_count": 160,
+    "cards_count": 32
+  },
+  {
+    "id": "great-encounters-pokemon",
+    "name": "Great Encounters",
+    "variants_count": 1022,
+    "cards_count": 106
+  },
+  {
+    "id": "gym-challenge-pokemon",
+    "name": "Gym Challenge",
+    "variants_count": 1308,
+    "cards_count": 133
+  },
+  {
+    "id": "gym-heroes-pokemon",
+    "name": "Gym Heroes",
+    "variants_count": 1310,
+    "cards_count": 132
+  },
+  {
+    "id": "heartgold-soulsilver-pokemon",
+    "name": "HeartGold SoulSilver",
+    "variants_count": 1124,
+    "cards_count": 124
+  },
+  {
+    "id": "hgss-promos-pokemon",
+    "name": "HGSS Promos",
+    "variants_count": 145,
+    "cards_count": 31
+  },
+  {
+    "id": "hgss-trainer-kit-gyarados-raichu-pokemon",
+    "name": "HGSS Trainer Kit: Gyarados & Raichu",
+    "variants_count": 240,
+    "cards_count": 60
+  },
+  {
+    "id": "hidden-fates-pokemon",
+    "name": "Hidden Fates",
+    "variants_count": 487,
+    "cards_count": 78
+  },
+  {
+    "id": "hidden-fates-shiny-vault-pokemon",
+    "name": "Hidden Fates: Shiny Vault",
+    "variants_count": 415,
+    "cards_count": 94
+  },
+  {
+    "id": "hidden-legends-pokemon",
+    "name": "Hidden Legends",
+    "variants_count": 950,
+    "cards_count": 102
+  },
+  {
+    "id": "holon-phantoms-pokemon",
+    "name": "Holon Phantoms",
+    "variants_count": 1042,
+    "cards_count": 111
+  },
+  {
+    "id": "jumbo-cards-pokemon",
+    "name": "Jumbo Cards",
+    "variants_count": 1001,
+    "cards_count": 298
+  },
+  {
+    "id": "jungle-pokemon",
+    "name": "Jungle",
+    "variants_count": 640,
+    "cards_count": 64
+  },
+  {
+    "id": "kalos-starter-set-pokemon",
+    "name": "Kalos Starter Set",
+    "variants_count": 249,
+    "cards_count": 45
+  },
+  {
+    "id": "kids-wb-promos-pokemon",
+    "name": "Kids WB Promos",
+    "variants_count": 13,
+    "cards_count": 5
+  },
+  {
+    "id": "league-championship-cards-pokemon",
+    "name": "League & Championship Cards",
+    "variants_count": 2326,
+    "cards_count": 591
+  },
+  {
+    "id": "legendary-collection-pokemon",
+    "name": "Legendary Collection",
+    "variants_count": 1089,
+    "cards_count": 110
+  },
+  {
+    "id": "legendary-treasures-pokemon",
+    "name": "Legendary Treasures",
+    "variants_count": 1007,
+    "cards_count": 116
+  },
+  {
+    "id": "legendary-treasures-radiant-collection-pokemon",
+    "name": "Legendary Treasures: Radiant Collection",
+    "variants_count": 125,
+    "cards_count": 25
+  },
+  {
+    "id": "legend-maker-pokemon",
+    "name": "Legend Maker",
+    "variants_count": 868,
+    "cards_count": 93
+  },
+  {
+    "id": "legends-awakened-pokemon",
+    "name": "Legends Awakened",
+    "variants_count": 1386,
+    "cards_count": 146
+  },
+  {
+    "id": "majestic-dawn-pokemon",
+    "name": "Majestic Dawn",
+    "variants_count": 946,
+    "cards_count": 100
+  },
+  {
+    "id": "mcdonald-s-25th-anniversary-promos-pokemon",
+    "name": "McDonald's 25th Anniversary Promos",
+    "variants_count": 250,
+    "cards_count": 25
+  },
+  {
+    "id": "mcdonald-s-promos-2011-pokemon",
+    "name": "McDonald's Promos 2011",
+    "variants_count": 60,
+    "cards_count": 12
+  },
+  {
+    "id": "mcdonald-s-promos-2012-pokemon",
+    "name": "McDonald's Promos 2012",
+    "variants_count": 60,
+    "cards_count": 12
+  },
+  {
+    "id": "mcdonald-s-promos-2014-pokemon",
+    "name": "McDonald's Promos 2014",
+    "variants_count": 60,
+    "cards_count": 12
+  },
+  {
+    "id": "mcdonald-s-promos-2015-pokemon",
+    "name": "McDonald's Promos 2015",
+    "variants_count": 60,
+    "cards_count": 12
+  },
+  {
+    "id": "mcdonald-s-promos-2016-pokemon",
+    "name": "McDonald's Promos 2016",
+    "variants_count": 25,
+    "cards_count": 11
+  },
+  {
+    "id": "mcdonald-s-promos-2017-pokemon",
+    "name": "McDonald's Promos 2017",
+    "variants_count": 60,
+    "cards_count": 12
+  },
+  {
+    "id": "mcdonald-s-promos-2018-pokemon",
+    "name": "McDonald's Promos 2018",
+    "variants_count": 60,
+    "cards_count": 12
+  },
+  {
+    "id": "mcdonald-s-promos-2019-pokemon",
+    "name": "McDonald's Promos 2019",
+    "variants_count": 60,
+    "cards_count": 12
+  },
+  {
+    "id": "mcdonald-s-promos-2022-pokemon",
+    "name": "McDonald's Promos 2022",
+    "variants_count": 75,
+    "cards_count": 15
+  },
+  {
+    "id": "mcdonald-s-promos-2023-pokemon",
+    "name": "McDonald's Promos 2023",
+    "variants_count": 71,
+    "cards_count": 15
+  },
+  {
+    "id": "mcdonald-s-promos-2024-pokemon",
+    "name": "McDonald's Promos 2024",
+    "variants_count": 67,
+    "cards_count": 15
+  },
+  {
+    "id": "me01-mega-evolution-pokemon",
+    "name": "ME01: Mega Evolution",
+    "variants_count": 762,
+    "cards_count": 194
+  },
+  {
+    "id": "me02-phantasmal-flames-pokemon",
+    "name": "ME02: Phantasmal Flames",
+    "variants_count": 365,
+    "cards_count": 138
+  },
+  {
+    "id": "mee-mega-evolution-energies-pokemon",
+    "name": "MEE: Mega Evolution Energies",
+    "variants_count": 16,
+    "cards_count": 8
+  },
+  {
+    "id": "me-mega-evolution-promo-pokemon",
+    "name": "ME: Mega Evolution Promo",
+    "variants_count": 93,
+    "cards_count": 35
+  },
+  {
+    "id": "miscellaneous-cards-products-pokemon",
+    "name": "Miscellaneous Cards & Products",
+    "variants_count": 2195,
+    "cards_count": 762
+  },
+  {
+    "id": "my-first-battle-pokemon",
+    "name": "My First Battle",
+    "variants_count": 99,
+    "cards_count": 48
+  },
+  {
+    "id": "mysterious-treasures-pokemon",
+    "name": "Mysterious Treasures",
+    "variants_count": 1212,
+    "cards_count": 124
+  },
+  {
+    "id": "neo-destiny-pokemon",
+    "name": "Neo Destiny",
+    "variants_count": 1082,
+    "cards_count": 113
+  },
+  {
+    "id": "neo-discovery-pokemon",
+    "name": "Neo Discovery",
+    "variants_count": 731,
+    "cards_count": 75
+  },
+  {
+    "id": "neo-genesis-pokemon",
+    "name": "Neo Genesis",
+    "variants_count": 1106,
+    "cards_count": 111
+  },
+  {
+    "id": "neo-revelation-pokemon",
+    "name": "Neo Revelation",
+    "variants_count": 657,
+    "cards_count": 66
+  },
+  {
+    "id": "next-destinies-pokemon",
+    "name": "Next Destinies",
+    "variants_count": 882,
+    "cards_count": 108
+  },
+  {
+    "id": "nintendo-promos-pokemon",
+    "name": "Nintendo Promos",
+    "variants_count": 344,
+    "cards_count": 79
+  },
+  {
+    "id": "noble-victories-pokemon",
+    "name": "Noble Victories",
+    "variants_count": 867,
+    "cards_count": 103
+  },
+  {
+    "id": "pikachu-world-collection-promos-pokemon",
+    "name": "Pikachu World Collection Promos",
+    "variants_count": 80,
+    "cards_count": 18
+  },
+  {
+    "id": "plasma-blast-pokemon",
+    "name": "Plasma Blast",
+    "variants_count": 895,
+    "cards_count": 107
+  },
+  {
+    "id": "plasma-freeze-pokemon",
+    "name": "Plasma Freeze",
+    "variants_count": 1016,
+    "cards_count": 123
+  },
+  {
+    "id": "plasma-storm-pokemon",
+    "name": "Plasma Storm",
+    "variants_count": 1154,
+    "cards_count": 139
+  },
+  {
+    "id": "platinum-pokemon",
+    "name": "Platinum",
+    "variants_count": 1235,
+    "cards_count": 133
+  },
+  {
+    "id": "pokemon-go-pokemon",
+    "name": "Pokemon GO",
+    "variants_count": 647,
+    "cards_count": 108
+  },
+  {
+    "id": "pop-series-1-pokemon",
+    "name": "POP Series 1",
+    "variants_count": 120,
+    "cards_count": 19
+  },
+  {
+    "id": "pop-series-2-pokemon",
+    "name": "POP Series 2",
+    "variants_count": 120,
+    "cards_count": 18
+  },
+  {
+    "id": "pop-series-3-pokemon",
+    "name": "POP Series 3",
+    "variants_count": 116,
+    "cards_count": 18
+  },
+  {
+    "id": "pop-series-4-pokemon",
+    "name": "POP Series 4",
+    "variants_count": 107,
+    "cards_count": 17
+  },
+  {
+    "id": "pop-series-5-pokemon",
+    "name": "POP Series 5",
+    "variants_count": 108,
+    "cards_count": 17
+  },
+  {
+    "id": "pop-series-6-pokemon",
+    "name": "POP Series 6",
+    "variants_count": 119,
+    "cards_count": 18
+  },
+  {
+    "id": "pop-series-7-pokemon",
+    "name": "POP Series 7",
+    "variants_count": 115,
+    "cards_count": 17
+  },
+  {
+    "id": "pop-series-8-pokemon",
+    "name": "POP Series 8",
+    "variants_count": 148,
+    "cards_count": 18
+  },
+  {
+    "id": "pop-series-9-pokemon",
+    "name": "POP Series 9",
+    "variants_count": 110,
+    "cards_count": 17
+  },
+  {
+    "id": "power-keepers-pokemon",
+    "name": "Power Keepers",
+    "variants_count": 990,
+    "cards_count": 108
+  },
+  {
+    "id": "prize-pack-series-cards-pokemon",
+    "name": "Prize Pack Series Cards",
+    "variants_count": 2261,
+    "cards_count": 652
+  },
+  {
+    "id": "professor-program-promos-pokemon",
+    "name": "Professor Program Promos",
+    "variants_count": 118,
+    "cards_count": 43
+  },
+  {
+    "id": "rising-rivals-pokemon",
+    "name": "Rising Rivals",
+    "variants_count": 1071,
+    "cards_count": 120
+  },
+  {
+    "id": "ruby-and-sapphire-pokemon",
+    "name": "Ruby and Sapphire",
+    "variants_count": 1050,
+    "cards_count": 109
+  },
+  {
+    "id": "rumble-pokemon",
+    "name": "Rumble",
+    "variants_count": 81,
+    "cards_count": 16
+  },
+  {
+    "id": "sandstorm-pokemon",
+    "name": "Sandstorm",
+    "variants_count": 952,
+    "cards_count": 100
+  },
+  {
+    "id": "secret-wonders-pokemon",
+    "name": "Secret Wonders",
+    "variants_count": 1285,
+    "cards_count": 132
+  },
+  {
+    "id": "shining-fates-pokemon",
+    "name": "Shining Fates",
+    "variants_count": 472,
+    "cards_count": 88
+  },
+  {
+    "id": "shining-fates-shiny-vault-pokemon",
+    "name": "Shining Fates: Shiny Vault",
+    "variants_count": 526,
+    "cards_count": 122
+  },
+  {
+    "id": "shining-legends-pokemon",
+    "name": "Shining Legends",
+    "variants_count": 588,
+    "cards_count": 87
+  },
+  {
+    "id": "skyridge-pokemon",
+    "name": "Skyridge",
+    "variants_count": 1417,
+    "cards_count": 182
+  },
+  {
+    "id": "sm-base-set-pokemon",
+    "name": "SM Base Set",
+    "variants_count": 1353,
+    "cards_count": 179
+  },
+  {
+    "id": "sm---burning-shadows-pokemon",
+    "name": "SM - Burning Shadows",
+    "variants_count": 9,
+    "cards_count": 9
+  },
+  {
+    "id": "sm-burning-shadows-pokemon",
+    "name": "SM - Burning Shadows",
+    "variants_count": 1187,
+    "cards_count": 174
+  },
+  {
+    "id": "sm---celestial-storm-pokemon",
+    "name": "SM - Celestial Storm",
+    "variants_count": 10,
+    "cards_count": 9
+  },
+  {
+    "id": "sm-celestial-storm-pokemon",
+    "name": "SM - Celestial Storm",
+    "variants_count": 1412,
+    "cards_count": 189
+  },
+  {
+    "id": "sm---cosmic-eclipse-pokemon",
+    "name": "SM - Cosmic Eclipse",
+    "variants_count": 4,
+    "cards_count": 4
+  },
+  {
+    "id": "sm-cosmic-eclipse-pokemon",
+    "name": "SM - Cosmic Eclipse",
+    "variants_count": 1777,
+    "cards_count": 274
+  },
+  {
+    "id": "sm---crimson-invasion-pokemon",
+    "name": "SM - Crimson Invasion",
+    "variants_count": 4,
+    "cards_count": 4
+  },
+  {
+    "id": "sm-crimson-invasion-pokemon",
+    "name": "SM - Crimson Invasion",
+    "variants_count": 913,
+    "cards_count": 130
+  },
+  {
+    "id": "sm---forbidden-light-pokemon",
+    "name": "SM - Forbidden Light",
+    "variants_count": 1,
+    "cards_count": 1
+  },
+  {
+    "id": "sm-forbidden-light-pokemon",
+    "name": "SM - Forbidden Light",
+    "variants_count": 1041,
+    "cards_count": 149
+  },
+  {
+    "id": "sm---guardians-rising-pokemon",
+    "name": "SM - Guardians Rising",
+    "variants_count": 19,
+    "cards_count": 19
+  },
+  {
+    "id": "sm-guardians-rising-pokemon",
+    "name": "SM - Guardians Rising",
+    "variants_count": 1270,
+    "cards_count": 176
+  },
+  {
+    "id": "sm---lost-thunder-pokemon",
+    "name": "SM - Lost Thunder",
+    "variants_count": 0,
+    "cards_count": 0
+  },
+  {
+    "id": "sm-lost-thunder-pokemon",
+    "name": "SM - Lost Thunder",
+    "variants_count": 1654,
+    "cards_count": 241
+  },
+  {
+    "id": "sm-promos-pokemon",
+    "name": "SM Promos",
+    "variants_count": 1475,
+    "cards_count": 326
+  },
+  {
+    "id": "sm---team-up-pokemon",
+    "name": "SM - Team Up",
+    "variants_count": 3,
+    "cards_count": 3
+  },
+  {
+    "id": "sm-team-up-pokemon",
+    "name": "SM - Team Up",
+    "variants_count": 1452,
+    "cards_count": 208
+  },
+  {
+    "id": "sm-trainer-kit-alolan-sandslash-alolan-ninetales-pokemon",
+    "name": "SM Trainer Kit: Alolan Sandslash & Alolan Ninetales",
+    "variants_count": 204,
+    "cards_count": 60
+  },
+  {
+    "id": "sm-trainer-kit-lycanroc-alolan-raichu-pokemon",
+    "name": "SM Trainer Kit: Lycanroc & Alolan Raichu",
+    "variants_count": 172,
+    "cards_count": 60
+  },
+  {
+    "id": "sm---ultra-prism-pokemon",
+    "name": "SM - Ultra Prism",
+    "variants_count": 2,
+    "cards_count": 2
+  },
+  {
+    "id": "sm-ultra-prism-pokemon",
+    "name": "SM - Ultra Prism",
+    "variants_count": 1234,
+    "cards_count": 175
+  },
+  {
+    "id": "sm---unbroken-bonds-pokemon",
+    "name": "SM - Unbroken Bonds",
+    "variants_count": 3,
+    "cards_count": 3
+  },
+  {
+    "id": "sm-unbroken-bonds-pokemon",
+    "name": "SM - Unbroken Bonds",
+    "variants_count": 1589,
+    "cards_count": 237
+  },
+  {
+    "id": "sm---unified-minds-pokemon",
+    "name": "SM - Unified Minds",
+    "variants_count": 5,
+    "cards_count": 5
+  },
+  {
+    "id": "sm-unified-minds-pokemon",
+    "name": "SM - Unified Minds",
+    "variants_count": 1644,
+    "cards_count": 260
+  },
+  {
+    "id": "southern-islands-pokemon",
+    "name": "Southern Islands",
+    "variants_count": 90,
+    "cards_count": 18
+  },
+  {
+    "id": "stormfront-pokemon",
+    "name": "Stormfront",
+    "variants_count": 978,
+    "cards_count": 106
+  },
+  {
+    "id": "supreme-victors-pokemon",
+    "name": "Supreme Victors",
+    "variants_count": 1408,
+    "cards_count": 153
+  },
+  {
+    "id": "sv01-scarlet-violet-base-set-pokemon",
+    "name": "SV01: Scarlet & Violet Base Set",
+    "variants_count": 1614,
+    "cards_count": 272
+  },
+  {
+    "id": "sv02-paldea-evolved-pokemon",
+    "name": "SV02: Paldea Evolved",
+    "variants_count": 1656,
+    "cards_count": 288
+  },
+  {
+    "id": "sv03-obsidian-flames-pokemon",
+    "name": "SV03: Obsidian Flames",
+    "variants_count": 1427,
+    "cards_count": 238
+  },
+  {
+    "id": "sv04-paradox-rift-pokemon",
+    "name": "SV04: Paradox Rift",
+    "variants_count": 1555,
+    "cards_count": 276
+  },
+  {
+    "id": "sv05-temporal-forces-pokemon",
+    "name": "SV05: Temporal Forces",
+    "variants_count": 1201,
+    "cards_count": 229
+  },
+  {
+    "id": "sv06-twilight-masquerade-pokemon",
+    "name": "SV06: Twilight Masquerade",
+    "variants_count": 1250,
+    "cards_count": 237
+  },
+  {
+    "id": "sv07-stellar-crown-pokemon",
+    "name": "SV07: Stellar Crown",
+    "variants_count": 918,
+    "cards_count": 187
+  },
+  {
+    "id": "sv08-surging-sparks-pokemon",
+    "name": "SV08: Surging Sparks",
+    "variants_count": 1267,
+    "cards_count": 262
+  },
+  {
+    "id": "sv09-journey-together-pokemon",
+    "name": "SV09: Journey Together",
+    "variants_count": 960,
+    "cards_count": 197
+  },
+  {
+    "id": "sv10-destined-rivals-pokemon",
+    "name": "SV10: Destined Rivals",
+    "variants_count": 1194,
+    "cards_count": 256
+  },
+  {
+    "id": "sv-black-bolt-pokemon",
+    "name": "SV: Black Bolt",
+    "variants_count": 1029,
+    "cards_count": 332
+  },
+  {
+    "id": "sve-scarlet-violet-energies-pokemon",
+    "name": "SVE: Scarlet & Violet Energies",
+    "variants_count": 168,
+    "cards_count": 40
+  },
+  {
+    "id": "sv-paldean-fates-pokemon",
+    "name": "SV: Paldean Fates",
+    "variants_count": 1204,
+    "cards_count": 258
+  },
+  {
+    "id": "sv-prismatic-evolutions-pokemon",
+    "name": "SV: Prismatic Evolutions",
+    "variants_count": 1470,
+    "cards_count": 356
+  },
+  {
+    "id": "sv-scarlet-violet-151-pokemon",
+    "name": "SV: Scarlet & Violet 151",
+    "variants_count": 1371,
+    "cards_count": 215
+  },
+  {
+    "id": "sv-scarlet-violet-promo-cards-pokemon",
+    "name": "SV: Scarlet & Violet Promo Cards",
+    "variants_count": 1154,
+    "cards_count": 280
+  },
+  {
+    "id": "sv-shrouded-fable-pokemon",
+    "name": "SV: Shrouded Fable",
+    "variants_count": 550,
+    "cards_count": 114
+  },
+  {
+    "id": "sv-white-flare-pokemon",
+    "name": "SV: White Flare",
+    "variants_count": 982,
+    "cards_count": 330
+  },
+  {
+    "id": "swsh01-sword-shield-base-set-pokemon",
+    "name": "SWSH01: Sword & Shield Base Set",
+    "variants_count": 1485,
+    "cards_count": 239
+  },
+  {
+    "id": "swsh02-rebel-clash-pokemon",
+    "name": "SWSH02: Rebel Clash",
+    "variants_count": 1292,
+    "cards_count": 218
+  },
+  {
+    "id": "swsh03-darkness-ablaze-pokemon",
+    "name": "SWSH03: Darkness Ablaze",
+    "variants_count": 1253,
+    "cards_count": 213
+  },
+  {
+    "id": "swsh04-vivid-voltage-pokemon",
+    "name": "SWSH04: Vivid Voltage",
+    "variants_count": 1293,
+    "cards_count": 216
+  },
+  {
+    "id": "swsh05-battle-styles-pokemon",
+    "name": "SWSH05: Battle Styles",
+    "variants_count": 1106,
+    "cards_count": 198
+  },
+  {
+    "id": "swsh06-chilling-reign-pokemon",
+    "name": "SWSH06: Chilling Reign",
+    "variants_count": 1388,
+    "cards_count": 247
+  },
+  {
+    "id": "swsh07-evolving-skies-pokemon",
+    "name": "SWSH07: Evolving Skies",
+    "variants_count": 1418,
+    "cards_count": 254
+  },
+  {
+    "id": "swsh08-fusion-strike-pokemon",
+    "name": "SWSH08: Fusion Strike",
+    "variants_count": 1758,
+    "cards_count": 296
+  },
+  {
+    "id": "swsh09-brilliant-stars-pokemon",
+    "name": "SWSH09: Brilliant Stars",
+    "variants_count": 1257,
+    "cards_count": 206
+  },
+  {
+    "id": "swsh09-brilliant-stars-trainer-gallery-pokemon",
+    "name": "SWSH09: Brilliant Stars Trainer Gallery",
+    "variants_count": 150,
+    "cards_count": 30
+  },
+  {
+    "id": "swsh10-astral-radiance-pokemon",
+    "name": "SWSH10: Astral Radiance",
+    "variants_count": 1404,
+    "cards_count": 225
+  },
+  {
+    "id": "swsh10-astral-radiance-trainer-gallery-pokemon",
+    "name": "SWSH10: Astral Radiance Trainer Gallery",
+    "variants_count": 149,
+    "cards_count": 30
+  },
+  {
+    "id": "swsh11-lost-origin-pokemon",
+    "name": "SWSH11: Lost Origin",
+    "variants_count": 1405,
+    "cards_count": 231
+  },
+  {
+    "id": "swsh11-lost-origin-trainer-gallery-pokemon",
+    "name": "SWSH11: Lost Origin Trainer Gallery",
+    "variants_count": 147,
+    "cards_count": 30
+  },
+  {
+    "id": "swsh12-silver-tempest-pokemon",
+    "name": "SWSH12: Silver Tempest",
+    "variants_count": 1345,
+    "cards_count": 224
+  },
+  {
+    "id": "swsh12-silver-tempest-trainer-gallery-pokemon",
+    "name": "SWSH12: Silver Tempest Trainer Gallery",
+    "variants_count": 149,
+    "cards_count": 30
+  },
+  {
+    "id": "swsh-sword-shield-promo-cards-pokemon",
+    "name": "SWSH: Sword & Shield Promo Cards",
+    "variants_count": 1523,
+    "cards_count": 342
+  },
+  {
+    "id": "team-magma-vs-team-aqua-pokemon",
+    "name": "Team Magma vs Team Aqua",
+    "variants_count": 889,
+    "cards_count": 97
+  },
+  {
+    "id": "team-rocket-pokemon",
+    "name": "Team Rocket",
+    "variants_count": 830,
+    "cards_count": 83
+  },
+  {
+    "id": "team-rocket-returns-pokemon",
+    "name": "Team Rocket Returns",
+    "variants_count": 1040,
+    "cards_count": 110
+  },
+  {
+    "id": "trading-card-game-classic-pokemon",
+    "name": "Trading Card Game Classic",
+    "variants_count": 238,
+    "cards_count": 102
+  },
+  {
+    "id": "trick-or-trade-booster-bundle-pokemon",
+    "name": "Trick or Trade BOOster Bundle",
+    "variants_count": 128,
+    "cards_count": 30
+  },
+  {
+    "id": "trick-or-trade-booster-bundle-2023-pokemon",
+    "name": "Trick or Trade BOOster Bundle 2023",
+    "variants_count": 114,
+    "cards_count": 30
+  },
+  {
+    "id": "trick-or-trade-booster-bundle-2024-pokemon",
+    "name": "Trick or Trade BOOster Bundle 2024",
+    "variants_count": 87,
+    "cards_count": 30
+  },
+  {
+    "id": "triumphant-pokemon",
+    "name": "Triumphant",
+    "variants_count": 925,
+    "cards_count": 103
+  },
+  {
+    "id": "undaunted-pokemon",
+    "name": "Undaunted",
+    "variants_count": 819,
+    "cards_count": 91
+  },
+  {
+    "id": "unleashed-pokemon",
+    "name": "Unleashed",
+    "variants_count": 864,
+    "cards_count": 96
+  },
+  {
+    "id": "unseen-forces-pokemon",
+    "name": "Unseen Forces",
+    "variants_count": 1196,
+    "cards_count": 144
+  },
+  {
+    "id": "world-championship-decks-pokemon",
+    "name": "World Championship Decks",
+    "variants_count": 5223,
+    "cards_count": 1799
+  },
+  {
+    "id": "wotc-promo-pokemon",
+    "name": "WoTC Promo",
+    "variants_count": 335,
+    "cards_count": 69
+  },
+  {
+    "id": "xy---ancient-origins-pokemon",
+    "name": "XY - Ancient Origins",
+    "variants_count": 2,
+    "cards_count": 2
+  },
+  {
+    "id": "xy-ancient-origins-pokemon",
+    "name": "XY - Ancient Origins",
+    "variants_count": 822,
+    "cards_count": 102
+  },
+  {
+    "id": "xy-base-set-pokemon",
+    "name": "XY Base Set",
+    "variants_count": 1265,
+    "cards_count": 149
+  },
+  {
+    "id": "xy---breakpoint-pokemon",
+    "name": "XY - BREAKpoint",
+    "variants_count": 2,
+    "cards_count": 2
+  },
+  {
+    "id": "xy-breakpoint-pokemon",
+    "name": "XY - BREAKpoint",
+    "variants_count": 999,
+    "cards_count": 125
+  },
+  {
+    "id": "xy---breakthrough-pokemon",
+    "name": "XY - BREAKthrough",
+    "variants_count": 6,
+    "cards_count": 6
+  },
+  {
+    "id": "xy-breakthrough-pokemon",
+    "name": "XY - BREAKthrough",
+    "variants_count": 1391,
+    "cards_count": 169
+  },
+  {
+    "id": "xy---evolutions-pokemon",
+    "name": "XY - Evolutions",
+    "variants_count": 11,
+    "cards_count": 11
+  },
+  {
+    "id": "xy-evolutions-pokemon",
+    "name": "XY - Evolutions",
+    "variants_count": 979,
+    "cards_count": 119
+  },
+  {
+    "id": "xy---fates-collide-pokemon",
+    "name": "XY - Fates Collide",
+    "variants_count": 1,
+    "cards_count": 1
+  },
+  {
+    "id": "xy-fates-collide-pokemon",
+    "name": "XY - Fates Collide",
+    "variants_count": 1052,
+    "cards_count": 128
+  },
+  {
+    "id": "xy---flashfire-pokemon",
+    "name": "XY - Flashfire",
+    "variants_count": 8,
+    "cards_count": 8
+  },
+  {
+    "id": "xy-flashfire-pokemon",
+    "name": "XY - Flashfire",
+    "variants_count": 927,
+    "cards_count": 110
+  },
+  {
+    "id": "xy---furious-fists-pokemon",
+    "name": "XY - Furious Fists",
+    "variants_count": 4,
+    "cards_count": 4
+  },
+  {
+    "id": "xy-furious-fists-pokemon",
+    "name": "XY - Furious Fists",
+    "variants_count": 973,
+    "cards_count": 114
+  },
+  {
+    "id": "xy---phantom-forces-pokemon",
+    "name": "XY - Phantom Forces",
+    "variants_count": 0,
+    "cards_count": 0
+  },
+  {
+    "id": "xy-phantom-forces-pokemon",
+    "name": "XY - Phantom Forces",
+    "variants_count": 1043,
+    "cards_count": 128
+  },
+  {
+    "id": "xy---primal-clash-pokemon",
+    "name": "XY - Primal Clash",
+    "variants_count": 6,
+    "cards_count": 6
+  },
+  {
+    "id": "xy-primal-clash-pokemon",
+    "name": "XY - Primal Clash",
+    "variants_count": 1385,
+    "cards_count": 166
+  },
+  {
+    "id": "xy-promos-pokemon",
+    "name": "XY Promos",
+    "variants_count": 1146,
+    "cards_count": 245
+  },
+  {
+    "id": "xy---roaring-skies-pokemon",
+    "name": "XY - Roaring Skies",
+    "variants_count": 3,
+    "cards_count": 3
+  },
+  {
+    "id": "xy-roaring-skies-pokemon",
+    "name": "XY - Roaring Skies",
+    "variants_count": 931,
+    "cards_count": 115
+  },
+  {
+    "id": "xy---steam-siege-pokemon",
+    "name": "XY - Steam Siege",
+    "variants_count": 4,
+    "cards_count": 4
+  },
+  {
+    "id": "xy-steam-siege-pokemon",
+    "name": "XY - Steam Siege",
+    "variants_count": 993,
+    "cards_count": 120
+  },
+  {
+    "id": "xy-trainer-kit-bisharp-wigglytuff-pokemon",
+    "name": "XY Trainer Kit: Bisharp & Wigglytuff",
+    "variants_count": 162,
+    "cards_count": 59
+  },
+  {
+    "id": "xy-trainer-kit-latias-latios-pokemon",
+    "name": "XY Trainer Kit: Latias & Latios",
+    "variants_count": 222,
+    "cards_count": 61
+  },
+  {
+    "id": "xy-trainer-kit-pikachu-libre-suicune-pokemon",
+    "name": "XY Trainer Kit: Pikachu Libre & Suicune",
+    "variants_count": 227,
+    "cards_count": 61
+  },
+  {
+    "id": "xy-trainer-kit-sylveon-noivern-pokemon",
+    "name": "XY Trainer Kit: Sylveon & Noivern",
+    "variants_count": 223,
+    "cards_count": 60
+  }
+]

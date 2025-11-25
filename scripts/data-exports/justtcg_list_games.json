@@ -1,0 +1,80 @@
+[
+  {
+    "id": "digimon-card-game",
+    "name": "Digimon Card Game",
+    "sets": 83,
+    "cards": 7555
+  },
+  {
+    "id": "disney-lorcana",
+    "name": "Disney Lorcana",
+    "sets": 15,
+    "cards": 2482
+  },
+  {
+    "id": "flesh-and-blood-tcg",
+    "name": "Flesh and Blood TCG",
+    "sets": 115,
+    "cards": 7509
+  },
+  {
+    "id": "grand-archive-tcg",
+    "name": "Grand Archive TCG",
+    "sets": 39,
+    "cards": 2804
+  },
+  {
+    "id": "gundam-card-game",
+    "name": "Gundam Card Game",
+    "sets": 14,
+    "cards": 738
+  },
+  {
+    "id": "magic-the-gathering",
+    "name": "Magic: The Gathering",
+    "sets": 425,
+    "cards": 103767
+  },
+  {
+    "id": "one-piece-card-game",
+    "name": "One Piece Card Game",
+    "sets": 68,
+    "cards": 5385
+  },
+  {
+    "id": "pokemon",
+    "name": "Pokemon",
+    "sets": 229,
+    "cards": 27584
+  },
+  {
+    "id": "pokemon-japan",
+    "name": "Pokemon Japan",
+    "sets": 409,
+    "cards": 17942
+  },
+  {
+    "id": "riftbound-league-of-legends-trading-card-game",
+    "name": "Riftbound: League of Legends Trading Card Game",
+    "sets": 5,
+    "cards": 420
+  },
+  {
+    "id": "star-wars-unlimited",
+    "name": "Star Wars: Unlimited",
+    "sets": 20,
+    "cards": 5511
+  },
+  {
+    "id": "union-arena",
+    "name": "Union Arena",
+    "sets": 53,
+    "cards": 3876
+  },
+  {
+    "id": "yugioh",
+    "name": "YuGiOh",
+    "sets": 601,
+    "cards": 43613
+  }
+]
