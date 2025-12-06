@@ -16,6 +16,27 @@ const {
   BORDER_COLORS
 } = variationService;
 
+/**
+ * Fetch with timeout
+ * Wraps fetch with an AbortController to enforce a timeout
+ */
+async function fetchWithTimeout(url: string, timeoutMs: number = 30000): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    clearTimeout(timeout);
+    return response;
+  } catch (error) {
+    clearTimeout(timeout);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error(`Request timed out after ${timeoutMs}ms. Scryfall may be experiencing high traffic or network issues.`);
+    }
+    throw error;
+  }
+}
+
 interface MTGCard {
   id: string;
   name: string;
@@ -166,7 +187,7 @@ async function fetchCardsFromScryfall(setCode: string, onProgress?: (progress: I
       });
     }
 
-    const response = await fetch(nextPage);
+    const response = await fetchWithTimeout(nextPage, 30000);
 
     if (!response.ok) {
       throw new Error(`Scryfall API error: ${response.status} ${response.statusText}`);
